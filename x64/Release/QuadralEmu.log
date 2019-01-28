@@ -1,0 +1,26 @@
+﻿  Player.cpp
+  Unknown compiler version - please run the configure tests and report the results
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\cppconn\exception.h(61): warning C4251: 'sql::SQLException::sql_state': class 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' needs to have dll-interface to be used by clients of class 'sql::SQLException'
+  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.15.26726\include\xstring(4373): note: see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\cppconn\exception.h(145): warning C4251: 'sql::SQLUnsupportedOptionException::option': class 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' needs to have dll-interface to be used by clients of struct 'sql::SQLUnsupportedOptionException'
+  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.15.26726\include\xstring(4373): note: see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\cppconn\sqlstring.h(39): warning C4251: 'sql::SQLString::realStr': class 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' needs to have dll-interface to be used by clients of class 'sql::SQLString'
+  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.15.26726\include\xstring(4373): note: see declaration of 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(175): warning C4251: 'sql::mysql::MySQL_Connection::proxy': class 'boost::shared_ptr<sql::mysql::NativeAPI::NativeConnectionWrapper>' needs to have dll-interface to be used by clients of class 'sql::mysql::MySQL_Connection'
+  c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(175): note: see declaration of 'boost::shared_ptr<sql::mysql::NativeAPI::NativeConnectionWrapper>'
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(179): warning C4251: 'sql::mysql::MySQL_Connection::service': class 'boost::scoped_ptr<sql::mysql::MySQL_Statement>' needs to have dll-interface to be used by clients of class 'sql::mysql::MySQL_Connection'
+  c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(179): note: see declaration of 'boost::scoped_ptr<sql::mysql::MySQL_Statement>'
+c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(181): warning C4251: 'sql::mysql::MySQL_Connection::intern': class 'boost::scoped_ptr<sql::mysql::MySQL_ConnectionData>' needs to have dll-interface to be used by clients of class 'sql::mysql::MySQL_Connection'
+  c:\users\liam-\documents\mysql-connector-c++-noinstall-1.1.9-winx64\include\mysql_connection.h(181): note: see declaration of 'boost::scoped_ptr<sql::mysql::MySQL_ConnectionData>'
+c:\users\liam-\source\repos\quadralemu\quadralemu\network\lib\connectionpool.h(109): warning C4101: 'e': unreferenced local variable
+  c:\users\liam-\source\repos\quadralemu\quadralemu\network\lib\connectionpool.h(85): note: while compiling class template member function 'std::shared_ptr<MySQLConnection> ConnectionPool<MySQLConnection>::borrow(void)'
+  c:\users\liam-\source\repos\quadralemu\quadralemu\entity\player\player.cpp(356): note: see reference to function template instantiation 'std::shared_ptr<MySQLConnection> ConnectionPool<MySQLConnection>::borrow(void)' being compiled
+  c:\users\liam-\source\repos\quadralemu\quadralemu\entity\player\player.cpp(356): note: see reference to class template instantiation 'ConnectionPool<MySQLConnection>' being compiled
+  ScheduleWalker.cpp
+  Unknown compiler version - please run the configure tests and report the results
+  Generating code
+  4 of 4098 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  QuadralEmu.vcxproj -> C:\Users\Liam-\source\repos\QuadralEmu\x64\Release\QuadralEmu.exe
