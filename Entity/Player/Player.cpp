@@ -84,47 +84,6 @@ void Player::SendObjectData()
 //-----------------------------------------------//
 void Player::Move(uint8 x, uint8 y)
 {
-    PathFinder pathFinder(this, GetCache());
-    pathFinder.FindPath(x, y);
-
-    for (const auto& coordinate : boost::adaptors::reverse(pathFinder.path))
-    {
-        int roomHeight = (int)pathFinder.Map[coordinate.y][coordinate.x];
-        roomHeight = roomHeight - 48;
-
-        WorldPacket buffer("# STATUS \r");
-        buffer << (std::string)GetName();
-        buffer.AppendSpace();
-        buffer << (uint8)GetPlayerPositionX();
-        buffer.AppendComma();
-        buffer << (uint8)GetPlayerPositionY();
-        buffer.AppendComma();
-        buffer << (uint8)roomHeight;
-        buffer.AppendComma();
-        buffer << (uint8)CalculateRotation(GetPlayerPositionX(), GetPlayerPositionY(), coordinate.x, coordinate.y);
-        buffer.AppendComma();
-        buffer << (uint8)CalculateRotation(GetPlayerPositionX(), GetPlayerPositionY(), coordinate.x, coordinate.y);
-        buffer << "/mv ";
-        buffer << (uint8)coordinate.x;
-        buffer.AppendComma();
-        buffer << (uint8)coordinate.y;
-        buffer.AppendComma();
-        buffer << (uint8)roomHeight;
-        buffer << "/";
-        buffer.AppendEndCarriage();
-        GetRoom()->SendPacketToAll(buffer.Write());
-        SetPlayerPosition(coordinate.x, coordinate.y, player->CalculateRotation(player->GetPlayerPositionX(), player->GetPlayerPositionY(), coordinate.x, coordinate.y));
-        SetCurrentRoomHeight(roomHeight);
-    }
-
-    if (IsLeavingRoom())
-        LeaveRoom();
-    else
-        StopWalking();
-
-    // The client requires the packet to be sent every 0.5 seconds, 
-    // client does not support batch packets, so each time player moves...
-    // we create a thread 
     sScheduleWalker->ScheduleWalk(this, x, y);
 }
 //-----------------------------------------------//

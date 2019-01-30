@@ -61,18 +61,19 @@ public:
     void FindPath(uint8 endPositionX, uint8 endPositionY);
     char Map[34][34];
 
-    std::vector <XYPositionStruct> GetPath() { return path; }
-    std::vector <XYPositionStruct> path;
+    std::vector <XYPositionStruct> GetPath();
+    Player* GetPlayer();
+
 protected:
     uint32 CalculateHeuristic(Node* current, uint8& endPositionX, uint8& endPositionY);
     bool CheckValidStep(uint8& x, uint8& y, Node* current, uint8& endX, uint8& endY);
     bool CheckValidPosition(const uint8& x, const uint8& y);
     Node* DoesNodeExist(std::set<Node*> nodes, const XYPositionStruct& pos);
     void DeleteNodes(std::set<Node*> nodes);
-
 protected:
     std::vector<XYPositionStruct> m_XYPos;
     XYPositionStruct m_PlayerPosition;
+    std::vector <XYPositionStruct> mPath;
     Player* mPlayer;
     uint8 m_Directions;
 };

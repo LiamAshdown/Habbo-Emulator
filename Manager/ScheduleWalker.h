@@ -21,7 +21,6 @@
 #include "../Common/SharedDefines.h"
 #include "../Pathfinding/PathFinding.h"
 #include <boost/interprocess/sync/scoped_lock.hpp>
-#include "../Common/Timer.h"
 #include <boost/thread/mutex.hpp>
 #include <chrono>
 #endif /* _QuadEmu_ScheduleWalker_ */
@@ -32,13 +31,11 @@ class ThreadPool;
 class WalkerWorker
 {
 public:
-    WalkerWorker(Player* player, std::vector<XYPositionStruct>& path) : mPlayer(player),
-        mPath(path) {}
+    WalkerWorker(PathFinder* pathfinder);
 
 public:
-    Player* mPlayer;
-    std::vector<XYPositionStruct> mPath;
-    CountDown timer;
+    PathFinder* mPathFinder;
+    uint32 mPosition;
 };
 
 class ScheduleWalker
@@ -54,8 +51,7 @@ public:
 
 private:
     static boost::mutex& GetMutex();
-    static bool mIsDestructed;
+    bool mIsDestructed;
     std::deque<WalkerWorker*> mWalkers;
-   // std::deque<WalkerWorker*> mPlayerLock;
 };
 #define sScheduleWalker ScheduleWalker::instance()

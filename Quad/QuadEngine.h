@@ -30,6 +30,7 @@ public:
 
     void Boot();
     void LoadPublicRoomsPort();
+    void UpdateWorld();
 
 protected:
     std::vector<std::shared_ptr<Listener>> publicRoomListener;

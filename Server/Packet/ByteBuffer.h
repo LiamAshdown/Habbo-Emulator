@@ -139,6 +139,13 @@ public:
             Append(end.c_str(), l_Length);
     }
 
+    void AppendMove()
+    {
+        std::string move = "/mv ";
+        if (std::size_t l_Length = move.length())
+            Append(move.c_str(), l_Length);
+    }
+
     void AppendCarriage()
     {
         std::string end = "\r";

@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //-----------------------------------------------//
+#include <boost/thread.hpp>
 #include "QuadEngine.h"
 #include "../Network/DatabaseManager.h"
 #include "../Manager/RoomManager.h"
@@ -24,7 +25,7 @@
 #include "../Manager/ScheduleWalker.h"
 #include "../Server/Packet/Opcodes.h"
 #include <thread>
-
+#define WORLD_SLEEP_FOR 500
 //-----------------------------------------------//
 void QuadEngine::Boot()
 {
@@ -32,10 +33,13 @@ void QuadEngine::Boot()
     std::cout << std::endl;
     std::cout << "[QUADRAL]: Booting up MYSQL" << std::endl;
 
-
     if (sDBManager->testConnection())
         std::cout << "[QUADRAL]: MYSQL connection sucessful" << std::endl;
     sDBManager->getConnectionFactory()->create();
+
+    std::cout << "[QUADRAL]: Booting up World Update" << std::endl;
+    boost::thread* thread = new boost::thread(&QuadEngine::UpdateWorld, this);
+    thread->detach();
 
     std::cout << "[QUADRAL]: Loading Public Rooms" << std::endl;
     sWorld->LoadRooms();
@@ -47,6 +51,8 @@ void QuadEngine::Boot()
     std::cout << "[QUADRAL]: Finished loading... listening on port 37120" << std::endl;
     Listener server(io_service, 37120);
     io_service.run();
+
+    delete thread;
 }
 //-----------------------------------------------//
 void QuadEngine::LoadPublicRoomsPort()
@@ -55,6 +61,23 @@ void QuadEngine::LoadPublicRoomsPort()
     {
         std::cout << "[QUADRAL]: Added " << itr.second->GetName() << " on port " << itr.second->GetRoomId() << std::endl;
         publicRoomListener.push_back(std::shared_ptr<Listener>(new Listener(io_service, itr.second->GetRoomId())));
+    }
+}
+//-----------------------------------------------//
+void QuadEngine::UpdateWorld()
+{
+    Timer timer;
+
+    while (true)
+    {
+        sScheduleWalker->WalkUpdate();
+        std::cout << timer.Elasped() << std::endl;
+        if (timer.Elasped() < WORLD_SLEEP_FOR)
+        {
+            uint32 diff = WORLD_SLEEP_FOR - timer.Elasped();
+            std::this_thread::sleep_for(std::chrono::milliseconds(diff));
+            timer.Reset();
+        }
     }
 }
 //-----------------------------------------------//

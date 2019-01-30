@@ -18,6 +18,7 @@
 
 #ifndef _QuadEmu_Common_h_
 #define _QuadEmu_Common_h_
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <unordered_map>

@@ -112,12 +112,24 @@ void PathFinder::FindPath(uint8 endPositionX, uint8 endPositionY)
         std::shared_ptr<XYPositionStruct> pos = std::make_shared<XYPositionStruct>();
         pos->x = current->m_x;
         pos->y = current->m_y;
-        path.push_back(*pos);
+        mPath.push_back(*pos);
         current = current->m_parent;
     }
 
+    std::reverse(mPath.begin(), mPath.end());
+
     DeleteNodes(openList);
     DeleteNodes(closedList);
+}
+//-----------------------------------------------//
+std::vector<XYPositionStruct> PathFinder::GetPath()
+{
+    return mPath;
+}
+//-----------------------------------------------//
+Player * PathFinder::GetPlayer()
+{
+    return mPlayer;
 }
 //-----------------------------------------------//
 uint32 PathFinder::CalculateHeuristic(Node* current, uint8& endPositionX, uint8& endPositionY)
@@ -134,7 +146,7 @@ bool PathFinder::CheckValidStep(uint8& x, uint8& y, Node* current, uint8& endX, 
 
     if (Map[current->m_y][current->m_x] != 'X')
     {
-        // If our previous posit2 is 0 and current position is 2 - we cannot formulate a path, player height is incremented by 1
+        // If our previous posit2 is 0 and current position is 2 - we cannot formulate a mPath, player height is incremented by 1
         if ((Map[y][x] > Map[current->m_y][current->m_x] + 1) || (Map[y][x] + 1 < Map[current->m_y][current->m_x]))
             return false;
     }
