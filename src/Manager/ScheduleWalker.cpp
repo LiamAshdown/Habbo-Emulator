@@ -22,7 +22,7 @@
 #include "../Server/Thread/ThreadPool.h"
 #include "../Entity/Player/Player.h"
 #include "../Server/WorldSession.h"
-#include "../Server/Packet/WorldPacket.h"
+#include "World.h"
 #include "../Room/Room.h"
 #include <boost/range/adaptor/reversed.hpp>
 //-----------------------------------------------//

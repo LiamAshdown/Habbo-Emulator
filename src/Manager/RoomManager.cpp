@@ -19,7 +19,6 @@
 #include "RoomManager.h"
 #include "../Room/Room.h"
 #include "../World/World.h"
-#include "../Server/Packet/WorldPacket.h"
 #include "../Entity/Player/Player.h"
 uint32 RoomManager::RealmPort = 37120;
 //-----------------------------------------------//
@@ -72,6 +71,7 @@ void RoomManager::CreateRoom(Player * player, uint32 mId, std::string floor, std
     newRoom->mModel = model;
     newRoom->mState = state;
     newRoom->mShowOwnerName = showName;
+    sWorld->mPublicRoomListener.push_back(new Listener(sWorld->mIoService, newRoom->mId));
     AddRoom(newRoom->mId, newRoom);
 }
 //-----------------------------------------------//

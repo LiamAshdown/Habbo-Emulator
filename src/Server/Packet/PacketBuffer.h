@@ -24,9 +24,6 @@
 class PacketBuffer
 {
 public:
-    friend class Socket;
-
-public:
     PacketBuffer(int initialSize = 4096) : mWritePosition(0), mReadPosition(0), mBuffer(initialSize, 0) {}
 
     void Read(char* buffer, const std::size_t& length);
@@ -34,7 +31,7 @@ public:
     void Write(const char *p_Buffer, const std::size_t p_Length);
     std::size_t ReadLengthRemaining() const { return mWritePosition - mReadPosition; }
 
-
+public:
     std::size_t mWritePosition;
     std::size_t mReadPosition;
     std::vector<uint8> mBuffer;

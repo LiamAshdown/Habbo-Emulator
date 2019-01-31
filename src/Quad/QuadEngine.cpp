@@ -30,15 +30,10 @@
 //-----------------------------------------------//
 QuadEngine::QuadEngine()
 {
-
 }
 //-----------------------------------------------//
 QuadEngine::~QuadEngine()
 {
-    for (auto itr : mPublicRoomListener)
-        delete itr;
-
-    mPublicRoomListener.clear();
 }
 //-----------------------------------------------//
 void QuadEngine::Boot()
@@ -54,10 +49,6 @@ void QuadEngine::Boot()
     std::cout << "[QUADRAL]: Booting up World Update" << std::endl;
     boost::thread* thread = new boost::thread(&QuadEngine::UpdateWorld, this);
     thread->detach();
-
-    std::cout << "[QUADRAL]: Loading Public Rooms" << std::endl;
-    sWorld->LoadRooms();
-    LoadPublicRoomsPort();
     std::cout << "[QUADRAL]: Loading Furniture" << std::endl;
     sWorld->LoadPublicFurniture();
     std::cout << "[QUADRAL]: Loading Room Height" << std::endl;
@@ -65,18 +56,10 @@ void QuadEngine::Boot()
     std::cout << "[QUADRAL]: Loading Packet Handlers" << std::endl;
     sPacketHandler->InitializePackets();
 
-    std::cout << "[QUADRAL]: Finished loading... listening on port 37120" << std::endl;
-    Listener server(mIoService, 37120);
-    mIoService.run();
-}
-//-----------------------------------------------//
-void QuadEngine::LoadPublicRoomsPort()
-{
-    for (auto& itr : sRoomManager->GetRoomStorage())
-    {
-        std::cout << "[QUADRAL]: Added " << itr.second->GetName() << " on port " << itr.second->GetRoomId() << std::endl;
-        mPublicRoomListener.push_back(new Listener(mIoService, itr.second->GetRoomId()));
-    }
+    std::cout << "[QUADRAL]: Loading Public Rooms" << std::endl;
+    sWorld->LoadRooms();
+    sWorld->LoadPublicRoomsPort();
+
 }
 //-----------------------------------------------//
 void QuadEngine::UpdateWorld()
@@ -87,7 +70,7 @@ void QuadEngine::UpdateWorld()
     {
         sScheduleWalker->WalkUpdate();
 
-        // Update the world evert 50 ms
+        // Update the world every 50 ms
         if (timer.Elasped() < WORLD_SLEEP_FOR)
         {
             uint32 diff = WORLD_SLEEP_FOR - timer.Elasped();

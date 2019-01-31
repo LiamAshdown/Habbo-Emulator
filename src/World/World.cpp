@@ -17,7 +17,6 @@
 */
 //-----------------------------------------------//
 #include "../Network/DatabaseManager.h"
-#include "../Server/Packet/WorldPacket.h"
 #include "../Entity/Player/Player.h"
 #include "../Manager/RoomManager.h"
 #include "../Entity/Item/Item.h"
@@ -40,7 +39,11 @@ World::~World()
     for (auto itr : mSessions)
         delete itr.second;
 
+    for (auto itr : mPublicRoomListener)
+        delete itr;
+
     mSessions.clear();
+    mPublicRoomListener.clear();
 }
 //-----------------------------------------------//
 WorldSession * World::FindSession(const uint32& mId) const
@@ -267,3 +270,19 @@ void World::LoadHeightMap()
         sDBManager->printException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
     }
 }
+//-----------------------------------------------//
+void World::LoadPublicRoomsPort()
+{
+    for (auto& itr : sRoomManager->GetRoomStorage())
+    {
+        std::cout << "[QUADRAL]: Added " << itr.second->GetName() << " on port " << itr.second->GetRoomId() << std::endl;
+        mPublicRoomListener.push_back(new Listener(mIoService, itr.second->GetRoomId()));
+    }
+
+    std::cout << "[QUADRAL]: Finished loading... listening on port 37120" << std::endl;
+
+    Listener server(mIoService, 37120);
+    mIoService.run();
+
+}
+//-----------------------------------------------//

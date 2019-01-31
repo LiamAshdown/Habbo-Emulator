@@ -16,7 +16,6 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //-----------------------------------------------//
-#include "../Server/Packet/WorldPacket.h"
 #include "../Entity/Player/Player.h"
 #include "../Server/WorldSession.h"
 #include "../Server/Packet/Opcodes.h"

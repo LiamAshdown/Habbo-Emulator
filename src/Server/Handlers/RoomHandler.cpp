@@ -19,7 +19,6 @@
 #include "../../Network/DatabaseManager.h"
 #include "../../Entity/Player/Player.h"
 #include "../../Manager/RoomManager.h"
-#include "../Protocol/Socket.h"
 #include "../../Room/Room.h"
 #include "../WorldSession.h"
 #include "../Packet/Opcodes.h"

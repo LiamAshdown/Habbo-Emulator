@@ -28,7 +28,6 @@ public:
     Listener(boost::asio::io_service& ioService, uint32 port) : mIoService(ioService), mAcceptor(ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
         mPort(port)
     {
-
         AcceptConnection();
     }
 

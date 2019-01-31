@@ -17,7 +17,6 @@
 */
 //-----------------------------------------------//
 #include <numeric>
-#include "../../World/World.h"
 #include "../WorldSession.h"
 #include "../Packet/Opcodes.h"
 #include "Socket.h"

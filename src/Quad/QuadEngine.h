@@ -18,22 +18,18 @@
 
 #ifndef _QuadEmu_QuadEngine_h_
 #define _QuadEmu_QuadEngine_h_
-#include "../Server/Protocol/Listener.h"
-#include "../Common/SharedDefines.h"
+#include "SharedDefines.h"
 #endif /* _QuadEmu_QuadEngine_ */
 
 class QuadEngine
 {
 public:
+    friend class World;
+public:
     QuadEngine();
     ~QuadEngine();
 
     void Boot();
-    void LoadPublicRoomsPort();
     void UpdateWorld();
-
-protected:
-    std::vector<Listener*> mPublicRoomListener;
-    boost::asio::io_service mIoService;
 };
 

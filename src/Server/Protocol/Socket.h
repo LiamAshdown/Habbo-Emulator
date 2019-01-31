@@ -22,14 +22,12 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include "../Packet/PacketBuffer.h"
-#include "../Packet/WorldPacket.h"
-#include "../../Common/SharedDefines.h"
+#include "PacketBuffer.h"
+#include "WorldPacket.h"
+#include "SharedDefines.h"
 #endif /* _QuadEmu_Socket_h_ */
 
 class WorldSession;
-class WorldPacket;
-class PacketBuffer;
 
 typedef struct Packet
 {

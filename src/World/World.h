@@ -19,6 +19,7 @@
 #ifndef _QuadEmu_World_h_
 #define _QuadEmu_World_h_
 #include "../Common/SharedDefines.h"
+#include "../Server/Protocol/Listener.h"
 #endif /* _QuadEmu_World_ */
 
 class WorldSession;
@@ -44,7 +45,7 @@ typedef std::map<std::string, PublicHeightStruct> PublicHeightMap;
 class World
 {
 public:
-    friend class QuadEngine;
+    friend class RoomManager;
     static World* instance();
 
     World();
@@ -62,13 +63,16 @@ public:
     void LoadRooms();
     void LoadPublicFurniture();
     void LoadHeightMap();
+    void LoadPublicRoomsPort();
 
 public:
     PublicItemMap mPublicItem;
     PublicHeightMap mPublicHeight;
 
-protected:
+private:
     SessionMap mSessions;
     uint32 mPlayerCount;
+    std::vector<Listener*> mPublicRoomListener;
+    boost::asio::io_service mIoService;
 };
 #define sWorld World::instance()

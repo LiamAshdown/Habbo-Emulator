@@ -24,7 +24,6 @@
 #include "../Server/Thread/ThreadPool.h"
 #include "../Room/Room.h"
 #include "../World/World.h"
-#include "Protocol/Socket.h"
 //-----------------------------------------------//
 inline std::string SplitString(std::string string, std::string key)
 {
@@ -127,7 +126,7 @@ bool WorldSession::InitializePlayerData(const std::string& username)
         GetPlayer()->mInRoom = result_set->getBoolean(15);
         GetPlayer()->mRoomCache = "";
         mPlayerInitialized = true;
-        sWorld->AddSession(GetPlayer()->mId, this);
+        sWorld->AddSession(GetPlayer()->GetAccountId(), this);
         return true;
     }
     catch (sql::SQLException &e)

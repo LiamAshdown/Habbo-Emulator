@@ -17,7 +17,6 @@
 */
 //-----------------------------------------------//
 #include <boost/range/adaptor/reversed.hpp>
-#include "../../Server/Packet/WorldPacket.h"
 #include "../../Manager/RoomManager.h"
 #include "../../Network/DatabaseManager.h"
 #include "../../Manager/ScheduleWalker.h"
@@ -360,7 +359,7 @@ void Player::CreateRoom(std::vector<std::string> room)
         ("INSERT INTO rooms(name, owner_id, state, floor_level, model, show_owner_name, ownerName) VALUES(?, ?, ?, ?, ?, ?, ?)");
 
         prepareStatement->setString(1, name);
-        prepareStatement->setInt(2, GetAccountId());
+        prepareStatement->setInt(2, mId);
         prepareStatement->setString(3, state);
         prepareStatement->setString(4, floor);
         prepareStatement->setString(5, model);
