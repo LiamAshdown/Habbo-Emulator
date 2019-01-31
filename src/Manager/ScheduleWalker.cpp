@@ -107,6 +107,7 @@ void ScheduleWalker::WalkUpdate()
         if (itr->second->mPathFinder->GetPlayer()->IsDancing())
             buffer << (std::string)"dance/";
         buffer.AppendEndCarriage();
+        itr->second->mPathFinder->GetPlayer()->SetCurrentRoomHeight(roomHeight);
         itr->second->mPathFinder->GetPlayer()->GetRoom()->SendPacketToAll(buffer.Write());
         itr->second->mPathFinder->GetPlayer()->SetPlayerPosition(coordinate.x, coordinate.y, itr->second->mPathFinder->GetPlayer()->CalculateRotation(itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y));
         itr->second->mPosition++;
