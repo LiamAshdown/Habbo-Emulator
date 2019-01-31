@@ -25,15 +25,15 @@
 class QuadEngine
 {
 public:
-    QuadEngine() {}
-    ~QuadEngine() {}
+    QuadEngine();
+    ~QuadEngine();
 
     void Boot();
     void LoadPublicRoomsPort();
     void UpdateWorld();
 
 protected:
-    std::vector<std::shared_ptr<Listener>> publicRoomListener;
-    boost::asio::io_service io_service;
+    std::vector<Listener*> mPublicRoomListener;
+    boost::asio::io_service mIoService;
 };
 

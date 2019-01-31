@@ -25,7 +25,21 @@
 #include "../Manager/ScheduleWalker.h"
 #include "../Server/Packet/Opcodes.h"
 #include <thread>
+//-----------------------------------------------//
 #define WORLD_SLEEP_FOR 500
+//-----------------------------------------------//
+QuadEngine::QuadEngine()
+{
+
+}
+//-----------------------------------------------//
+QuadEngine::~QuadEngine()
+{
+    for (auto itr : mPublicRoomListener)
+        delete itr;
+
+    mPublicRoomListener.clear();
+}
 //-----------------------------------------------//
 void QuadEngine::Boot()
 {
@@ -44,15 +58,16 @@ void QuadEngine::Boot()
     std::cout << "[QUADRAL]: Loading Public Rooms" << std::endl;
     sWorld->LoadRooms();
     LoadPublicRoomsPort();
+    std::cout << "[QUADRAL]: Loading Furniture" << std::endl;
     sWorld->LoadPublicFurniture();
+    std::cout << "[QUADRAL]: Loading Room Height" << std::endl;
     sWorld->LoadHeightMap();
+    std::cout << "[QUADRAL]: Loading Packet Handlers" << std::endl;
     sPacketHandler->InitializePackets();
 
     std::cout << "[QUADRAL]: Finished loading... listening on port 37120" << std::endl;
-    Listener server(io_service, 37120);
-    io_service.run();
-
-    delete thread;
+    Listener server(mIoService, 37120);
+    mIoService.run();
 }
 //-----------------------------------------------//
 void QuadEngine::LoadPublicRoomsPort()
@@ -60,7 +75,7 @@ void QuadEngine::LoadPublicRoomsPort()
     for (auto& itr : sRoomManager->GetRoomStorage())
     {
         std::cout << "[QUADRAL]: Added " << itr.second->GetName() << " on port " << itr.second->GetRoomId() << std::endl;
-        publicRoomListener.push_back(std::shared_ptr<Listener>(new Listener(io_service, itr.second->GetRoomId())));
+        mPublicRoomListener.push_back(new Listener(mIoService, itr.second->GetRoomId()));
     }
 }
 //-----------------------------------------------//
@@ -71,7 +86,8 @@ void QuadEngine::UpdateWorld()
     while (true)
     {
         sScheduleWalker->WalkUpdate();
-        std::cout << timer.Elasped() << std::endl;
+
+        // Update the world evert 50 ms
         if (timer.Elasped() < WORLD_SLEEP_FOR)
         {
             uint32 diff = WORLD_SLEEP_FOR - timer.Elasped();
