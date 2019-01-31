@@ -306,7 +306,18 @@ void WorldSession::HandleDeleteFlat(std::string& packetBuffer, std::vector<std::
 //-----------------------------------------------//
 void WorldSession::HandleGoAway(std::string& packetBuffer, std::vector<std::string>& packetStorage)
 {
+    // TODO; find out the proper way of leaving the room, setting the z axis to 99 only temporary makes the user leave
+    // until some one else joins
     GetPlayer()->SetLeavingRoom(true);
     GetPlayer()->Move(GetPlayer()->GetRoom()->GetRoomModel().x, GetPlayer()->GetRoom()->GetRoomModel().y);
+}
+//-----------------------------------------------//
+void WorldSession::HandleLookTo(std::string& packetBuffer, std::vector<std::string>& packetStorage)
+{
+    // Increase the x axis, so we don't end up moving ontop of the player
+    uint8 x = std::stoi(packetStorage[1]);
+    uint8 y = std::stoi(packetStorage[2]);
+
+    GetPlayer()->Move(x, y);
 }
 //-----------------------------------------------//

@@ -166,14 +166,37 @@ bool PathFinder::CheckValidStep(uint8& x, uint8& y, Node* current, uint8& endX, 
     return true;
 }
 //-----------------------------------------------//
-bool PathFinder::CheckValidPosition(const uint8& x, const uint8& y)
+bool PathFinder::CheckValidPosition(uint8& x, uint8& y)
 {
+    // If there's a player already occupying the grid, then we adjust our grid
+    // to move next to the player
     for (const auto& itr : mPlayer->GetRoom()->GetPlayerStorage())
     {
         if (itr->GetPlayerPositionX() == x && itr->GetPlayerPositionY() == y)
-            return false;
-    }
+        {
+            uint8 newX = x;
+            uint8 newY = y;
 
+            if (Map[newY][++newX] != 'X')
+            {
+                x = newX;
+                return true;
+            }
+            else if (Map[++newY][x] != 'X')
+            {
+                y = newY;
+                return true;
+            }
+            else if (Map[newY][newX] != 'X')
+            {
+                x = newX;
+                y = newY;
+                return true;
+            }
+            else
+                return false;
+        }
+    }
     return true;
 }
 //-----------------------------------------------//

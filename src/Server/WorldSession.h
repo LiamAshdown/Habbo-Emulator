@@ -74,6 +74,7 @@ public:
     void HandleGoAway(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleDance(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleStop(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandleLookTo(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleNULL(std::string& packetBuffer, std::vector<std::string>& packetStorage) {}
 
 protected:

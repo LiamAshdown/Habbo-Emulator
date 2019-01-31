@@ -58,6 +58,7 @@ void PacketTable::InitializePackets()
     StorePacket(OpcodesList::GOAWAY,                     "GOAWAY",                   &WorldSession::HandleGoAway             );
     StorePacket(OpcodesList::DANCE,                      "DANCE",                    &WorldSession::HandleDance              );
     StorePacket(OpcodesList::STOP,                       "STOP",                     &WorldSession::HandleStop               );
+    StorePacket(OpcodesList::LOOKTO,                     "LOOKTO",                   &WorldSession::HandleLookTo             );
 }
 //-----------------------------------------------//
 void PacketTable::StorePacket(uint16 opcode, char const * name, void(WorldSession::* handler)(std::string &packet, std::vector<std::string>& packetStorage))

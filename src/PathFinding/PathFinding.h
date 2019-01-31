@@ -67,7 +67,7 @@ public:
 protected:
     uint32 CalculateHeuristic(Node* current, uint8& endPositionX, uint8& endPositionY);
     bool CheckValidStep(uint8& x, uint8& y, Node* current, uint8& endX, uint8& endY);
-    bool CheckValidPosition(const uint8& x, const uint8& y);
+    bool CheckValidPosition(uint8& x, uint8& y);
     Node* DoesNodeExist(std::set<Node*> nodes, const XYPositionStruct& pos);
     void DeleteNodes(std::set<Node*> nodes);
 protected:

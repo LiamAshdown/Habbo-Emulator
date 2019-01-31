@@ -48,6 +48,7 @@ enum OpcodesList : uint16
     GOAWAY                      = 456,
     DANCE                       = 475,
     STOP                        = 326,
+    LOOKTO                      = 472,
 };
 
 class WorldSession;
