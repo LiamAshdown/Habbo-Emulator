@@ -38,6 +38,8 @@ public:
     uint32 mPosition;
 };
 
+typedef std::map<uint32, WalkerWorker*> MapWalkers;
+
 class ScheduleWalker
 {
 public:
@@ -52,6 +54,6 @@ public:
 private:
     static boost::mutex& GetMutex();
     bool mIsDestructed;
-    std::deque<WalkerWorker*> mWalkers;
+    MapWalkers mWalkers;
 };
 #define sScheduleWalker ScheduleWalker::instance()

@@ -43,7 +43,7 @@ ScheduleWalker::~ScheduleWalker()
     
 }
 //-----------------------------------------------//
-WalkerWorker::WalkerWorker(PathFinder* pathfinder) : mPathFinder(pathfinder)
+WalkerWorker::WalkerWorker(PathFinder* pathfinder) : mPathFinder(pathfinder), mPosition(0)
 {
 
 }
@@ -51,43 +51,51 @@ WalkerWorker::WalkerWorker(PathFinder* pathfinder) : mPathFinder(pathfinder)
 void ScheduleWalker::ScheduleWalk(Player* player, uint8& x, uint8& y)
 {
     boost::mutex::scoped_lock lock(GetMutex());
+    MapWalkers::iterator itr = mWalkers.find(player->GetAccountId());
+    if (itr != mWalkers.end())
+    {
+        delete itr->second->mPathFinder;
+        delete itr->second;
+        mWalkers.erase(itr);
+    }
     PathFinder* path = new PathFinder(player, player->GetCache());
     path->FindPath(x, y);
     WalkerWorker* worker = new WalkerWorker(path);
-    worker->mPosition = 0;
-
-    mWalkers.push_back(worker);
+    mWalkers[player->GetAccountId()] = worker;
 }
 //-----------------------------------------------//
 void ScheduleWalker::WalkUpdate()
 {
-    for (WalkerWorker* itr : mWalkers)
+    boost::mutex::scoped_lock lock(GetMutex());
+
+    MapWalkers::iterator itr;
+    for (itr = mWalkers.begin(); itr != mWalkers.end();)
     {
-        if (itr->mPosition >= itr->mPathFinder->GetPath().size())
+        if (itr->second->mPosition >= itr->second->mPathFinder->GetPath().size())
         {
-            delete itr->mPathFinder;
-            delete itr;
-            mWalkers.pop_front();
+            delete itr->second->mPathFinder;
+            delete itr->second;
+            mWalkers.erase(itr++);
             continue;
         }
 
-        auto coordinate = itr->mPathFinder->GetPath().at(itr->mPosition);
+        auto coordinate = itr->second->mPathFinder->GetPath().at(itr->second->mPosition);
 
-        int roomHeight = itr->mPathFinder->Map[coordinate.y][coordinate.x];
+        int roomHeight = itr->second->mPathFinder->Map[coordinate.y][coordinate.x];
         roomHeight = roomHeight - 48;
 
         WorldPacket buffer("# STATUS \r");
-        buffer << (std::string)itr->mPathFinder->GetPlayer()->GetName();
+        buffer << (std::string)itr->second->mPathFinder->GetPlayer()->GetName();
         buffer.AppendSpace();
-        buffer << (uint8)itr->mPathFinder->GetPlayer()->GetPlayerPositionX();
+        buffer << (uint8)itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX();
         buffer.AppendComma();
-        buffer << (uint8)itr->mPathFinder->GetPlayer()->GetPlayerPositionY();
+        buffer << (uint8)itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY();
         buffer.AppendComma();
         buffer << (uint8)roomHeight;
         buffer.AppendComma();
-        buffer << (uint8)itr->mPathFinder->GetPlayer()->CalculateRotation(itr->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y);
+        buffer << (uint8)itr->second->mPathFinder->GetPlayer()->CalculateRotation(itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y);
         buffer.AppendComma();
-        buffer << (uint8)itr->mPathFinder->GetPlayer()->CalculateRotation(itr->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y);
+        buffer << (uint8)itr->second->mPathFinder->GetPlayer()->CalculateRotation(itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y);
         buffer.AppendMove();
         buffer << (uint8)coordinate.x;
         buffer.AppendComma();
@@ -96,9 +104,10 @@ void ScheduleWalker::WalkUpdate()
         buffer << (uint8)roomHeight;
         buffer.AppendForwardSlash();
         buffer.AppendEndCarriage();
-        itr->mPathFinder->GetPlayer()->GetRoom()->SendPacketToAll(buffer.Write());
-        itr->mPathFinder->GetPlayer()->SetPlayerPosition(coordinate.x, coordinate.y, itr->mPathFinder->GetPlayer()->CalculateRotation(itr->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y));
-        itr->mPosition++;
+        itr->second->mPathFinder->GetPlayer()->GetRoom()->SendPacketToAll(buffer.Write());
+        itr->second->mPathFinder->GetPlayer()->SetPlayerPosition(coordinate.x, coordinate.y, itr->second->mPathFinder->GetPlayer()->CalculateRotation(itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y));
+        itr->second->mPosition++;
+        ++itr;
         continue;
     }
 }
