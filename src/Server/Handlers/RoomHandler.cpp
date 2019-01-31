@@ -314,7 +314,6 @@ void WorldSession::HandleGoAway(std::string& packetBuffer, std::vector<std::stri
 //-----------------------------------------------//
 void WorldSession::HandleLookTo(std::string& packetBuffer, std::vector<std::string>& packetStorage)
 {
-    // Increase the x axis, so we don't end up moving ontop of the player
     uint8 x = std::stoi(packetStorage[1]);
     uint8 y = std::stoi(packetStorage[2]);
 
