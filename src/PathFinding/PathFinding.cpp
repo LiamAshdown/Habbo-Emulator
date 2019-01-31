@@ -172,6 +172,9 @@ bool PathFinder::CheckValidPosition(uint8& x, uint8& y)
     // to move next to the player
     for (const auto& itr : mPlayer->GetRoom()->GetPlayerStorage())
     {
+        if (itr->GetAccountId() == GetPlayer()->GetAccountId() && GetPlayer()->GetPlayerPositionX() == x && GetPlayer()->GetPlayerPositionY() == y)
+            return false;
+
         if (itr->GetPlayerPositionX() == x && itr->GetPlayerPositionY() == y)
         {
             uint8 newX = x;
