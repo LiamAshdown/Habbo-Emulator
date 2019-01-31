@@ -72,6 +72,8 @@ public:
     void HandleUpdateFlat(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleDeleteFlat(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleGoAway(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandleDance(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandleStop(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleNULL(std::string& packetBuffer, std::vector<std::string>& packetStorage) {}
 
 protected:

@@ -67,6 +67,8 @@ public:
     std::string GetSpecialRights() const;
     std::string GetBadgeType() const;
     uint32 GetAccountId() const;
+    bool IsDancing() const;
+    void SetIsDancing(bool dancing);
 
     std::string GetCache() const;
     void SetCache(const std::string& roomCache);
@@ -112,5 +114,6 @@ protected:
     uint32 mId;
     bool mLeavingRoom;
     uint32 mLastRoomCreated;
+    bool mDancing;
 };
 

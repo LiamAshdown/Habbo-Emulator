@@ -30,6 +30,7 @@ Player::Player(WorldSession* session) : mSession(session)
 {
     mInRoom = false;
     mLeavingRoom = false;
+    mDancing = false;
     sWorld->IncreasePlayerCount();
 }
 //-----------------------------------------------//
@@ -324,6 +325,8 @@ void Player::StopWalking()
     data.AppendComma();
     data << (uint8)GetPlayerPositionZ();
     data.AppendForwardSlash();
+    if (IsDancing())
+        data << (std::string)"dance/";
     data.AppendEndCarriage();
     GetRoom()->SendPacketToAll(data.Write());
 }
@@ -459,5 +462,34 @@ WorldSession* Player::GetSession() const
 uint32 Player::GetAccountId() const
 {
     return mId;
+}
+bool Player::IsDancing() const
+{
+    return mDancing;
+}
+//-----------------------------------------------//
+void Player::SetIsDancing(bool dancing)
+{
+    mDancing = dancing;
+
+    WorldPacket data("# STATUS");
+    data.AppendSpace();
+    data.AppendCarriage();
+    data << (std::string)GetName();
+    data.AppendSpace();
+    data << (uint8)GetPlayerPositionX();
+    data.AppendComma();
+    data << (uint8)GetPlayerPositionY();
+    data.AppendComma();
+    data << (uint8)GetCurrentRoomHeight();
+    data.AppendComma();
+    data << (uint8)GetPlayerPositionZ();
+    data.AppendComma();
+    data << (uint8)GetPlayerPositionZ();
+    data.AppendForwardSlash();
+    if (IsDancing())
+        data << (std::string)"dance/";
+    data.AppendEndCarriage();
+    GetRoom()->SendPacketToAll(data.Write());
 }
 //-----------------------------------------------//

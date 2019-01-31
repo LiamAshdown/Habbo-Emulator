@@ -49,3 +49,18 @@ void WorldSession::HandleInfoRetrieve(std::string& packetBuffer, std::vector<std
         SendLoginFailure();
 }
 //-----------------------------------------------//
+void WorldSession::HandleDance(std::string& packetBuffer, std::vector<std::string>& packetStorage)
+{
+    if (!GetPlayer()->IsDancing())
+        GetPlayer()->SetIsDancing(true);
+}
+//-----------------------------------------------//
+void WorldSession::HandleStop(std::string& packetBuffer, std::vector<std::string>& packetStorage)
+{
+    if (packetStorage[1] == "Dance")
+    {
+        if (GetPlayer()->IsDancing())
+            GetPlayer()->SetIsDancing(false);
+    }
+}
+//-----------------------------------------------//

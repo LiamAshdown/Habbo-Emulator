@@ -46,6 +46,8 @@ enum OpcodesList : uint16
     UPDATEFLAT                  = 746,
     DELETEFLAT                  = 730,
     GOAWAY                      = 456,
+    DANCE                       = 475,
+    STOP                        = 326,
 };
 
 class WorldSession;
