@@ -73,7 +73,10 @@ void ScheduleWalker::WalkUpdate()
     {
         if (itr->second->mPosition >= itr->second->mPathFinder->GetPath().size())
         {
-            itr->second->mPathFinder->GetPlayer()->StopWalking();
+            if (itr->second->mPathFinder->GetPlayer()->IsLeavingRoom())
+                itr->second->mPathFinder->GetPlayer()->LeaveRoom();
+            else
+                itr->second->mPathFinder->GetPlayer()->StopWalking();
             delete itr->second->mPathFinder;
             delete itr->second;
             mWalkers.erase(itr++);

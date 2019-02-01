@@ -32,6 +32,8 @@ class WorldPacket;
 enum OpcodesList : uint16;
 struct mPublicHeight;
 
+typedef std::vector<Player*> GetPlayersMap;
+
 class Room
 {
 public:
@@ -84,7 +86,7 @@ public:
     std::vector<Player*> GetPlayerStorage() const;
 
 protected:
-    std::vector<Player*> mGetPlayers;
+    GetPlayersMap mGetPlayers;
     uint32 mId;
     uint32 mRowId;
     std::string mName;

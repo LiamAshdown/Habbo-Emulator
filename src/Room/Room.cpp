@@ -37,10 +37,17 @@ void Room::OnEnter(Player* player)
 //-----------------------------------------------//
 void Room::OnLeave(Player * player)
 {
-    mGetPlayers.erase(std::remove(mGetPlayers.begin(), mGetPlayers.end(), player), mGetPlayers.end());
-    mNowIn--;
-
-    QUAD_LOG_INFO("Player left room");
+    GetPlayersMap::iterator itr = mGetPlayers.begin();
+    while (itr != mGetPlayers.end())
+    {
+        if ((*itr)->GetAccountId() == player->GetAccountId())
+        {
+            mGetPlayers.erase(itr);
+            mNowIn--;
+            QUAD_LOG_INFO("Player left room");
+            break;
+        }
+    }
 }
 //-----------------------------------------------//
 void Room::SendPacketToAll(const WorldPacket packet)
