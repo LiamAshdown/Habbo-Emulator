@@ -19,6 +19,7 @@
 #ifndef _QuadEmu_QuadEngine_h_
 #define _QuadEmu_QuadEngine_h_
 #include "SharedDefines.h"
+#include "ThreadPool.h"
 #endif /* _QuadEmu_QuadEngine_ */
 
 class QuadEngine
@@ -31,5 +32,8 @@ public:
 
     void Boot();
     void UpdateWorld();
+
+private:
+    ThreadPool* mThreadPool;
 };
 

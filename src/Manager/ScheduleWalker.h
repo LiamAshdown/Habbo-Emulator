@@ -26,7 +26,6 @@
 #endif /* _QuadEmu_ScheduleWalker_ */
 
 class Player;
-class ThreadPool;
 
 class WalkerWorker
 {

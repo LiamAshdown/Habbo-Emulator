@@ -45,16 +45,17 @@ public:
     friend class Worker;
 
     ThreadPool(std::size_t);
-    void enqueue(const std::function<void()>& task);
     ~ThreadPool();
+
+    void Enqueue(std::function<void()> task);
 
 private:
 
     // need to keep track of threads so we can join them
-    std::vector< std::thread > mWorkers;
+    std::vector<std::thread> mWorkers;
 
     // the task queue
-    std::deque< std::function<void()> > mTasks;
+    std::deque<std::function<void()>> mTasks;
 
     // synchronization
     std::mutex mMutex;

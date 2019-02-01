@@ -18,7 +18,7 @@
 
 #ifndef _QuadEmu_Player_h_
 #define _QuadEmu_Player_h_
-#include "../../Common/SharedDefines.h"
+#include "SharedDefines.h"
 #endif /* _QuadEmu_Common_ */
 
 class WorldSession;
@@ -43,15 +43,18 @@ public:
     ~Player();
     void SendObjectData();
 
-    // Player Data
+    // Movement
     void Move(uint8 x, uint8 y);
-    bool IsLeavingRoom() const;
-    void SetLeavingRoom(bool leaving);
     int GetPlayerPositionX() const;
     int GetPlayerPositionY() const;
     int GetPlayerPositionZ() const;
     void SetPlayerPosition(const uint8& x, const uint8& y, const uint8& z);
-    void LeaveRoom();
+    uint8 CalculateRotation(const uint8& x, const uint8& y, const uint8& toX, const uint8& toY);
+    void StopWalking();
+    void SetCurrentRoomHeight(const uint8& height);
+    uint8 GetCurrentRoomHeight() const;
+    bool IsDancing() const;
+    void SetIsDancing(bool dancing);
 
     uint32 GetCredits() const;
     void SetCredits(const uint32& credits);
@@ -67,25 +70,20 @@ public:
     std::string GetSpecialRights() const;
     std::string GetBadgeType() const;
     uint32 GetAccountId() const;
-    bool IsDancing() const;
-    void SetIsDancing(bool dancing);
 
     std::string GetCache() const;
     void SetCache(const std::string& roomCache);
 
-    void SetCurrentRoomHeight(const uint8& height);
-    uint8 GetCurrentRoomHeight() const;
-    
     WorldPacket GetUserStatus() const;
     WorldPacket GetUpdateStatus() const;
 
-    uint8 CalculateRotation(const uint8& x, const uint8& y, const uint8& toX, const uint8& toY);
-    void StopWalking();
-
+    Room* GetRoom();
     void CreateRoom(std::vector<std::string> room);
     void SetRoomInfo(const std::string& room);
     void SetRoom(Room* room);
-    Room* GetRoom();
+    bool IsLeavingRoom() const;
+    void SetLeavingRoom(bool leaving);
+    void LeaveRoom();
     bool IsInRoom() const;
 
     WorldSession* GetSession() const;

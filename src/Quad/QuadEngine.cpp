@@ -30,10 +30,12 @@
 //-----------------------------------------------//
 QuadEngine::QuadEngine()
 {
+    mThreadPool = new ThreadPool(0);
 }
 //-----------------------------------------------//
 QuadEngine::~QuadEngine()
 {
+    delete mThreadPool;
 }
 //-----------------------------------------------//
 void QuadEngine::Boot()
@@ -47,8 +49,8 @@ void QuadEngine::Boot()
     sDBManager->getConnectionFactory()->create();
 
     std::cout << "[QUADRAL]: Booting up World Update" << std::endl;
-    boost::thread* thread = new boost::thread(&QuadEngine::UpdateWorld, this);
-    thread->detach();
+    mThreadPool->Enqueue(std::bind(&QuadEngine::UpdateWorld, this));
+
     std::cout << "[QUADRAL]: Loading Furniture" << std::endl;
     sWorld->LoadPublicFurniture();
     std::cout << "[QUADRAL]: Loading Room Height" << std::endl;

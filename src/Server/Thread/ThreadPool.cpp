@@ -67,7 +67,7 @@ ThreadPool::~ThreadPool()
         mWorkers[i].join();
 }
 //-----------------------------------------------//
-void ThreadPool::enqueue(const std::function<void()>& task)
+void ThreadPool::Enqueue(std::function<void()> task)
 {
     { // acquire lock
         std::unique_lock<std::mutex> lock(mMutex);
