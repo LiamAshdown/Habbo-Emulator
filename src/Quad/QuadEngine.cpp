@@ -30,7 +30,7 @@
 //-----------------------------------------------//
 QuadEngine::QuadEngine()
 {
-    mThreadPool = new ThreadPool(0);
+    mThreadPool = new ThreadPool(1);
 }
 //-----------------------------------------------//
 QuadEngine::~QuadEngine()
@@ -50,9 +50,10 @@ void QuadEngine::Boot()
 
     std::cout << "[QUADRAL]: Booting up World Update" << std::endl;
     mThreadPool->Enqueue(std::bind(&QuadEngine::UpdateWorld, this));
-
     std::cout << "[QUADRAL]: Loading Furniture" << std::endl;
     sWorld->LoadPublicFurniture();
+    sWorld->LoadCatalogue();
+    sWorld->LoadItemDefinitions();
     std::cout << "[QUADRAL]: Loading Room Height" << std::endl;
     sWorld->LoadHeightMap();
     std::cout << "[QUADRAL]: Loading Packet Handlers" << std::endl;

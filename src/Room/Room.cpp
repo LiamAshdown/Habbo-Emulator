@@ -20,6 +20,7 @@
 #include "../Server/WorldSession.h"
 #include "../Server/Packet/Opcodes.h"
 #include "../Entity/Item/Item.h"
+#include "PublicItem.h"
 #include "../World/World.h"
 #include "Room.h"
 //-----------------------------------------------//
@@ -44,6 +45,7 @@ void Room::OnLeave(Player * player)
         {
             mGetPlayers.erase(itr);
             mNowIn--;
+            SendRoomLeaveToAll();
             QUAD_LOG_INFO("Player left room");
             break;
         }
@@ -53,20 +55,13 @@ void Room::OnLeave(Player * player)
 void Room::SendPacketToAll(const WorldPacket packet)
 {
     for (const auto& itr : mGetPlayers)
-    {
-        if (!itr)
-            QUAD_LOG_ERROR("Trying to send packet to nullptr!");
-
         itr->GetSession()->SendPacket(packet);
-    }
 }
 //-----------------------------------------------//
 void Room::SendUpdateStatusToAll(Player* player)
 {
     for (const auto& itr : mGetPlayers)
-    {
         player->GetSession()->SendPacket(itr->GetUpdateStatus());
-    }
 }
 //-----------------------------------------------//
 void Room::SendUserStatusToAll(Player * player)
@@ -139,21 +134,21 @@ void Room::SendRoomFurniture(Player* player)
         if (itr != sWorld->mPublicItem.end())
         {
             WorldPacket data("# OBJECTS WORLD 0 ");
-            data << (std::string)itr->second.at(0)->mItemModelRoomName;
+            data << (std::string)itr->second.at(0)->mModelName;
             for (const auto& itemItr : itr->second)
             {
                 data.AppendCarriage();
-                data << (uint32)itemItr->mItemId;
+                data << (uint32)itemItr->mId;
                 data.AppendSpace();
-                data << (std::string)itemItr->m_itemSpriteName;
+                data << (std::string)itemItr->mName;
                 data.AppendSpace();
-                data << (uint8)itemItr->m_itemPos->x;
+                data << (uint8)itemItr->mPosition->x;
                 data.AppendSpace(); 
-                data << (uint8)itemItr->m_itemPos->y;
+                data << (uint8)itemItr->mPosition->y;
                 data.AppendSpace();
-                data << (uint8)itemItr->m_itemPos->z;
+                data << (uint8)itemItr->mPosition->z;
                 data.AppendSpace(); 
-                data << (uint8)itemItr->mItemRotation;
+                data << (uint8)itemItr->mRotation;
             }
             data.AppendEndCarriage();
             player->GetSession()->SendPacket(data.Write());
@@ -176,6 +171,12 @@ void Room::SendRoomHeight(Player* player)
         player->SetPlayerPosition(itr->second.x, itr->second.y, itr->second.z);
         player->SetCurrentRoomHeight(itr->second.dir);
     }
+}
+//-----------------------------------------------//
+void Room::SendRoomLeaveToAll() const
+{
+    for (const auto& itr : mGetPlayers)
+        itr->GetRoom()->SendUpdateStatusToAll(itr);
 }
 //-----------------------------------------------//
 mPublicHeight Room::GetRoomModel()

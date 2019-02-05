@@ -75,6 +75,8 @@ public:
     void HandleDance(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleStop(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleLookTo(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandleOrderInfo(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandlePurchase(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleNULL(std::string& packetBuffer, std::vector<std::string>& packetStorage) {}
 
 protected:

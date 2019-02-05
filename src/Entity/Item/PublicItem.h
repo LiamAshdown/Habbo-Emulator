@@ -21,39 +21,35 @@
 #include "../../Common/SharedDefines.h"
 #endif /* _QuadEmu_Item_ */
 
-typedef struct ItemData
+typedef struct ItemPosition
 {
-    ItemData() : length(0), width(0), height(0) {}
-    uint8 length;
-    uint8 width;
-    float height;
-}ItemDataStruct;
+    ItemPosition() : x(0), y(0), z(0) {}
+    uint8 x;
+    uint8 y;
+    uint8 z;
+}ItemPositionStruct;
 
-class Item
+class PublicItem
 {
 public:
     friend class World;
 
-    Item();
-    ~Item();
+    PublicItem();
+    ~PublicItem();
 
     uint32 GetId() const;
-    std::string GetSprite() const;
-    std::string GetColour() const;
-    ItemDataStruct* GetPosition();
-    uint8 GetData() const;
-    std::string GetBehaviour() const;
+    std::string GetModelName() const;
     std::string GetName() const;
-    std::string GetDescription() const;
+    ItemPositionStruct* GetPosition() const;
+    uint8 GetRotation() const;
+    std::string GetData() const;
 
 private:
     uint32 mId;
-    std::string mSprite;
-    std::string mColour;
-    ItemDataStruct* mPosition;
-    uint8 mDataClass;
-    std::string mBehaviour;
+    std::string mModelName;
     std::string mName;
-    std::string mDescription;
+    ItemPositionStruct* mPosition;
+    uint8 mRotation;
+    std::string mData;
 };
 

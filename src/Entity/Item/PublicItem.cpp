@@ -16,61 +16,48 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //-----------------------------------------------//
-#include "Item.h"
+#include "PublicItem.h"
 //-----------------------------------------------//
-Item::Item()
+PublicItem::PublicItem()
 {
     mId = 0;
-    mSprite = "";
-    mColour = "";
-    mPosition = new ItemDataStruct;
-    mDataClass = 0;
-    mBehaviour = "";
+    mModelName = "";
     mName = "";
-    mDescription = "";
+    mData = "";
+    mRotation = 0;
+    mPosition = new ItemPositionStruct;
 }
 //-----------------------------------------------//
-Item::~Item()
+PublicItem::~PublicItem()
 {
 }
 //-----------------------------------------------//
-uint32 Item::GetId() const
+uint32 PublicItem::GetId() const
 {
-    return mId;
+    return mId; 
 }
 //-----------------------------------------------//
-std::string Item::GetSprite() const
+std::string PublicItem::GetModelName() const
 {
-    return mSprite;
+    return mModelName;
 }
 //-----------------------------------------------//
-std::string Item::GetColour() const
-{
-    return mColour;
-}
-//-----------------------------------------------//
-ItemDataStruct * Item::GetPosition()
-{
-    return mPosition;
-}
-//-----------------------------------------------//
-uint8 Item::GetData() const
-{
-    return mDataClass;
-}
-//-----------------------------------------------//
-std::string Item::GetBehaviour() const
-{
-    return mBehaviour
-}
-//-----------------------------------------------//
-std::string Item::GetName() const
+std::string PublicItem::GetName() const
 {
     return mName;
 }
 //-----------------------------------------------//
-std::string Item::GetDescription() const
+ItemPositionStruct * PublicItem::GetPosition() const
 {
-    return mDescription;
+    return mPosition;
+}
+//-----------------------------------------------//
+uint8 PublicItem::GetRotation() const
+{
+    return mRotation;
+}//-----------------------------------------------//
+std::string PublicItem::GetData() const
+{
+    return mData;
 }
 //-----------------------------------------------//

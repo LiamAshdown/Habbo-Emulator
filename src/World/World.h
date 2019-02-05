@@ -25,6 +25,7 @@
 class WorldSession;
 class Socket;
 class WorldPacket;
+class PublicItem;
 class Item;
 
 typedef struct mPublicHeight
@@ -39,7 +40,7 @@ typedef struct mPublicHeight
 }PublicHeightStruct;
 
 typedef std::unordered_map<uint32, WorldSession*> SessionMap;
-typedef std::map<uint32, std::vector<Item*>> PublicItemMap;
+typedef std::map<uint32, std::vector<PublicItem*>> PublicItemMap;
 typedef std::map<std::string, PublicHeightStruct> PublicHeightMap;
 
 class World
@@ -62,9 +63,10 @@ public:
     // Load Data on start up
     void LoadRooms();
     void LoadPublicFurniture();
+    void LoadCatalogue();
+    void LoadItemDefinitions();
     void LoadHeightMap();
     void LoadPublicRoomsPort();
-
 public:
     PublicItemMap mPublicItem;
     PublicHeightMap mPublicHeight;

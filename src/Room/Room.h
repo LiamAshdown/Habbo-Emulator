@@ -53,6 +53,7 @@ public:
     void SendChatToAll(Player* player, OpcodesList opcode, std::string message);
     void SendRoomFurniture(Player* player);
     void SendRoomHeight(Player* player);
+    void SendRoomLeaveToAll() const;
     mPublicHeight GetRoomModel();
 
     // Player Wrapper

@@ -49,6 +49,8 @@ enum OpcodesList : uint16
     DANCE                       = 475,
     STOP                        = 326,
     LOOKTO                      = 472,
+    GETORDERINFO                = 904,
+    PURCHASE                    = 603,
 };
 
 class WorldSession;
