@@ -32,7 +32,7 @@ void WorldSession::HandleOrderInfo(std::string& packetBuffer, std::vector<std::s
     if (!item)
         return;
 
-    uint32 credits = sCatalogueManager->GetCatalogue(packetStorage[2])->Credits;
+    uint32 credits = sCatalogueManager->GetCatalogueByCallId(packetStorage[2])->Credits;
 
     WorldPacket data("# GETORDERINFO");
     data.AppendCarriage();
@@ -44,9 +44,49 @@ void WorldSession::HandleOrderInfo(std::string& packetBuffer, std::vector<std::s
     data << (uint32)credits;
     data.AppendEndCarriage();
     SendPacket(data.Write());
+
+    // Store the item Id for later since we will use it when player purchases
+    GetPlayer()->SetPendingPurchase(item->GetId(), credits);
 }
 //-----------------------------------------------//
 void WorldSession::HandlePurchase(std::string& packetBuffer, std::vector<std::string>& packetStorage)
 {
+    Item* item = sCatalogueManager->GetItemDefintion(GetPlayer()->GetPendingPurchase().itemId);    
 
+    if (!item)
+        return;
+
+    std::shared_ptr<MySQLConnection> connection = sDBManager->getConnectionPool()->borrow();
+    try
+    {
+        sql::PreparedStatement* prepareStatement = connection->sql_connection->prepareStatement
+        ("INSERT INTO user_hand_furniture(userId, sprite, color, length, width, height, dataclass, behaviour, name, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        prepareStatement->setInt(1, GetPlayer()->GetAccountId());
+        prepareStatement->setString(2, item->GetSprite());
+        prepareStatement->setString(3, item->GetColour());
+        prepareStatement->setInt(4, item->GetPosition()->length);
+        prepareStatement->setInt(5, item->GetPosition()->width);
+        prepareStatement->setDouble(6, item->GetPosition()->height);
+        prepareStatement->setString(7, item->GetData());
+        prepareStatement->setString(8, item->GetBehaviour());
+        prepareStatement->setString(9, item->GetName());
+        prepareStatement->setString(10, item->GetDescription());
+        prepareStatement->executeQuery();
+
+        GetPlayer()->SetCredits(GetPlayer()->GetCredits() - GetPlayer()->GetPendingPurchase().itemCredits);
+
+        // Update client user credits
+        WorldPacket data("# WALLETBALANCE");
+        data.AppendCarriage();
+        data << (uint32)GetPlayer()->GetCredits();
+        data.AppendEndCarriage();
+        SendPacket(data.Write());
+    }
+    catch (sql::SQLException &e)
+    {
+        sDBManager->printException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
+    }
+
+    sDBManager->getConnectionPool()->unborrow(connection);
 }

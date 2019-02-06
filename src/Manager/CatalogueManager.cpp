@@ -52,7 +52,7 @@ Item* CatalogueManager::GetCatalogueItem(const std::string& catalogue)
     return nullptr;
 }
 //-----------------------------------------------//
-CatalogueDataStruct* CatalogueManager::GetCatalogue(const std::string & catalogue)
+CatalogueDataStruct* CatalogueManager::GetCatalogueByCallId(const std::string & catalogue)
 {
     CatalogueMap::const_iterator itr = mCatalogue.find(catalogue);
 

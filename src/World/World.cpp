@@ -287,9 +287,9 @@ void World::LoadItemDefinitions()
             itemDefinitions->mPosition->length   = result_set->getInt(4);
             itemDefinitions->mPosition->width    = result_set->getInt(5);
             itemDefinitions->mPosition->height   = result_set->getDouble(6);
-            itemDefinitions->mDataClass          = result_set->getInt(7);
+            itemDefinitions->mDataClass          = result_set->getString(7);
             itemDefinitions->mBehaviour          = result_set->getString(8);
-            itemDefinitions->mName               = result_set->getInt(9);
+            itemDefinitions->mName               = result_set->getString(9);
             itemDefinitions->mDescription        = result_set->getString(10);
             sCatalogueManager->mItemDefinitions[itemDefinitions->mId] = itemDefinitions;
 

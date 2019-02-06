@@ -41,7 +41,7 @@ public:
     std::string GetSprite() const;
     std::string GetColour() const;
     ItemDataStruct* GetPosition();
-    uint8 GetData() const;
+    std::string GetData() const;
     std::string GetBehaviour() const;
     std::string GetName() const;
     std::string GetDescription() const;
@@ -51,7 +51,7 @@ private:
     std::string mSprite;
     std::string mColour;
     ItemDataStruct* mPosition;
-    uint8 mDataClass;
+    std::string  mDataClass;
     std::string mBehaviour;
     std::string mName;
     std::string mDescription;

@@ -134,21 +134,21 @@ void Room::SendRoomFurniture(Player* player)
         if (itr != sWorld->mPublicItem.end())
         {
             WorldPacket data("# OBJECTS WORLD 0 ");
-            data << (std::string)itr->second.at(0)->mModelName;
+            data << (std::string)itr->second.at(0)->GetModelName();
             for (const auto& itemItr : itr->second)
             {
                 data.AppendCarriage();
-                data << (uint32)itemItr->mId;
+                data << (uint32)itemItr->GetId();
                 data.AppendSpace();
-                data << (std::string)itemItr->mName;
+                data << (std::string)itemItr->GetName();
                 data.AppendSpace();
-                data << (uint8)itemItr->mPosition->x;
+                data << (uint8)itemItr->GetPosition()->x;
                 data.AppendSpace(); 
-                data << (uint8)itemItr->mPosition->y;
+                data << (uint8)itemItr->GetPosition()->y;
                 data.AppendSpace();
-                data << (uint8)itemItr->mPosition->z;
+                data << (uint8)itemItr->GetPosition()->z;
                 data.AppendSpace(); 
-                data << (uint8)itemItr->mRotation;
+                data << (uint8)itemItr->GetRotation();
             }
             data.AppendEndCarriage();
             player->GetSession()->SendPacket(data.Write());

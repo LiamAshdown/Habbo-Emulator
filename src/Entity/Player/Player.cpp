@@ -453,6 +453,17 @@ bool Player::IsInRoom() const
     return mInRoom;
 }
 //-----------------------------------------------//
+void Player::SetPendingPurchase(uint32 itemId, uint32 credits)
+{
+    mPendingItemPurchase.itemCredits = credits;
+    mPendingItemPurchase.itemId = itemId;
+}
+//-----------------------------------------------//
+PendingPurchase Player::GetPendingPurchase()
+{
+    return mPendingItemPurchase;
+}
+//-----------------------------------------------//
 WorldSession* Player::GetSession() const
 {
     return mSession;

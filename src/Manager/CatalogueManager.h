@@ -44,7 +44,7 @@ public:
 
 public:
     Item* GetCatalogueItem(const std::string& catalogue);
-    CatalogueDataStruct* GetCatalogue(const std::string& catalogue);
+    CatalogueDataStruct* GetCatalogueByCallId(const std::string& catalogue);
     Item* GetItemDefintion(const uint32& itemId);
 
 private:

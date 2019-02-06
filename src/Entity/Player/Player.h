@@ -34,6 +34,12 @@ typedef struct PlayerPosition
 
 } PlayerPositionStruct;
 
+typedef struct PendingPurchase
+{
+    uint32 itemId;
+    uint32 itemCredits;
+} PendingPurchaseStruct;
+
 class Player
 {
     friend class WorldSession;
@@ -86,6 +92,9 @@ public:
     void LeaveRoom();
     bool IsInRoom() const;
 
+    void SetPendingPurchase(uint32 itemId, uint32 credits);
+    PendingPurchase GetPendingPurchase();
+
     WorldSession* GetSession() const;
 
 protected:
@@ -113,5 +122,7 @@ protected:
     bool mLeavingRoom;
     uint32 mLastRoomCreated;
     bool mDancing;
+
+    PendingPurchase mPendingItemPurchase;
 };
 

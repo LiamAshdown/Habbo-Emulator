@@ -24,7 +24,7 @@ Item::Item()
     mSprite = "";
     mColour = "";
     mPosition = new ItemDataStruct;
-    mDataClass = 0;
+    mDataClass = "";
     mBehaviour = "";
     mName = "";
     mDescription = "";
@@ -32,6 +32,7 @@ Item::Item()
 //-----------------------------------------------//
 Item::~Item()
 {
+    delete mPosition;
 }
 //-----------------------------------------------//
 uint32 Item::GetId() const
@@ -54,14 +55,14 @@ ItemDataStruct * Item::GetPosition()
     return mPosition;
 }
 //-----------------------------------------------//
-uint8 Item::GetData() const
+std::string Item::GetData() const
 {
     return mDataClass;
 }
 //-----------------------------------------------//
 std::string Item::GetBehaviour() const
 {
-    return mBehaviour
+    return mBehaviour;
 }
 //-----------------------------------------------//
 std::string Item::GetName() const
