@@ -69,7 +69,8 @@ void World::AddSession(const uint32& mId, WorldSession* currentSession)
         QUAD_LOG_INFO("Add player session");
     }
     else
-        QUAD_LOG_ERROR("Player session already exists");
+        QUAD_LOG_ERROR("Session already exists!");
+
 }
 //-----------------------------------------------//
 void World::RemoveSession(const uint32& mId)
@@ -145,13 +146,13 @@ void World::LoadPublicFurniture()
         {
             PublicItem* publicRoomItems         = new PublicItem;
             publicRoomItems->mId            = result_set->getInt(1);
-            publicRoomItems->mModelName = result_set->getString(3);
-            publicRoomItems->mName    = result_set->getString(4);
+            publicRoomItems->mName    = result_set->getString(3);
+            publicRoomItems->mModelName = result_set->getString(4);
             publicRoomItems->mPosition->x        = result_set->getInt(5);
             publicRoomItems->mPosition->y        = result_set->getInt(6);
             publicRoomItems->mPosition->z        = result_set->getInt(7);
             publicRoomItems->mRotation      = result_set->getInt(8);
-            publicRoomItems->mData          = result_set->getString(9);
+            publicRoomItems->mData          = result_set->getString(10);
             itemVec.push_back(publicRoomItems);
 
         } while (result_set->next());
@@ -344,4 +345,4 @@ void World::LoadPublicRoomsPort()
     mIoService.run();
 
 }
-//-----------------------------------------------//
+//-----------------------------------------------//-----------------------------------//

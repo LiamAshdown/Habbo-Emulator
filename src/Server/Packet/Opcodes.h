@@ -51,6 +51,7 @@ enum OpcodesList : uint16
     LOOKTO                      = 472,
     GETORDERINFO                = 904,
     PURCHASE                    = 603,
+    GETSTRIP                    = 626,
 };
 
 class WorldSession;

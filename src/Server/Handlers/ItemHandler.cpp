@@ -78,9 +78,11 @@ void WorldSession::HandlePurchase(std::string& packetBuffer, std::vector<std::st
 
         // Update client user credits
         WorldPacket data("# WALLETBALANCE");
+        ByteBuffer buffer("# ADDSTRIPITEM\r##");
         data.AppendCarriage();
         data << (uint32)GetPlayer()->GetCredits();
         data.AppendEndCarriage();
+        data.Append(buffer);
         SendPacket(data.Write());
     }
     catch (sql::SQLException &e)

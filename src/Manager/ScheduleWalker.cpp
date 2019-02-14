@@ -88,7 +88,15 @@ void ScheduleWalker::WalkUpdate()
         int roomHeight = itr->second->mPathFinder->Map[coordinate.y][coordinate.x];
         roomHeight = roomHeight - 48;
 
-        WorldPacket buffer("# STATUS \r");
+        // Hack fix temp
+        // Needs to be fixed
+        if (itr->second->mPathFinder->GetPlayer()->GetRoom())
+            if (itr->second->mPathFinder->GetPlayer()->GetRoom()->GetType() == PLAYER_ROOM)
+                roomHeight = 1;
+
+        WorldPacket buffer("# STATUS");
+        buffer.AppendSpace();
+        buffer.AppendCarriage();
         buffer << (std::string)itr->second->mPathFinder->GetPlayer()->GetName();
         buffer.AppendSpace();
         buffer << (uint8)itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX();

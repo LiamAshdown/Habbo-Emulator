@@ -95,6 +95,8 @@ bool Socket::ProcessHandler()
     boost::split(splitData, stringBuffer, boost::is_any_of("\t "));
 
     const uint16& opcode = static_cast<uint16>(std::accumulate(splitData[0].begin(), splitData[0].end(), 0));
+    std::cout << opcode << std::endl;
+    std::cout << stringBuffer << std::endl;
     PacketHandlerStruct const& opHandle = sPacketHandler->GetPacket(opcode);
     mWorldSession->ExecutePacket(opHandle, stringBuffer, splitData);
     return true;
@@ -112,12 +114,15 @@ void Socket::SendAuthResponse()
 //-----------------------------------------------//
 void Socket::SendPacket(const WorldPacket& packet)
 {
+    //std::lock_guard<std::mutex> guard(mLock);
     mOutBuffer->Write((const char*)packet.GetContents(), packet.GetSize());
     boost::asio::async_write(mSocket,
         boost::asio::buffer(mOutBuffer->mBuffer, mOutBuffer->mWritePosition),
         boost::bind(&Socket::LogPacket, shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
+
+    
 }
 //-----------------------------------------------//
 void Socket::Read(char* buffer, const std::size_t& length)
@@ -136,10 +141,10 @@ void Socket::CloseSocket()
 {
     if (IsSocketOpen())
     {
-        mSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both); 
-        mSocket.close();
-
         mWorldSession->LogoutPlayer(true);
+
+        mSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        mSocket.close();
     }
 }
 //-----------------------------------------------//

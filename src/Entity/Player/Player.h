@@ -95,6 +95,8 @@ public:
     void SetPendingPurchase(uint32 itemId, uint32 credits);
     PendingPurchase GetPendingPurchase();
 
+    void SendUpdateFlats();
+
     WorldSession* GetSession() const;
 
 protected:

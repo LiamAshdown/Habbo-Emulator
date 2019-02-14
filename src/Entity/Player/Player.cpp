@@ -251,7 +251,9 @@ WorldPacket Player::GetUserStatus() const
 //-----------------------------------------------//
 WorldPacket Player::GetUpdateStatus() const
 {
-    WorldPacket data("# STATUS \r");
+    WorldPacket data("# STATUS");
+    data.AppendSpace();
+    data.AppendCarriage();
     data << (std::string)GetName();
     data.AppendSpace();
     data << (uint8)GetPlayerPositionX();
@@ -462,6 +464,42 @@ void Player::SetPendingPurchase(uint32 itemId, uint32 credits)
 PendingPurchase Player::GetPendingPurchase()
 {
     return mPendingItemPurchase;
+}
+//-----------------------------------------------//
+void Player::SendUpdateFlats()
+{
+    WorldPacket data("# BUSY_FLAT_RESULTS 1");
+    for (const auto& itr : sRoomManager->GetRoomStorage())
+    {
+        if (itr.second->GetType() != RoomFlags::PLAYER_ROOM || itr.second->IsHidden())
+            continue;
+
+        data.AppendCarriage();
+        data << (uint32)(itr.second->GetRowId());
+        data.AppendForwardSlash();
+        data << (std::string)itr.second->GetName();
+        data << (std::string)" Room";
+        data.AppendForwardSlash();
+        data << (std::string)itr.second->GetOwnerName();
+        data.AppendForwardSlash();
+        data << (std::string)itr.second->GetState();
+        data.AppendForwardSlash();
+        data.AppendForwardSlash();
+        data << (std::string)itr.second->GetFloorLevel();
+        data.AppendForwardSlash();
+        data << GetSession()->GetSocket()->GetRealmIP();
+        data.AppendForwardSlash();
+        data << GetSession()->GetSocket()->GetRealmIP();
+        data.AppendForwardSlash();
+        data << (uint32)itr.second->GetRoomId();
+        data.AppendForwardSlash();
+        data << (uint8)itr.second->GetNowIn();
+        data.AppendForwardSlash();
+        data << (uint8)itr.second->GetMaxIn();
+        data.AppendForwardSlash();
+    }
+    data.AppendEndCarriage();
+    GetSession()->SendPacket(data.Write());
 }
 //-----------------------------------------------//
 WorldSession* Player::GetSession() const

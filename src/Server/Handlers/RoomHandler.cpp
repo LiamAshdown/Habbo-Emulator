@@ -184,6 +184,7 @@ void WorldSession::HandleGoToFlat(std::string& packetBuffer, std::vector<std::st
     if (Room* room = sRoomManager->GetRoom((std::stoi(roomDetails[1]))))
     {
         WorldPacket data;
+        data << (std::string)"# ROOM_READY\r##";
         data << (std::string)"# FLATPROPERTY\rwallpaper/201\r##";
         data << (std::string)"# FLATPROPERTY\rfloor/0\r##";
         data << (std::string)"# YOUAREOWNER\r##";

@@ -95,9 +95,15 @@ uint32 WorldSession::GetAccountId()
     return mId;
 }
 //-----------------------------------------------//
-void WorldSession::LogoutPlayer(bool save)
+void WorldSession::LogoutPlayer(bool removeSession)
 {
-    sWorld->RemoveSession(GetPlayer()->GetAccountId());
+    if (removeSession)
+        sWorld->RemoveSession(GetPlayer()->GetAccountId());
+    else
+    {
+        if (GetPlayer()->IsInRoom())
+            GetPlayer()->GetRoom()->OnLeave(GetPlayer());
+    }
 }
 //-----------------------------------------------//
 bool WorldSession::InitializePlayerData(const std::string& username)

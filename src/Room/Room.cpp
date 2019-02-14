@@ -168,8 +168,8 @@ void Room::SendRoomHeight(Player* player)
         data.AppendEndCarriage();
         player->GetSession()->SendPacket(data.Write());
         player->SetCache(heightMap);
-        player->SetPlayerPosition(itr->second.x, itr->second.y, itr->second.z);
-        player->SetCurrentRoomHeight(itr->second.dir);
+        player->SetPlayerPosition(itr->second.x, itr->second.y, itr->second.dir);
+        player->SetCurrentRoomHeight(itr->second.z);
     }
 }
 //-----------------------------------------------//

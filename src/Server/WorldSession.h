@@ -43,7 +43,7 @@ public:
     Player* GetPlayer();
     void SendSystemBroadCast(const std::string& broadcast);
     uint32 GetAccountId();
-    void LogoutPlayer(bool save);
+    void LogoutPlayer(bool removeSession);
     bool InitializePlayerData(const std::string& username);
     bool IsPlayerInitialized();
     void SendLoginFailure();
@@ -77,6 +77,7 @@ public:
     void HandleLookTo(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleOrderInfo(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandlePurchase(std::string& packetBuffer, std::vector<std::string>& packetStorage);
+    void HandleGetStrip(std::string& packetBuffer, std::vector<std::string>& packetStorage);
     void HandleNULL(std::string& packetBuffer, std::vector<std::string>& packetStorage) {}
 
 protected:

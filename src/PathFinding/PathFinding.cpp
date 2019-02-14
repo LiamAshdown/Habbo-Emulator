@@ -36,15 +36,15 @@ PathFinder::PathFinder(Player * player, std::string map) : mPlayer(player)
         counter++;
     }
 
-   /* for (uint8 i = 0; i < 34; i++)
-    {
-        for (uint8 j = 0; j < 34; j++)
-            std::cout << Map[i][j] << " ";
+    /* for (uint8 i = 0; i < 34; i++)
+     {
+         for (uint8 j = 0; j < 34; j++)
+             std::cout << Map[i][j] << " ";
 
-        std::cout << std::endl;
-    }*/
+         std::cout << std::endl;
+     }*/
 
-    m_XYPos = 
+    m_XYPos =
     {
         { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
         { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
@@ -57,7 +57,7 @@ PathFinder::PathFinder(Player * player, std::string map) : mPlayer(player)
 void PathFinder::FindPath(uint8 endPositionX, uint8 endPositionY)
 {
     // Check ifs selected tile is valid, prevents from doing extra work
-   if (!CheckValidPosition(endPositionX, endPositionY))
+    if (!CheckValidPosition(endPositionX, endPositionY))
         return;
 
     Node* current = nullptr;
@@ -70,7 +70,7 @@ void PathFinder::FindPath(uint8 endPositionX, uint8 endPositionY)
         current = *openList.begin();
         for (auto node : openList)
         {
-            if (node->GetScore() <= current->GetScore()) 
+            if (node->GetScore() <= current->GetScore())
                 current = node;
         }
 
@@ -80,7 +80,7 @@ void PathFinder::FindPath(uint8 endPositionX, uint8 endPositionY)
         closedList.insert(current);
         openList.erase(std::find(openList.begin(), openList.end(), current));
 
-        for (uint8 i = 0; i < 8; ++i) 
+        for (uint8 i = 0; i < 8; ++i)
         {
             std::shared_ptr<XYPositionStruct> pos = std::make_unique<XYPositionStruct>();
             uint8 newPosX = pos->x = current->m_x + m_XYPos[i].x;
@@ -107,7 +107,7 @@ void PathFinder::FindPath(uint8 endPositionX, uint8 endPositionY)
         }
     }
 
-    while (current != nullptr) 
+    while (current != nullptr)
     {
         std::shared_ptr<XYPositionStruct> pos = std::make_shared<XYPositionStruct>();
         pos->x = current->m_x;
@@ -136,32 +136,27 @@ uint32 PathFinder::CalculateHeuristic(Node* current, uint8& endPositionX, uint8&
 {
     // Manhattan Distance Formula
     //< http://artis.imag.fr/~Xavier.Decoret/resources/maths/manhattan/html/
-    return (static_cast<unsigned int>(10 *(abs(current->m_x - endPositionX) + abs(current->m_y - endPositionY))));
+    return (static_cast<unsigned int>(10 * (abs(current->m_x - endPositionX) + abs(current->m_y - endPositionY))));
 }
 //-----------------------------------------------//
 bool PathFinder::CheckValidStep(uint8& x, uint8& y, Node* current, uint8& endX, uint8& endY)
 {
-    if (y < 0 || x < 0)
+    if (y < 0 || x < 0 || x > 40 || y > 40)
         return false;
-
-    if (Map[current->m_y][current->m_x] != 'X')
-    {
-        // If our previous posit2 is 0 and current position is 2 - we cannot formulate a mPath, player height is incremented by 1
-        if ((Map[y][x] > Map[current->m_y][current->m_x] + 1) || (Map[y][x] + 1 < Map[current->m_y][current->m_x]))
-            return false;
-    }
 
     // Collision are highlighted as X on the map
     if (Map[y][x] == 'X')
         return false;
 
-    // We need to loop through current players, so we don't walk through them
-    // This is dynamic checking, we check each tile whether there is a player occupying the tile
-    for (const auto& itr : mPlayer->GetRoom()->GetPlayerStorage())
+    if (Map[current->m_y][current->m_x] != 'X')
     {
-        if (itr->GetPlayerPositionX() == x && itr->GetPlayerPositionY() == y)
+        // If our previous position is 0 and current position is 2 - we cannot formulate a mPath, player height is incremented by 1
+        if ((Map[y][x] > Map[current->m_y][current->m_x] + 1) || (Map[y][x] + 1 < Map[current->m_y][current->m_x]))
             return false;
     }
+
+    if (!CheckValidPosition(x, y))
+        return false;
 
     return true;
 }

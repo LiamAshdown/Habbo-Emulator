@@ -61,6 +61,7 @@ void PacketTable::InitializePackets()
     StorePacket(OpcodesList::LOOKTO,                     "LOOKTO",                   &WorldSession::HandleLookTo             );
     StorePacket(OpcodesList::GETORDERINFO,               "GETORDERINFO",             &WorldSession::HandleOrderInfo          );
     StorePacket(OpcodesList::PURCHASE,                   "PURCHASE",                 &WorldSession::HandlePurchase           );
+    StorePacket(OpcodesList::GETSTRIP,                   "GETSTRIP",                 &WorldSession::HandleGetStrip           );
 }
 //-----------------------------------------------//
 void PacketTable::StorePacket(uint16 opcode, char const * name, void(WorldSession::* handler)(std::string &packet, std::vector<std::string>& packetStorage))

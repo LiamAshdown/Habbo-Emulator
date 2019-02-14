@@ -25,6 +25,7 @@
 #include "PacketBuffer.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
+#include <mutex>
 #endif /* _QuadEmu_Socket_h_ */
 
 class WorldSession;
@@ -65,6 +66,7 @@ protected:
     std::unique_ptr<PacketBuffer> mOutBuffer;
     std::unique_ptr<PacketBuffer> mInBuffer;
     const int mPort;
+    std::mutex mLock;
     WorldSession* mWorldSession;
 };
 
