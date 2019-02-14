@@ -25,6 +25,7 @@ Socket::Socket(boost::asio::io_service & socket, uint32& port) : mSocket(socket)
 {
     mOutBuffer.reset(new PacketBuffer);
     mInBuffer.reset(new PacketBuffer);
+    mSocketOpen = true;
 }
 //-----------------------------------------------//
 void Socket::ReadHandler()
@@ -40,7 +41,7 @@ void Socket::ReadOnComing(const boost::system::error_code& error, const std::siz
 {
     if (error)
     {
-        if (!mSocket.is_open())
+        if (!IsSocketOpen())
             return;
 
         CloseSocket();
@@ -114,15 +115,15 @@ void Socket::SendAuthResponse()
 //-----------------------------------------------//
 void Socket::SendPacket(const WorldPacket& packet)
 {
-    //std::lock_guard<std::mutex> guard(mLock);
+    if (!IsSocketOpen())
+        return;
+
     mOutBuffer->Write((const char*)packet.GetContents(), packet.GetSize());
     boost::asio::async_write(mSocket,
         boost::asio::buffer(mOutBuffer->mBuffer, mOutBuffer->mWritePosition),
         boost::bind(&Socket::LogPacket, shared_from_this(),
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-
-    
 }
 //-----------------------------------------------//
 void Socket::Read(char* buffer, const std::size_t& length)
@@ -130,7 +131,6 @@ void Socket::Read(char* buffer, const std::size_t& length)
     mInBuffer->Read(buffer, length);
 }
 //-----------------------------------------------//
-
 void Socket::LogPacket(const boost::system::error_code& error, const std::size_t& length)
 {
     // mOutBuffer is a smart pointer, gets deleted automatically when we allocate new
@@ -142,7 +142,7 @@ void Socket::CloseSocket()
     if (IsSocketOpen())
     {
         mWorldSession->LogoutPlayer(true);
-
+        mSocketOpen = false;
         mSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
         mSocket.close();
     }

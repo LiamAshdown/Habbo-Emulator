@@ -440,9 +440,11 @@ void Player::SetRoomInfo(const std::string& room)
 //-----------------------------------------------//
 void Player::SetRoom(Room* room)
 {
-    mRoom = room;
-    mInRoom = true;
-    mRoom->OnEnter(this);
+    if (mRoom = room)
+    {
+        mInRoom = true;
+        mRoom->OnEnter(this);
+    }
 }
 //-----------------------------------------------//
 Room* Player::GetRoom()

@@ -88,12 +88,6 @@ void ScheduleWalker::WalkUpdate()
         int roomHeight = itr->second->mPathFinder->Map[coordinate.y][coordinate.x];
         roomHeight = roomHeight - 48;
 
-        // Hack fix temp
-        // Needs to be fixed
-        if (itr->second->mPathFinder->GetPlayer()->GetRoom())
-            if (itr->second->mPathFinder->GetPlayer()->GetRoom()->GetType() == PLAYER_ROOM)
-                roomHeight = 1;
-
         WorldPacket buffer("# STATUS");
         buffer.AppendSpace();
         buffer.AppendCarriage();
@@ -103,7 +97,7 @@ void ScheduleWalker::WalkUpdate()
         buffer.AppendComma();
         buffer << (uint8)itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY();
         buffer.AppendComma();
-        buffer << (uint8)roomHeight;
+        buffer << (uint8)itr->second->mPathFinder->GetPlayer()->GetCurrentRoomHeight();
         buffer.AppendComma();
         buffer << (uint8)itr->second->mPathFinder->GetPlayer()->CalculateRotation(itr->second->mPathFinder->GetPlayer()->GetPlayerPositionX(), itr->second->mPathFinder->GetPlayer()->GetPlayerPositionY(), coordinate.x, coordinate.y);
         buffer.AppendComma();

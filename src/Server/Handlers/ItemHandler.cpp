@@ -60,18 +60,17 @@ void WorldSession::HandlePurchase(std::string& packetBuffer, std::vector<std::st
     try
     {
         sql::PreparedStatement* prepareStatement = connection->sql_connection->prepareStatement
-        ("INSERT INTO user_hand_furniture(userId, sprite, color, length, width, height, dataclass, behaviour, name, description) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        ("INSERT INTO user_hand_furniture(user_id, item_id, room_id, x, y, z, rotation, extra_data) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
 
         prepareStatement->setInt(1, GetPlayer()->GetAccountId());
-        prepareStatement->setString(2, item->GetSprite());
-        prepareStatement->setString(3, item->GetColour());
-        prepareStatement->setInt(4, item->GetPosition()->length);
-        prepareStatement->setInt(5, item->GetPosition()->width);
-        prepareStatement->setDouble(6, item->GetPosition()->height);
-        prepareStatement->setString(7, item->GetData());
-        prepareStatement->setString(8, item->GetBehaviour());
-        prepareStatement->setString(9, item->GetName());
-        prepareStatement->setString(10, item->GetDescription());
+        prepareStatement->setInt(2, item->GetId());
+        prepareStatement->setInt(3, GetPlayer()->GetRoom()->GetRoomId());
+        prepareStatement->setInt(4, 0);
+        prepareStatement->setInt(5, 0);
+        prepareStatement->setInt(6, 0);
+        prepareStatement->setDouble(7, 0);
+        prepareStatement->setString(8, "");
+
         prepareStatement->executeQuery();
 
         GetPlayer()->SetCredits(GetPlayer()->GetCredits() - GetPlayer()->GetPendingPurchase().itemCredits);

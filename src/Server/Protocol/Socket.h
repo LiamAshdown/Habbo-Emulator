@@ -57,7 +57,7 @@ public:
     // Misc
     int GetPort() const { return mPort; }
     boost::asio::ip::tcp::socket& GetSocket() { return mSocket; }
-    bool IsSocketOpen() const { return mSocket.is_open(); }
+    bool IsSocketOpen() const { return mSocketOpen; }
     void CloseSocket();
     const char* GetRealmIP() const;
 
@@ -66,6 +66,7 @@ protected:
     std::unique_ptr<PacketBuffer> mOutBuffer;
     std::unique_ptr<PacketBuffer> mInBuffer;
     const int mPort;
+    bool mSocketOpen;
     std::mutex mLock;
     WorldSession* mWorldSession;
 };

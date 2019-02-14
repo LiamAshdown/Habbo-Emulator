@@ -32,7 +32,6 @@ void Room::OnEnter(Player* player)
 {
     mGetPlayers.push_back(player);
     mNowIn++;
-
     QUAD_LOG_INFO("Player entered room");
 }
 //-----------------------------------------------//
