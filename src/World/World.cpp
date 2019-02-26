@@ -144,15 +144,15 @@ void World::LoadPublicFurniture()
         result_set->next();
         do
         {
-            PublicItem* publicRoomItems         = new PublicItem;
-            publicRoomItems->mId            = result_set->getInt(1);
-            publicRoomItems->mName    = result_set->getString(3);
-            publicRoomItems->mModelName = result_set->getString(4);
-            publicRoomItems->mPosition->x        = result_set->getInt(5);
-            publicRoomItems->mPosition->y        = result_set->getInt(6);
-            publicRoomItems->mPosition->z        = result_set->getInt(7);
-            publicRoomItems->mRotation      = result_set->getInt(8);
-            publicRoomItems->mData          = result_set->getString(10);
+            PublicItem* publicRoomItems      = new PublicItem;
+            publicRoomItems->mId             = result_set->getInt(1);
+            publicRoomItems->mName           = result_set->getString(3);
+            publicRoomItems->mModelName      = result_set->getString(4);
+            publicRoomItems->mPosition->x    = result_set->getInt(5);
+            publicRoomItems->mPosition->y    = result_set->getInt(6);
+            publicRoomItems->mPosition->z    = result_set->getInt(7);
+            publicRoomItems->mRotation       = result_set->getInt(8);
+            publicRoomItems->mData           = result_set->getString(10);
             itemVec.push_back(publicRoomItems);
 
         } while (result_set->next());
@@ -285,9 +285,9 @@ void World::LoadItemDefinitions()
             itemDefinitions->mId                 = result_set->getInt(1);
             itemDefinitions->mSprite             = result_set->getString(2);
             itemDefinitions->mColour             = result_set->getString(3);
-            itemDefinitions->mPosition->length   = result_set->getInt(4);
-            itemDefinitions->mPosition->width    = result_set->getInt(5);
-            itemDefinitions->mPosition->height   = result_set->getDouble(6);
+            itemDefinitions->mAxis->length       = result_set->getInt(4);
+            itemDefinitions->mAxis->width        = result_set->getInt(5);
+            itemDefinitions->mAxis->height       = result_set->getDouble(6);
             itemDefinitions->mDataClass          = result_set->getString(7);
             itemDefinitions->mBehaviour          = result_set->getString(8);
             itemDefinitions->mName               = result_set->getString(9);
@@ -341,7 +341,7 @@ void World::LoadPublicRoomsPort()
 
     std::cout << "[QUADRAL]: Finished loading... listening on port 37120" << std::endl;
 
-    Listener server(mIoService, 37120);
+    Listener server(mIoService, 33123);
     mIoService.run();
 
 }

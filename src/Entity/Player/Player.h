@@ -25,6 +25,7 @@ class WorldSession;
 class Player;
 class WorldPacket;
 class Room;
+class Item;
 
 typedef struct PlayerPosition
 {
@@ -39,6 +40,8 @@ typedef struct PendingPurchase
     uint32 itemId;
     uint32 itemCredits;
 } PendingPurchaseStruct;
+
+typedef std::unordered_map<uint32, Item*> HandStripMap;
 
 class Player
 {
@@ -61,6 +64,8 @@ public:
     uint8 GetCurrentRoomHeight() const;
     bool IsDancing() const;
     void SetIsDancing(bool dancing);
+
+    void LoadStripData();
 
     uint32 GetCredits() const;
     void SetCredits(const uint32& credits);
@@ -95,6 +100,8 @@ public:
     void SetPendingPurchase(uint32 itemId, uint32 credits);
     PendingPurchase GetPendingPurchase();
 
+    HandStripMap* GetStrip();
+
     void SendUpdateFlats();
 
     WorldSession* GetSession() const;
@@ -126,5 +133,7 @@ protected:
     bool mDancing;
 
     PendingPurchase mPendingItemPurchase;
+    HandStripMap mHandStrip;
+    
 };
 

@@ -23,6 +23,7 @@
 #include "../../Server/WorldSession.h"
 #include "../../World/World.h"
 #include "../../Room/Room.h"
+#include "CatalogueManager.h"
 #include "Player.h"
 //-----------------------------------------------//
 Player::Player(WorldSession* session) : mSession(session)
@@ -30,6 +31,8 @@ Player::Player(WorldSession* session) : mSession(session)
     mInRoom = false;
     mLeavingRoom = false;
     mDancing = false;
+    mRoom = new Room;
+
     sWorld->IncreasePlayerCount();
 }
 //-----------------------------------------------//
@@ -39,6 +42,7 @@ Player::~Player()
     if (IsInRoom())
         GetRoom()->OnLeave(this);
     sWorld->DecreasePlayerCount();
+    delete mRoom;
 }
 //-----------------------------------------------//
 void Player::SendObjectData()
@@ -445,6 +449,8 @@ void Player::SetRoom(Room* room)
         mInRoom = true;
         mRoom->OnEnter(this);
     }
+    else
+        return;
 }
 //-----------------------------------------------//
 Room* Player::GetRoom()
@@ -466,6 +472,11 @@ void Player::SetPendingPurchase(uint32 itemId, uint32 credits)
 PendingPurchase Player::GetPendingPurchase()
 {
     return mPendingItemPurchase;
+}
+//-----------------------------------------------//
+HandStripMap* Player::GetStrip()
+{
+    return &mHandStrip;
 }
 //-----------------------------------------------//
 void Player::SendUpdateFlats()
@@ -541,5 +552,49 @@ void Player::SetIsDancing(bool dancing)
         data << (std::string)"dance/";
     data.AppendEndCarriage();
     GetRoom()->SendPacketToAll(data.Write());
+}
+//-----------------------------------------------//
+void Player::LoadStripData()
+{
+    // Load our item data
+    std::shared_ptr<MySQLConnection> connection = sDBManager->getConnectionPool()->borrow();
+    try
+    {
+        uint32 itemCounter = 0;
+        std::shared_ptr<sql::Connection> sql_connection = connection->sql_connection;
+        std::shared_ptr<sql::PreparedStatement> statement = std::shared_ptr<sql::PreparedStatement>(sql_connection->prepareStatement("SELECT * FROM user_hand_furniture WHERE user_id = ?"));
+        statement->setInt(1, GetAccountId());
+        std::shared_ptr<sql::ResultSet> result_set = std::shared_ptr<sql::ResultSet>(statement->executeQuery());
+        while (result_set->next())
+        {
+            std::cout << result_set->getInt(3) << std::endl;
+            Item* item = sCatalogueManager->GetItemDefintion(result_set->getInt(3));
+
+            // TODO add log error
+            if (!item)
+                continue;
+
+            Item* playerItem = new Item;
+            playerItem->mId = item->GetId();
+            playerItem->mSprite = item->GetSprite();
+            playerItem->mColour = item->GetColour();
+            playerItem->mAxis->length = item->GetAxis()->length;
+            playerItem->mAxis->width = item->GetAxis()->width;
+            playerItem->mAxis->height = item->GetAxis()->height;
+            playerItem->mPosition->x = result_set->getInt(5);
+            playerItem->mPosition->y = result_set->getInt(6);
+            playerItem->mPosition->z = result_set->getInt(7);
+            playerItem->mPosition->rotation = result_set->getInt(8);
+            playerItem->mDataClass = item->GetData();
+            playerItem->mBehaviour = item->GetBehaviour();
+            playerItem->mName = item->GetName();
+            playerItem->mDescription = item->GetDescription();
+            mHandStrip[itemCounter++] = playerItem;
+        }
+    }
+    catch (sql::SQLException &e)
+    {
+        sDBManager->printException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
+    }
 }
 //-----------------------------------------------//

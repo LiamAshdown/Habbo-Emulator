@@ -29,10 +29,21 @@ typedef struct ItemData
     float height;
 }ItemDataStruct;
 
+typedef struct ItemPosition
+{
+    ItemPosition() : x(0), y(0), z(0), rotation(0) {}
+    uint32 x;
+    uint32 y;
+    uint32 z;
+    float rotation;
+
+}ItemPositionStruct;
+
 class Item
 {
 public:
     friend class World;
+    friend class Player;
 
     Item();
     ~Item();
@@ -40,7 +51,8 @@ public:
     uint32 GetId() const;
     std::string GetSprite() const;
     std::string GetColour() const;
-    ItemDataStruct* GetPosition();
+    ItemDataStruct* GetAxis() const;
+    ItemPositionStruct* GetPosition() const;
     std::string GetData() const;
     std::string GetBehaviour() const;
     std::string GetName() const;
@@ -50,10 +62,11 @@ private:
     uint32 mId;
     std::string mSprite;
     std::string mColour;
-    ItemDataStruct* mPosition;
+    ItemDataStruct* mAxis;
     std::string  mDataClass;
     std::string mBehaviour;
     std::string mName;
     std::string mDescription;
+    ItemPositionStruct* mPosition;
 };
 

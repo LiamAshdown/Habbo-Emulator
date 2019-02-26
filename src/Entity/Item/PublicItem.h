@@ -21,13 +21,13 @@
 #include "../../Common/SharedDefines.h"
 #endif /* _QuadEmu_Item_ */
 
-typedef struct ItemPosition
+typedef struct PublicItemPosition
 {
-    ItemPosition() : x(0), y(0), z(0) {}
+    PublicItemPosition() : x(0), y(0), z(0) {}
     uint8 x;
     uint8 y;
     uint8 z;
-}ItemPositionStruct;
+}PublicItemPositionStruct;
 
 class PublicItem
 {
@@ -40,7 +40,7 @@ public:
     uint32 GetId() const;
     std::string GetModelName() const;
     std::string GetName() const;
-    ItemPositionStruct* GetPosition() const;
+    PublicItemPositionStruct* GetPosition() const;
     uint8 GetRotation() const;
     std::string GetData() const;
 
@@ -48,7 +48,7 @@ private:
     uint32 mId;
     std::string mModelName;
     std::string mName;
-    ItemPositionStruct* mPosition;
+    PublicItemPositionStruct* mPosition;
     uint8 mRotation;
     std::string mData;
 };

@@ -23,15 +23,17 @@ Item::Item()
     mId = 0;
     mSprite = "";
     mColour = "";
-    mPosition = new ItemDataStruct;
+    mAxis = new ItemDataStruct;
     mDataClass = "";
     mBehaviour = "";
     mName = "";
     mDescription = "";
+    mPosition = new ItemPositionStruct;
 }
 //-----------------------------------------------//
 Item::~Item()
 {
+    delete mAxis;
     delete mPosition;
 }
 //-----------------------------------------------//
@@ -50,7 +52,12 @@ std::string Item::GetColour() const
     return mColour;
 }
 //-----------------------------------------------//
-ItemDataStruct * Item::GetPosition()
+ItemDataStruct * Item::GetAxis() const
+{
+    return mAxis;
+}
+//-----------------------------------------------//
+ItemPositionStruct * Item::GetPosition() const
 {
     return mPosition;
 }

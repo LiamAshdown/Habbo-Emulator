@@ -41,12 +41,12 @@ void Socket::ReadOnComing(const boost::system::error_code& error, const std::siz
 {
     if (error)
     {
-        if (!IsSocketOpen())
-            return;
-
         CloseSocket();
         return;
     }
+
+    if (!IsSocketOpen())
+        return;
 
     mInBuffer->mWritePosition += length;
 

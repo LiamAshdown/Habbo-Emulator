@@ -132,7 +132,10 @@ bool WorldSession::InitializePlayerData(const std::string& username)
         GetPlayer()->mInRoom = result_set->getBoolean(15);
         GetPlayer()->mRoomCache = "";
         mPlayerInitialized = true;
+        GetPlayer()->LoadStripData();
+
         sWorld->AddSession(GetPlayer()->GetAccountId(), this);
+        GetPlayer()->SetRoom(sRoomManager->GetRoom(GetSocket()->GetPort(), false));
         return true;
     }
     catch (sql::SQLException &e)

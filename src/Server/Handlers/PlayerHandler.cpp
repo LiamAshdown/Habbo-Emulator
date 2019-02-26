@@ -21,6 +21,7 @@
 #include "../../Manager/RoomManager.h"
 #include "../../Room/Room.h"
 #include "../WorldSession.h"
+#include "CatalogueManager.h"
 #include "../../World/World.h"
 //-----------------------------------------------//
 void WorldSession::HandleGetCredits(std::string& packetBuffer, std::vector<std::string>& packetStorage)
@@ -65,29 +66,29 @@ void WorldSession::HandleStop(std::string& packetBuffer, std::vector<std::string
 //-----------------------------------------------//
 void WorldSession::HandleGetStrip(std::string& packetBuffer, std::vector<std::string>& packetStorage)
 {
-    std::shared_ptr<MySQLConnection> connection = sDBManager->getConnectionPool()->borrow();
-    try
-    {
-        std::shared_ptr<sql::Connection> sql_connection = connection->sql_connection;
-        std::shared_ptr<sql::PreparedStatement> statement = std::shared_ptr<sql::PreparedStatement>(sql_connection->prepareStatement("SELECT * FROM users WHERE userId = ?"));
-        statement->setInt(1, GetPlayer()->GetAccountId());
+    WorldPacket data("# STRIPINFO");
 
-        std::shared_ptr<sql::ResultSet> result_set = std::shared_ptr<sql::ResultSet>(statement->executeQuery());
-    
-        WorldPacket data("# STRIPINFO");
+    for (HandStripMap::iterator itr = GetPlayer()->GetStrip()->begin(); itr != GetPlayer()->GetStrip()->end(); itr++)
+    {
+        Item* item = itr->second;
         data.AppendCarriage();
-        while (result_set->next())
-        {
-            data << (std::string)"BLSI;";
-            data << (std::string)result_set->getString(1);
-            data << (std::string)";0;S;";
-            data << (std::string)result_set->getString(1);
-        }
+        data << "Quad;";
+        data << (uint32)itr->first;
+        data << ";";
+        data << "0;S;0;";
+        data << (std::string)item->GetSprite();
+        data << ";";
+        data << (std::string)item->GetName();
+        data << ";;";
+        data << (uint8)item->GetAxis()->length;
+        data << ";";
+        data << (uint8)item->GetAxis()->width;
+        data << ";";
+        data << (std::string)item->GetColour();
+        data.AppendForwardSlash();
+    }
 
-    }
-    catch (sql::SQLException &e)
-    {
-        sDBManager->printException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
-    }
+    data.AppendEndCarriage();
+    SendPacket(data.Write());
 }
 //-----------------------------------------------//

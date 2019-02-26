@@ -45,6 +45,7 @@ Room * RoomManager::GetRoom(uint32 Id, bool addPort)
 {
     if (addPort)
         Id += ListenerPort;
+    std::cout << "Port: " << Id << std::endl;
     RoomMap::iterator itr = mRoomStorage.find(Id);
     if (itr != mRoomStorage.end())
         return itr->second;

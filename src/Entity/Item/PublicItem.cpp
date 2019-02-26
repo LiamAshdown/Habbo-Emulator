@@ -25,7 +25,7 @@ PublicItem::PublicItem()
     mName = "";
     mData = "";
     mRotation = 0;
-    mPosition = new ItemPositionStruct;
+    mPosition = new PublicItemPositionStruct;
 }
 //-----------------------------------------------//
 PublicItem::~PublicItem()
@@ -47,7 +47,7 @@ std::string PublicItem::GetName() const
     return mName;
 }
 //-----------------------------------------------//
-ItemPositionStruct * PublicItem::GetPosition() const
+PublicItemPositionStruct * PublicItem::GetPosition() const
 {
     return mPosition;
 }

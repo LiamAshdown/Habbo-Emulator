@@ -103,10 +103,8 @@ void WorldSession::HandleLogin(std::string& packetBuffer, std::vector<std::strin
     if (InitializePlayerData(packetStorage[1]))
     {
         // If our size is more than 4, that means we are entering a room
-        if (packetStorage.size() >= 4)
+        if (packetStorage[4] == "0")
         {
-            GetPlayer()->SetRoom(sRoomManager->GetRoom(GetSocket()->GetPort(), false));
-
             if (Room* room = GetPlayer()->GetRoom())
             {
                 room->SendRoomFurniture(GetPlayer());
@@ -114,6 +112,8 @@ void WorldSession::HandleLogin(std::string& packetBuffer, std::vector<std::strin
                 room->SendUserStatusToAll(GetPlayer());
                 room->SendUpdateStatusToAll(GetPlayer());
             }
+            else
+                CloseSocket();
         }
     }
     else

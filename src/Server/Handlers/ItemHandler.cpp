@@ -56,6 +56,8 @@ void WorldSession::HandlePurchase(std::string& packetBuffer, std::vector<std::st
     if (!item)
         return;
 
+    GetPlayer()->SetRoom(sRoomManager->GetRoom(GetSocket()->GetPort(), false));
+
     std::shared_ptr<MySQLConnection> connection = sDBManager->getConnectionPool()->borrow();
     try
     {
