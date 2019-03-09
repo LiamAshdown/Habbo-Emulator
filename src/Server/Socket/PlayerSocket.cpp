@@ -65,16 +65,27 @@ namespace Quad
     //-----------------------------------------------//
     std::unique_ptr<Packet> PlayerSocket::DecryptPacket()
     {
-        // Skip first 4 bytes
-        ReadSkip(4);
 
         std::vector<uint8> buffer;
-        buffer.resize(ReadLengthRemaining());
-        if (Read((char*)&buffer[0], ReadLengthRemaining()))
+        buffer.resize(4);
+        if (Read((char*)&buffer[0], 4))
         {
+            std::unique_ptr<Packet> packet = std::make_unique<Packet>();
+
+            packet->sLength = std::stoi((std::string)(char*)&buffer[0]);
+
+            buffer.clear();
+
+            buffer.resize(packet->sLength);
+
+            Read((char*)&buffer[0], packet->sLength);
+
+            // Get rid of junk characters
+            buffer.resize(buffer.size() + 1);
+            buffer[buffer.size() - 1] = 0;
+
             std::string tempString = (char*)&buffer[0];
 
-            std::unique_ptr<Packet> packet = std::make_unique<Packet>();
             packet->sLength = ReadLength();
             packet->sHeader = tempString.substr(0, tempString.find(' '));
             tempString = tempString.erase(0, tempString.find_first_of(" \t") + 1);

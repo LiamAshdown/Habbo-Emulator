@@ -56,32 +56,25 @@ namespace Quad
         database.GetStatement()->setString(11, SplitString(packet->sFullBody, "country").c_str());
         database.GetStatement()->setUInt(12, sConfig->GetIntDefault("CustomRegCredits", 0));
         database.ExecuteBoolPrepareQuery();
-
-        if (database.GetExecuteResult())
-        {
-            LOG_ERROR << "User tried to create account but account already exists! closing socket!";
-            CloseSocket();
-        }
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleApproveUsername(std::unique_ptr<Packet> packet)
     {
         QueryDatabase database("users");
         database.PrepareQuery("SELECT user_name FROM accounts WHERE user_name = ?");
-        database.GetStatement()->setString(1, packet->sBody[0].c_str());
-        database.ExecuteBoolPrepareQuery();
+        database.GetStatement()->setString(1, packet->sFullBody.c_str());
+        database.ExecuteResultPrepareQuery();
 
-        if (database.GetExecuteResult())
+        if (!database.GetExecuteQueryResult())
         {
-            LOG_ERROR << "Username: " << packet->sBody[0] << " already exists while creating an account!";
             StringBuffer buffer;
-            buffer << (std::string)"# NAME_UNACCEPTABLE\r##";
+            buffer << (std::string)"# NAME_APPROVED\r##";
             SendPacket((char*)buffer.GetContents(), buffer.GetSize());
         }
         else
         {
             StringBuffer buffer;
-            buffer << (std::string)"# NAME_APPROVED\r##";
+            buffer << (std::string)"# ERROR: Name already exists!\r##";
             SendPacket((char*)buffer.GetContents(), buffer.GetSize());
         }
     }
@@ -103,7 +96,8 @@ namespace Quad
         Field* fields = database.Fetch();
 
         // Check if passwords match
-        if (fields->GetString(3) == packet->sBody[1])
+        if (fields->GetString(3) == 
+            CalculateSHA1Hash(boost::to_upper_copy<std::string>(packet->sBody[0]) + ":" + boost::to_upper_copy<std::string>(packet->sBody[1])))
         {
             mPlayer.reset(new Player);
 
@@ -121,14 +115,13 @@ namespace Quad
             mPlayer->mCountry = fields->GetString(12);
             mPlayer->mCredits = fields->GetUint32(13);
             mPlayer->mInitialized = true;
-
-            QueryDatabase database("users");
+            
             database.PrepareQuery("UPDATE accounts SET last_logged_in = now() WHERE user_name = ?");
             database.GetStatement()->setString(1, mPlayer->GetName());
             database.ExecuteBoolPrepareQuery();
 
             // If size is more than 1, this means we are entering a room
-            if (packet->sBody.size() > 1)
+            if (packet->sBody.size() > 2)
             {
                 if (std::shared_ptr<Room> room = sRoomMgr->GetRoom(GetPort()))
                 {

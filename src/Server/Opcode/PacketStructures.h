@@ -16,11 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_PlayerSocket_h_
-#define _Quad_PlayerSocket_h_
-#include "Network/Socket.h"
-#include "Opcodes.h"
-#endif /* _Quad_PlayerSocket_h_ */
+#ifndef _Quad_PacketStructures_h_
+#define _Quad_PacketStructures_h_
+#include "Common/SharedDefines.h"
+#endif /* _Quad_PacketStructures_h_ */
 
 typedef struct PacketReceivingStruct
 {

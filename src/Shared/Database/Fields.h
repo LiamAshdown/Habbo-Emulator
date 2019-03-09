@@ -79,6 +79,11 @@ namespace Quad
             return mResultSet->next();
         }
 
+        bool RowExists() const
+        {
+            return mResultSet->rowsCount() > 0 ? true : false;
+        }
+
     public:
         std::shared_ptr<sql::ResultSet> mResultSet;
     };
