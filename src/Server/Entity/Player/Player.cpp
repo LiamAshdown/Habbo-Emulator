@@ -17,11 +17,14 @@
 */
 //-----------------------------------------------//
 #include "Player.h"
+#include "Network/StringBuffer.h"
+#include "PlayerSocket.h"
 //-----------------------------------------------//
 namespace Quad
 {
     //-----------------------------------------------//
-    Player::Player()
+    Player::Player(PlayerSocket* playerSocket)
+        : mSocket(playerSocket ? playerSocket->Shared<PlayerSocket>() : nullptr)
     {
     }
     Player::~Player()
@@ -113,6 +116,52 @@ namespace Quad
     std::shared_ptr<Room> Player::GetRoom() const
     {
         return mRoom;
+    }
+    //-----------------------------------------------//
+    void Player::SendObjectData()
+    {
+        StringBuffer buffer("# USEROBJECT");
+        buffer.AppendCarriage();
+        buffer << "name=";
+        buffer << (std::string)GetName();
+        buffer.AppendCarriage();
+        buffer << "email=";
+        buffer << (std::string)GetEmail();
+        buffer.AppendCarriage();
+        buffer << "figure=";
+        buffer << (std::string)GetFigure();
+        buffer.AppendCarriage();
+        buffer << "birthday=";
+        buffer << (std::string)GetBirthday();
+        buffer.AppendCarriage();
+        buffer << "phonenumber=";
+        buffer << (std::string)GetPhoneNumber();
+        buffer.AppendCarriage();
+        buffer << "custombuffer=";
+        buffer << (std::string)GetMission();
+        buffer.AppendCarriage();
+        buffer << "had_read_agreement=";
+        buffer << (uint8)GetReadAgreement();
+        buffer.AppendCarriage();
+        buffer << "sex=";
+        buffer << (std::string)GetSex();
+        buffer.AppendCarriage();
+        buffer << "country=";
+        buffer << (std::string)GetCountry();
+        buffer.AppendCarriage();
+        buffer << "has_special_rights=";
+        buffer << (uint8)0;
+        buffer.AppendCarriage();
+        buffer << "badge_type=";
+        buffer << (uint32)GetBadgeType();
+        buffer.AppendCarriage();
+        buffer.AppendEndCarriage();
+        mSocket->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    std::shared_ptr<PlayerSocket> Player::ToSocket()
+    {
+        return mSocket;
     }
     //-----------------------------------------------//
 }

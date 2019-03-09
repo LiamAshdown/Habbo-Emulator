@@ -43,6 +43,7 @@ namespace Quad
         StorePacket(OpcodesList::REGISTER,                   "APPROVENAME",              &PlayerSocket::HandleRegisteration      );
         StorePacket(OpcodesList::LOGIN,                      "LOGIN",                    &PlayerSocket::HandleLogin              );
         StorePacket(OpcodesList::GETCREDITS,                 "GETCREDITS",               &PlayerSocket::HandleGetCredits         );
+        StorePacket(OpcodesList::INFORETRIEVE,               "INFORETRIEVE",             &PlayerSocket::HandleInfoRetrieve       );
     }
     //-----------------------------------------------//
     void Opcodes::StorePacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))

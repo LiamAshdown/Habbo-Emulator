@@ -23,14 +23,23 @@
 //-----------------------------------------------//
 namespace Quad
 {
+    //-----------------------------------------------//
     void PlayerSocket::HandleGetCredits(std::unique_ptr<Packet> packet)
     {
         StringBuffer buffer;
         buffer << (std::string)"# WALLETBALANCE\r";
-        buffer << (uint32)(ToPlayer()->GetCredits());
+        buffer << (uint32)(mPlayer->GetCredits());
         buffer.AppendEndCarriage();
         buffer << (std::string) "# MESSENGERSMSACCOUNT\rnoaccount\r##";
         buffer << (std::string)"# MESSENGERREADY \r##";
         SendPacket((char*)buffer.GetContents(), buffer.GetSize());
     }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleInfoRetrieve(std::unique_ptr<Packet> packet)
+    {
+        if (mPlayer->IsInitialized())
+            mPlayer->SendObjectData();
+    }
+    //-----------------------------------------------//
 }
+//-----------------------------------------------//

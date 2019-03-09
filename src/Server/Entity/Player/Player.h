@@ -29,7 +29,7 @@ namespace Quad
         friend class PlayerSocket;
 
     public:
-        Player();
+        Player(PlayerSocket* playerSocket);
         ~Player();
 
     public:
@@ -52,6 +52,10 @@ namespace Quad
         void SetRoom(std::shared_ptr<Room> room);
         std::shared_ptr<Room> GetRoom() const;
 
+        void SendObjectData();
+
+        std::shared_ptr<PlayerSocket> ToSocket();
+
     private:
         uint32 mId;
         std::string mName;
@@ -71,6 +75,8 @@ namespace Quad
         bool mInitialized;
 
         std::shared_ptr<Room> mRoom;
+
+        std::shared_ptr<PlayerSocket> mSocket;
     };
 }
 

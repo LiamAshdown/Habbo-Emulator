@@ -189,6 +189,7 @@ namespace Quad
 
             handler_allocator m_allocator;
     };
+
     template<typename T>
     inline std::shared_ptr<T> Socket::Shared()
     {

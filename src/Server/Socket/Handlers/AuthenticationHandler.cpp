@@ -99,7 +99,7 @@ namespace Quad
         if (fields->GetString(3) == 
             CalculateSHA1Hash(boost::to_upper_copy<std::string>(packet->sBody[0]) + ":" + boost::to_upper_copy<std::string>(packet->sBody[1])))
         {
-            mPlayer.reset(new Player);
+            mPlayer.reset(new Player(this));
 
             mPlayer->mId = fields->GetUint32(1);
             mPlayer->mName = fields->GetString(2);

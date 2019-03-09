@@ -47,6 +47,7 @@ namespace Quad
         void HandleClientIP(std::unique_ptr<Packet> packe);
         void HandleLogin(std::unique_ptr<Packet> packet);
         void HandleGetCredits(std::unique_ptr<Packet> packet);
+        void HandleInfoRetrieve(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 
