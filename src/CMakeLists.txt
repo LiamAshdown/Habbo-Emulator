@@ -15,38 +15,6 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*/
 
-#Set the minimum version of CMake that can be used
-# To find the cmake version run
-# $ cmake --version
-# Set the project name
-project (QuadEmulator)
-
-cmake_minimum_required(VERSION 2.8)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common/Logging)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Player)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Item)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Manager)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Network)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Network/lib)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/PathFinding)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Quad)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Room)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Handlers)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Packet)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Protocol)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Thread)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/World)
-
-file(GLOB_RECURSE source_list RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.h")
-
-add_executable(Game ${source_list})
-
-foreach(source IN LISTS source_list)
-    get_filename_component(source_path "${source}" PATH)
-    string(REPLACE "/" "\\" source_path_msvc "${source_path}")
-    source_group("${source_path_msvc}" FILES "${source}")
-endforeach()
+# Shared must be included first
+add_subdirectory(Shared)
+add_subdirectory(Server)

@@ -1,0 +1,108 @@
+###############################################
+# Server Configuration File 			      #
+###############################################
+
+###################################################################################################
+# SECTION INDEX
+#
+#    EXAMPLE CONFIG
+#    SERVER SETTINGS
+#	 MYSQL SETTINGS
+#    CUSTOM SETTINGS
+#
+###################################################################################################
+
+###################################################################################################
+# EXAMPLE CONFIG
+#
+#    Variable
+#        Description: Brief description what the variable is doing.
+#        Important:   Annotation for important things about this variable.
+#        Example:     "Example, i.e. if the value is a string"
+#        Default:     10 - (Enabled|Comment|Variable name in case of grouped config options)
+#                     0  - (Disabled|Comment|Variable name in case of grouped config options)
+#
+# Note to developers:
+# - Copy this example to keep the formatting.
+# - Line breaks should be at column 100.
+###################################################################################################
+
+###################################################################################################
+# SERVER SETTINGS
+#
+#    ServerPort
+#        Description: TCP port to reach the auth server.
+#        Default:     37120
+
+ServerPort = 37120
+
+#
+#
+#    BindIP
+#        Description: Bind auth server to IP/hostname
+#        Default:     "127.0.0.1" - (Bind to all IPs on the system)
+
+BindIP = "127.0.0.1"
+
+#
+#
+#    NetworkThreadProcessors
+#        Description: Amount of worker threads to launch NetworkThreadProcessors
+#        Default:     1
+
+NetworkThreadProcessors = 1
+
+#
+###################################################################################################
+
+###################################################################################################
+# MYSQL SETTINGS
+#
+#    UserDatabaseInfo
+#        Description: Database connection settings for the auth server.
+#        Example:     "hostname;port;username;password;database"
+#                     ".;somenumber;username;password;database" - (Use named pipes on Windows
+#                                                                 "enable-named-pipe" to [mysqld]
+#                                                                 section my.ini)
+#        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
+
+UserDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
+
+#
+#    UserDatabaseInfo.WorkerThreads
+#        Description: The amount of MySQL connections spawned to handle.
+#        Default:     1 - (LoginDatabase.WorkerThreads)
+
+UserDatabaseInfo.WorkerThreads  = 1
+
+#    RoomDatabaseInfo
+#        Description: Database connection settings for the auth server.
+#        Example:     "hostname;port;username;password;database"
+#                     ".;somenumber;username;password;database" - (Use named pipes on Windows
+#                                                                 "enable-named-pipe" to [mysqld]
+#                                                                 section my.ini)
+#        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
+
+RoomDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
+
+#
+#    RoomDatabaseInfo.WorkerThreads
+#        Description: The amount of MySQL connections spawned to handle.
+#        Default:     1 - (LoginDatabase.WorkerThreads)
+
+RoomDatabaseInfo.WorkerThreads  = 1
+
+#
+###################################################################################################
+
+###################################################################################################
+# CUSTOM SETTINGS
+#
+#    CustomRegCredits
+#        Description: Set credit amount on player registeration
+#        Default:     0
+#
+CustomRegCredits = 0
+
+#
+###################################################################################################
