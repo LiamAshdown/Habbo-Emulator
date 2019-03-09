@@ -48,6 +48,8 @@ namespace Quad
         void HandleLogin(std::unique_ptr<Packet> packet);
         void HandleGetCredits(std::unique_ptr<Packet> packet);
         void HandleInfoRetrieve(std::unique_ptr<Packet> packet);
+        void HandleSearchBusyFlats(std::unique_ptr<Packet> packet);
+        void HandleInitUnitListener(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 

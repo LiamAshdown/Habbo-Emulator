@@ -37,6 +37,11 @@ namespace Quad
     {
     }
     //-----------------------------------------------//
+    RoomMap RoomManager::GetRoomStorage() const
+    {
+        return mRooms;
+    }
+    //-----------------------------------------------//
     void RoomManager::LoadRooms()
     {
         QueryDatabase database("rooms");
@@ -65,6 +70,7 @@ namespace Quad
             room->mEnabled = fields->GetBool(9);
             room->mShowOwnerName = fields->GetBool(10);
             room->mSuperUser = fields->GetBool(11);
+            room->mNowIn = 0;
             room->mMaxIn = fields->GetUint32(12);
 
             ///< IMPORTANT!

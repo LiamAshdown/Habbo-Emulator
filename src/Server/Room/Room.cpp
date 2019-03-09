@@ -85,6 +85,11 @@ namespace Quad
         return mCurrentIn;
     }
     //-----------------------------------------------//
+    uint32 Room::GetNowIn() const
+    {
+        return mNowIn;
+    }
+    //-----------------------------------------------//
     uint32 Room::GetMaxIn() const
     {
         return mMaxIn;

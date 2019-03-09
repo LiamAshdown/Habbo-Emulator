@@ -17,8 +17,82 @@
 */
 //-----------------------------------------------//
 #include "../PlayerSocket.h"
+#include "Network/StringBuffer.h"
+#include "Database/QueryDatabase.h"
+#include "../Entity/Player/Player.h"
+#include "RoomManager.h"
 //-----------------------------------------------//
 namespace Quad
 {
+    //-----------------------------------------------//
+    void PlayerSocket::HandleSearchBusyFlats(std::unique_ptr<Packet> packet)
+    {
+        StringBuffer buffer;
+        buffer << "# BUSY_FLAT_RESULTS 1";
 
+        for (const auto& itr : sRoomMgr->GetRoomStorage())
+        {
+
+            buffer.AppendCarriage();
+            buffer << (uint32)(itr.second->GetId());
+            buffer.AppendForwardSlash();
+            buffer << (std::string)itr.second->GetName();
+            buffer << (std::string)" Room";
+            buffer.AppendForwardSlash();
+            buffer << (std::string)itr.second->GetOwnerName();
+            buffer.AppendForwardSlash();
+            buffer << (uint8)0;
+            buffer.AppendForwardSlash();
+            buffer.AppendForwardSlash();
+            buffer << (std::string)itr.second->GetFloorLevel();
+            buffer.AppendForwardSlash();
+            buffer << (std::string)GetRemoteAddress();
+            buffer.AppendForwardSlash();
+            buffer << (std::string)GetRemoteAddress();
+            buffer.AppendForwardSlash();
+            buffer << (uint32)(itr.second->GetId());
+            buffer.AppendForwardSlash();
+            buffer << (uint8)itr.second->GetNowIn();
+            buffer.AppendForwardSlash();
+            buffer << (uint8)itr.second->GetMaxIn();
+            buffer.AppendForwardSlash();
+        }
+        buffer.AppendEndCarriage();
+        SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleInitUnitListener(std::unique_ptr<Packet> packet)
+    {
+        StringBuffer buffer;
+        buffer << "# ALLUNITS";
+        buffer.AppendCarriage();
+
+        for (const auto& itr : sRoomMgr->GetRoomStorage())
+        {
+            buffer << (std::string)itr.second->GetName();
+            buffer.AppendComma();
+            buffer << (uint8)itr.second->GetNowIn();
+            buffer.AppendComma();
+            buffer << (uint8)itr.second->GetMaxIn();
+            buffer.AppendComma();
+            buffer << (std::string)GetRemoteAddress();
+            buffer.AppendForwardSlash();
+            buffer << (std::string)GetRemoteAddress();
+            buffer.AppendComma();
+            buffer << (uint32)itr.second->GetId();
+            buffer.AppendComma();
+            buffer << itr.second->GetName();
+            buffer.AppendTab();
+            buffer << (std::string)itr.second->GetFloorLevel();
+            buffer.AppendComma();
+            buffer << (uint8)itr.second->GetNowIn();
+            buffer.AppendComma();
+            buffer << (uint8)itr.second->GetMaxIn();
+            buffer.AppendComma();
+            buffer << (std::string)itr.second->GetModel();
+            buffer.AppendCarriage();
+        }
+        buffer.AppendEndCarriage();
+        SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+    }
 }

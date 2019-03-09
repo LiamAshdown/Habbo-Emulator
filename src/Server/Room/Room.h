@@ -44,6 +44,7 @@ namespace Quad
         bool IsShowOwnerName() const;
         bool IsSuperUser() const;
         uint32 GetCurrentIn() const;
+        uint32 GetNowIn() const;
         uint32 GetMaxIn() const;
 
         void AddPlayer(std::shared_ptr<Player> player);
@@ -62,6 +63,7 @@ namespace Quad
         bool mShowOwnerName;
         bool mSuperUser;
         uint32 mCurrentIn;
+        uint32 mNowIn;
         uint32 mMaxIn;
 
         std::vector<std::shared_ptr<Player>> mPlayers;

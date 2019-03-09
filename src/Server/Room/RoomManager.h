@@ -35,6 +35,8 @@ namespace Quad
         RoomManager();
         ~RoomManager();
 
+        RoomMap GetRoomStorage() const;
+
     public:
         void LoadRooms();
 

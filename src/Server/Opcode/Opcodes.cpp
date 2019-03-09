@@ -44,7 +44,9 @@ namespace Quad
         StorePacket(OpcodesList::LOGIN,                      "LOGIN",                    &PlayerSocket::HandleLogin              );
         StorePacket(OpcodesList::GETCREDITS,                 "GETCREDITS",               &PlayerSocket::HandleGetCredits         );
         StorePacket(OpcodesList::INFORETRIEVE,               "INFORETRIEVE",             &PlayerSocket::HandleInfoRetrieve       );
-    }
+        StorePacket(OpcodesList::SEARCHBUSYFLATS,            "SEARCHBUSYFLATS",          &PlayerSocket::HandleSearchBusyFlats    );
+        StorePacket(OpcodesList::INITUNITLISTENER,           "INITUNITLISTENER",         &PlayerSocket::HandleInitUnitListener   );
+    } 
     //-----------------------------------------------//
     void Opcodes::StorePacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))
     {
