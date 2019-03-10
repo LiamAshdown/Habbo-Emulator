@@ -47,7 +47,7 @@ namespace Quad
         virtual ~Socket() = default;
 
     public:
-        virtual bool Open();
+        virtual bool Open(uint16 port);
         void CloseSocket();
 
         bool IsClosed() const;
@@ -60,7 +60,7 @@ namespace Quad
 
         std::size_t ReadLength() const;
         std::size_t ReadLengthRemaining() const;
-        uint32 GetPort() const;
+        uint16 GetPort() const;
 
         boost::asio::ip::tcp::socket &GetAsioSocket();
 
@@ -99,6 +99,8 @@ namespace Quad
         const std::string m_remoteEndpoint;
 
         static const int32 BufferTimeout = 50;
+
+        uint16 mPort;
 
     protected:
         virtual bool ProcessIncomingData() = 0;

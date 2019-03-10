@@ -44,6 +44,16 @@ namespace Quad
             return mResultSet->getString(i);
         }
 
+        uint16 GetUint8(uint8 i)
+        {
+            return mResultSet->getUInt(i);
+        }
+
+        uint16 GetUint16(uint8 i)
+        {
+            return mResultSet->getUInt(i);
+        }
+
         int32 GetInt32(uint8 i)
         {
             return mResultSet->getInt(i);

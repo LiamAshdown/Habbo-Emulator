@@ -15,31 +15,21 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-#include "SharedDefines.h"
-
-std::string SplitString(const std::string& stringData, const std::string& tokenizer)
+//-----------------------------------------------//
+#include "Item.h"
+#include "Network/StringBuffer.h"
+//-----------------------------------------------//
+namespace Quad
 {
-    std::size_t startPosition = stringData.find(tokenizer);
-
-    if (stringData[startPosition + tokenizer.length()] == '=')
+    //-----------------------------------------------//
+    Item::Item()
     {
-        std::string keyString;
-        for (std::size_t i = startPosition + (tokenizer.length() + 1); i < stringData.length(); i++)
-        {
-            if (stringData[i] == '\r')
-                break;
-
-            keyString += stringData[i];
-        }
-
-        return keyString;
     }
-
-    return "0";
+    Item::~Item()
+    {
+        IF_LOG(plog::debug)
+            LOG_DEBUG << "Destructor Item called!";
+    }
+    //-----------------------------------------------//
 }
-
-uint16 ConvertEndian(uint16 value)
-{
-    return ((value & 0xff) << 8) | ((value & 0xff00) >> 8);
-}
+//-----------------------------------------------//

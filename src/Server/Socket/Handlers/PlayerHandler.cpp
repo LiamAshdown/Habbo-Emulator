@@ -37,7 +37,7 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleInfoRetrieve(std::unique_ptr<Packet> packet)
     {
-        if (mPlayer->IsInitialized())
+        if (mPlayer && mPlayer->IsInitialized())
             mPlayer->SendObjectData();
     }
     //-----------------------------------------------//

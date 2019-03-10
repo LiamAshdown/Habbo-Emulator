@@ -89,7 +89,10 @@ namespace Quad
         if (!database.GetExecuteQueryResult())
         {
             LOG_ERROR << "User: " << packet->sBody[0] << " does not exist in accounts database!";
-            CloseSocket();
+
+            StringBuffer buffer;
+            buffer << (std::string)"# ERROR: login incorrect\r##";
+            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
             return;
         }
 
@@ -99,7 +102,7 @@ namespace Quad
         if (fields->GetString(3) == 
             CalculateSHA1Hash(boost::to_upper_copy<std::string>(packet->sBody[0]) + ":" + boost::to_upper_copy<std::string>(packet->sBody[1])))
         {
-            mPlayer.reset(new Player(this));
+            mPlayer = new Player(this);
 
             mPlayer->mId = fields->GetUint32(1);
             mPlayer->mName = fields->GetString(2);
@@ -128,14 +131,15 @@ namespace Quad
                     mPlayer->SetRoom(room);
                     room->AddPlayer(mPlayer);
                 }
+                else
+                    CloseSocket();
             }
         }
         else
         {
             StringBuffer buffer;
-            buffer << (std::string)"# ERROR: Incorrect password\r##";
+            buffer << (std::string)"# ERROR: login incorrect\r##";
             SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-            CloseSocket();
         }
     }
     //-----------------------------------------------//

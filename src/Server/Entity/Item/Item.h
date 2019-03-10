@@ -16,30 +16,34 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "SharedDefines.h"
+#ifndef _Quad_Item_h_
+#define _Quad_Item_h_
+#include "Common/SharedDefines.h"
 
-std::string SplitString(const std::string& stringData, const std::string& tokenizer)
+namespace Quad
 {
-    std::size_t startPosition = stringData.find(tokenizer);
-
-    if (stringData[startPosition + tokenizer.length()] == '=')
+    class Item
     {
-        std::string keyString;
-        for (std::size_t i = startPosition + (tokenizer.length() + 1); i < stringData.length(); i++)
-        {
-            if (stringData[i] == '\r')
-                break;
+    public:
+        friend class ItemManager;
 
-            keyString += stringData[i];
-        }
+    public:
+        Item();
+        ~Item();
 
-        return keyString;
-    }
+    private:
+        uint32 mId;
+        std::string mSprite;
+        std::string mColor;
+        std::string mLength;
+        uint16 mWidth;
+        float mHeight;
+        std::string mDataClass;
+        std::string mBehaviour;
+        std::string mName;
+        std::string mDescription;
 
-    return "0";
+    };
 }
 
-uint16 ConvertEndian(uint16 value)
-{
-    return ((value & 0xff) << 8) | ((value & 0xff00) >> 8);
-}
+#endif /* _Quad_Item_h_ */

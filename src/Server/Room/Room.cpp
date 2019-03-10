@@ -18,6 +18,10 @@
 //-----------------------------------------------//
 #include "Room.h"
 #include "Player.h"
+#include "PlayerSocket.h"
+#include "Network/StringBuffer.h"
+#include "RoomManager.h"
+#include "ItemManager.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -33,6 +37,11 @@ namespace Quad
     uint32 Room::GetId() const
     {
         return mId;
+    }
+    //-----------------------------------------------//
+    uint16 Room::GetServerPort() const
+    {
+        return mServerPort;
     }
     //-----------------------------------------------//
     std::string Room::GetName() const
@@ -60,7 +69,12 @@ namespace Quad
         return mModel;
     }
     //-----------------------------------------------//
-    bool Room::GetType() const
+    std::string Room::GetState() const
+    {
+        return mState;
+    }
+    //-----------------------------------------------//
+    uint8 Room::GetType() const
     {
         return mType;
     }
@@ -77,12 +91,7 @@ namespace Quad
     //-----------------------------------------------//
     bool Room::IsSuperUser() const
     {
-        return mSuperUser;;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetCurrentIn() const
-    {
-        return mCurrentIn;
+        return mSuperUser;
     }
     //-----------------------------------------------//
     uint32 Room::GetNowIn() const
@@ -95,9 +104,9 @@ namespace Quad
         return mMaxIn;
     }
     //-----------------------------------------------//
-    void Room::AddPlayer(std::shared_ptr<Player> player)
+    void Room::AddPlayer(Player* player)
     {
-        std::vector<std::shared_ptr<Player>>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
+        std::vector<Player*>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
 
         if (itr != mPlayers.end())
         {
@@ -106,11 +115,15 @@ namespace Quad
         }
 
         mPlayers.push_back(player);
+
+        // Send Room Height to player
+        SendRoomHeight(player);
+        SendRoomFurniture(player);
     }
     //-----------------------------------------------//
-    void Room::RemovePlayer(std::shared_ptr<Player> player)
+    void Room::RemovePlayer(Player* player)
     {
-        std::vector<std::shared_ptr<Player>>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
+        std::vector<Player*>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
 
         if (itr != mPlayers.end())
         {
@@ -119,6 +132,53 @@ namespace Quad
         }
         
         LOG_ERROR << "Tried to remove player: " << player->GetName() << " but doesn't exist in room!";
+    }
+    //-----------------------------------------------//
+    void Room::SendRoomHeight(Player* player)
+    {
+        if (std::shared_ptr<RoomModels> roomModel = sRoomMgr->GetRoomModel(player->GetRoom()->GetModel()))
+        {
+            std::string roomHeight = roomModel->sHeightMap;
+            boost::replace_all(roomHeight, " ", "\r");
+
+            StringBuffer buffer;
+            buffer << (std::string)"# HEIGHTMAP\r";
+            buffer << (std::string)roomHeight;
+            buffer.AppendEndCarriage();
+            player->UpdatePosition(roomModel->sDoorX, roomModel->sDoorY, roomModel->sDoorZ, roomModel->sOrientation);
+            player->ToSocket()->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+        }
+        else
+            player->ToSocket()->CloseSocket();
+    }
+    //-----------------------------------------------//
+    void Room::SendRoomFurniture(Player * player)
+    {
+        if (GetType() == RoomFlag::ROOM_TYPE_PUBLIC)
+        {
+            StringBuffer buffer;
+            buffer << (std::string)"# OBJECTS WORLD 0 ";
+            buffer << (std::string)GetModel();
+
+            for (auto& itr : sItemMgr->GetRoomPublicItems(player->ToSocket()->GetPort()))
+            {
+                buffer.AppendCarriage();
+                buffer << (uint32)itr->sId;
+                buffer.AppendSpace();
+                buffer << (std::string)itr->sSprite;
+                buffer.AppendSpace();
+                buffer << (uint8)itr->sX;
+                buffer.AppendSpace();
+                buffer << (uint8)itr->sY;
+                buffer.AppendSpace();
+                buffer << (uint8)itr->sZ;
+                buffer.AppendSpace();
+                buffer << (uint8)itr->sRotation;
+            }
+
+            buffer.AppendEndCarriage();
+            player->ToSocket()->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+        }
     }
     //-----------------------------------------------//
 }

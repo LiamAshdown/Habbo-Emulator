@@ -32,7 +32,6 @@ namespace Quad
 
         for (const auto& itr : sRoomMgr->GetRoomStorage())
         {
-
             buffer.AppendCarriage();
             buffer << (uint32)(itr.second->GetId());
             buffer.AppendForwardSlash();
@@ -50,13 +49,14 @@ namespace Quad
             buffer.AppendForwardSlash();
             buffer << (std::string)GetRemoteAddress();
             buffer.AppendForwardSlash();
-            buffer << (uint32)(itr.second->GetId());
+            buffer << (uint32)(itr.second->GetServerPort());
             buffer.AppendForwardSlash();
             buffer << (uint8)itr.second->GetNowIn();
             buffer.AppendForwardSlash();
             buffer << (uint8)itr.second->GetMaxIn();
             buffer.AppendForwardSlash();
         }
+
         buffer.AppendEndCarriage();
         SendPacket((char*)buffer.GetContents(), buffer.GetSize());
     }
@@ -69,6 +69,9 @@ namespace Quad
 
         for (const auto& itr : sRoomMgr->GetRoomStorage())
         {
+            if (itr.second->GetType() != RoomFlag::ROOM_TYPE_PUBLIC || !itr.second->IsEnabled())
+                continue;
+
             buffer << (std::string)itr.second->GetName();
             buffer.AppendComma();
             buffer << (uint8)itr.second->GetNowIn();
@@ -79,7 +82,7 @@ namespace Quad
             buffer.AppendForwardSlash();
             buffer << (std::string)GetRemoteAddress();
             buffer.AppendComma();
-            buffer << (uint32)itr.second->GetId();
+            buffer << (uint32)itr.second->GetServerPort();
             buffer.AppendComma();
             buffer << itr.second->GetName();
             buffer.AppendTab();
@@ -92,6 +95,7 @@ namespace Quad
             buffer << (std::string)itr.second->GetModel();
             buffer.AppendCarriage();
         }
+
         buffer.AppendEndCarriage();
         SendPacket((char*)buffer.GetContents(), buffer.GetSize());
     }

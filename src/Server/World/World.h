@@ -37,7 +37,7 @@ namespace Quad
         ~World();
 
     public:
-        void AddListener(const uint32 port);
+        void AddListener(const uint16 port);
         void UpdateWorld();
 
     private:

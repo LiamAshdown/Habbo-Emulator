@@ -26,10 +26,9 @@ namespace Quad
 {
     //-----------------------------------------------//
     PlayerSocket::PlayerSocket(boost::asio::io_service& service, std::function<void(Socket*)> closeHandler) :
-        Socket(service, std::move(closeHandler))
+        Socket(service, std::move(closeHandler)), mPlayer(nullptr)
     {
-        IF_LOG(plog::debug)
-            sDatabase->GetDatabase("users")->GetConnectionPool()->GetStats();
+
     }
     //-----------------------------------------------//
     PlayerSocket::~PlayerSocket()
@@ -37,10 +36,11 @@ namespace Quad
         IF_LOG(plog::debug)
             LOG_DEBUG << "Destructor PlayerSocket called!";
 
-        mPlayer.reset();
+        if (mPlayer != nullptr)
+            delete mPlayer;
     }
     //-----------------------------------------------//
-    std::shared_ptr<Player> PlayerSocket::ToPlayer()
+    Player* PlayerSocket::ToPlayer()
     {
         return mPlayer;
     }

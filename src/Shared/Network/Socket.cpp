@@ -26,10 +26,11 @@ namespace Quad
         : mWriteState(WriteState::Idle), mReadState(ReadState::Idle), mSocket(service),
         mCloseHandler(std::move(closeHandler)), mOutBufferFlushTimer(service), m_address("0.0.0.0") {}
     //-----------------------------------------------//
-    bool Socket::Open()
+    bool Socket::Open(uint16 port)
     {
         try
         {
+            mPort = port;
             const_cast<std::string&>(m_address) = mSocket.remote_endpoint().address().to_string();
             const_cast<std::string&>(m_remoteEndpoint) = boost::lexical_cast<std::string>(mSocket.remote_endpoint());
         }
@@ -262,9 +263,9 @@ namespace Quad
         return mInBuffer->ReadLengthRemaining();
     }
     //-----------------------------------------------//
-    uint32 Socket::GetPort() const
+    uint16 Socket::GetPort() const
     {
-        return mSocket.remote_endpoint().port();
+        return mPort;
     }
     //-----------------------------------------------//
     // If the write state is idle, this will do nothing, which is correct

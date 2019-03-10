@@ -32,7 +32,7 @@ namespace Quad
         ~PlayerSocket();
 
     public:
-        std::shared_ptr<Player> ToPlayer();
+        Player* ToPlayer();
 
     public:
         void SendPacket(const char* buffer, const std::size_t& length);
@@ -60,7 +60,7 @@ namespace Quad
         std::unique_ptr<Packet> DecryptPacket();
 
     private:
-        std::shared_ptr<Player> mPlayer;
+        Player* mPlayer;
     };
 }
 

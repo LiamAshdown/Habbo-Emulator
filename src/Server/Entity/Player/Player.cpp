@@ -29,7 +29,8 @@ namespace Quad
     }
     Player::~Player()
     {
-        mRoom.reset();
+        IF_LOG(plog::debug)
+            LOG_DEBUG << "Destructor Player called!";
     }
     //-----------------------------------------------//
     uint32 Player::GetId() const
@@ -157,6 +158,14 @@ namespace Quad
         buffer.AppendCarriage();
         buffer.AppendEndCarriage();
         mSocket->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void Player::UpdatePosition(const uint16 & x, const uint16 & y, const uint16 & z, const uint16 & orientation)
+    {
+        mPositionX = x;
+        mPositionY = y;
+        mPositionZ = z;
+        mOrientation = orientation;
     }
     //-----------------------------------------------//
     std::shared_ptr<PlayerSocket> Player::ToSocket()

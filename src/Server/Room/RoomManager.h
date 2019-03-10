@@ -22,9 +22,22 @@
 #include "Common/SharedDefines.h"
 #include "Room.h"
 
+typedef struct RoomModelsStruct
+{
+    std::string sModel;
+    uint16 sDoorX;
+    uint16 sDoorY;
+    uint16 sDoorZ;
+    uint16 sOrientation;
+    std::string sHeightMap;
+    bool sHasPool;
+    bool sHeightMapDisabled;
+}RoomModels;
+
 namespace Quad
 {
     typedef std::map<uint32, std::shared_ptr<Room>> RoomMap;
+    typedef std::map<std::string, std::shared_ptr<RoomModels>> RoomModelsMap;
 
     class RoomManager
     {
@@ -38,14 +51,16 @@ namespace Quad
         RoomMap GetRoomStorage() const;
 
     public:
-        void LoadRooms();
+        std::shared_ptr<RoomModels> GetRoomModel(std::string model);
+        void LoadRoomHeights();
 
-        std::shared_ptr<Room> GetRoom(uint32 Id);
+        void LoadRooms();
+        std::shared_ptr<Room> GetRoom(uint16 Id);
         void AddRoom(std::shared_ptr<Room> room);
         void RemoveRoom(std::shared_ptr<Room> room);
-
     private:
         RoomMap mRooms;
+        RoomModelsMap mRoomModels;
         std::mutex mMutex;
     };
 }

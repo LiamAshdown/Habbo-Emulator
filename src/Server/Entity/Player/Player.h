@@ -53,6 +53,7 @@ namespace Quad
         std::shared_ptr<Room> GetRoom() const;
 
         void SendObjectData();
+        void UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation);
 
         std::shared_ptr<PlayerSocket> ToSocket();
 
@@ -73,6 +74,11 @@ namespace Quad
         uint32 mBadgeType;
         bool mDirectMail;
         bool mInitialized;
+
+        uint16 mPositionX;
+        uint16 mPositionY;
+        uint16 mPositionZ;
+        uint16 mOrientation;
 
         std::shared_ptr<Room> mRoom;
 

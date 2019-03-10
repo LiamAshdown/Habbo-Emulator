@@ -41,7 +41,7 @@ namespace Quad
         mPool.reset();
     }
     //-----------------------------------------------//
-    void World::AddListener(const uint32 port)
+    void World::AddListener(const uint16 port)
     {
         std::unique_ptr<Quad::Listener<Quad::PlayerSocket>> listener = std::make_unique<Quad::Listener<Quad::PlayerSocket>>(sConfig->GetStringDefault("BindIP", "127.0.0.1"), port,
             sConfig->GetIntDefault("NetworkThreadProcessors", 1));

@@ -27,7 +27,7 @@ namespace Quad
     class Listener
     {
     public:
-        Listener(std::string const& address, uint32 port, uint8 workerThreads);
+        Listener(std::string const& address, uint16 port, uint8 workerThreads);
         ~Listener();
 
     private:
@@ -59,11 +59,12 @@ namespace Quad
 
         std::thread mAcceptorThread;
         std::vector<std::unique_ptr<NetworkThread<SocketType>>> mWorkerThreads;
+        uint16 mPort;
     };
 
     template <typename SocketType>
-    Listener<SocketType>::Listener(std::string const& address, uint32 port, uint8 workerThreads)
-        : mService(new boost::asio::io_service()), mAcceptor(new boost::asio::ip::tcp::acceptor(*mService, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port)))
+    Listener<SocketType>::Listener(std::string const& address, uint16 port, uint8 workerThreads)
+        : mService(new boost::asio::io_service()), mAcceptor(new boost::asio::ip::tcp::acceptor(*mService, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port))), mPort(port)
     {
         mWorkerThreads.reserve(workerThreads);
         for (auto i = 0; i < workerThreads; ++i)
@@ -107,7 +108,7 @@ namespace Quad
         if (ec)
             worker->RemoveSocket(socket.get());
         else
-            socket->Open();
+            socket->Open(mPort);
 
         BeginAccept();
     }

@@ -19,6 +19,16 @@
 #ifndef _Quad_Room_h_
 #define _Quad_Room_h_
 #include "Common/SharedDefines.h"
+#include "Item.h"
+
+enum RoomFlag
+{
+    ROOM_TYPE_PUBLIC,
+    ROOM_TYPE_OPEN,
+    ROOM_TYPE_PRIVATE,
+    ROOM_TYPE_FAVOURITE
+};
+
 namespace Quad
 {
     class Player;
@@ -34,39 +44,46 @@ namespace Quad
 
     public:
         uint32 GetId() const;
+        uint16 GetServerPort() const;
         std::string GetName() const;
         std::string GetPassword() const;
         std::string GetOwnerName() const;
         std::string GetFloorLevel() const;
         std::string GetModel() const;
-        bool GetType() const;
+        std::string GetState() const;
+        uint8 GetType() const;
         bool IsEnabled() const;
         bool IsShowOwnerName() const;
         bool IsSuperUser() const;
-        uint32 GetCurrentIn() const;
         uint32 GetNowIn() const;
         uint32 GetMaxIn() const;
 
-        void AddPlayer(std::shared_ptr<Player> player);
-        void RemovePlayer(std::shared_ptr<Player> player);
+        void AddPlayer(Player* player);
+        void RemovePlayer(Player* player);
+
+        void SendRoomHeight(Player* player);
+        void SendRoomFurniture(Player* player);
         
     private:
         uint32 mId;
+        uint16 mServerPort;
         std::string mName;
         std::string mDescription;
         std::string mPassword;
         std::string mOwnerName;
         std::string mFloorLevel;
         std::string mModel;
-        bool mType;
+        std::string mState;
+        uint8 mType;
         bool mEnabled;
         bool mShowOwnerName;
         bool mSuperUser;
-        uint32 mCurrentIn;
         uint32 mNowIn;
         uint32 mMaxIn;
 
-        std::vector<std::shared_ptr<Player>> mPlayers;
+        std::unique_ptr<Item> mItems;
+
+        std::vector<Player*> mPlayers;
     };
 }
 
