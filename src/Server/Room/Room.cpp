@@ -163,17 +163,17 @@ namespace Quad
             for (auto& itr : sItemMgr->GetRoomPublicItems(player->ToSocket()->GetPort()))
             {
                 buffer.AppendCarriage();
-                buffer << (uint32)itr->sId;
+                buffer << (uint32)itr->GetId();
                 buffer.AppendSpace();
-                buffer << (std::string)itr->sSprite;
+                buffer << (std::string)itr->GetSprite();
                 buffer.AppendSpace();
-                buffer << (uint8)itr->sX;
+                buffer << (uint8)itr->GetPositionX();
                 buffer.AppendSpace();
-                buffer << (uint8)itr->sY;
+                buffer << (uint8)itr->GetPositionY();
                 buffer.AppendSpace();
-                buffer << (uint8)itr->sZ;
+                buffer << (uint8)itr->GetPositionZ();
                 buffer.AppendSpace();
-                buffer << (uint8)itr->sRotation;
+                buffer << (uint8)itr->GetRotation();
             }
 
             buffer.AppendEndCarriage();

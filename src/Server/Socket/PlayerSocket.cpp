@@ -21,6 +21,7 @@
 #include "Database/Fields.h"
 #include "Common/SHA1.h"
 #include "Player.h"
+#include "Network/StringBuffer.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -54,9 +55,9 @@ namespace Quad
     {
         if (std::unique_ptr<Packet> packet = DecryptPacket())
         {
-            LOG_INFO << "Processing packet: " << packet->sHeader;
+            LOG_INFO << "Processing packet: " << packet->GetHeader();
 
-            ExecutePacket(sOpcode->GetPacket(packet->sCmd), std::move(packet));
+            ExecutePacket(sOpcode->GetPacket(packet->GetHeader()), std::move(packet));
             return true;
         }
         else
@@ -65,36 +66,16 @@ namespace Quad
     //-----------------------------------------------//
     std::unique_ptr<Packet> PlayerSocket::DecryptPacket()
     {
-
-        std::vector<uint8> buffer;
-        buffer.resize(4);
-        if (Read((char*)&buffer[0], 4))
+        std::vector<uint8> bufferVec;
+        bufferVec.resize(ReadLengthRemaining());
+        if (Read((char*)&bufferVec[0], ReadLengthRemaining()))
         {
             std::unique_ptr<Packet> packet = std::make_unique<Packet>();
 
-            packet->sLength = std::stoi((std::string)(char*)&buffer[0]);
+            packet->Parse(((std::string)(char*)&bufferVec[0])
+                .substr(3, DecodeBase64(((std::string)(char*)&bufferVec[0]).substr(1, 2))));
 
-            buffer.clear();
-
-            buffer.resize(packet->sLength);
-
-            Read((char*)&buffer[0], packet->sLength);
-
-            // Get rid of junk characters
-            buffer.resize(buffer.size() + 1);
-            buffer[buffer.size() - 1] = 0;
-
-            std::string tempString = (char*)&buffer[0];
-
-            packet->sLength = ReadLength();
-            packet->sHeader = tempString.substr(0, tempString.find(' '));
-            tempString = tempString.erase(0, tempString.find_first_of(" \t") + 1);
-            packet->sFullBody = tempString;
-
-            boost::split(packet->sBody, tempString, boost::is_any_of("\t "));
-            packet->sCmd = static_cast<uint16>(std::accumulate(packet->sHeader.begin(), packet->sHeader.end(), 0));
-
-            return std::move(packet);
+            return packet;
         }
         else
             return nullptr;

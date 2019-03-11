@@ -22,6 +22,42 @@
 
 namespace Quad
 {
+    ///< We don't need to create a class for public room items, because they will never be changed
+    ///< So we will leave it as a struct
+    typedef struct PublicItemStruct
+    {
+    public:
+        friend class ItemManager;
+
+    public:
+        PublicItemStruct() {}
+        ~PublicItemStruct() {}
+
+    public:
+        uint32 GetId() const { return sId; }
+        uint32 GetDefinitionId() const { return sDefinitionId; }
+        std::string GetSprite() const { return sSprite; }
+        std::string GetModel() const { return sModel; }
+        uint16 GetPositionX() const { return sX; }
+        uint16 GetPositionY() const { return sY; }
+        uint16 GetPositionZ() const { return sZ; }
+        uint8 GetRotation() const { return sRotation; }
+        std::string GetObject() const { return sObject; }
+        std::string GetData() const { return sData; }
+
+    private:
+        uint32 sId;
+        uint32 sDefinitionId;
+        std::string sSprite;
+        std::string sModel;
+        uint16 sX;
+        uint16 sY;
+        uint16 sZ;
+        uint8 sRotation;
+        std::string sObject;
+        std::string sData;
+    }PublicItem;
+
     class Item
     {
     public:
@@ -42,7 +78,6 @@ namespace Quad
         std::string mBehaviour;
         std::string mName;
         std::string mDescription;
-
     };
 }
 

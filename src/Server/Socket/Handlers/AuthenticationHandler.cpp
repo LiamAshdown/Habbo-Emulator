@@ -27,128 +27,197 @@
 namespace Quad
 {
     //-----------------------------------------------//
-    void PlayerSocket::HandleVersionCheck(std::unique_ptr<Packet> packet)
+    void PlayerSocket::HandleInitializeCrypto(std::unique_ptr<Packet> packet)
     {
-        if (packet->sBody[0] == "client002")
-        {
-            // TODO; Figure out how SECREY_KEY works
-            StringBuffer buffer;
-            buffer << "# ENCRYPTION_OFF\r##";
-            buffer << "# SECRET_KEY\r##";
-            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
+        TempBuffer buffer;
+        buffer.AppendBase64(SMSG_CRYPTO_PARAMETERS);
+        buffer.AppendWired(0);
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
-    void PlayerSocket::HandleRegisteration(std::unique_ptr<Packet> packet)
+    void PlayerSocket::HandleGenerateKey(std::unique_ptr<Packet> packet)
     {
-        QueryDatabase database("users");
-        database.PrepareQuery("INSERT INTO accounts(user_name, hash_pass, email, figure, direct_mail, birthday, phone_number, mission, has_read_agreement, sex, country, credits) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        database.GetStatement()->setString(1, SplitString(packet->sFullBody, "name").c_str());
-        database.GetStatement()->setString(2, CalculateSHA1Hash(boost::to_upper_copy<std::string>(SplitString(packet->sFullBody, "name")) + ":" + boost::to_upper_copy<std::string>(SplitString(packet->sFullBody, "password")).c_str()));
-        database.GetStatement()->setString(3, SplitString(packet->sFullBody, "email").c_str());
-        database.GetStatement()->setString(4, SplitString(packet->sFullBody, "figure").c_str());
-        database.GetStatement()->setBoolean(5, boost::lexical_cast<bool>(SplitString(packet->sFullBody, "directMail").c_str()));
-        database.GetStatement()->setString(6, SplitString(packet->sFullBody, "birthday").c_str());
-        database.GetStatement()->setString(7, SplitString(packet->sFullBody, "phonenumber").c_str());
-        database.GetStatement()->setString(8, SplitString(packet->sFullBody, "customData").c_str());
-        database.GetStatement()->setBoolean(9, boost::lexical_cast<bool>(SplitString(packet->sFullBody, "has_read_agreement").c_str()));
-        database.GetStatement()->setString(10, SplitString(packet->sFullBody, "sex").c_str());
-        database.GetStatement()->setString(11, SplitString(packet->sFullBody, "country").c_str());
-        database.GetStatement()->setUInt(12, sConfig->GetIntDefault("CustomRegCredits", 0));
-        database.ExecuteBoolPrepareQuery();
+        TempBuffer buffer;
+
+        buffer.AppendBase64(SMSG_SESSION_PARAMETERS);
+        buffer.AppendWired(0); // VOUCHER_ENABLED
+        buffer.AppendWired(0); // REGISTER_REQUIRE_PARENT_EMAIL
+        buffer.AppendWired(0); // REGISTER_SEND_PARENT_EMAIL
+        buffer.AppendWired(0); // ALLOW_DIRECT_MAIL
+        buffer.AppendWired(1); // DATE_FORMAT
+        buffer.AppendWired(0); // PARTNER_INTEGRATION_ENABLED
+        buffer.AppendWired(1); // ALLOW_PROFILE_EDITING
+        buffer.AppendWired(0); // TRACKING_HEADER
+        buffer.AppendWired(0); // TUTORIAL_ENABLED
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+
+        buffer.Clear();
+
+        buffer.AppendBase64(SMSG_AVAILABLE_SETS);
+        buffer.AppendString("[100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,176,177,178,180,185,190,195,200,205,206,207,210,215,220,225,230,235,240,245,250,255,260,265,266,267,270,275,280,281,285,290,295,300,305,500,505,510,515,520,525,530,535,540,545,550,555,565,570,575,580,585,590,595,596,600,605,610,615,620,625,626,627,630,635,640,645,650,655,660,665,667,669,670,675,680,685,690,695,696,700,705,710,715,720,725,730,735,740,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,869,870,871,872,873]");
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleGDate(std::unique_ptr<Packet> packet)
+    {
+        TempBuffer buffer;
+        buffer.AppendBase64(MSG_GDATE);
+        buffer.AppendString(GetDate());
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleApproveUsername(std::unique_ptr<Packet> packet)
     {
+        std::string username = packet->ReadString();
+
         QueryDatabase database("users");
         database.PrepareQuery("SELECT user_name FROM accounts WHERE user_name = ?");
-        database.GetStatement()->setString(1, packet->sFullBody.c_str());
+        database.GetStatement()->setString(1, username.c_str());
         database.ExecuteResultPrepareQuery();
+
+        ApproveNameError errorCode = ApproveNameError::NAME_VALID;
 
         if (!database.GetExecuteQueryResult())
         {
-            StringBuffer buffer;
-            buffer << (std::string)"# NAME_APPROVED\r##";
-            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
-        else
-        {
-            StringBuffer buffer;
-            buffer << (std::string)"# ERROR: Name already exists!\r##";
-            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
-    }
-    //-----------------------------------------------//
-    void PlayerSocket::HandleLogin(std::unique_ptr<Packet> packet)
-    {
-        QueryDatabase database("users");
-        database.PrepareQuery("SELECT * FROM accounts WHERE user_name = ?");
-        database.GetStatement()->setString(1, packet->sBody[0].c_str());
-        database.ExecuteResultPrepareQuery();
-
-        if (!database.GetExecuteQueryResult())
-        {
-            LOG_ERROR << "User: " << packet->sBody[0] << " does not exist in accounts database!";
-
-            StringBuffer buffer;
-            buffer << (std::string)"# ERROR: login incorrect\r##";
-            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-            return;
-        }
-
-        Field* fields = database.Fetch();
-
-        // Check if passwords match
-        if (fields->GetString(3) == 
-            CalculateSHA1Hash(boost::to_upper_copy<std::string>(packet->sBody[0]) + ":" + boost::to_upper_copy<std::string>(packet->sBody[1])))
-        {
-            mPlayer = new Player(this);
-
-            mPlayer->mId = fields->GetUint32(1);
-            mPlayer->mName = fields->GetString(2);
-            mPlayer->mPassword = fields->GetString(3);
-            mPlayer->mEmail = fields->GetString(4);
-            mPlayer->mFigure = fields->GetString(5);
-            mPlayer->mDirectMail = fields->GetBool(6);
-            mPlayer->mBirthday = fields->GetString(7);
-            mPlayer->mPhoneNumber = fields->GetString(8);
-            mPlayer->mMission = fields->GetString(9);
-            mPlayer->mReadAgreement = fields->GetBool(10);
-            mPlayer->mSex = fields->GetString(11);
-            mPlayer->mCountry = fields->GetString(12);
-            mPlayer->mCredits = fields->GetUint32(13);
-            mPlayer->mInitialized = true;
-            
-            database.PrepareQuery("UPDATE accounts SET last_logged_in = now() WHERE user_name = ?");
-            database.GetStatement()->setString(1, mPlayer->GetName());
-            database.ExecuteBoolPrepareQuery();
-
-            // If size is more than 1, this means we are entering a room
-            if (packet->sBody.size() > 2)
+            if (username.length() > 15)
+                errorCode = ApproveNameError::NAME_TOO_LONG;
+            else if (username.length() < 3)
+                errorCode = ApproveNameError::NAME_UNACCEPTABLE_TO_STAFF;
+            else
             {
-                if (std::shared_ptr<Room> room = sRoomMgr->GetRoom(GetPort()))
+                std::string badWords = sConfig->GetStringDefault("BannedWords");
+
+                for (uint8 i = 0; i < badWords.length(); i++)
                 {
-                    mPlayer->SetRoom(room);
-                    room->AddPlayer(mPlayer);
+                    if (username.find(badWords[i]) != std::string::npos)
+                    {
+                        errorCode = ApproveNameError::NAME_UNACCEPTABLE_TO_STAFF_2;;
+                        break;
+                    }
                 }
-                else
-                    CloseSocket();
             }
         }
         else
-        {
-            StringBuffer buffer;
-            buffer << (std::string)"# ERROR: login incorrect\r##";
-            SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
+            errorCode = ApproveNameError::NAME_TAKEN;
+
+        TempBuffer buffer;
+        buffer.AppendBase64(SMSG_APPROVE_NAME_REPLY);
+        buffer.AppendWired(errorCode);
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
-    void PlayerSocket::HandleClientIP(std::unique_ptr<Packet> packet)
+    void PlayerSocket::HandleApprovePassword(std::unique_ptr<Packet> packet)
     {
+        std::string username = packet->ReadString();
+        std::string password = packet->ReadString();
+
+        ApprovePasswordError errorCode = ApprovePasswordError::PASSWORD_VALID;
+
+        if (password.length() < 6)
+            errorCode = ApprovePasswordError::PASSWORD_TOO_SHORT;
+        else if (password.length() > 9)
+            errorCode = ApprovePasswordError::PASSWORD_TOO_LONG;
+        else
+        {
+            std::string badWords = sConfig->GetStringDefault("BannedWords");
+            bool usedNumber = false;
+
+            // Must contain atleast a number
+            for (uint8 i = 0; i < 10; i++)
+            {
+                if (password.find(badWords[i]) != std::string::npos)
+                {
+                    usedNumber = true;
+                    break;
+                }
+            }
+
+            if (!usedNumber)
+                errorCode = ApprovePasswordError::PASSWORD_REQUIRES_NUMBERS;
+
+            // Username similiar to password
+            if (strstr(username.c_str(), password.c_str()))
+                errorCode = ApprovePasswordError::PASSWORD_USER_NAME_SIMILIAR;
+        }
+
+        TempBuffer buffer;
+        buffer.AppendBase64(SMSG_APPROVE_PASSWORD_REPLY);
+        buffer.AppendWired(errorCode);
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleApproveEmail(std::unique_ptr<Packet> packet)
+    {
+        // TODO; Check if email is valid
+        TempBuffer buffer;
+        buffer.AppendBase64(SMSG_APPROVE_EMAIL_REPLY);
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleRegisteration(std::unique_ptr<Packet> packet)
+    {
+        std::string username;
+        std::string figure;
+        std::string gender;
+        std::string email;
+        std::string password;
+        std::string birth;
+        bool directEmail;
+
+        for (uint8 i = 0; i < 6; i++)
+        {
+            uint32 id = packet->ReadUInt();
+            std::string content = packet->ReadString();
+
+            switch (id)
+            {
+            case 2:
+                username = content;
+                break;
+            case 4:
+                figure = content;
+                break;
+            case 5:
+                gender = content;
+                break;
+            case 7:
+                email = content;
+                break;
+            case 8:
+                birth = content;
+                break;
+            default:
+                break;
+            }
+        }
+
+        packet->ReadSkip(4);
+        directEmail = packet->ReadBool();
+        packet->ReadSkip(1);
+        password = packet->ReadString();
+
+        if (gender == "M")
+            gender = "Male";
+        else
+            gender = "Female";
+
         QueryDatabase database("users");
-        database.PrepareQuery("INSERT INTO account_client_ip_log(ip_address, client_ip) VALUES (?, ?)");
-        database.GetStatement()->setString(1, GetRemoteAddress());
-        database.GetStatement()->setString(2, packet->sFullBody);
+        database.PrepareQuery("INSERT INTO accounts(user_name, hash_pass, email, figure, direct_mail, birthday, gender, credits) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        database.GetStatement()->setString(1, username.c_str());
+        database.GetStatement()->setString(2, (CalculateSHA1Hash(boost::to_upper_copy(username) + ":" + boost::to_upper_copy(password))).c_str());
+        database.GetStatement()->setString(3, email.c_str());
+        database.GetStatement()->setString(4, figure.c_str());
+        database.GetStatement()->setBoolean(5, directEmail);
+        database.GetStatement()->setString(6, birth.c_str());
+        database.GetStatement()->setString(7, gender.c_str());
+        database.GetStatement()->setUInt(8, sConfig->GetIntDefault("CustomRegCredits", 0));
         database.ExecuteBoolPrepareQuery();
     }
     //-----------------------------------------------//

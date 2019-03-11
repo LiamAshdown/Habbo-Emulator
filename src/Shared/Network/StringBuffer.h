@@ -21,6 +21,137 @@
 #include "Common/SharedDefines.h"
 namespace Quad
 {
+
+    class TempBuffer
+    {
+    public:
+        TempBuffer() : mWritePosition(0), mReadPosition(0)
+        {
+            mStorage.reserve(4096);
+        }
+        ~TempBuffer() {}
+
+    public:
+
+        void AppendString(const std::string buffer)
+        {
+            if (std::size_t length = buffer.length())
+                Append((uint8 const*)buffer.c_str(), length);
+        }
+
+        void AppendUint8(const uint8 value)
+        {
+            Append<uint8>(value);
+        }
+
+        void AppendInt8(const int8 value)
+        {
+            Append<int8>(value);
+        }
+
+        void AppendUint16(const uint16 value)
+        {
+            Append<uint16>(value);
+        }
+
+        void AppendInt16(const int16 value)
+        {
+            Append<int16>(value);
+        }
+
+        void AppendUint32(const uint32 value)
+        {
+            Append<uint32>(value);
+        }
+
+        void AppendInt32(const int32 value)
+        {
+            Append<uint8>(value);
+        }
+
+        void AppendUint64(const uint64 value)
+        {
+            Append<uint64>(value);
+        }
+
+        void AppendInt64(const int64 value)
+        {
+            Append<int64>(value);
+        }
+
+        void AppendBase64(const uint32 value)
+        {
+            std::string encoder = EncodeBase64(value);
+
+            if (std::size_t length = encoder.length())
+                Append((uint8 const*)encoder.c_str(), length);
+        }
+
+        void AppendWired(const int64 value)
+        {
+            std::string wired = EncodeWired(value);
+
+            if (std::size_t length = wired.length())
+                Append((uint8 const*)wired.c_str(), length);
+        }
+
+        void AppendSOH()
+        {
+            std::string SOH = "\u0001";
+            if (std::size_t length = SOH.length())
+                Append(SOH.c_str(), length);
+        }
+
+        template <typename T> void Append(T value)
+        {
+            Append((uint8*)&value, sizeof(value));
+        }
+
+        template<class T> void Append(const T* src, std::size_t cnt)
+        {
+            return Append((const uint8*)src, cnt * sizeof(T));
+        }
+
+        void Append(const char* buffer, const std::size_t& size)
+        {
+            return Append((const uint8*)buffer, size);
+        }
+
+        void Append(const uint8* buffer, const std::size_t& size)
+        {
+            if (!size)
+                return;
+            
+            if (mStorage.size() < mWritePosition + size)
+                mStorage.resize(mWritePosition + size);
+
+            memcpy(&mStorage[mWritePosition], buffer, size);
+            mWritePosition += size;
+        }
+
+        std::size_t GetSize() const
+        {
+            return mStorage.size();
+        }
+
+        uint8 const* GetContents() const
+        {
+            return &mStorage[0];
+        }
+
+        void Clear()
+        {
+            mWritePosition = 0;
+            mReadPosition = 0;
+            mStorage.clear();
+        }
+
+    private:
+        std::size_t mWritePosition;
+        std::size_t mReadPosition;
+        std::vector<uint8> mStorage;
+    };
+
     class StringBuffer
     {
     public:
@@ -186,6 +317,7 @@ namespace Quad
         std::size_t mReadPosition;
         std::vector<uint8> mStorage;
     };
+#pragma endregion
 }
 
 #endif /* _Quad_StringBuffer_ */

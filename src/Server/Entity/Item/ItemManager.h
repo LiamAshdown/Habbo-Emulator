@@ -22,25 +22,11 @@
 #include "Common/SharedDefines.h"
 #include "Item.h"
 
-typedef struct PublicRoomItemStruct
-{
-    uint32 sId;
-    uint32 sDefinitionId;
-    std::string sSprite;
-    std::string sModel;
-    uint16 sX;
-    uint16 sY;
-    uint16 sZ;
-    uint8 sRotation;
-    std::string sObject;
-    std::string sData;
-
-}PublicRoomItem;
-
 namespace Quad
 {
     typedef std::map<uint32, std::unique_ptr<Item>> ItemDefinitionsMap;
-    typedef std::map<uint32, std::vector<std::shared_ptr<PublicRoomItem>>> PublicRoomItemsMap;
+    typedef std::vector<std::shared_ptr<PublicItem>> PublicItemVect;
+    typedef std::map<uint32, PublicItemVect> PublicRoomItemsMap;
 
     class ItemManager
     {
@@ -55,7 +41,7 @@ namespace Quad
         void LoadItemDefinitions();
         void LoadPublicRoomItems();
 
-        std::vector<std::shared_ptr<PublicRoomItem>> GetRoomPublicItems(const uint32& id);
+        PublicItemVect GetRoomPublicItems(const uint32& id);
 
     private:
         ItemDefinitionsMap mItemDefinitions;

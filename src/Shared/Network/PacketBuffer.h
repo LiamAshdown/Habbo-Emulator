@@ -27,7 +27,7 @@ namespace Quad
     public:
         friend class Socket;
     public:
-        PacketBuffer(int initialSize = 8192) : mWritePosition(0), mReadPosition(0), mBuffer(initialSize, 0) {}
+        PacketBuffer(int initialSize = 4096) : mWritePosition(0), mReadPosition(0), mBuffer(initialSize, 0) {}
 
         void Read(char* buffer, const std::size_t& length);
         std::size_t ReadPosition() const;

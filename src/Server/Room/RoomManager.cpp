@@ -87,7 +87,7 @@ namespace Quad
 
         } while (fields->GetNextResult());
 
-        LOG_INFO << "Sucessfully loaded Hotel Rooms!";
+        LOG_INFO << "Loaded " << mRooms.size() << " Rooms!";
     }
     //-----------------------------------------------//
     std::shared_ptr<RoomModels> RoomManager::GetRoomModel(std::string model)
@@ -134,7 +134,7 @@ namespace Quad
 
         }while(fields->GetNextResult());
 
-        LOG_INFO << "Sucessfully loaded Room Height Maps!";
+        LOG_INFO << "Loaded " << mRoomModels.size() << " Room Models!";
     }
     //-----------------------------------------------//
     std::shared_ptr<Room> RoomManager::GetRoom(uint16 Id)

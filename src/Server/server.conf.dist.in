@@ -104,5 +104,11 @@ RoomDatabaseInfo.WorkerThreads  = 1
 #
 CustomRegCredits = 0
 
+#    BannedWords
+#        Description: Set words which are not allowed when creating username.
+#        Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
+#
+BannedWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
+
 #
 ###################################################################################################

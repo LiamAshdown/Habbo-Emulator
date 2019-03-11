@@ -31,16 +31,16 @@ namespace Quad
         mReadPosition += length;
     }
     //-----------------------------------------------//
-    void PacketBuffer::Write(const char* p_Buffer, const std::size_t& p_Length)
+    void PacketBuffer::Write(const char* buffer, const std::size_t& length)
     {
-        const size_t newLength = mWritePosition + p_Length;
+        const size_t newLength = mWritePosition + length;
 
         if (mBuffer.size() < newLength)
             mBuffer.resize(newLength);
 
-        memcpy(&mBuffer[mWritePosition], p_Buffer, p_Length);
+        memcpy(&mBuffer[mWritePosition], buffer, length);
 
-        mWritePosition += p_Length;
+        mWritePosition += length;
     }
     //-----------------------------------------------//
     std::size_t PacketBuffer::ReadLength() const

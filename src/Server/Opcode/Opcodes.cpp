@@ -36,16 +36,21 @@ namespace Quad
     void Opcodes::InitializePackets()
     {
         ///< CMSG
-        StorePacket(OpcodesList::VERSIONCHECK,               "VERSIONCHECK",             &PlayerSocket::HandleVersionCheck       );
-        StorePacket(OpcodesList::KEYENCRYPTED,               "KEYENCRYPTED",             &PlayerSocket::HandleNULL               );
-        StorePacket(OpcodesList::CLIENTIP,                   "CLIENTIP",                 &PlayerSocket::HandleClientIP           );
-        StorePacket(OpcodesList::APPROVENAME,                "APPROVENAME",              &PlayerSocket::HandleApproveUsername    );
-        StorePacket(OpcodesList::REGISTER,                   "APPROVENAME",              &PlayerSocket::HandleRegisteration      );
-        StorePacket(OpcodesList::LOGIN,                      "LOGIN",                    &PlayerSocket::HandleLogin              );
-        StorePacket(OpcodesList::GETCREDITS,                 "GETCREDITS",               &PlayerSocket::HandleGetCredits         );
-        StorePacket(OpcodesList::INFORETRIEVE,               "INFORETRIEVE",             &PlayerSocket::HandleInfoRetrieve       );
-        StorePacket(OpcodesList::SEARCHBUSYFLATS,            "SEARCHBUSYFLATS",          &PlayerSocket::HandleSearchBusyFlats    );
-        StorePacket(OpcodesList::INITUNITLISTENER,           "INITUNITLISTENER",         &PlayerSocket::HandleInitUnitListener   );
+        StorePacket(OpcodesList::CMSG_INITIALIZE_CRYPTO,             "CMSG_INITIALIZE_CRYPTO",                &PlayerSocket::HandleInitializeCrypto           );
+        StorePacket(OpcodesList::CMSG_GENERATE_KEY,                  "CMSG_GENERATE_KEY",                     &PlayerSocket::HandleGenerateKey                );
+        StorePacket(OpcodesList::MSG_GDATE,                          "MSG_GDATE",                             &PlayerSocket::HandleGDate                      );
+        StorePacket(OpcodesList::CMSG_APPROVE_NAME,                  "CMSG_APPROVE_NAME",                     &PlayerSocket::HandleApproveUsername            );
+        StorePacket(OpcodesList::CMSG_APPROVE_PASSWORD,              "CMSG_APPROVE_PASSWORD",                 &PlayerSocket::HandleApprovePassword            );
+        StorePacket(OpcodesList::CMSG_APPROVE_EMAIL,                 "CMSG_APPROVE_EMAIL",                    &PlayerSocket::HandleApproveEmail               );
+        StorePacket(OpcodesList::CMSG_REGISTER,                      "CMSG_REGISTER",                         &PlayerSocket::HandleRegisteration              );
+
+        ///< SMSG
+        StorePacket(OpcodesList::SMSG_CRYPTO_PARAMETERS,             "SMSG_CRYPTO_PARAMETERS",                &PlayerSocket::HandleServerMessage              );
+        StorePacket(OpcodesList::SMSG_SESSION_PARAMETERS,            "SMSG_SESSION_PARAMETERS",               &PlayerSocket::HandleServerMessage              );
+        StorePacket(OpcodesList::SMSG_AVAILABLE_SETS,                "SMSG_AVAILABLE_SETS",                   &PlayerSocket::HandleServerMessage              );
+        StorePacket(OpcodesList::SMSG_APPROVE_NAME_REPLY,            "SMSG_APPROVE_NAME_REPLY",               &PlayerSocket::HandleServerMessage              );
+        StorePacket(OpcodesList::SMSG_APPROVE_PASSWORD_REPLY,        "SMSG_APPROVE_PASSWORD_REPLY",           &PlayerSocket::HandleServerMessage              );
+        StorePacket(OpcodesList::SMSG_APPROVE_EMAIL_REPLY,           "SMSG_APPROVE_EMAIL_REPLY",              &PlayerSocket::HandleServerMessage              );
     } 
     //-----------------------------------------------//
     void Opcodes::StorePacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))

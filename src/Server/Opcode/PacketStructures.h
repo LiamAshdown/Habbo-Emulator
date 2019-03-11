@@ -21,19 +21,91 @@
 #include "Common/SharedDefines.h"
 #endif /* _Quad_PacketStructures_h_ */
 
-typedef struct PacketReceivingStruct
+enum ApproveNameError
 {
-    uint8 sLength[4];
-}PacketReceiving;
+    NAME_VALID                      = 0,
+    NAME_TOO_LONG                   = 1,
+    NAME_UNACCEPTABLE_TO_STAFF      = 2,
+    NAME_UNACCEPTABLE_TO_STAFF_2    = 3,
+    NAME_TAKEN                      = 4,
+};
 
-typedef struct PacketStruct
+enum ApprovePasswordError
 {
-    PacketStruct() : sLength(0), sCmd(0){}
+    PASSWORD_VALID                  = 0,
+    PASSWORD_TOO_SHORT              = 1,
+    PASSWORD_TOO_LONG               = 2,
+    PASSWORD_INVALID_CHARS          = 3,
+    PASSWORD_REQUIRES_NUMBERS       = 4,
+    PASSWORD_USER_NAME_SIMILIAR     = 5,
+};
+
+class Packet
+{
+public:
+    Packet() : mReadPosition(0), mHeader(0), mContent("") {}
+
+    ~Packet() {}
+
+public:
+    void Parse(std::string buffer)
+    {
+        mHeader = DecodeBase64(buffer.substr(0, 2));
+        mContent = buffer.substr(2);
+    }
+
+    std::string ReadString()
+    {
+        std::size_t length = DecodeBase64(mContent.substr(mReadPosition, 2));
+        std::string temp = mContent.substr(2 + mReadPosition, length);
+        mReadPosition += (length + 2);
+
+        return temp;
+    }
+
+    uint32 ReadUInt()
+    {
+        uint32 reader = DecodeBase64(mContent.substr(mReadPosition, 2));
+        mReadPosition += 2;
+
+        return reader;
+    }
+
+    bool ReadBool()
+    {
+        uint8 boolean = DecodeBase64(mContent.substr(mReadPosition, 2));
+        mReadPosition++;
+        return boolean;
+    }
+
+    void ReadSkip(uint8 value)
+    {
+        for (uint8 i = 0; i < value; i++)
+        {
+            DecodeBase64(mContent.substr(mReadPosition, 2));
+            mReadPosition += 2;
+        }
+    }
+
+    std::size_t GetSize() const
+    {
+        return mReadPosition;
+    }
+
+    uint32 GetHeader() const
+    {
+        return mHeader;
+    }
 
     uint32 sLength;
-    uint16 sCmd;
+    uint32 sCmd;
     std::string sHeader;
     std::string sFullBody;
     std::vector<std::string> sBody;
 
-}Packet;
+private:
+    std::size_t mReadPosition;
+    std::string mContent;
+    uint32 mHeader;
+
+};

@@ -33,7 +33,7 @@
 #include <map>
 #include <numeric>
 #include <unordered_set>
-
+#include <stdlib.h>
 #include "../Platform/CompilerDefs.h"   
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
@@ -63,3 +63,8 @@ typedef std::vector<std::string> Tokens;
 
 std::string SplitString(const std::string& stringData, const std::string& tokenizer);
 uint16 ConvertEndian(uint16 value);
+uint32 DecodeBase64(const std::string buffer);
+int64 DecodeWired(std::string buffer);
+std::string EncodeBase64(const uint32 value);
+std::string EncodeWired(int64 value);
+std::string GetDate();

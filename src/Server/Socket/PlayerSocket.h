@@ -41,9 +41,17 @@ namespace Quad
         //      HANDLERS      //
         ///////////////////////
         void ExecutePacket(const OpcodeHandler& opHandler, std::unique_ptr<Packet> packet);
+        void HandleInitializeCrypto(std::unique_ptr<Packet> packet);
+        void HandleGenerateKey(std::unique_ptr<Packet> packet);
+        void HandleGDate(std::unique_ptr<Packet> packet);
+        void HandleApproveUsername(std::unique_ptr<Packet> packet);
+        void HandleApprovePassword(std::unique_ptr<Packet> packet);
+        void HandleApproveEmail(std::unique_ptr<Packet> packet);
+
+       
+
         void HandleVersionCheck(std::unique_ptr<Packet> packet);
         void HandleRegisteration(std::unique_ptr<Packet> packet);
-        void HandleApproveUsername(std::unique_ptr<Packet> packet);
         void HandleClientIP(std::unique_ptr<Packet> packe);
         void HandleLogin(std::unique_ptr<Packet> packet);
         void HandleGetCredits(std::unique_ptr<Packet> packet);

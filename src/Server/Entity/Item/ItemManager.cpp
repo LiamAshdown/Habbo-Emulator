@@ -38,7 +38,7 @@ namespace Quad
             LOG_DEBUG << "Destructor ItemManager called!";
     }
     //-----------------------------------------------//
-    void ItemManager::LoadItemDefinitions()
+    void ItemManager::LoadPublicRoomItems()
     {
         QueryDatabase database("rooms");
         database.PrepareQuery("SELECT id, definition_id, sprite, model, x, y, z, rotation, object, data FROM room_public_items");
@@ -52,11 +52,11 @@ namespace Quad
 
         Field* fields = database.Fetch();
 
-        std::vector<std::shared_ptr<PublicRoomItem>> publicRoomVect;
+        std::vector<std::unique_ptr<PublicItem>> publicRoomVect;
 
         do
         {
-            std::unique_ptr<PublicRoomItem> item = std::make_unique<PublicRoomItem>();
+            std::unique_ptr<PublicItem> item = std::make_unique<PublicItem>();
             item->sId = fields->GetUint32(1);
             item->sDefinitionId = fields->GetUint32(2);
             item->sSprite = fields->GetString(3);
@@ -71,26 +71,26 @@ namespace Quad
             publicRoomVect.push_back(std::move(item));
 
         } while (fields->GetNextResult());
-        
-        std::vector<std::shared_ptr<PublicRoomItem>> poolAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> poolBVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> lobbyAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> lobbyTheaterVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> habBurgerVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> floorLobbyAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> floorLobbyBVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> floorLobbyCVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> barAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> pubAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> barBVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> malhaBarAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> malhaBarBVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> tavisCafeVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> hallCVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> entryHallVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> HallAVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> HallBVec;
-        std::vector<std::shared_ptr<PublicRoomItem>> HallDVec;
+
+        std::vector<std::shared_ptr<PublicItem>> poolAVec;
+        std::vector<std::shared_ptr<PublicItem>> poolBVec;
+        std::vector<std::shared_ptr<PublicItem>> lobbyAVec;
+        std::vector<std::shared_ptr<PublicItem>> lobbyTheaterVec;
+        std::vector<std::shared_ptr<PublicItem>> habBurgerVec;
+        std::vector<std::shared_ptr<PublicItem>> floorLobbyAVec;
+        std::vector<std::shared_ptr<PublicItem>> floorLobbyBVec;
+        std::vector<std::shared_ptr<PublicItem>> floorLobbyCVec;
+        std::vector<std::shared_ptr<PublicItem>> barAVec;
+        std::vector<std::shared_ptr<PublicItem>> pubAVec;
+        std::vector<std::shared_ptr<PublicItem>> barBVec;
+        std::vector<std::shared_ptr<PublicItem>> malhaBarAVec;
+        std::vector<std::shared_ptr<PublicItem>> malhaBarBVec;
+        std::vector<std::shared_ptr<PublicItem>> tavisCafeVec;
+        std::vector<std::shared_ptr<PublicItem>> hallCVec;
+        std::vector<std::shared_ptr<PublicItem>> entryHallVec;
+        std::vector<std::shared_ptr<PublicItem>> HallAVec;
+        std::vector<std::shared_ptr<PublicItem>> HallBVec;
+        std::vector<std::shared_ptr<PublicItem>> HallDVec;
 
         for (auto& itr : publicRoomVect)
         {
@@ -153,9 +153,11 @@ namespace Quad
         mPublicRoomItems[37138] = HallDVec;
         mPublicRoomItems[37139] = malhaBarAVec;
         mPublicRoomItems[37140] = malhaBarBVec;
+
+        LOG_INFO << "Loaded " << publicRoomVect.size() << " Public Room Items";
     }
     //-----------------------------------------------//
-    void ItemManager::LoadPublicRoomItems()
+    void ItemManager::LoadItemDefinitions()
     {
         QueryDatabase database("rooms");
         database.PrepareQuery("SELECT id, sprite, color, length, width, height, data_class, behaviour, name, description FROM item_definitions");
@@ -186,9 +188,11 @@ namespace Quad
             mItemDefinitions[item->mId] = std::move(item);
 
         } while (fields->GetNextResult());
+
+        LOG_INFO << "Loaded " << mItemDefinitions.size() << " Items Definitions";
     }
     //-----------------------------------------------//
-    std::vector<std::shared_ptr<PublicRoomItem>> ItemManager::GetRoomPublicItems(const uint32& id)
+    PublicItemVect ItemManager::GetRoomPublicItems(const uint32& id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
@@ -198,7 +202,7 @@ namespace Quad
         else
         {
             LOG_ERROR << "Couldn't find public room storage for Id: " << id;
-            return std::vector<std::shared_ptr<PublicRoomItem>>{};
+            assert(false);
         }
     }
     //-----------------------------------------------//

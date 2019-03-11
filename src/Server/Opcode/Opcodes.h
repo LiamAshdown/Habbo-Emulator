@@ -23,35 +23,22 @@
 
 enum OpcodesList : uint16
 {
-    VERSIONCHECK                = 900,
-    KEYENCRYPTED                = 919,
-    CLIENTIP                    = 600,
-    APPROVENAME                 = 830,
-    REGISTER                    = 613,
-    STATUSOK                    = 638,
-    LOGIN                       = 377,
-    GETCREDITS                  = 750,
-    SEARCHBUSYFLATS             = 1139,
-    INFORETRIEVE                = 914,
-    INITUNITLISTENER            = 1242,
-    MOVE                        = 407,
-    CHAT                        = 288,
-    SHOUT                       = 403,
-    WHISPER                     = 546,
-    CREATEFLAT                  = 731,
-    SETFLATINFO                 = 831,
-    TRYFLAT                     = 550,
-    GOTOFLAT                    = 608,
-    GETFLATINFO                 = 819,
-    UPDATEFLAT                  = 746,
-    DELETEFLAT                  = 730,
-    GOAWAY                      = 456,
-    DANCE                       = 475,
-    STOP                        = 326,
-    LOOKTO                      = 472,
-    GETORDERINFO                = 904,
-    PURCHASE                    = 603,
-    GETSTRIP                    = 626,
+    ///< CMSG
+    CMSG_INITIALIZE_CRYPTO              = 206,
+    CMSG_GENERATE_KEY                   = 202,
+    MSG_GDATE                           = 49,
+    CMSG_APPROVE_NAME                   = 42,
+    CMSG_APPROVE_PASSWORD               = 203,
+    CMSG_APPROVE_EMAIL                  = 197,
+    CMSG_REGISTER                       = 43,
+
+    ///< SMSG
+    SMSG_CRYPTO_PARAMETERS              = 277,
+    SMSG_SESSION_PARAMETERS             = 257,
+    SMSG_AVAILABLE_SETS                 = 8,
+    SMSG_APPROVE_NAME_REPLY             = 36,
+    SMSG_APPROVE_PASSWORD_REPLY         = 282,
+    SMSG_APPROVE_EMAIL_REPLY            = 271,
 };
 
 namespace Quad

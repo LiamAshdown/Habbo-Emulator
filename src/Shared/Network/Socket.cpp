@@ -79,8 +79,10 @@ namespace Quad
     //-----------------------------------------------//
     void Socket::InitializeClientServer()
     {
-        StringBuffer buffer;
-        buffer << (std::string)"# HELLO ##";
+        TempBuffer buffer;
+        buffer.AppendBase64(0);
+        buffer.AppendSOH();
+
         Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
