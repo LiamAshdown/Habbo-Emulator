@@ -41,47 +41,47 @@ namespace Quad
     public:
         std::string GetString(uint8 i)
         {
-            return mResultSet->getString(i);
+            return mResultSet->getString(i).c_str();
         }
 
         uint16 GetUint8(uint8 i)
         {
-            return mResultSet->getUInt(i);
+            return (uint8)mResultSet->getUInt(i);
         }
 
         uint16 GetUint16(uint8 i)
         {
-            return mResultSet->getUInt(i);
+            return (uint16)mResultSet->getUInt(i);
         }
 
         int32 GetInt32(uint8 i)
         {
-            return mResultSet->getInt(i);
+            return (int32)mResultSet->getInt(i);
         }
 
         int64 GetInt64(uint8 i)
         {
-            return mResultSet->getInt64(i);
+            return (int64)mResultSet->getInt64(i);
         }
 
         uint32 GetUint32(uint8 i)
         {
-            return mResultSet->getUInt(i);
+            return (uint32)mResultSet->getUInt(i);
         }
 
         uint32 GetUint64(uint8 i)
         {
-            return mResultSet->getUInt64(i);
+            return (uint64)mResultSet->getUInt64(i);
         }
 
         bool GetBool(uint8 i)
         {
-            return mResultSet->getBoolean(i);
+            return (bool)mResultSet->getBoolean(i);
         }
 
         double GetDouble(uint8 i)
         {
-            return mResultSet->getDouble(i);
+            return (double)mResultSet->getDouble(i);
         }
 
         bool GetNextResult()
@@ -89,13 +89,13 @@ namespace Quad
             return mResultSet->next();
         }
 
-        bool RowExists() const
+        uint32 GetRowCount()
         {
-            return mResultSet->rowsCount() > 0 ? true : false;
+            return (uint32)mResultSet->rowsCount();
         }
 
     public:
-        std::shared_ptr<sql::ResultSet> mResultSet;
+        std::unique_ptr<sql::ResultSet> mResultSet;
     };
 }
 

@@ -27,19 +27,8 @@ namespace Quad
     class QueryDatabase
     {
     public:
-        QueryDatabase(const std::string database)
-        {
-            mDatabase = database;
-            mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
-            mSqlConnection = mConnection->SQLConnection;
-        }
-        ~QueryDatabase()
-        {
-            IF_LOG(plog::debug)
-                LOG_DEBUG << "Destructor QueryDatabase called!";
-
-            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
-        }
+        QueryDatabase(const std::string database);
+        ~QueryDatabase();
 
     public:
         // Direct Execute
@@ -47,13 +36,11 @@ namespace Quad
 
         // Prepare Query
         void PrepareQuery(const std::string& query);
-        void ExecuteResultPrepareQuery();
-        void ExecuteBoolPrepareQuery();
-        bool GetExecuteQueryResult();
+        void ExecuteQuery();
+        bool GetResult();
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
         // Neutral
-        bool GetExecuteResult() const;
         Field* Fetch();
 
     private:
@@ -70,7 +57,8 @@ namespace Quad
 
         // Neutral
         bool mExecuteResult;
-        std::shared_ptr<sql::ResultSet> mResultSet;
+        bool mIsExecuteResult;
+        std::unique_ptr<sql::ResultSet> mResultSet;
         Field mField;
     }; 
 }

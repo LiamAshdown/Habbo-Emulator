@@ -24,10 +24,6 @@
 
 namespace Quad
 {
-    typedef std::map<uint32, std::unique_ptr<Item>> ItemDefinitionsMap;
-    typedef std::vector<std::shared_ptr<PublicItem>> PublicItemVect;
-    typedef std::map<uint32, PublicItemVect> PublicRoomItemsMap;
-
     class ItemManager
     {
     public:
@@ -37,16 +33,7 @@ namespace Quad
         ItemManager();
         ~ItemManager();
 
-    public:
-        void LoadItemDefinitions();
-        void LoadPublicRoomItems();
-
-        PublicItemVect GetRoomPublicItems(const uint32& id);
-
     private:
-        ItemDefinitionsMap mItemDefinitions;
-        PublicRoomItemsMap mPublicRoomItems;
-
         std::mutex mMutex;
     };
 }
