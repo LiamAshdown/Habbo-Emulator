@@ -37,20 +37,46 @@ namespace Quad
     {
     }
     //-----------------------------------------------//
-    RoomMap RoomManager::GetRoomStorage() const
+    void RoomManager::LoadRoomCategories()
     {
-        return mRooms;
+        QueryDatabase database("rooms");
+        database.PrepareQuery("SELECT id, parent_id, name, public_spaces, allow_trading, minrole_access, minrole_setflatcat FROM rooms_categories");
+        database.ExecuteQuery();
+
+        if (!database.GetResult())
+        {
+            LOG_ERROR << "room_categories is empty!";
+            return;
+        }
+
+        Field* fields = database.Fetch();
+
+        do
+        {
+            std::unique_ptr<RoomCategory> roomCategories = std::make_unique<RoomCategory>();
+            roomCategories->mCategoryId     = fields->GetUint32(1);
+            roomCategories->mParentId       = fields->GetUint32(2);
+            roomCategories->mName           = fields->GetString(3);
+            roomCategories->mPublicSpace    = fields->GetBool(4);
+            roomCategories->mAllowTrading   = fields->GetUint16(5);
+            roomCategories->mMinRoleAccess  = fields->GetBool(6);
+            roomCategories->mMinRoleSetFlat = fields->GetBool(7);
+
+            mRoomCategories[roomCategories->mCategoryId] = std::move(roomCategories);
+        } while (fields->GetNextResult());
+
+        LOG_INFO << "Loaded " << mRoomCategories.size() << " room categories";
     }
     //-----------------------------------------------//
     void RoomManager::LoadRooms()
     {
         QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT id, name, description, password, owner_name, floor_level, model, state, type, enabled, show_owner, super_user, max_in FROM hotel_rooms");
-        database.ExecuteResultPrepareQuery();
+        database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, rating FROM rooms");
+        database.ExecuteQuery();
 
-        if (!database.GetExecuteQueryResult())
+        if (!database.GetResult())
         {
-            LOG_ERROR << "hotel_rooms database is empty!";
+            LOG_ERROR << "hotel_rooms is empty!";
             return;
         }
 
@@ -58,61 +84,42 @@ namespace Quad
 
         do
         {
-            std::shared_ptr<Room> room = std::make_shared<Room>();
-            room->mId = fields->GetUint32(1);
-            room->mServerPort = DEFAULT_SERVER_PORT + room->mId;
-            room->mName = fields->GetString(2);
-            room->mDescription = fields->GetString(3);
-            room->mPassword = fields->GetString(4);
-            room->mOwnerName = fields->GetString(5);
-            room->mFloorLevel = fields->GetString(6);
-            room->mModel = fields->GetString(7);
-            room->mState = fields->GetString(8);
-            room->mType = fields->GetUint16(9);
-            room->mEnabled = fields->GetBool(10);
-            room->mShowOwnerName = fields->GetBool(11);
-            room->mSuperUser = fields->GetBool(12);
-            room->mNowIn = 0;
-            room->mMaxIn = fields->GetUint32(13);
+            std::unique_ptr<Room> room = std::make_unique<Room>();
+            room->mId                      = fields->GetUint32(1);
+            room->mOwnerId                 = fields->GetUint32(2);
+            room->mOwnerName               = fields->GetString(3);
+            room->mCategory                = fields->GetUint32(4);
+            room->mName                    = fields->GetString(5);
+            room->mDescription             = fields->GetString(6);
+            room->mModel                   = fields->GetString(7);
+            room->mCcts                    = fields->GetString(8);
+            room->mWallPaper               = fields->GetUint32(9);
+            room->mFloor                   = fields->GetUint32(10);
+            room->mShowName                = fields->GetBool(11);
+            room->mSuperUsers              = fields->GetBool(12);
+            room->mAccessType              = fields->GetString(13);
+            room->mPassword                = fields->GetString(14);
+            room->mVisitorsNow             = fields->GetUint32(15);
+            room->mVisitorsMax             = fields->GetUint32(16);
 
-            ///< IMPORTANT!
-            // Each room has its own port. Due to the way Sulake coded it's habbo client, the habbo client
-            // connects to each room on its own port. So in order to replicate this, each time we create
-            // a new room, we add the default server port (37120) + the room Id. For example:
-            // 37120 + 1 = room port
-            mRooms[room->mServerPort] = room;
+            sWorld->AddListener(room->GetId() + DEFAULT_SERVER_PORT);
 
-            // Launch our new listener for this room
-            sWorld->AddListener(room->mServerPort);
+            mRooms[room->mId] = std::move(room);
 
         } while (fields->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRooms.size() << " Rooms!";
+        LOG_INFO << "Loaded " << mRooms.size() << " rooms";
     }
     //-----------------------------------------------//
-    std::shared_ptr<RoomModels> RoomManager::GetRoomModel(std::string model)
-    {
-        std::lock_guard<std::mutex> guard(mMutex);
-
-        RoomModelsMap::const_iterator itr = mRoomModels.find(model);
-        if (itr != mRoomModels.end())
-            return itr->second;
-        else
-        {
-            LOG_ERROR << "Couldn't locate room height map!";
-            return nullptr;
-        }
-    }
-    //-----------------------------------------------//
-    void RoomManager::LoadRoomHeights()
+    void RoomManager::LoadFavouriteRooms()
     {
         QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT model, door_x, door_y, door_z, door_orientation, height_map, has_pool, disable_height_check FROM room_models");
-        database.ExecuteResultPrepareQuery();
+        database.PrepareQuery("SELECT id, room_id, public_space FROM favourite_rooms");
+        database.ExecuteQuery();
 
-        if (!database.GetExecuteQueryResult())
+        if (!database.GetResult())
         {
-            LOG_ERROR << "height_maps database is empty!";
+            LOG_ERROR << "favourite_rooms is empty!";
             return;
         }
 
@@ -120,65 +127,108 @@ namespace Quad
 
         do
         {
-            std::shared_ptr<RoomModels> roomModel = std::make_shared<RoomModels>();
-            roomModel->sModel = fields->GetString(1);
-            roomModel->sDoorX = fields->GetUint16(2);
-            roomModel->sDoorY = fields->GetUint16(3);
-            roomModel->sDoorZ = fields->GetUint16(4);
-            roomModel->sOrientation = fields->GetUint16(5);
-            roomModel->sHeightMap = fields->GetString(6);
-            roomModel->sHasPool = fields->GetBool(7);
-            roomModel->sHeightMapDisabled = fields->GetBool(8);
+            std::unique_ptr<FavouriteRooms> favouriteRoom = std::make_unique<FavouriteRooms>();
+            favouriteRoom->mId                      = fields->GetUint32(1);
+            favouriteRoom->mRoomId                  = fields->GetUint32(2);
+            favouriteRoom->mPublicSpace             = fields->GetBool(3);
 
-            mRoomModels[fields->GetString(1)] = std::move(roomModel);
+            FavouriteRoomsMap::iterator itr = mFavouriteRooms.find(favouriteRoom->mId);
+            if (itr != mFavouriteRooms.end())
+                itr->second.emplace_back(std::move(favouriteRoom));
+            else
+                mFavouriteRooms[favouriteRoom->mId].emplace_back(std::move(favouriteRoom));
 
-        }while(fields->GetNextResult());
+        } while (fields->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRoomModels.size() << " Room Models!";
+        LOG_INFO << "Loaded " << mFavouriteRooms.size() << " favourite rooms";
     }
     //-----------------------------------------------//
-    std::shared_ptr<Room> RoomManager::GetRoom(uint16 Id)
+    std::shared_ptr<RoomCategory> RoomManager::GetRoomCategory(const uint32 id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
-        RoomMap::const_iterator itr = mRooms.find(Id);
+        RoomCategoriesMap::const_iterator itr = mRoomCategories.find(id);
+        if (itr != mRoomCategories.end())
+            return itr->second;
+        else
+            return nullptr;
+    }
+    //-----------------------------------------------//
+    std::shared_ptr<Room> RoomManager::GetRoom(const uint32 id)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
+
+        RoomsMap::const_iterator itr = mRooms.find(id);
         if (itr != mRooms.end())
             return itr->second;
         else
-        {
-            LOG_ERROR << "Room Id: " << Id << " does not exist!";
             return nullptr;
-        }
     }
     //-----------------------------------------------//
-    void RoomManager::AddRoom(std::shared_ptr<Room> room)
+    std::vector<std::shared_ptr<FavouriteRooms>> RoomManager::GetFavouriteRooms(const uint32 & id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
-        if (mRooms.count(room->GetServerPort()))
-        {
-            LOG_ERROR << "Room Id: " << room->GetId() << " already exists!";
-            return;
-        }
-
-        mRooms[room->GetServerPort()] = room;
-
-        sWorld->AddListener(room->GetServerPort());
-    }
-    //-----------------------------------------------//
-    void RoomManager::RemoveRoom(std::shared_ptr<Room> room)
-    {
-        std::lock_guard<std::mutex> guard(mMutex);
-
-        RoomMap::const_iterator itr = mRooms.find(DEFAULT_SERVER_PORT + room->GetId());
-        if (itr != mRooms.end())
-            mRooms.erase(itr);
+        FavouriteRoomsMap::const_iterator itr = mFavouriteRooms.find(id);
+        if (itr != mFavouriteRooms.end())
+            return itr->second;
         else
-        {
-            LOG_ERROR << "Room Id: " << room->GetId() << " does not exist!";
-            return;
-        }
+            return std::vector<std::shared_ptr<FavouriteRooms>>{};
+    }
+    //-----------------------------------------------//
+    RoomCategoriesMap* RoomManager::GetRoomCategories()
+    {
+        return &mRoomCategories;
+    }
+    //-----------------------------------------------//
+    RoomsMap* RoomManager::GetRooms()
+    {
+        return &mRooms;
+    }
+    //-----------------------------------------------//
+    void RoomManager::AddFavouriteRoom(const uint32& accountId, const bool& isPublic, const uint32& roomId)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
 
+        std::unique_ptr<FavouriteRooms> favouriteRoom = std::make_unique<FavouriteRooms>();
+        favouriteRoom->SetId(accountId);
+        favouriteRoom->SetPublicSpace(isPublic);
+        favouriteRoom->SetRoomId(roomId);
+
+        FavouriteRoomsMap::iterator itr = mFavouriteRooms.find(accountId);
+        if (itr != mFavouriteRooms.end())
+        {
+            if (itr->second.size() >= sConfig->GetIntDefault("MaxFavouriteRooms", 50))
+                return;
+
+            for (const auto& roomItr : itr->second)
+            {
+                if (roomItr->GetRoomId() == roomId)
+                    return;
+            }
+
+            itr->second.push_back(std::move(favouriteRoom));
+        }
+        else
+            mFavouriteRooms[favouriteRoom->mId].push_back(std::move(favouriteRoom));
+    }
+    //-----------------------------------------------//
+    void RoomManager::DeleteFavouriteRoom(const uint32& accountId, const uint32& roomId)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
+
+        FavouriteRoomsMap::iterator itr = mFavouriteRooms.find(accountId);
+        if (itr != mFavouriteRooms.end())
+        {
+            for (std::vector<std::shared_ptr<FavouriteRooms>>::iterator roomItr = itr->second.begin(); roomItr != itr->second.end(); roomItr++)
+            {
+                if ((*roomItr)->GetRoomId() == roomId)
+                {
+                    itr->second.erase(roomItr);
+                    return;
+                }
+            }
+        }
     }
     //-----------------------------------------------//
 }

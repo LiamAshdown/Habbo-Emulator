@@ -25,9 +25,9 @@ namespace Quad
     class StringBuffer
     {
     public:
-        StringBuffer() : mWritePosition(0), mReadPosition(0)
+        explicit StringBuffer(std::size_t reverseSize = 4096) : mWritePosition(0), mReadPosition(0)
         {
-            mStorage.reserve(4096);
+            mStorage.reserve(reverseSize);
         }
         ~StringBuffer() {}
 
@@ -43,10 +43,15 @@ namespace Quad
         void AppendString(const std::string buffer)
         {
             if (std::size_t length = buffer.length())
-            {
                 Append((uint8 const*)buffer.c_str(), length);
-                AppendSOT();
-            }
+            AppendSOT();
+        }
+
+        void AppendString(const std::string buffer, const std::string delimeter)
+        {
+            if (std::size_t length = buffer.length())
+                Append((uint8 const*)buffer.c_str(), length);
+            AppendString(delimeter);
         }
 
         void AppendBase64(const uint32 value)

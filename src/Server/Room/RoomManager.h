@@ -22,22 +22,11 @@
 #include "Common/SharedDefines.h"
 #include "Room.h"
 
-typedef struct RoomModelsStruct
-{
-    std::string sModel;
-    uint16 sDoorX;
-    uint16 sDoorY;
-    uint16 sDoorZ;
-    uint16 sOrientation;
-    std::string sHeightMap;
-    bool sHasPool;
-    bool sHeightMapDisabled;
-}RoomModels;
-
 namespace Quad
 {
-    typedef std::map<uint32, std::shared_ptr<Room>> RoomMap;
-    typedef std::map<std::string, std::shared_ptr<RoomModels>> RoomModelsMap;
+    typedef std::map<uint32, std::shared_ptr<RoomCategory>> RoomCategoriesMap;
+    typedef std::map<uint32, std::shared_ptr<Room>> RoomsMap;
+    typedef std::map<uint32, std::vector<std::shared_ptr<FavouriteRooms>>> FavouriteRoomsMap;
 
     class RoomManager
     {
@@ -48,19 +37,27 @@ namespace Quad
         RoomManager();
         ~RoomManager();
 
-        RoomMap GetRoomStorage() const;
-
     public:
-        std::shared_ptr<RoomModels> GetRoomModel(std::string model);
-        void LoadRoomHeights();
-
+        void LoadRoomCategories();
         void LoadRooms();
-        std::shared_ptr<Room> GetRoom(uint16 Id);
-        void AddRoom(std::shared_ptr<Room> room);
-        void RemoveRoom(std::shared_ptr<Room> room);
+        void LoadFavouriteRooms();
+
+        std::shared_ptr<RoomCategory> GetRoomCategory(const uint32 id);
+        std::shared_ptr<Room> GetRoom(const uint32 id);
+        std::vector<std::shared_ptr<FavouriteRooms>> GetFavouriteRooms(const uint32& Id);
+            
+        RoomCategoriesMap* GetRoomCategories();
+        RoomsMap* GetRooms();
+
+        void AddFavouriteRoom(const uint32& accountId, const bool& isPublic, const uint32& roomId);
+        void DeleteFavouriteRoom(const uint32& accountId, const uint32& roomId);
+
     private:
-        RoomMap mRooms;
-        RoomModelsMap mRoomModels;
+        RoomCategoriesMap mRoomCategories;
+        RoomsMap mRooms;
+        FavouriteRoomsMap mFavouriteRooms;
+
+    private:
         std::mutex mMutex;
     };
 }

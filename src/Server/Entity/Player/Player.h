@@ -33,47 +33,59 @@ namespace Quad
         ~Player();
 
     public:
-        uint32 GetId() const;
         std::string GetName() const;
-        uint32 GetCredits() const;
         std::string GetEmail() const;
         std::string GetFigure() const;
         std::string GetBirthday() const;
         std::string GetPhoneNumber() const;
-        std::string GetMission() const;
-        bool GetReadAgreement() const;
-        std::string GetSex() const;
+        std::string GetMotto() const;
+        std::string GetConsoleMotto() const;
+        std::string GetGender() const;
         std::string GetCountry() const;
-        bool GetSpecialRights() const;
+        std::string GetPoolFigure() const;
+        uint32 GetFilms() const;
+
+        uint32 GetCredits() const;
         uint32 GetBadgeType() const;
+        uint32 GetId() const;
+        uint32 GetTickets() const;
+
         bool CanSendMail() const;
         bool IsInitialized() const;
+        bool GetReadAgreement() const;
+        bool GetSpecialRights() const;
 
         void SetRoom(std::shared_ptr<Room> room);
         std::shared_ptr<Room> GetRoom() const;
 
-        void SendObjectData();
+        void SendUserObject();
         void UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation);
 
         std::shared_ptr<PlayerSocket> ToSocket();
 
     private:
-        uint32 mId;
         std::string mName;
         std::string mPassword;
-        uint32 mCredits;
         std::string mEmail;
         std::string mFigure;
         std::string mBirthday;
         std::string mPhoneNumber;
-        std::string mMission;
-        bool mReadAgreement;
-        std::string mSex;
+        std::string mMotto;
+        std::string mConsoleMotto;
+        std::string mGender;
         std::string mCountry;
+        std::string mPoolFigure;
+
+        bool mReadAgreement;
         bool mSpecialRights;
-        uint32 mBadgeType;
         bool mDirectMail;
         bool mInitialized;
+
+        uint32 mId;
+        uint32 mCredits;
+        uint32 mBadgeType;
+        uint32 mTickets;
+        uint32 mFilms;
 
         uint16 mPositionX;
         uint16 mPositionY;
@@ -81,7 +93,6 @@ namespace Quad
         uint16 mOrientation;
 
         std::shared_ptr<Room> mRoom;
-
         std::shared_ptr<PlayerSocket> mSocket;
     };
 }

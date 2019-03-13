@@ -47,17 +47,19 @@ namespace Quad
         void HandleApproveUsername(std::unique_ptr<Packet> packet);
         void HandleApprovePassword(std::unique_ptr<Packet> packet);
         void HandleApproveEmail(std::unique_ptr<Packet> packet);
-
-       
-
-        void HandleVersionCheck(std::unique_ptr<Packet> packet);
         void HandleRegisteration(std::unique_ptr<Packet> packet);
-        void HandleClientIP(std::unique_ptr<Packet> packe);
-        void HandleLogin(std::unique_ptr<Packet> packet);
-        void HandleGetCredits(std::unique_ptr<Packet> packet);
-        void HandleInfoRetrieve(std::unique_ptr<Packet> packet);
-        void HandleSearchBusyFlats(std::unique_ptr<Packet> packet);
-        void HandleInitUnitListener(std::unique_ptr<Packet> packet);
+        void HandleTryLogin(std::unique_ptr<Packet> packet);
+        void HandleGetInfo(std::unique_ptr<Packet> packet);
+        void HandleCreditBalance(std::unique_ptr<Packet> packet);
+        void HandleNoDespaceUsers(std::unique_ptr<Packet> packet);
+        void HandleGetClub(std::unique_ptr<Packet> packet);
+        void HandleNavigate(std::unique_ptr<Packet> packet);
+        void HandleGetUserFlatsCatergors(std::unique_ptr<Packet> packet);
+        void HandleGetFavouriteRooms(std::unique_ptr<Packet> packet);
+        void HandleAddFavouriteRoom(std::unique_ptr<Packet> packet);
+        void HandleDeleteFavouriteRoom(std::unique_ptr<Packet> packet);
+        void HandleSearchRooms(std::unique_ptr<Packet> packet);
+        void HandleGetInterest(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 

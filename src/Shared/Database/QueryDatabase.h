@@ -27,7 +27,7 @@ namespace Quad
     class QueryDatabase
     {
     public:
-        QueryDatabase(const std::string database);
+       explicit QueryDatabase(const std::string database);
         ~QueryDatabase();
 
     public:

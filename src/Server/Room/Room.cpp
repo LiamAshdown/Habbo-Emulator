@@ -39,19 +39,9 @@ namespace Quad
         return mId;
     }
     //-----------------------------------------------//
-    uint16 Room::GetServerPort() const
+    uint32 Room::GetOwnerId() const
     {
-        return mServerPort;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetName() const
-    {
-        return mName;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetPassword() const
-    {
-        return mPassword;
+        return mOwnerId;
     }
     //-----------------------------------------------//
     std::string Room::GetOwnerName() const
@@ -59,9 +49,19 @@ namespace Quad
         return mOwnerName;
     }
     //-----------------------------------------------//
-    std::string Room::GetFloorLevel() const
+    uint32 Room::GetCategory() const
     {
-        return mFloorLevel;
+        return mCategory;
+    }
+    //-----------------------------------------------//
+    std::string Room::GetName() const
+    {
+        return mName;
+    }
+    //-----------------------------------------------//
+    std::string Room::GetDescription() const
+    {
+        return mDescription;
     }
     //-----------------------------------------------//
     std::string Room::GetModel() const
@@ -69,116 +69,49 @@ namespace Quad
         return mModel;
     }
     //-----------------------------------------------//
-    std::string Room::GetState() const
+    std::string Room::GetCcts() const
     {
-        return mState;
+        return mCcts;
     }
     //-----------------------------------------------//
-    uint8 Room::GetType() const
+    uint32 Room::GetWallPaper() const
     {
-        return mType;
+        return mWallPaper;
     }
     //-----------------------------------------------//
-    bool Room::IsEnabled() const
+    uint32 Room::GetFloor() const
     {
-        return mEnabled;
+        return mFloor;
     }
     //-----------------------------------------------//
-    bool Room::IsShowOwnerName() const
+    bool Room::ShowName() const
     {
-        return mShowOwnerName;
+        return mShowName;
     }
     //-----------------------------------------------//
-    bool Room::IsSuperUser() const
+    bool Room::GetSuperUsers() const
     {
-        return mSuperUser;
+        return mSuperUsers;
     }
     //-----------------------------------------------//
-    uint32 Room::GetNowIn() const
+    std::string Room::GetAccessType() const
     {
-        return mNowIn;
+        return mAccessType;
     }
     //-----------------------------------------------//
-    uint32 Room::GetMaxIn() const
+    std::string Room::GetPassword() const
     {
-        return mMaxIn;
+        return mPassword;
     }
     //-----------------------------------------------//
-    void Room::AddPlayer(Player* player)
+    uint32 Room::GetVisitorsNow() const
     {
-        std::vector<Player*>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
-
-        if (itr != mPlayers.end())
-        {
-            LOG_ERROR << "Tried to add player: " << player->GetName() << " but already exists in room!";
-            return;
-        }
-
-        mPlayers.push_back(player);
-
-        // Send Room Height to player
-        SendRoomHeight(player);
-        SendRoomFurniture(player);
+        return mVisitorsNow;
     }
     //-----------------------------------------------//
-    void Room::RemovePlayer(Player* player)
+    uint32 Room::GetVisitorsMax() const
     {
-        std::vector<Player*>::iterator itr = std::find(mPlayers.begin(), mPlayers.end(), player);
-
-        if (itr != mPlayers.end())
-        {
-            mPlayers.erase(itr);
-            return;
-        }
-        
-        LOG_ERROR << "Tried to remove player: " << player->GetName() << " but doesn't exist in room!";
-    }
-    //-----------------------------------------------//
-    void Room::SendRoomHeight(Player* player)
-    {
-        if (std::shared_ptr<RoomModels> roomModel = sRoomMgr->GetRoomModel(player->GetRoom()->GetModel()))
-        {
-            std::string roomHeight = roomModel->sHeightMap;
-            boost::replace_all(roomHeight, " ", "\r");
-
-            StringBuffer buffer;
-            buffer << (std::string)"# HEIGHTMAP\r";
-            buffer << (std::string)roomHeight;
-            buffer.AppendEndCarriage();
-            player->UpdatePosition(roomModel->sDoorX, roomModel->sDoorY, roomModel->sDoorZ, roomModel->sOrientation);
-            player->ToSocket()->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
-        else
-            player->ToSocket()->CloseSocket();
-    }
-    //-----------------------------------------------//
-    void Room::SendRoomFurniture(Player * player)
-    {
-        if (GetType() == RoomFlag::ROOM_TYPE_PUBLIC)
-        {
-            StringBuffer buffer;
-            buffer << (std::string)"# OBJECTS WORLD 0 ";
-            buffer << (std::string)GetModel();
-
-            for (auto& itr : sItemMgr->GetRoomPublicItems(player->ToSocket()->GetPort()))
-            {
-                buffer.AppendCarriage();
-                buffer << (uint32)itr->GetId();
-                buffer.AppendSpace();
-                buffer << (std::string)itr->GetSprite();
-                buffer.AppendSpace();
-                buffer << (uint8)itr->GetPositionX();
-                buffer.AppendSpace();
-                buffer << (uint8)itr->GetPositionY();
-                buffer.AppendSpace();
-                buffer << (uint8)itr->GetPositionZ();
-                buffer.AppendSpace();
-                buffer << (uint8)itr->GetRotation();
-            }
-
-            buffer.AppendEndCarriage();
-            player->ToSocket()->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-        }
+        return mVisitorsMax;
     }
     //-----------------------------------------------//
 }

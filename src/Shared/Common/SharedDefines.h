@@ -19,6 +19,7 @@
 #ifndef _Quad_SharedDefines_h_
 #define _Quad_SharedDefines_h_
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <unordered_map>

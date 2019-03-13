@@ -98,17 +98,33 @@ RoomDatabaseInfo.WorkerThreads  = 1
 ###################################################################################################
 # CUSTOM SETTINGS
 #
-#    CustomRegCredits
+#    RegisterationCredits
 #        Description: Set credit amount on player registeration
 #        Default:     0
 #
-CustomRegCredits = 0
 
-#    BannedWords
-#        Description: Set words which are not allowed when creating username.
+RegisterationCredits = 0
+
+#    BobbaWords
+#        Description: Set words which are not allowed.
 #        Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
 #
-BannedWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
+
+BobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
+
+#    WelcomeMessage
+#        Description: Set welcome message when user logging into Habbo
+#        Default:     "Welcome to QuadEmulator!"
+#
+
+WelcomeMessage = Welcome to QuadEmulator!
+
+#    MaxFavouriteRooms
+#        Description: Max of favourite rooms user can have
+#        Default:     50
+#
+
+MaxFavouriteRooms = 50
 
 #
 ###################################################################################################

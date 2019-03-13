@@ -16,10 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_PacketStructures_h_
-#define _Quad_PacketStructures_h_
+#ifndef _Quad_Packet_h_
+#define _Quad_Packet_h_
 #include "Common/SharedDefines.h"
-#endif /* _Quad_PacketStructures_h_ */
+#endif /* _Quad_Packet_h_ */
 
 enum ApproveNameError
 {
@@ -63,19 +63,47 @@ public:
         return temp;
     }
 
-    uint32 ReadUInt()
+    int32 ReadBase64Int()
     {
-        uint32 reader = DecodeBase64(mContent.substr(mReadPosition, 2));
+        int32 i = DecodeBase64(mContent.substr(mReadPosition, 2));
         mReadPosition += 2;
 
-        return reader;
+        return i;
+    }
+
+    int32 ReadWiredInt()
+    {
+        int32 i = DecodeWired(mContent.substr(mReadPosition));
+        mReadPosition += EncodeWired(i).length();
+
+        return i;
+    }
+
+    uint32 ReadBase64Uint()
+    {
+        uint32 i = DecodeBase64(mContent.substr(mReadPosition, 2));
+        mReadPosition += 2;
+
+        return i;
+    }
+
+    uint32 ReadWiredUint()
+    {
+        uint32 i = DecodeWired(mContent.substr(mReadPosition));
+        mReadPosition += EncodeWired(i).length();
+
+        return i;
     }
 
     bool ReadBool()
     {
-        uint8 boolean = DecodeBase64(mContent.substr(mReadPosition, 2));
-        mReadPosition++;
-        return boolean;
+        int64 i = DecodeWired(mContent.substr(mReadPosition));
+        mReadPosition += EncodeWired(i).length();
+
+        if (i == 1)
+            return true;
+        else
+            return false;
     }
 
     void ReadSkip(uint8 value)

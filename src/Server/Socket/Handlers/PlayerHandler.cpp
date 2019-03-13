@@ -24,22 +24,33 @@
 namespace Quad
 {
     //-----------------------------------------------//
-    void PlayerSocket::HandleGetCredits(std::unique_ptr<Packet> packet)
-    {
-        StringBuffer buffer;
-        buffer << (std::string)"# WALLETBALANCE\r";
-        buffer << (uint32)(mPlayer->GetCredits());
-        buffer.AppendEndCarriage();
-        buffer << (std::string) "# MESSENGERSMSACCOUNT\rnoaccount\r##";
-        buffer << (std::string)"# MESSENGERREADY \r##";
-        SendPacket((char*)buffer.GetContents(), buffer.GetSize());
-    }
-    //-----------------------------------------------//
-    void PlayerSocket::HandleInfoRetrieve(std::unique_ptr<Packet> packet)
+    void PlayerSocket::HandleGetInfo(std::unique_ptr<Packet> packet)
     {
         if (mPlayer && mPlayer->IsInitialized())
-            mPlayer->SendObjectData();
+            mPlayer->SendUserObject();
     }
     //-----------------------------------------------//
+    void PlayerSocket::HandleCreditBalance(std::unique_ptr<Packet> packet)
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(OpcodesServer::SMSG_CREDIT_BALANCE);
+        buffer.AppendString(std::to_string(mPlayer->GetCredits()) + ".0");
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleNoDespaceUsers(std::unique_ptr<Packet> packet)
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(OpcodesClient::MSG_NO_DESPACE_USERS);
+        buffer.AppendString(mPlayer->GetName());
+        buffer.AppendSOH();
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleGetClub(std::unique_ptr<Packet> packet)
+    {
+        // TODO
+    }
 }
 //-----------------------------------------------//

@@ -38,6 +38,11 @@ namespace Quad
         return mId;
     }
     //-----------------------------------------------//
+    uint32 Player::GetTickets() const
+    {
+        return mTickets;
+    }
+    //-----------------------------------------------//
     std::string Player::GetName() const
     {
         return mName;
@@ -67,9 +72,14 @@ namespace Quad
         return mPhoneNumber;
     }
     //-----------------------------------------------//
-    std::string Player::GetMission() const
+    std::string Player::GetMotto() const
     {
-        return mMission;
+        return mMotto;
+    }
+    //-----------------------------------------------//
+    std::string Player::GetConsoleMotto() const
+    {
+        return mConsoleMotto;
     }
     //-----------------------------------------------//
     bool Player::GetReadAgreement() const
@@ -77,14 +87,24 @@ namespace Quad
         return mReadAgreement;
     }
     //-----------------------------------------------//
-    std::string Player::GetSex() const
+    std::string Player::GetGender() const
     {
-        return mSex;
+        return mGender;
     }
     //-----------------------------------------------//
     std::string Player::GetCountry() const
     {
         return mCountry;
+    }
+    //-----------------------------------------------//
+    std::string Player::GetPoolFigure() const
+    {
+        return mPoolFigure;
+    }
+    //-----------------------------------------------//
+    uint32 Player::GetFilms() const
+    {
+        return mFilms;
     }
     //-----------------------------------------------//
     bool Player::GetSpecialRights() const
@@ -119,45 +139,21 @@ namespace Quad
         return mRoom;
     }
     //-----------------------------------------------//
-    void Player::SendObjectData()
+    void Player::SendUserObject()
     {
-        StringBuffer buffer("# USEROBJECT");
-        buffer.AppendCarriage();
-        buffer << "name=";
-        buffer << (std::string)GetName();
-        buffer.AppendCarriage();
-        buffer << "email=";
-        buffer << (std::string)GetEmail();
-        buffer.AppendCarriage();
-        buffer << "figure=";
-        buffer << (std::string)GetFigure();
-        buffer.AppendCarriage();
-        buffer << "birthday=";
-        buffer << (std::string)GetBirthday();
-        buffer.AppendCarriage();
-        buffer << "phonenumber=";
-        buffer << (std::string)GetPhoneNumber();
-        buffer.AppendCarriage();
-        buffer << "custombuffer=";
-        buffer << (std::string)GetMission();
-        buffer.AppendCarriage();
-        buffer << "had_read_agreement=";
-        buffer << (uint8)GetReadAgreement();
-        buffer.AppendCarriage();
-        buffer << "sex=";
-        buffer << (std::string)GetSex();
-        buffer.AppendCarriage();
-        buffer << "country=";
-        buffer << (std::string)GetCountry();
-        buffer.AppendCarriage();
-        buffer << "has_special_rights=";
-        buffer << (uint8)0;
-        buffer.AppendCarriage();
-        buffer << "badge_type=";
-        buffer << (uint32)GetBadgeType();
-        buffer.AppendCarriage();
-        buffer.AppendEndCarriage();
-        mSocket->SendPacket((char*)buffer.GetContents(), buffer.GetSize());
+        StringBuffer buffer;
+        buffer.AppendBase64(OpcodesServer::SMSG_USER_OBJECT);
+        buffer.AppendString(std::to_string(mId));
+        buffer.AppendString(mName);
+        buffer.AppendString(mFigure);
+        buffer.AppendString(mGender);
+        buffer.AppendString(mMotto);
+        buffer.AppendWired(mTickets);
+        buffer.AppendString(mPoolFigure);
+        buffer.AppendWired(mFilms);
+        buffer.AppendSOH();
+
+        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
     void Player::UpdatePosition(const uint16 & x, const uint16 & y, const uint16 & z, const uint16 & orientation)

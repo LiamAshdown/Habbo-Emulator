@@ -79,7 +79,7 @@ namespace Quad
     //-----------------------------------------------//
     void Socket::InitializeClientServer()
     {
-        TempBuffer buffer;
+        StringBuffer buffer;
         buffer.AppendBase64(0);
         buffer.AppendSOH();
 

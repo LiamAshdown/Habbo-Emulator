@@ -57,7 +57,7 @@ namespace Quad
         {
             LOG_INFO << "Processing packet: " << packet->GetHeader();
 
-            ExecutePacket(sOpcode->GetPacket(packet->GetHeader()), std::move(packet));
+            ExecutePacket(sOpcode->GetClientPacket(packet->GetHeader()), std::move(packet));
             return true;
         }
         else
