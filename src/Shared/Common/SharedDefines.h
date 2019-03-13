@@ -63,8 +63,8 @@ typedef std::vector<std::string> Tokens;
 
 std::string SplitString(const std::string& stringData, const std::string& tokenizer);
 uint16 ConvertEndian(uint16 value);
-uint32 DecodeBase64(const std::string buffer);
-int64 DecodeWired(std::string buffer);
+int DecodeBase64(const std::string buffer);
+int DecodeWired(std::string buffer);
 std::string EncodeBase64(const uint32 value);
 std::string EncodeWired(int64 value);
 std::string GetDate();

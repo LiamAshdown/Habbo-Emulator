@@ -57,7 +57,7 @@ std::string EncodeBase64(const uint32 value)
     return stack;
 }
 
-uint32 DecodeBase64(const std::string buffer)
+int DecodeBase64(const std::string buffer)
 {
     int intTot = 0;
     int y = 0;
@@ -77,27 +77,26 @@ uint32 DecodeBase64(const std::string buffer)
 std::string EncodeWired(int64 value)
 {
     char wf[6];
-    int pos = 0;
-    int startPos = pos;
+    int position = 0;
     int bytes = 1;
     int negativeMask = value >= 0 ? 0 : 4;
     value = abs(value);
-    wf[pos++] = (char)(64 + (value & 3));
+    wf[position++] = (char)(64 + (value & 3));
     for (value >>= 2; value != 0; value >>= 6)
     {
         bytes++;
-        wf[pos++] = (char)(64 + (value & 0x3f));
+        wf[position++] = (char)(64 + (value & 0x3f));
     }
 
-    wf[startPos] = (char)(wf[startPos] | bytes << 3 | negativeMask);
+    wf[0] = (char)(wf[0] | bytes << 3 | negativeMask);
 
     std::string tmp(wf);
-    boost::replace_all(tmp, "\0", "");
+    tmp.resize(bytes);
 
     return tmp;
 }
 
-int64 DecodeWired(std::string buffer)
+int DecodeWired(std::string buffer)
 {
     try
     {
@@ -122,7 +121,6 @@ int64 DecodeWired(std::string buffer)
     }
     catch (const std::exception& e)
     {
-        LOG_ERROR << "Could not DecodeWired String!";
         return 0;
     }
 }
