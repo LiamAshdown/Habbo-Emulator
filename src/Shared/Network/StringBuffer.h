@@ -19,64 +19,34 @@
 #ifndef _Quad_StringBuffer_h_
 #define _Quad_StringBuffer_h_
 #include "Common/SharedDefines.h"
+
 namespace Quad
 {
-
-    class TempBuffer
+    class StringBuffer
     {
     public:
-        TempBuffer() : mWritePosition(0), mReadPosition(0)
+        StringBuffer() : mWritePosition(0), mReadPosition(0)
         {
             mStorage.reserve(4096);
         }
-        ~TempBuffer() {}
+        ~StringBuffer() {}
 
     public:
+        void AppendWiredBool(bool value)
+        {
+            if (value)
+                AppendWired(1);
+            else
+                AppendWired(0);
+        }
 
         void AppendString(const std::string buffer)
         {
             if (std::size_t length = buffer.length())
+            {
                 Append((uint8 const*)buffer.c_str(), length);
-        }
-
-        void AppendUint8(const uint8 value)
-        {
-            Append<uint8>(value);
-        }
-
-        void AppendInt8(const int8 value)
-        {
-            Append<int8>(value);
-        }
-
-        void AppendUint16(const uint16 value)
-        {
-            Append<uint16>(value);
-        }
-
-        void AppendInt16(const int16 value)
-        {
-            Append<int16>(value);
-        }
-
-        void AppendUint32(const uint32 value)
-        {
-            Append<uint32>(value);
-        }
-
-        void AppendInt32(const int32 value)
-        {
-            Append<uint8>(value);
-        }
-
-        void AppendUint64(const uint64 value)
-        {
-            Append<uint64>(value);
-        }
-
-        void AppendInt64(const int64 value)
-        {
-            Append<int64>(value);
+                AppendSOT();
+            }
         }
 
         void AppendBase64(const uint32 value)
@@ -102,6 +72,13 @@ namespace Quad
                 Append(SOH.c_str(), length);
         }
 
+        void AppendSOT()
+        {
+            std::string SOH = "\u0002";
+            if (std::size_t length = SOH.length())
+                Append(SOH.c_str(), length);
+        }
+
         template <typename T> void Append(T value)
         {
             Append((uint8*)&value, sizeof(value));
@@ -121,12 +98,43 @@ namespace Quad
         {
             if (!size)
                 return;
-            
+
+            assert(GetSize() < 10000000);
+
             if (mStorage.size() < mWritePosition + size)
                 mStorage.resize(mWritePosition + size);
 
             memcpy(&mStorage[mWritePosition], buffer, size);
             mWritePosition += size;
+        }
+
+        void Append(const StringBuffer& buffer)
+        {
+            if (buffer.GetWritePosition())
+                Append(buffer.GetContents(), buffer.GetWritePosition());
+        }
+
+        void Resize(const std::size_t newSize)
+        {
+            mStorage.reserve(newSize);
+            mReadPosition = 0;
+            mWritePosition = 0;
+        }
+
+        void Reserve(const std::size_t resize)
+        {
+            if (resize > GetSize())
+                mStorage.reserve(resize);
+        }
+
+        std::size_t GetWritePosition() const
+        {
+            return mWritePosition;
+        }
+
+        std::size_t GetReadPositino()
+        {
+            return mReadPosition;
         }
 
         std::size_t GetSize() const
@@ -151,173 +159,6 @@ namespace Quad
         std::size_t mReadPosition;
         std::vector<uint8> mStorage;
     };
-
-    class StringBuffer
-    {
-    public:
-
-        StringBuffer(const std::string& value) : mWritePosition(0), mReadPosition(0)
-        {
-            if (std::size_t l_Length = value.length())
-                Append(value.c_str(), l_Length);
-        }
-
-        StringBuffer(const char* packetName, std::size_t packetSize) : mWritePosition(0), mReadPosition(0)
-        {
-            *this << packetName;
-            mStorage.reserve(packetSize);
-        }
-
-        StringBuffer() : mWritePosition(0), mReadPosition(0)
-        {
-        }
-
-        ~StringBuffer() {}
-
-    public:
-        StringBuffer& operator<<(const std::string& value)
-        {
-            if (std::size_t l_Length = value.length())
-                Append(value.c_str(), l_Length);
-
-            return *this;
-        }
-
-        StringBuffer& operator<<(int8 value)
-        {
-            std::string toString = std::to_string(value);
-            if (std::size_t l_Length = toString.length())
-                Append(toString.c_str(), l_Length);
-            return *this;
-        }
-
-        StringBuffer& operator<<(int value)
-        {
-            std::string toString = std::to_string(value);
-            if (std::size_t l_Length = toString.length())
-                Append(toString.c_str(), l_Length);
-            return *this;
-        }
-
-        StringBuffer& operator<<(uint8 value)
-        {
-            int newValue = (int)value;
-            std::string toString = std::to_string(newValue);
-            if (std::size_t l_Length = toString.length())
-                Append(toString.c_str(), l_Length);
-            return *this;
-        }
-
-        StringBuffer& operator<<(uint16 value)
-        {
-            std::string toString = std::to_string(value);
-            if (std::size_t l_Length = toString.length())
-                Append(toString.c_str(), l_Length);
-            return *this;
-        }
-
-        StringBuffer& operator<<(uint32 value)
-        {
-            std::string toString = std::to_string(value);
-            if (std::size_t l_Length = toString.length())
-                Append(toString.c_str(), l_Length);
-            return *this;
-        }
-
-        void Append(const char* p_Char, std::size_t p_Size)
-        {
-            return Append((const uint8*)p_Char, p_Size);
-        }
-
-        void Append(const uint8* p_Char, std::size_t p_Size)
-        {
-            mStorage.insert(mStorage.begin() + mWritePosition, p_Char, p_Char + p_Size);
-            mWritePosition += p_Size;
-        }
-
-        void AppendSpace()
-        {
-            std::string space = " ";
-            if (std::size_t l_Length = space.length())
-                Append(space.c_str(), l_Length);
-        }
-
-        void AppendComma()
-        {
-            std::string space = ",";
-            if (std::size_t l_Length = space.length())
-                Append(space.c_str(), l_Length);
-        }
-
-        void AppendTab()
-        {
-            std::string space = "\t";
-            if (std::size_t l_Length = space.length())
-                Append(space.c_str(), l_Length);
-        }
-
-        void AppendEndCarriage()
-        {
-            std::string end = "\r##";
-            if (std::size_t l_Length = end.length())
-                Append(end.c_str(), l_Length);
-        }
-
-        void AppendForwardSlash()
-        {
-            std::string end = "/";
-            if (std::size_t l_Length = end.length())
-                Append(end.c_str(), l_Length);
-        }
-
-        void AppendMove()
-        {
-            std::string move = "/mv ";
-            if (std::size_t l_Length = move.length())
-                Append(move.c_str(), l_Length);
-        }
-
-        void AppendCarriage()
-        {
-            std::string end = "\r";
-            if (std::size_t l_Length = end.length())
-                Append(end.c_str(), l_Length);
-        }
-
-        // limited for internal use because can "append" any unexpected type (like pointer and etc) with hard detection problem
-        template <typename T> void Append(T value)
-        {
-            Append((uint8*)&value, sizeof(value));
-        }
-
-        uint8 const* GetContents() const
-        {
-            return &mStorage[0];
-        }
-
-        std::size_t const GetSize() const
-        {
-            return mStorage.size();
-        }
-
-        void Clear()
-        {
-            mWritePosition = 0;
-            mReadPosition = 0;
-            mStorage.clear();
-        }
-
-        std::vector<uint8> GetStorage()
-        {
-            return mStorage;
-        }
-
-    protected:
-        std::size_t mWritePosition;
-        std::size_t mReadPosition;
-        std::vector<uint8> mStorage;
-    };
-#pragma endregion
 }
 
 #endif /* _Quad_StringBuffer_ */
