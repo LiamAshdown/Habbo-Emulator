@@ -36,42 +36,83 @@ namespace Quad
     void Opcodes::InitializePackets()
     {
         ///< CMSG
-        StorePacket(OpcodesList::CMSG_INITIALIZE_CRYPTO,             "CMSG_INITIALIZE_CRYPTO",                &PlayerSocket::HandleInitializeCrypto           );
-        StorePacket(OpcodesList::CMSG_GENERATE_KEY,                  "CMSG_GENERATE_KEY",                     &PlayerSocket::HandleGenerateKey                );
-        StorePacket(OpcodesList::MSG_GDATE,                          "MSG_GDATE",                             &PlayerSocket::HandleGDate                      );
-        StorePacket(OpcodesList::CMSG_APPROVE_NAME,                  "CMSG_APPROVE_NAME",                     &PlayerSocket::HandleApproveUsername            );
-        StorePacket(OpcodesList::CMSG_APPROVE_PASSWORD,              "CMSG_APPROVE_PASSWORD",                 &PlayerSocket::HandleApprovePassword            );
-        StorePacket(OpcodesList::CMSG_APPROVE_EMAIL,                 "CMSG_APPROVE_EMAIL",                    &PlayerSocket::HandleApproveEmail               );
-        StorePacket(OpcodesList::CMSG_REGISTER,                      "CMSG_REGISTER",                         &PlayerSocket::HandleRegisteration              );
+        StoreClientPacket(OpcodesClient::CMSG_INITIALIZE_CRYPTO,             "CMSG_INITIALIZE_CRYPTO",                &PlayerSocket::HandleInitializeCrypto           );
+        StoreClientPacket(OpcodesClient::CMSG_GENERATE_KEY,                  "CMSG_GENERATE_KEY",                     &PlayerSocket::HandleGenerateKey                );
+        StoreClientPacket(OpcodesClient::MSG_GDATE,                          "MSG_GDATE",                             &PlayerSocket::HandleGDate                      );
+        StoreClientPacket(OpcodesClient::CMSG_APPROVE_NAME,                  "CMSG_APPROVE_NAME",                     &PlayerSocket::HandleApproveUsername            );
+        StoreClientPacket(OpcodesClient::CMSG_APPROVE_PASSWORD,              "CMSG_APPROVE_PASSWORD",                 &PlayerSocket::HandleApprovePassword            );
+        StoreClientPacket(OpcodesClient::CMSG_APPROVE_EMAIL,                 "CMSG_APPROVE_EMAIL",                    &PlayerSocket::HandleApproveEmail               );
+        StoreClientPacket(OpcodesClient::CMSG_REGISTER,                      "CMSG_REGISTER",                         &PlayerSocket::HandleRegisteration              );
+        StoreClientPacket(OpcodesClient::CMSG_TRY_LOGIN,                     "CMSG_TRY_LOGIN",                        &PlayerSocket::HandleTryLogin                   );
+        StoreClientPacket(OpcodesClient::CMSG_GET_INFO,                      "CMSG_GET_INFO",                         &PlayerSocket::HandleGetInfo                    );
+        StoreClientPacket(OpcodesClient::CMSG_GET_CREDITS,                   "CMSG_GET_CREDITS",                      &PlayerSocket::HandleCreditBalance              );
+        StoreClientPacket(OpcodesClient::CMSG_FLAT_CATALOGUE,                "CMSG_FLAT_CATALOGUE",                   &PlayerSocket::HandleNULL                       );
+        StoreClientPacket(OpcodesClient::MSG_NO_DESPACE_USERS,               "MSG_NO_DESPACE_USERS",                  &PlayerSocket::HandleNoDespaceUsers             );
+        StoreClientPacket(OpcodesClient::CMSG_GET_CLUB,                      "CMSG_GET_CLUB",                         &PlayerSocket::HandleGetClub                    );
+        StoreClientPacket(OpcodesClient::CMSG_NAVIGATE,                      "CMSG_NAVIGATE",                         &PlayerSocket::HandleNavigate                   );
+        StoreClientPacket(OpcodesClient::CMSG_GET_USER_FLAT_CATEGORYS,       "CMSG_GET_USER_FLAT_CATEGORYS",          &PlayerSocket::HandleGetUserFlatsCatergors      );
 
         ///< SMSG
-        StorePacket(OpcodesList::SMSG_CRYPTO_PARAMETERS,             "SMSG_CRYPTO_PARAMETERS",                &PlayerSocket::HandleServerMessage              );
-        StorePacket(OpcodesList::SMSG_SESSION_PARAMETERS,            "SMSG_SESSION_PARAMETERS",               &PlayerSocket::HandleServerMessage              );
-        StorePacket(OpcodesList::SMSG_AVAILABLE_SETS,                "SMSG_AVAILABLE_SETS",                   &PlayerSocket::HandleServerMessage              );
-        StorePacket(OpcodesList::SMSG_APPROVE_NAME_REPLY,            "SMSG_APPROVE_NAME_REPLY",               &PlayerSocket::HandleServerMessage              );
-        StorePacket(OpcodesList::SMSG_APPROVE_PASSWORD_REPLY,        "SMSG_APPROVE_PASSWORD_REPLY",           &PlayerSocket::HandleServerMessage              );
-        StorePacket(OpcodesList::SMSG_APPROVE_EMAIL_REPLY,           "SMSG_APPROVE_EMAIL_REPLY",              &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_CRYPTO_PARAMETERS,             "SMSG_CRYPTO_PARAMETERS",                &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_SESSION_PARAMETERS,            "SMSG_SESSION_PARAMETERS",               &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_AVAILABLE_SETS,                "SMSG_AVAILABLE_SETS",                   &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_APPROVE_NAME_REPLY,            "SMSG_APPROVE_NAME_REPLY",               &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_APPROVE_PASSWORD_REPLY,        "SMSG_APPROVE_PASSWORD_REPLY",           &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_APPROVE_EMAIL_REPLY,           "SMSG_APPROVE_EMAIL_REPLY",              &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_MODERATOR_ALERT,               "SMSG_MODERATOR_ALERT",                  &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_LOGIN,                         "SMSG_LOGIN",                            &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_ALERT,                         "SMSG_ALERT",                            &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_NOTICE,                        "SMSG_NOTICE",                           &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_USER_OBJECT,                   "SMSG_USER_OBJECT",                      &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_CREDIT_BALANCE,                "SMSG_CREDIT_BALANCE",                   &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_USER_FLAT_CATEGORYS,            "SMSG_USER_FLAT_CATEGORYS",             &PlayerSocket::HandleServerMessage              );
+
+        LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG opcodes";
+        LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG opcodes";
     } 
     //-----------------------------------------------//
-    void Opcodes::StorePacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))
+    void Opcodes::StoreClientPacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))
     {
-        OpcodeHandler& ref = mOpcode[opcode];
+        OpcodeHandler& ref = mClientOpcode[opcode];
         ref.name = name;
         ref.handler = handler;
     }
     //-----------------------------------------------//
-    OpcodeHandler const& Opcodes::GetPacket(const uint64& Id)
+    void Opcodes::StoreServerPacket(const uint64& opcode, char const * name, void(PlayerSocket::* handler)(std::unique_ptr<Packet> packet))
     {
-        OpcodeMap::const_iterator itr = mOpcode.find(Id);
-        if (itr != mOpcode.end())
+        OpcodeHandler& ref = mServerOpcode[opcode];
+        ref.name = name;
+        ref.handler = handler;
+    }
+    //-----------------------------------------------//
+    OpcodeHandler const& Opcodes::GetClientPacket(const uint64& Id)
+    {
+        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
+        if (itr != mClientOpcode.end())
             return itr->second;
         return emptyHandler;
     }
     //-----------------------------------------------//
-    const char * Opcodes::GetOpCodeName(const uint64& Id)
+    const char * Opcodes::GetClientPacketName(const uint64& Id)
     {
-        OpcodeMap::const_iterator itr = mOpcode.find(Id);
-        if (itr != mOpcode.end())
+        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
+        if (itr != mClientOpcode.end())
+            return itr->second.name;
+        return "NULL";
+    }
+    //-----------------------------------------------//
+    OpcodeHandler const& Opcodes::GetServerPacket(const uint64& Id)
+    {
+        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
+        if (itr != mServerOpcode.end())
+            return itr->second;
+        return emptyHandler;
+    }
+    //-----------------------------------------------//
+    const char * Opcodes::GetServerPacketName(const uint64& Id)
+    {
+        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
+        if (itr != mServerOpcode.end())
             return itr->second.name;
         return "NULL";
     }

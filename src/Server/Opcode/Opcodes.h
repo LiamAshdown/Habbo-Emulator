@@ -19,11 +19,10 @@
 #ifndef _Quad_Opcodes_h_
 #define _Quad_Opcodes_h_
 #include "Common/SharedDefines.h"
-#include "PacketStructures.h"
+#include "Network/Packet.h"
 
-enum OpcodesList : uint16
+enum OpcodesClient : uint16
 {
-    ///< CMSG
     CMSG_INITIALIZE_CRYPTO              = 206,
     CMSG_GENERATE_KEY                   = 202,
     MSG_GDATE                           = 49,
@@ -31,14 +30,33 @@ enum OpcodesList : uint16
     CMSG_APPROVE_PASSWORD               = 203,
     CMSG_APPROVE_EMAIL                  = 197,
     CMSG_REGISTER                       = 43,
+    CMSG_TRY_LOGIN                      = 4,
+    CMSG_GET_INFO                       = 7,
+    CMSG_GET_CREDITS                    = 8,
+    CMSG_FLAT_CATALOGUE                 = 222,
+    MSG_NO_DESPACE_USERS                = 223,
+    CMSG_GET_CLUB                       = 26,
+    CMSG_NAVIGATE                       = 150,
+    CMSG_GET_USER_FLAT_CATEGORYS        = 151,
+};
 
-    ///< SMSG
+enum OpcodesServer : uint16
+{
     SMSG_CRYPTO_PARAMETERS              = 277,
     SMSG_SESSION_PARAMETERS             = 257,
     SMSG_AVAILABLE_SETS                 = 8,
     SMSG_APPROVE_NAME_REPLY             = 36,
     SMSG_APPROVE_PASSWORD_REPLY         = 282,
     SMSG_APPROVE_EMAIL_REPLY            = 271,
+    SMSG_MODERATOR_ALERT                = 33,
+    SMSG_LOGIN                          = 3,
+    SMSG_ALERT                          = 139,
+    SMSG_NOTICE                         = 139,
+    SMSG_USER_OBJECT                    = 5,
+    SMSG_CREDIT_BALANCE                 = 6,
+    SMSG_ROOM_DIRECTORY                 = 2, 
+    SMSG_NAVIGATE_NODE_INFO             = 220,
+    SMSG_USER_FLAT_CATEGORYS            = 221,
 };
 
 namespace Quad
@@ -64,16 +82,20 @@ namespace Quad
 
     public:
         void InitializePackets();
-        OpcodeHandler const& GetPacket(const uint64& Id);
+        OpcodeHandler const& GetClientPacket(const uint64& Id);
+        OpcodeHandler const& GetServerPacket(const uint64& Id);
 
-        const char* GetOpCodeName(const uint64& Id);
+        const char* GetClientPacketName(const uint64& Id);
+        const char* GetServerPacketName(const uint64& Id);
 
     private:
-        void StorePacket(const uint64& opcode, char const* name, void (PlayerSocket::*handler)(std::unique_ptr<Packet> packet));
+        void StoreClientPacket(const uint64& opcode, char const* name, void (PlayerSocket::*handler)(std::unique_ptr<Packet> packet));
+        void StoreServerPacket(const uint64& opcode, char const* name, void (PlayerSocket::*handler)(std::unique_ptr<Packet> packet));
 
     private:
         static OpcodeHandler const emptyHandler;
-        OpcodeMap mOpcode;
+        OpcodeMap mClientOpcode;
+        OpcodeMap mServerOpcode;
     };
 }
 
