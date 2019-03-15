@@ -27,7 +27,7 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleNavigate(std::unique_ptr<Packet> packet)
     {
-        bool hideFullRooms = packet->ReadBool();
+        bool hideFullRooms = packet->ReadWiredBool();
         int32 categoryId = packet->ReadWiredInt();
 
         StringBuffer buffer;
@@ -40,7 +40,8 @@ namespace Quad
         uint32 nowVisitors = 0;
         uint32 maxVisitors = 0;
         uint32 guestRooms = 0;
-        for (auto& itr = rooms->begin(); itr != rooms->end(); itr++)
+
+        for (RoomsMap::const_iterator& itr = rooms->begin(); itr != rooms->end(); itr++)
         {
             std::shared_ptr<RoomCategory> category = sRoomMgr->GetRoomCategory(itr->second->GetCategory());
 
@@ -55,7 +56,7 @@ namespace Quad
 
                 if (category->IsPublicSpace())
                 {
-                    thirdBuffer.AppendWired(itr->second->GetId());
+                    thirdBuffer.AppendWired(itr->second->GetId() + ROOM_ID_OFFSET);
                     thirdBuffer.AppendWired(1);
                     thirdBuffer.AppendString(itr->second->GetName());
                     thirdBuffer.AppendWired(itr->second->GetVisitorsNow());
@@ -97,7 +98,7 @@ namespace Quad
         buffer.Append(thirdBuffer);
 
         RoomCategoriesMap* categories = sRoomMgr->GetRoomCategories();
-        for (auto& itr = categories->begin(); itr != categories->end(); itr++)
+        for (RoomCategoriesMap::const_iterator& itr = categories->begin(); itr != categories->end(); itr++)
         {
             if (itr->second->GetParentCategory() != categoryId)
                 continue;
@@ -114,25 +115,34 @@ namespace Quad
         Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
-    void PlayerSocket::HandleGetUserFlatsCatergors(std::unique_ptr<Packet> packet)
+    void PlayerSocket::HandleGetUserFlatsCategories(std::unique_ptr<Packet> packet)
     {
         RoomCategoriesMap* categories = sRoomMgr->GetRoomCategories();
 
         StringBuffer buffer;
-        buffer.Append(categories->size());
-        for (auto itr = categories->begin(); itr != categories->end(); itr++)
+        StringBuffer secondBuffer;
+        uint32 flatCategorySize = 0;
+
+        for (RoomCategoriesMap::const_iterator& itr = categories->begin(); itr != categories->end(); itr++)
         {
-            buffer.AppendWired(itr->second->GetCategory());
-            buffer.AppendString(itr->second->GetName());
+            if (!itr->second->IsPublicSpace())
+            {
+                secondBuffer.AppendWired(itr->second->GetCategory());
+                secondBuffer.AppendString(itr->second->GetName());
+                flatCategorySize++;
+            }
         }
+        buffer.AppendBase64(OpcodesServer::SMSG_USER_FLAT_CATEGORIES);
+        buffer.Append(flatCategorySize);
+        buffer.Append(secondBuffer);
         buffer.AppendSOH();
         Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleGetFavouriteRooms(std::unique_ptr<Packet> packet)
     {
-        uint32 roomId = packet->ReadBase64Uint();
-        std::vector<std::shared_ptr<FavouriteRooms>> favouriteRooms = sRoomMgr->GetFavouriteRooms(mPlayer->GetId());
+        uint32 roomId = packet->ReadBase64Uint() - ROOM_ID_OFFSET;
+        FavouriteRoomsVector favouriteRooms = sRoomMgr->GetFavouriteRooms(mPlayer->GetId());
 
         StringBuffer buffer;
         StringBuffer secondBuffer;
@@ -149,13 +159,16 @@ namespace Quad
 
         if (!favouriteRooms.empty())
         {
-            for (auto& itr = favouriteRooms.begin(); itr != favouriteRooms.end(); itr++)
+            for (FavouriteRoomsVector::const_iterator itr = favouriteRooms.begin(); itr != favouriteRooms.end(); itr++)
             {
                 std::shared_ptr<Room> room = sRoomMgr->GetRoom((*itr)->GetRoomId());
 
+                if (!room)
+                    continue;
+
                 if (!(*itr)->IsPublicSpace())
                 {
-                    secondBuffer.AppendWired(room->GetId());
+                    secondBuffer.AppendWired(room->GetId() + ROOM_ID_OFFSET);
                     secondBuffer.AppendString(room->GetName());
                     secondBuffer.AppendString(room->GetOwnerName());
                     secondBuffer.AppendString(room->GetAccessType());
@@ -166,7 +179,7 @@ namespace Quad
                 }
                 else
                 {
-                    secondBuffer.AppendWired(room->GetId());
+                    secondBuffer.AppendWired(room->GetId() + ROOM_ID_OFFSET);
                     secondBuffer.AppendWired(1);
                     secondBuffer.AppendString(room->GetName());
                     secondBuffer.AppendWired(room->GetVisitorsNow());
@@ -192,16 +205,16 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleAddFavouriteRoom(std::unique_ptr<Packet> packet)
     {
-        bool roomType = packet->ReadBool();
-        uint32 roomId = packet->ReadWiredUint();
+        bool roomType = packet->ReadWiredBool();
+        uint32 roomId = packet->ReadWiredUint() - ROOM_ID_OFFSET;
 
         sRoomMgr->AddFavouriteRoom(mPlayer->GetId(), roomType, roomId);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleDeleteFavouriteRoom(std::unique_ptr<Packet> packet)
     {
-        bool roomType = packet->ReadBool();
-        uint32 roomId = packet->ReadWiredUint();
+        bool roomType = packet->ReadWiredBool();
+        uint32 roomId = packet->ReadWiredUint() - ROOM_ID_OFFSET;
 
         sRoomMgr->DeleteFavouriteRoom(mPlayer->GetId(), roomId);
     }
@@ -214,7 +227,7 @@ namespace Quad
 
         StringBuffer buffer;
         buffer.AppendBase64(OpcodesServer::SMSG_SEARCH_RESULTS);
-        for (auto& itr = rooms->begin(); itr != rooms->end(); itr++)
+        for (RoomsMap::const_iterator& itr = rooms->begin(); itr != rooms->end(); itr++)
         {
             std::shared_ptr<Room> room = itr->second;
 
@@ -242,7 +255,46 @@ namespace Quad
     {
         StringBuffer buffer;
         buffer.AppendBase64(OpcodesServer::SMSG_ROOM_INTEREST);
-        buffer.AppendString("0");
+        buffer.AppendStringDelimiter("", "\t");
+        buffer.AppendString("", false);
+        buffer.AppendSOH();
+        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleRoomDirectory(std::unique_ptr<Packet> packet)
+    {
+        bool isPublic = packet->ReadBase64Bool();
+        uint32 roomId = packet->ReadWiredUint();
+
+        StringBuffer buffer;
+
+        buffer.AppendBase64(OpcodesServer::SMSG_OPEN_CONNECTION);
+        buffer.AppendSOH();
+        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+
+        buffer.Clear();
+
+        buffer.AppendBase64(OpcodesServer::SMSG_ROOM_URL);
+        buffer.AppendString("/client/");
+        buffer.AppendSOH();
+        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+
+        buffer.Clear();
+
+
+        if (mPlayer->SetRoom(sRoomMgr->GetRoom(roomId)))
+        {
+            buffer.AppendBase64(OpcodesServer::SMSG_ROOM_READY);
+            buffer.AppendString(mPlayer->GetRoom()->GetModel());
+            buffer.AppendString(" ");
+            buffer.AppendWired(roomId);
+        }
+        else
+        {
+            buffer.AppendBase64(OpcodesServer::SMSG_CANT_CONNECT);
+            buffer.AppendWired(RoomConnectionError::ROOM_IS_CLOSED);
+        }
+
         buffer.AppendSOH();
         SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
     }

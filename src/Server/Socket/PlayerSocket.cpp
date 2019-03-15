@@ -29,16 +29,12 @@ namespace Quad
     PlayerSocket::PlayerSocket(boost::asio::io_service& service, std::function<void(Socket*)> closeHandler) :
         Socket(service, std::move(closeHandler)), mPlayer(nullptr)
     {
-
     }
     //-----------------------------------------------//
     PlayerSocket::~PlayerSocket()
     {
         IF_LOG(plog::debug)
             LOG_DEBUG << "Destructor PlayerSocket called!";
-
-        if (mPlayer != nullptr)
-            delete mPlayer;
     }
     //-----------------------------------------------//
     Player* PlayerSocket::ToPlayer()

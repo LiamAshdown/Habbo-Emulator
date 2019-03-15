@@ -95,10 +95,20 @@ public:
         return i;
     }
 
-    bool ReadBool()
+    bool ReadWiredBool()
     {
         int64 i = DecodeWired(mContent.substr(mReadPosition));
         mReadPosition += EncodeWired(i).length();
+
+        if (i == 1)
+            return true;
+        else
+            return false;
+    }
+
+    bool ReadBase64Bool()
+    {
+        int64 i = DecodeBase64(mContent.substr(mReadPosition++, 1));
 
         if (i == 1)
             return true;

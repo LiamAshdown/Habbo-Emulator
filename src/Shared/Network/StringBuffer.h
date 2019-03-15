@@ -40,18 +40,20 @@ namespace Quad
                 AppendWired(0);
         }
 
-        void AppendString(const std::string buffer)
+        void AppendString(const std::string buffer, bool delimiter = true)
         {
             if (std::size_t length = buffer.length())
                 Append((uint8 const*)buffer.c_str(), length);
-            AppendSOT();
+
+            if (delimiter)
+                AppendSOT();
         }
 
-        void AppendString(const std::string buffer, const std::string delimeter)
+        void AppendStringDelimiter(const std::string buffer, const std::string delimiter)
         {
             if (std::size_t length = buffer.length())
                 Append((uint8 const*)buffer.c_str(), length);
-            AppendString(delimeter);
+            AppendString(delimiter, false);
         }
 
         void AppendBase64(const uint32 value)

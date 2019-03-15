@@ -24,6 +24,10 @@
 namespace Quad
 {
     //-----------------------------------------------//
+    void PlayerSocket::HandlePong(std::unique_ptr<Packet> packet)
+    {
+        mPlayer->mPonged = true;
+    }
     void PlayerSocket::HandleGetInfo(std::unique_ptr<Packet> packet)
     {
         if (mPlayer && mPlayer->IsInitialized())
@@ -41,6 +45,8 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleNoDespaceUsers(std::unique_ptr<Packet> packet)
     {
+        uint32 roomId = packet->ReadWiredUint();
+
         StringBuffer buffer;
         buffer.AppendBase64(OpcodesClient::MSG_NO_DESPACE_USERS);
         buffer.AppendString(mPlayer->GetName());

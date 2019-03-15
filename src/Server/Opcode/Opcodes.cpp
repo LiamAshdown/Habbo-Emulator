@@ -50,12 +50,15 @@ namespace Quad
         StoreClientPacket(OpcodesClient::MSG_NO_DESPACE_USERS,               "MSG_NO_DESPACE_USERS",                  &PlayerSocket::HandleNoDespaceUsers             );
         StoreClientPacket(OpcodesClient::CMSG_GET_CLUB,                      "CMSG_GET_CLUB",                         &PlayerSocket::HandleGetClub                    );
         StoreClientPacket(OpcodesClient::CMSG_NAVIGATE,                      "CMSG_NAVIGATE",                         &PlayerSocket::HandleNavigate                   );
-        StoreClientPacket(OpcodesClient::CMSG_GET_USER_FLAT_CATEGORYS,       "CMSG_GET_USER_FLAT_CATEGORYS",          &PlayerSocket::HandleGetUserFlatsCatergors      );
+        StoreClientPacket(OpcodesClient::CMSG_GET_USER_FLAT_CATEGORYS,       "CMSG_GET_USER_FLAT_CATEGORYS",          &PlayerSocket::HandleGetUserFlatsCategories      );
         StoreClientPacket(OpcodesClient::CMSG_GET_FAVOURITE_ROOMS,           "CMSG_GET_FAVOURITE_ROOMS",              &PlayerSocket::HandleGetFavouriteRooms          );
         StoreClientPacket(OpcodesClient::CMSG_ADD_FAVOURITE_ROOM,            "CMSG_ADD_FAVOURITE_ROOM",               &PlayerSocket::HandleAddFavouriteRoom           );
         StoreClientPacket(OpcodesClient::CMSG_DELETE_FAVOURITE_ROOM,         "CMSG_DELETE_FAVOURITE_ROOM",            &PlayerSocket::HandleDeleteFavouriteRoom        );
         StoreClientPacket(OpcodesClient::CMSG_SEARCH_ROOMS,                  "CMSG_SEARCH_ROOMS",                     &PlayerSocket::HandleSearchRooms                );
         StoreClientPacket(OpcodesClient::CMSG_GET_INTEREST,                  "CMSG_GET_INTEREST",                     &PlayerSocket::HandleGetInterest                );
+        StoreClientPacket(OpcodesClient::CMSG_MESSENGER_INIT,                "CMSG_MESSENGER_INIT",                   &PlayerSocket::HandleMessengerInitialize        );
+        StoreClientPacket(OpcodesClient::CMSG_ROOM_DIRECTORY,                "CMSG_ROOM_DIRECTORY",                   &PlayerSocket::HandleRoomDirectory              );
+        StoreClientPacket(OpcodesClient::CMSG_PONG,                          "CMSG_PONG",                             &PlayerSocket::HandlePong                       );
 
         ///< SMSG
         StoreServerPacket(OpcodesServer::SMSG_CRYPTO_PARAMETERS,             "SMSG_CRYPTO_PARAMETERS",                &PlayerSocket::HandleServerMessage              );
@@ -70,9 +73,14 @@ namespace Quad
         StoreServerPacket(OpcodesServer::SMSG_NOTICE,                        "SMSG_NOTICE",                           &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(OpcodesServer::SMSG_USER_OBJECT,                   "SMSG_USER_OBJECT",                      &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(OpcodesServer::SMSG_CREDIT_BALANCE,                "SMSG_CREDIT_BALANCE",                   &PlayerSocket::HandleServerMessage              );
-        StoreServerPacket(OpcodesServer::SMSG_USER_FLAT_CATEGORYS,           "SMSG_USER_FLAT_CATEGORYS",              &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_USER_FLAT_CATEGORIES,           "SMSG_USER_FLAT_CATEGORIES",              &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(OpcodesServer::SMSG_SEARCH_RESULTS,                "SMSG_SEARCH_RESULTS",                   &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(OpcodesServer::SMSG_ROOM_INTEREST,                 "SMSG_ROOM_INTEREST",                    &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_OPEN_CONNECTION,               "SMSG_OPEN_CONNECTION",                  &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_ROOM_URL,                      "SMSG_OPEN_CONNECTION",                  &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_CANT_CONNECT,                  "SMSG_CANT_CONNECT",                     &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_PING,                          "SMSG_PING",                             &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(OpcodesServer::SMSG_ROOM_READY,                    "SMSG_ROOM_READY",                       &PlayerSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG opcodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG opcodes";

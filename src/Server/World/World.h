@@ -24,9 +24,12 @@
 #include "Config/Config.h"
 #include "Database/Database.h"
 #include "Platform/Thread/ThreadPool.h"
+#include <mutex>
 
 namespace Quad
 {
+    typedef std::unordered_map<uint32, Player*> PlayerMap;
+
     class World
     {
     public:
@@ -38,11 +41,18 @@ namespace Quad
 
     public:
         void AddListener(const uint16 port);
+
+        Player* FindPlayer(const uint32& mId) const;
+        void AddPlayer(const uint32& mId, Player* currentSession);
+        void RemovePlayer(const uint32& mId);
+
         void UpdateWorld();
 
     private:
         std::unique_ptr<ThreadPool> mPool;
         std::vector<std::unique_ptr<Listener<PlayerSocket>>> mListener;
+        PlayerMap mPlayers;
+        std::mutex mMutex;
     };
 }
 

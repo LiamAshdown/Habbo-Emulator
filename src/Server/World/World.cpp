@@ -19,6 +19,8 @@
 #include "World.h"
 #include "Platform/Thread/ThreadPool.h"
 #include "Common/Timer.h"
+#include "Player.h"
+#include "Config/Config.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -47,17 +49,55 @@ namespace Quad
             sConfig->GetIntDefault("NetworkThreadProcessors", 1));
 
         mListener.push_back(std::move(listener));
+    }
+    //-----------------------------------------------//
+    Player* World::FindPlayer(const uint32& mId) const
+    {
+        PlayerMap::const_iterator itr = mPlayers.find(mId);
+        if (itr != mPlayers.end() && itr->second)
+            return itr->second;
 
-        LOG_INFO << "Added listener port: " << port;
+        return nullptr;
+    }
+    //-----------------------------------------------//
+    void World::AddPlayer(const uint32& mId, Player* currentSession)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
+
+        if (!mPlayers.count(mId))
+            mPlayers[mId] = currentSession;
+    }
+    //-----------------------------------------------//
+    void World::RemovePlayer(const uint32& mId)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
+
+        PlayerMap::const_iterator itr = mPlayers.find(mId);
+        if (itr->second && itr != mPlayers.end())
+            itr->second->ToSocket()->CloseSocket();
     }
     //-----------------------------------------------//
     void World::UpdateWorld()
     {
         Timer timer;
+        Timer pingTimer;
 
         while (true)
         {
-            // Update the world every 50 ms
+            for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
+            {
+                Player* player = itr->second;
+
+                if (!player->Update())
+                {
+                    itr = mPlayers.erase(itr);
+                    delete player;
+                }
+                else
+                    ++itr;
+            }
+
+            // Update the world every 500 ms
             if (timer.Elasped() < UPDATE_WORLD_TIMER)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds((uint32)(UPDATE_WORLD_TIMER - timer.Elasped())));

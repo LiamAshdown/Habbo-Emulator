@@ -43,6 +43,9 @@ enum OpcodesClient : uint16
     CMSG_DELETE_FAVOURITE_ROOM          = 20,
     CMSG_SEARCH_ROOMS                   = 17,
     CMSG_GET_INTEREST                   = 182,
+    CMSG_MESSENGER_INIT                 = 12,
+    CMSG_ROOM_DIRECTORY                 = 2,
+    CMSG_PONG                           = 196,
 };
 
 enum OpcodesServer : uint16
@@ -59,12 +62,17 @@ enum OpcodesServer : uint16
     SMSG_NOTICE                         = 139,
     SMSG_USER_OBJECT                    = 5,
     SMSG_CREDIT_BALANCE                 = 6,
-    SMSG_ROOM_DIRECTORY                 = 2, 
     SMSG_NAVIGATE_NODE_INFO             = 220,
-    SMSG_USER_FLAT_CATEGORYS            = 221,
+    SMSG_USER_FLAT_CATEGORIES           = 221,
     SMSG_FAVOURITE_ROOMS_RESULT         = 61,
     SMSG_SEARCH_RESULTS                 = 55,
     SMSG_ROOM_INTEREST                  = 258,
+    SMSG_MESSENGER_INIT                 = 12,
+    SMSG_OPEN_CONNECTION                = 19,
+    SMSG_ROOM_URL                       = 166,
+    SMSG_CANT_CONNECT                   = 224,
+    SMSG_PING                           = 50,
+    SMSG_ROOM_READY                     = 69,
 };
 
 namespace Quad

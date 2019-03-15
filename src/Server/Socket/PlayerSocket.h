@@ -54,12 +54,15 @@ namespace Quad
         void HandleNoDespaceUsers(std::unique_ptr<Packet> packet);
         void HandleGetClub(std::unique_ptr<Packet> packet);
         void HandleNavigate(std::unique_ptr<Packet> packet);
-        void HandleGetUserFlatsCatergors(std::unique_ptr<Packet> packet);
+        void HandleGetUserFlatsCategories(std::unique_ptr<Packet> packet);
         void HandleGetFavouriteRooms(std::unique_ptr<Packet> packet);
         void HandleAddFavouriteRoom(std::unique_ptr<Packet> packet);
         void HandleDeleteFavouriteRoom(std::unique_ptr<Packet> packet);
         void HandleSearchRooms(std::unique_ptr<Packet> packet);
         void HandleGetInterest(std::unique_ptr<Packet> packet);
+        void HandleMessengerInitialize(std::unique_ptr<Packet> packet);
+        void HandleRoomDirectory(std::unique_ptr<Packet> packet);
+        void HandlePong(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 

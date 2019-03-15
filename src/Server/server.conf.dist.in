@@ -53,6 +53,13 @@ BindIP = "127.0.0.1"
 NetworkThreadProcessors = 1
 
 #
+#    PongInterval
+#        Description: Pong interval time to sent to clients in milliseconds
+#        Default:     10000
+
+PongInterval = 10000
+
+#
 ###################################################################################################
 
 ###################################################################################################

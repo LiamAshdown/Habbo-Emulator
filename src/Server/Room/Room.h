@@ -27,6 +27,13 @@ enum RoomFlag
     ROOM_TYPE_FLATS                     = 2
 };
 
+enum RoomConnectionError
+{
+    ROOM_IS_FULL                        = 1,
+    ROOM_IS_CLOSED                      = 2,
+    ROOM_IS_IN_QUEUE                    = 3,
+};
+
 namespace Quad
 {
     class Player;
@@ -60,6 +67,37 @@ namespace Quad
 
     }RoomCategory;
 
+    typedef struct RoomModelsStruct
+    {
+    public:
+        friend class RoomManager;
+
+    public:
+        RoomModelsStruct() {}
+        ~RoomModelsStruct() {}
+
+    public:
+        uint32 GetId() const { return mId; }
+        uint32 GetModelId() const { return mModelId; }
+        std::string GetModel() const { return mModel; }
+        uint16 GetPositionX() const { return mX; }
+        uint16 GetPositionY() const { return mY; }
+        float GetPositionZ() const { return mZ; }
+        uint16 GetOrientation() const { return mOrientation; }
+        std::string GetHeightMap() const { return mHeightMap; }
+
+    private:
+        uint32 mId;
+        uint32 mModelId;
+        std::string mModel;
+        uint16 mX;
+        uint16 mY;
+        float mZ;
+        uint16 mOrientation;
+        std::string mHeightMap;
+
+    }RoomModels;
+
     typedef struct FavouriteRoomsStruct
     {
     public:
@@ -67,14 +105,6 @@ namespace Quad
 
     public:
         FavouriteRoomsStruct() : mId(0), mRoomId(0), mPublicSpace(false) {}
-        FavouriteRoomsStruct(const FavouriteRoomsStruct& object)
-        {
-            mId = object.mId;
-            mRoomId = object.mRoomId;
-            mPublicSpace = object.mPublicSpace;
-
-            LOG_INFO << "COPIED!";
-        }
         ~FavouriteRoomsStruct() {}
 
     public:

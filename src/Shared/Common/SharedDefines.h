@@ -61,6 +61,7 @@ typedef std::vector<std::string> Tokens;
 
 #define DEFAULT_SERVER_PORT 37120
 #define UPDATE_WORLD_TIMER 500
+#define ROOM_ID_OFFSET 37120
 
 std::string SplitString(const std::string& stringData, const std::string& tokenizer);
 uint16 ConvertEndian(uint16 value);

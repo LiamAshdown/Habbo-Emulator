@@ -27,13 +27,15 @@ namespace Quad
         mSqlConnection = mConnection->SQLConnection;
         mConnection->connectionState = ConnectionState::Connection_Idle;
         mIsExecuteResult = false;
+        mHasReleased = false;
     }
     QueryDatabase::~QueryDatabase()
     {
         IF_LOG(plog::debug)
             LOG_DEBUG << "Destructor QueryDatabase called!";
 
-        sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
+        if (!mHasReleased)
+            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
     }
     //-----------------------------------------------//
     void QueryDatabase::DirectExecuteQuery(const std::string& query)
@@ -81,6 +83,14 @@ namespace Quad
             return true;
         }
         return false;
+    }
+    void QueryDatabase::Release()
+    {
+        if (!mHasReleased)
+        {
+            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
+            mHasReleased = true;
+        }
     }
     //-----------------------------------------------//
     std::shared_ptr<sql::PreparedStatement>& QueryDatabase::GetStatement()

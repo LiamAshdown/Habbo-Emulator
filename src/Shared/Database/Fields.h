@@ -84,6 +84,11 @@ namespace Quad
             return (double)mResultSet->getDouble(i);
         }
 
+        float GetFloat(uint8 i)
+        {
+            return (float)mResultSet->getDouble(i);
+        }
+
         bool GetNextResult()
         {
             return mResultSet->next();

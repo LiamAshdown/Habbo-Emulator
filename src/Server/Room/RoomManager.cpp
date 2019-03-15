@@ -102,7 +102,7 @@ namespace Quad
             room->mVisitorsNow             = fields->GetUint32(15);
             room->mVisitorsMax             = fields->GetUint32(16);
 
-            sWorld->AddListener(room->GetId() + DEFAULT_SERVER_PORT);
+            sWorld->AddListener(room->GetId() + ROOM_ID_OFFSET);
 
             mRooms[room->mId] = std::move(room);
 
@@ -143,7 +143,40 @@ namespace Quad
         LOG_INFO << "Loaded " << mFavouriteRooms.size() << " favourite rooms";
     }
     //-----------------------------------------------//
-    std::shared_ptr<RoomCategory> RoomManager::GetRoomCategory(const uint32 id)
+    void RoomManager::LoadRoomModels()
+    {
+        QueryDatabase database("rooms");
+        database.PrepareQuery("SELECT id, model_id, model_name, door_x, door_y, door_z, door_dir, height_map from room_models");
+        database.ExecuteQuery();
+
+        if (!database.GetResult())
+        {
+            LOG_ERROR << "height_map is empty!";
+            return;
+        }
+
+        Field* fields = database.Fetch();
+
+        do
+        {
+            std::unique_ptr<RoomModels> roomModel = std::make_unique<RoomModels>();
+            roomModel->mId = fields->GetUint32(1);
+            roomModel->mModelId = fields->GetUint32(2);
+            roomModel->mModel = fields->GetString(3);
+            roomModel->mX = fields->GetUint16(4);
+            roomModel->mY = fields->GetFloat(5);
+            roomModel->mZ = fields->GetUint16(6);
+            roomModel->mOrientation = fields->GetUint16(7);
+            roomModel->mHeightMap = fields->GetString(8);
+
+            mRoomModels[roomModel->GetModel()] = std::move(roomModel);
+
+        } while (fields->GetNextResult());
+
+        LOG_INFO << "Loaded " << mRoomModels.size() << " room models";
+    }
+    //-----------------------------------------------//
+    std::shared_ptr<RoomCategory> RoomManager::GetRoomCategory(const uint32& id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
@@ -154,7 +187,7 @@ namespace Quad
             return nullptr;
     }
     //-----------------------------------------------//
-    std::shared_ptr<Room> RoomManager::GetRoom(const uint32 id)
+    std::shared_ptr<Room> RoomManager::GetRoom(const uint32& id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
@@ -165,7 +198,7 @@ namespace Quad
             return nullptr;
     }
     //-----------------------------------------------//
-    std::vector<std::shared_ptr<FavouriteRooms>> RoomManager::GetFavouriteRooms(const uint32 & id)
+    FavouriteRoomsVector RoomManager::GetFavouriteRooms(const uint32& id)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
@@ -173,7 +206,18 @@ namespace Quad
         if (itr != mFavouriteRooms.end())
             return itr->second;
         else
-            return std::vector<std::shared_ptr<FavouriteRooms>>{};
+            return FavouriteRoomsVector{};
+    }
+    //-----------------------------------------------//
+    std::shared_ptr<RoomModelsStruct> RoomManager::GetRoomModel(const std::string& model)
+    {
+        std::lock_guard<std::mutex> guard(mMutex);
+
+        RoomModelsMap::const_iterator itr = mRoomModels.find(model);
+        if (itr != mRoomModels.end())
+            return itr->second;
+        else
+            return nullptr;
     }
     //-----------------------------------------------//
     RoomCategoriesMap* RoomManager::GetRoomCategories()
@@ -210,7 +254,7 @@ namespace Quad
             itr->second.push_back(std::move(favouriteRoom));
         }
         else
-            mFavouriteRooms[favouriteRoom->mId].push_back(std::move(favouriteRoom));
+            mFavouriteRooms[favouriteRoom->GetId()].emplace_back(std::move(favouriteRoom));
     }
     //-----------------------------------------------//
     void RoomManager::DeleteFavouriteRoom(const uint32& accountId, const uint32& roomId)

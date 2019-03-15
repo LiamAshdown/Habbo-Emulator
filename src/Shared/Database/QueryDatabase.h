@@ -41,6 +41,7 @@ namespace Quad
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
         // Neutral
+        void Release();
         Field* Fetch();
 
     private:
@@ -58,6 +59,7 @@ namespace Quad
         // Neutral
         bool mExecuteResult;
         bool mIsExecuteResult;
+        bool mHasReleased;
         std::unique_ptr<sql::ResultSet> mResultSet;
         Field mField;
     }; 

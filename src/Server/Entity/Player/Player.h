@@ -20,6 +20,9 @@
 #define _Quad_Player_h_
 #include "Common/SharedDefines.h"
 #include "Room.h"
+#include "Messenger.h"
+#include "Common/Timer.h"
+#include <mutex>
 
 namespace Quad
 {
@@ -55,13 +58,24 @@ namespace Quad
         bool GetReadAgreement() const;
         bool GetSpecialRights() const;
 
-        void SetRoom(std::shared_ptr<Room> room);
+        bool SetRoom(std::shared_ptr<Room> room);
         std::shared_ptr<Room> GetRoom() const;
 
         void SendUserObject();
         void UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation);
 
+        void SendInitializeMessenger();
+
+        bool IsPonged() const;
+
+        bool Update();
+
+        void Logout();
+
         std::shared_ptr<PlayerSocket> ToSocket();
+
+    private:
+        void SendPing();
 
     private:
         std::string mName;
@@ -94,6 +108,12 @@ namespace Quad
 
         std::shared_ptr<Room> mRoom;
         std::shared_ptr<PlayerSocket> mSocket;
+        std::unique_ptr<Messenger> mMessenger;
+
+        Timer mPingTimer;
+        uint32 mPingInterval;
+        bool mPonged;
+        std::mutex mMutex;
     };
 }
 

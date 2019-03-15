@@ -26,7 +26,9 @@ namespace Quad
 {
     typedef std::map<uint32, std::shared_ptr<RoomCategory>> RoomCategoriesMap;
     typedef std::map<uint32, std::shared_ptr<Room>> RoomsMap;
-    typedef std::map<uint32, std::vector<std::shared_ptr<FavouriteRooms>>> FavouriteRoomsMap;
+    typedef std::vector<std::shared_ptr<FavouriteRooms>> FavouriteRoomsVector;
+    typedef std::map<uint32, FavouriteRoomsVector> FavouriteRoomsMap;
+    typedef std::map<std::string, std::shared_ptr<RoomModelsStruct>> RoomModelsMap;
 
     class RoomManager
     {
@@ -41,10 +43,12 @@ namespace Quad
         void LoadRoomCategories();
         void LoadRooms();
         void LoadFavouriteRooms();
+        void LoadRoomModels();
 
-        std::shared_ptr<RoomCategory> GetRoomCategory(const uint32 id);
-        std::shared_ptr<Room> GetRoom(const uint32 id);
-        std::vector<std::shared_ptr<FavouriteRooms>> GetFavouriteRooms(const uint32& Id);
+        std::shared_ptr<RoomCategory> GetRoomCategory(const uint32& id);
+        std::shared_ptr<Room> GetRoom(const uint32& id);
+        FavouriteRoomsVector GetFavouriteRooms(const uint32& Id);
+        std::shared_ptr<RoomModelsStruct> GetRoomModel(const std::string& model);
             
         RoomCategoriesMap* GetRoomCategories();
         RoomsMap* GetRooms();
@@ -56,6 +60,7 @@ namespace Quad
         RoomCategoriesMap mRoomCategories;
         RoomsMap mRooms;
         FavouriteRoomsMap mFavouriteRooms;
+        RoomModelsMap mRoomModels;
 
     private:
         std::mutex mMutex;

@@ -21,6 +21,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Socket)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Socket/Handlers)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Room)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Player)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Player/Messenger)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Item)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Opcode)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/World)
@@ -56,7 +57,7 @@ target_link_libraries(${EXECUTABLE_NAME}
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}")
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}")
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
-set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "AuthServer")
+set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "Server")
 
 # Add conf file to dev folder
 add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD

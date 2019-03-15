@@ -19,6 +19,9 @@
 #include "Player.h"
 #include "Network/StringBuffer.h"
 #include "PlayerSocket.h"
+#include "Config/Config.h"
+#include "Common/Timer.h"
+#include "World.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -26,11 +29,19 @@ namespace Quad
     Player::Player(PlayerSocket* playerSocket)
         : mSocket(playerSocket ? playerSocket->Shared<PlayerSocket>() : nullptr)
     {
+        mMessenger = std::make_unique<Messenger>();
+        mMessenger->LoadMessenger(mId);
+
+        mPingInterval = sConfig->GetIntDefault("PongInterval", 10000);
+        mPingTimer.Reset();
+        mPonged = true;
     }
     Player::~Player()
     {
         IF_LOG(plog::debug)
             LOG_DEBUG << "Destructor Player called!";
+
+        mMessenger.reset();
     }
     //-----------------------------------------------//
     uint32 Player::GetId() const
@@ -127,11 +138,14 @@ namespace Quad
         return mInitialized;
     }
     //-----------------------------------------------//
-    void Player::SetRoom(std::shared_ptr<Room> room)
+    bool Player::SetRoom(std::shared_ptr<Room> room)
     {
         mRoom.reset(new Room);
 
-        mRoom = room;
+        if (mRoom = room)
+            return true;
+        else
+            return false;
     }
     //-----------------------------------------------//
     std::shared_ptr<Room> Player::GetRoom() const
@@ -152,7 +166,6 @@ namespace Quad
         buffer.AppendString(mPoolFigure);
         buffer.AppendWired(mFilms);
         buffer.AppendSOH();
-
         ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
@@ -164,9 +177,68 @@ namespace Quad
         mOrientation = orientation;
     }
     //-----------------------------------------------//
+    void Player::SendInitializeMessenger()
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(OpcodesServer::SMSG_MESSENGER_INIT);
+        buffer.AppendString(GetConsoleMotto());
+
+        buffer.AppendWired(100);
+        buffer.AppendWired(200);
+        buffer.AppendWired(600);
+
+        mMessenger->ParseFriendData(buffer);
+
+        buffer.AppendSOH();
+        mSocket->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+    }
+    //-----------------------------------------------//
+    bool Player::IsPonged() const
+    {
+        return mPonged;
+    }
+    //-----------------------------------------------//
+    bool Player::Update()
+    {
+        if (mSocket && !mSocket->IsClosed())
+        {
+            if (mPingTimer.Elasped() > mPingInterval)
+            {
+                if (IsPonged())
+                {
+                    SendPing();
+                    mPingTimer.Reset();
+                }
+                else
+                {
+                    LOG_INFO << "Disconnecting Player: " << GetId() << " have not recieved a pong back";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        else
+            return false;
+    }
+    //-----------------------------------------------//
+    void Player::Logout()
+    {
+    }
+    //-----------------------------------------------//
     std::shared_ptr<PlayerSocket> Player::ToSocket()
     {
         return mSocket;
+    }
+    //-----------------------------------------------//
+    void Player::SendPing()
+    {
+        mPonged = false;
+
+        StringBuffer buffer;
+        buffer.AppendBase64(OpcodesServer::SMSG_PING);
+        buffer.AppendSOH();
+        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
 }
