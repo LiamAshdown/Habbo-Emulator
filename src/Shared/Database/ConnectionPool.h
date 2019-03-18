@@ -2,9 +2,6 @@
 * Liam Ashdown
 * Copyright(C) 2019
 *
-* Active911 Inc.
-* Copyright(C) 2013
-*
 * This program is free software : you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
@@ -35,142 +32,77 @@
 #include <exception>
 #include <mutex>
 #include <thread>
+#include "MySQLConnection.h"
 #include "Common/SharedDefines.h"
-
-enum ConnectionState
-{
-    Connection_Idle,               // When we borrowed the connection
-    Connection_Prepare,            // When we prepared a query
-    Connection_Query               // When we executed a query
-};
 
 namespace Quad
 {
-    class Connection 
-    {
-    public:
-        Connection() {};
-        virtual ~Connection() {};
-        
-    public:
-        ConnectionState connectionState;
-    };
-
-    class ConnectionFactory 
-    {
-    public:
-        virtual std::shared_ptr<Connection> Create() = 0;
-    };
-
-    struct ConnectionPoolStats 
-    {
-        std::size_t sPoolSize;
-        std::size_t sBorrowedSize;
-    };
-
-    template<class T>
     class ConnectionPool
     {
     public:
-        ConnectionPool(std::size_t poolSize, std::shared_ptr<ConnectionFactory> factory)
+        ConnectionPool(std::shared_ptr<MySQLConnection> mySQLConnection, const std::size_t& poolSize)
+            : mMySQLConnection(mySQLConnection), mPoolSize(poolSize)
         {
-            // Setup
-            mPoolSize = poolSize;
-            mFactory = factory;
-
-            // Fill the mPool
-            while (mPool.size() < mPoolSize)
-            {
-                mPool.push_back(mFactory->Create());
-            }
+            for (std::size_t i = 0; i < mPoolSize; i++)
+                mPool.push_back(mMySQLConnection->CreateDatabase());
         }
 
-        ~ConnectionPool() {};
-
-        void GetStats()
+        std::shared_ptr<Connection> Borrow()
         {
-            std::lock_guard<std::mutex> lock(mMutex);
+            std::lock_guard<std::mutex> guard(mMutex);
 
-            ConnectionPoolStats stats;
-            stats.sPoolSize = mPool.size();
-            stats.sBorrowedSize = mBorrowed.size();
-        }
-
-        /*
-        * Borrow a connection for temporary use
-        * When done, either (a) call unborrow() to return it, or (b) (if it's bad) just let it go out of scope.  This will cause it to automatically be replaced.
-        * @retval a shared_ptr to the connection object
-        */
-        std::shared_ptr<T> Borrow()
-        {
-            std::lock_guard<std::mutex> lock(mMutex);
-
-            // Check for a free connection
-            if (mPool.size() == 0) 
+            if (mPool.size() == 0)
             {
-                // Are there any crashed connections listed as "borrowed"?
-                for (std::set<std::shared_ptr<Connection>>::iterator it = mBorrowed.begin();
-                    it != mBorrowed.end(); ++it) 
+                for (std::set<std::shared_ptr<Connection>>::iterator itr = mBorrowedPool.begin(); itr != mBorrowedPool.end(); itr++)
                 {
-                    if ((*it).unique() || (*it)->connectionState == ConnectionState::Connection_Query)
+                    std::shared_ptr<Connection> connection = (*itr);
+
+                    // If our connection is unique this means that the QueryDatabase is not sharing a pointer from this connection,
+                    // so we will erase the borrowed connection and put back into the pool so QueryDatabase can share it
+                    if (connection.unique())
                     {
-                        // This connection has been abandoned! Destroy it and create a new connection
-                        try 
+                        try
                         {
-                            // If we are able to create a new connection, return it
-                            IF_LOG(plog::debug)
-                                LOG_DEBUG << "Creating new connection to replace discarded connection";
+                            std::shared_ptr<Connection> newConnection = mMySQLConnection->CreateDatabase();
 
-                            std::shared_ptr<Connection> conn = mFactory->Create();
+                            mBorrowedPool.erase(connection);
+                            mBorrowedPool.insert(newConnection);
 
-                            mBorrowed.erase(it);
-                            mBorrowed.insert(conn);
-
-                            return std::static_pointer_cast<T>(conn);
-
+                            return newConnection;
                         }
-                        catch (std::exception &e) 
+                        catch (const std::exception&)
                         {
-                            LOG_ERROR << "Failed in borrowing a connection!";
                             assert(false);
                         }
                     }
+
                 }
             }
 
-            // Take one off the front
-            std::shared_ptr<Connection> conn = mPool.front();
+            // We are now borrowing a connection, remove 1 connection from our thread pool
+            std::shared_ptr<Connection> connection = mPool.front();
             mPool.pop_front();
 
-            // Add it to the borrowed list
-            mBorrowed.insert(conn);
+            // Insert our borrowed connection into the borrowed pool
+            mBorrowedPool.insert(connection);
 
-            return std::static_pointer_cast<T>(conn);
+            return connection;
         }
 
-        /*
-        * Unborrow a connection
-        *
-        * Only call this if you are returning a working connection.  If the connection was bad, just let it go out of scope (so the connection manager can replace it).
-        * @param the connection
-        */
-        void UnBorrow(std::shared_ptr<T> conn) 
+        void UnBorrow(std::shared_ptr<Connection> connection)
         {
-            // Lock
-            std::lock_guard<std::mutex> lock(mMutex);
+            std::lock_guard<std::mutex> guard(mMutex);
 
-            // Push onto the pool
-            mPool.push_back(std::static_pointer_cast<Connection>(conn));
+            mBorrowedPool.erase(connection);
+            mPool.push_back(connection);
+        }
 
-            // Unborrow
-            mBorrowed.erase(conn);
-        };
-
-    protected:
-        std::shared_ptr<ConnectionFactory> mFactory;
-        std::size_t mPoolSize;
+    private:
+        std::shared_ptr<MySQLConnection> mMySQLConnection;
         std::deque<std::shared_ptr<Connection>> mPool;
-        std::set<std::shared_ptr<Connection>> mBorrowed;
+        std::set<std::shared_ptr<Connection>> mBorrowedPool;
+
+        std::size_t mPoolSize;
         std::mutex mMutex;
     };
 }

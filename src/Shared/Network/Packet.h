@@ -48,7 +48,7 @@ public:
     ~Packet() {}
 
 public:
-    void Parse(std::string buffer)
+    void Parse(std::string& buffer)
     {
         mHeader = DecodeBase64(buffer.substr(0, 2));
         mContent = buffer.substr(2);
@@ -135,15 +135,8 @@ public:
         return mHeader;
     }
 
-    uint32 sLength;
-    uint32 sCmd;
-    std::string sHeader;
-    std::string sFullBody;
-    std::vector<std::string> sBody;
-
 private:
     std::size_t mReadPosition;
     std::string mContent;
     uint32 mHeader;
-
 };

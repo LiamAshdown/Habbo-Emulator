@@ -33,6 +33,7 @@ namespace Quad
 
     public:
         Player* ToPlayer();
+        void DestroyPlayer();
 
     public:
         void SendPacket(const char* buffer, const std::size_t& length);
@@ -63,14 +64,17 @@ namespace Quad
         void HandleMessengerInitialize(std::unique_ptr<Packet> packet);
         void HandleRoomDirectory(std::unique_ptr<Packet> packet);
         void HandlePong(std::unique_ptr<Packet> packet);
+        void HandleGetRoomAdd(std::unique_ptr<Packet> packet);
+        void HandleGetRoomHeight(std::unique_ptr<Packet> packet);
+        void HandleGetAvailableBadges(std::unique_ptr<Packet> packet);
+        void HandleGetAccountPreferences(std::unique_ptr<Packet> packet);
+        void HandleRoomUsers(std::unique_ptr<Packet> packet);
+        void HandleMessengerUpdate(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 
     private:
         virtual bool ProcessIncomingData() override;
-
-    private:
-        std::unique_ptr<Packet> DecryptPacket();
 
     private:
         Player* mPlayer;

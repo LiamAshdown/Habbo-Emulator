@@ -28,7 +28,7 @@ namespace Quad
         return &instance;
     }
     //-----------------------------------------------//
-    bool Config::SetSource(const std::string& file)
+    bool Config::SetFile(const std::string& file)
     {
         mFileName = file;
 
@@ -68,7 +68,7 @@ namespace Quad
             newEntries[entry] = value;
         } while (in.good());
 
-        m_entries = std::move(newEntries);
+        mEntries = std::move(newEntries);
 
         return true;
     }
@@ -76,16 +76,16 @@ namespace Quad
     bool Config::IsSet(const std::string& name) const
     {
         auto const nameLower = boost::algorithm::to_lower_copy(name);
-        return m_entries.find(nameLower) != m_entries.cend();
+        return mEntries.find(nameLower) != mEntries.cend();
     }
     //-----------------------------------------------//
     const std::string Config::GetStringDefault(const std::string& name, const std::string& def) const
     {
         auto const nameLower = boost::algorithm::to_lower_copy(name);
 
-        auto const entry = m_entries.find(nameLower);
+        auto const entry = mEntries.find(nameLower);
 
-        return entry == m_entries.cend() ? def : entry->second;
+        return entry == mEntries.cend() ? def : entry->second;
     }
     //-----------------------------------------------//
     bool Config::GetBoolDefault(const std::string& name, bool def) const
@@ -113,3 +113,4 @@ namespace Quad
     }
     //-----------------------------------------------//
 }
+//-----------------------------------------------//

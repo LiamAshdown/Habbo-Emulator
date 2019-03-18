@@ -46,13 +46,17 @@ namespace Quad
         void AddPlayer(const uint32& mId, Player* currentSession);
         void RemovePlayer(const uint32& mId);
 
+        static bool StopWorld();
         void UpdateWorld();
 
+        void CleanUp();
+
     private:
-        std::unique_ptr<ThreadPool> mPool;
         std::vector<std::unique_ptr<Listener<PlayerSocket>>> mListener;
         PlayerMap mPlayers;
         std::mutex mMutex;
+
+        static volatile bool mStopWorld;
     };
 }
 

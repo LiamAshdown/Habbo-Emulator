@@ -37,7 +37,7 @@ namespace Quad
         std::string GetFigure() const { return mFigure; }
         std::string GetName() const { return mName; }
         std::string GetGender() const { return mGender; }
-        std::string GetMotto() const { return mMotto; }
+        std::string GetConsoleMotto() const { return mConsoleMotto; }
         std::string GetLastOnline() const { return mLastOnline; }
 
     private:
@@ -45,27 +45,36 @@ namespace Quad
         std::string mFigure;
         std::string mName;
         std::string mGender;
-        std::string mMotto;
+        std::string mConsoleMotto;
         std::string mLastOnline;
     }MessengerFriends;
 
-    typedef std::vector<std::unique_ptr<MessengerFriends>> MessengerFriendsMap;
+    typedef std::vector<std::unique_ptr<MessengerFriends>> MessengerFriendsVector;
+    typedef std::vector<std::unique_ptr<MessengerFriends>> MessengerFriendRequestsVector;
 
     class Messenger
     {
     public:
 
     public:
-        Messenger();
+        Messenger(const uint32& id);
         ~Messenger();
 
     public:
-        void LoadMessenger(const uint32& id);
+        void LoadMessenger();
+        void LoadMessengerFriends();
+        void LoadMessengerFriendRequests();
 
-        void ParseFriendData(StringBuffer& buffer);
+        void UpdateConsole();
+
+        void ParseMessengerFriends(StringBuffer& buffer);
+        void ParseMessengerFriendRequests(StringBuffer& buffer);
+        void ParseMessengerUpdate(StringBuffer& buffer);
 
     private:
-        MessengerFriendsMap mMessengerFriends;
+        MessengerFriendsVector mMessengerFriends;
+        MessengerFriendRequestsVector mMessengerFriendRequests;
+        uint32 mId;
     };
 }
 

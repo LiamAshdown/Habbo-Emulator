@@ -18,7 +18,7 @@
 //-----------------------------------------------//
 #include "PlayerSocket.h"
 #include "Database/QueryDatabase.h"
-#include "Database/Fields.h"
+#include "Database/Result.h"
 #include "Common/SHA1.h"
 #include "Player.h"
 #include "Network/StringBuffer.h"
@@ -33,13 +33,16 @@ namespace Quad
     //-----------------------------------------------//
     PlayerSocket::~PlayerSocket()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor PlayerSocket called!";
     }
     //-----------------------------------------------//
     Player* PlayerSocket::ToPlayer()
     {
         return mPlayer;
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::DestroyPlayer()
+    {
+        mPlayer = nullptr;
     }
     //-----------------------------------------------//
     void PlayerSocket::SendPacket(const char* buffer, const std::size_t& length)
@@ -49,32 +52,33 @@ namespace Quad
     //-----------------------------------------------//
     bool PlayerSocket::ProcessIncomingData()
     {
-        if (std::unique_ptr<Packet> packet = DecryptPacket())
-        {
-            LOG_INFO << "Processing packet: " << packet->GetHeader();
-
-            ExecutePacket(sOpcode->GetClientPacket(packet->GetHeader()), std::move(packet));
-            return true;
-        }
-        else
-            return false;
-    }
-    //-----------------------------------------------//
-    std::unique_ptr<Packet> PlayerSocket::DecryptPacket()
-    {
         std::vector<uint8> bufferVec;
         bufferVec.resize(ReadLengthRemaining());
         if (Read((char*)&bufferVec[0], ReadLengthRemaining()))
         {
-            std::unique_ptr<Packet> packet = std::make_unique<Packet>();
+            bufferVec.resize(bufferVec.size() + 1);
+            bufferVec[bufferVec.size() - 1] = 0;
 
-            packet->Parse(((std::string)(char*)&bufferVec[0])
-                .substr(3, DecodeBase64(((std::string)(char*)&bufferVec[0]).substr(1, 2))));
+            std::string tempBuffer = (char*)&bufferVec[0];
 
-            return packet;
+            while (tempBuffer.length() > 0)
+            {
+                std::string trimBuffer = tempBuffer.substr(3, DecodeBase64(tempBuffer.substr(1, 2)));
+
+                std::unique_ptr<Packet> packet = std::make_unique<Packet>();
+                packet->Parse(trimBuffer);
+
+                LOG_INFO << "Processing Packet: " << packet->GetHeader();
+
+                ExecutePacket(sOpcode->GetClientPacket(packet->GetHeader()), std::move(packet));
+
+                tempBuffer = tempBuffer.substr(trimBuffer.length() + 3);
+            }
+
+            return true;
         }
         else
-            return nullptr;
+            return false;
     }
     //-----------------------------------------------//
     void PlayerSocket::ExecutePacket(const OpcodeHandler& opHandler, std::unique_ptr<Packet> packet)
@@ -84,6 +88,7 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleNULL(std::unique_ptr<Packet> packet)
     {
+        LOG_ERROR << "Packet: " << packet->GetHeader() << " is not handled";
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleServerMessage(std::unique_ptr<Packet> packet)
@@ -91,3 +96,4 @@ namespace Quad
     }
     //-----------------------------------------------//
 }
+//-----------------------------------------------//

@@ -32,7 +32,7 @@ namespace Quad
         void Read(char* buffer, const std::size_t& length);
         std::size_t ReadPosition() const;
 
-        void Write(const char *p_Buffer, const std::size_t& p_Length);
+        void Write(const char * buffer, const std::size_t& length);
         std::size_t ReadLength() const;
         std::size_t ReadLengthRemaining() const;
 

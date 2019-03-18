@@ -49,23 +49,23 @@ namespace Quad
             return;
         }
 
-        Field* fields = database.Fetch();
+        Result* result = database.Fetch();
 
         do
         {
             std::unique_ptr<RoomCategory> roomCategories = std::make_unique<RoomCategory>();
-            roomCategories->mCategoryId     = fields->GetUint32(1);
-            roomCategories->mParentId       = fields->GetUint32(2);
-            roomCategories->mName           = fields->GetString(3);
-            roomCategories->mPublicSpace    = fields->GetBool(4);
-            roomCategories->mAllowTrading   = fields->GetUint16(5);
-            roomCategories->mMinRoleAccess  = fields->GetBool(6);
-            roomCategories->mMinRoleSetFlat = fields->GetBool(7);
+            roomCategories->mCategoryId     = result->GetUint32(1);
+            roomCategories->mParentId       = result->GetUint32(2);
+            roomCategories->mName           = result->GetString(3);
+            roomCategories->mPublicSpace    = result->GetBool(4);
+            roomCategories->mAllowTrading   = result->GetUint16(5);
+            roomCategories->mMinRoleAccess  = result->GetBool(6);
+            roomCategories->mMinRoleSetFlat = result->GetBool(7);
 
             mRoomCategories[roomCategories->mCategoryId] = std::move(roomCategories);
-        } while (fields->GetNextResult());
+        } while (result->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRoomCategories.size() << " room categories";
+        LOG_INFO << "Loaded " << mRoomCategories.size() << " Room Categories";
     }
     //-----------------------------------------------//
     void RoomManager::LoadRooms()
@@ -80,35 +80,35 @@ namespace Quad
             return;
         }
 
-        Field* fields = database.Fetch();
+        Result* result = database.Fetch();
 
         do
         {
             std::unique_ptr<Room> room = std::make_unique<Room>();
-            room->mId                      = fields->GetUint32(1);
-            room->mOwnerId                 = fields->GetUint32(2);
-            room->mOwnerName               = fields->GetString(3);
-            room->mCategory                = fields->GetUint32(4);
-            room->mName                    = fields->GetString(5);
-            room->mDescription             = fields->GetString(6);
-            room->mModel                   = fields->GetString(7);
-            room->mCcts                    = fields->GetString(8);
-            room->mWallPaper               = fields->GetUint32(9);
-            room->mFloor                   = fields->GetUint32(10);
-            room->mShowName                = fields->GetBool(11);
-            room->mSuperUsers              = fields->GetBool(12);
-            room->mAccessType              = fields->GetString(13);
-            room->mPassword                = fields->GetString(14);
-            room->mVisitorsNow             = fields->GetUint32(15);
-            room->mVisitorsMax             = fields->GetUint32(16);
+            room->mId                      = result->GetUint32(1);
+            room->mOwnerId                 = result->GetUint32(2);
+            room->mOwnerName               = result->GetString(3);
+            room->mCategory                = result->GetUint32(4);
+            room->mName                    = result->GetString(5);
+            room->mDescription             = result->GetString(6);
+            room->mModel                   = result->GetString(7);
+            room->mCcts                    = result->GetString(8);
+            room->mWallPaper               = result->GetUint32(9);
+            room->mFloor                   = result->GetUint32(10);
+            room->mShowName                = result->GetBool(11);
+            room->mSuperUsers              = result->GetBool(12);
+            room->mAccessType              = result->GetString(13);
+            room->mPassword                = result->GetString(14);
+            room->mVisitorsNow             = result->GetUint32(15);
+            room->mVisitorsMax             = result->GetUint32(16);
 
             sWorld->AddListener(room->GetId() + ROOM_ID_OFFSET);
 
             mRooms[room->mId] = std::move(room);
 
-        } while (fields->GetNextResult());
+        } while (result->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRooms.size() << " rooms";
+        LOG_INFO << "Loaded " << mRooms.size() << " Hotel Rooms";
     }
     //-----------------------------------------------//
     void RoomManager::LoadFavouriteRooms()
@@ -123,14 +123,14 @@ namespace Quad
             return;
         }
 
-        Field* fields = database.Fetch();
+        Result* result = database.Fetch();
 
         do
         {
             std::unique_ptr<FavouriteRooms> favouriteRoom = std::make_unique<FavouriteRooms>();
-            favouriteRoom->mId                      = fields->GetUint32(1);
-            favouriteRoom->mRoomId                  = fields->GetUint32(2);
-            favouriteRoom->mPublicSpace             = fields->GetBool(3);
+            favouriteRoom->mId                      = result->GetUint32(1);
+            favouriteRoom->mRoomId                  = result->GetUint32(2);
+            favouriteRoom->mPublicSpace             = result->GetBool(3);
 
             FavouriteRoomsMap::iterator itr = mFavouriteRooms.find(favouriteRoom->mId);
             if (itr != mFavouriteRooms.end())
@@ -138,9 +138,9 @@ namespace Quad
             else
                 mFavouriteRooms[favouriteRoom->mId].emplace_back(std::move(favouriteRoom));
 
-        } while (fields->GetNextResult());
+        } while (result->GetNextResult());
 
-        LOG_INFO << "Loaded " << mFavouriteRooms.size() << " favourite rooms";
+        LOG_INFO << "Loaded " << mFavouriteRooms.size() << " Favourite Rooms";
     }
     //-----------------------------------------------//
     void RoomManager::LoadRoomModels()
@@ -155,25 +155,25 @@ namespace Quad
             return;
         }
 
-        Field* fields = database.Fetch();
+        Result* result = database.Fetch();
 
         do
         {
             std::unique_ptr<RoomModels> roomModel = std::make_unique<RoomModels>();
-            roomModel->mId = fields->GetUint32(1);
-            roomModel->mModelId = fields->GetUint32(2);
-            roomModel->mModel = fields->GetString(3);
-            roomModel->mX = fields->GetUint16(4);
-            roomModel->mY = fields->GetFloat(5);
-            roomModel->mZ = fields->GetUint16(6);
-            roomModel->mOrientation = fields->GetUint16(7);
-            roomModel->mHeightMap = fields->GetString(8);
+            roomModel->mId = result->GetUint32(1);
+            roomModel->mModelId = result->GetUint32(2);
+            roomModel->mModel = result->GetString(3);
+            roomModel->mX = result->GetUint16(4);
+            roomModel->mY = result->GetFloat(5);
+            roomModel->mZ = result->GetUint16(6);
+            roomModel->mOrientation = result->GetUint16(7);
+            roomModel->mHeightMap = result->GetString(8);
 
             mRoomModels[roomModel->GetModel()] = std::move(roomModel);
 
-        } while (fields->GetNextResult());
+        } while (result->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRoomModels.size() << " room models";
+        LOG_INFO << "Loaded " << mRoomModels.size() << " Room Models";
     }
     //-----------------------------------------------//
     std::shared_ptr<RoomCategory> RoomManager::GetRoomCategory(const uint32& id)

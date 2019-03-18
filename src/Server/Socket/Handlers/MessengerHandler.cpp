@@ -26,7 +26,13 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleMessengerInitialize(std::unique_ptr<Packet> packet)
     {
-
+        mPlayer->SendInitializeMessenger();
     }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleMessengerUpdate(std::unique_ptr<Packet> packet)
+    {
+        mPlayer->SendMessengerUpdate();
+    }
+    //-----------------------------------------------//
 }
 //-----------------------------------------------//

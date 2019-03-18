@@ -27,8 +27,6 @@ namespace Quad
     }
     Item::~Item()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor Item called!";
     }
     //-----------------------------------------------//
 }

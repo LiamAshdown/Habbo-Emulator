@@ -34,7 +34,7 @@ namespace Quad
             const_cast<std::string&>(m_address) = mSocket.remote_endpoint().address().to_string();
             const_cast<std::string&>(m_remoteEndpoint) = boost::lexical_cast<std::string>(mSocket.remote_endpoint());
         }
-        catch (boost::system::error_code& error)
+        catch (boost::system::error_code&)
         {
             return false;
         }
@@ -52,9 +52,6 @@ namespace Quad
     void Socket::CloseSocket()
     {
         std::lock_guard<std::mutex> guard(mClosedMutex);
-
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Closing Socket!";
 
         if (IsClosed())
             return;
@@ -128,30 +125,26 @@ namespace Quad
             return;
         }
 
-        // we must repeat this in case we have read in multiple messages from the client
-        while (mInBuffer->mReadPosition < mInBuffer->mWritePosition)
+        if (!ProcessIncomingData())
         {
-            if (!ProcessIncomingData())
+            // this errno is set when there is not enough buffer data available to either complete a header, or the packet length
+            // specified in the header goes past what we've read.  in this case, we will reset the buffer with the remaining data
+            if (errno == EBADMSG)
             {
-                // this errno is set when there is not enough buffer data available to either complete a header, or the packet length
-                // specified in the header goes past what we've read.  in this case, we will reset the buffer with the remaining data
-                if (errno == EBADMSG)
-                {
-                    const std::size_t bytesRemaining = mInBuffer->mWritePosition - mInBuffer->mReadPosition;
+                const std::size_t bytesRemaining = mInBuffer->mWritePosition - mInBuffer->mReadPosition;
 
-                    ::memmove(&mInBuffer->mBuffer[0], &mInBuffer->mBuffer[mInBuffer->mReadPosition], bytesRemaining);
+                ::memmove(&mInBuffer->mBuffer[0], &mInBuffer->mBuffer[mInBuffer->mReadPosition], bytesRemaining);
 
-                    mInBuffer->mReadPosition = 0;
-                    mInBuffer->mWritePosition = bytesRemaining;
+                mInBuffer->mReadPosition = 0;
+                mInBuffer->mWritePosition = bytesRemaining;
 
-                    StartAsyncRead();
-                }
-                else 
-                    if (!IsClosed())
-                        CloseSocket();
-
-                return;
+                StartAsyncRead();
             }
+            else
+                if (!IsClosed())
+                    CloseSocket();
+
+            return;
         }
 
         // Reset to read next packet

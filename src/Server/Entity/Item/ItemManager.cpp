@@ -34,8 +34,6 @@ namespace Quad
     }
     ItemManager::~ItemManager()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor ItemManager called!";
     }
     //-----------------------------------------------//
 }

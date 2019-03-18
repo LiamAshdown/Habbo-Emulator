@@ -37,7 +37,7 @@ namespace Quad
     void PlayerSocket::HandleCreditBalance(std::unique_ptr<Packet> packet)
     {
         StringBuffer buffer;
-        buffer.AppendBase64(OpcodesServer::SMSG_CREDIT_BALANCE);
+        buffer.AppendBase64(PacketServerHeader::SERVER_CREDIT_BALANCE);
         buffer.AppendString(std::to_string(mPlayer->GetCredits()) + ".0");
         buffer.AppendSOH();
         Write((const char*)buffer.GetContents(), buffer.GetSize());
@@ -48,7 +48,7 @@ namespace Quad
         uint32 roomId = packet->ReadWiredUint();
 
         StringBuffer buffer;
-        buffer.AppendBase64(OpcodesClient::MSG_NO_DESPACE_USERS);
+        buffer.AppendBase64(PacketClientHeader::CLIENT_NO_DESPACE_USERS);
         buffer.AppendString(mPlayer->GetName());
         buffer.AppendSOH();
         Write((const char*)buffer.GetContents(), buffer.GetSize());
@@ -56,7 +56,18 @@ namespace Quad
     //-----------------------------------------------//
     void PlayerSocket::HandleGetClub(std::unique_ptr<Packet> packet)
     {
-        // TODO
+
     }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleGetAvailableBadges(std::unique_ptr<Packet> packet)
+    {
+        mPlayer->SendAccountBadges();
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleGetAccountPreferences(std::unique_ptr<Packet> packet)
+    {
+        mPlayer->SendAccountPreferences();
+    }
+    //-----------------------------------------------//
 }
 //-----------------------------------------------//

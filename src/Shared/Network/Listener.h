@@ -27,7 +27,7 @@ namespace Quad
     class Listener
     {
     public:
-        Listener(std::string const& address, uint16 port, uint8 workerThreads);
+        Listener(std::string const& address, const uint16& port, uint8 workerThreads);
         ~Listener();
 
     private:
@@ -52,6 +52,7 @@ namespace Quad
 
         void BeginAccept();
         void OnAccept(NetworkThread<SocketType> *worker, std::shared_ptr<SocketType> const& socket, const boost::system::error_code &ec);
+        void CloseListener();
 
     private:
         std::unique_ptr<boost::asio::io_service> mService;
@@ -63,7 +64,7 @@ namespace Quad
     };
 
     template <typename SocketType>
-    Listener<SocketType>::Listener(std::string const& address, uint16 port, uint8 workerThreads)
+    Listener<SocketType>::Listener(std::string const& address, const uint16& port, uint8 workerThreads)
         : mService(new boost::asio::io_service()), mAcceptor(new boost::asio::ip::tcp::acceptor(*mService, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port))), mPort(port)
     {
         mWorkerThreads.reserve(workerThreads);
@@ -78,9 +79,6 @@ namespace Quad
     template <typename SocketType>
     Listener<SocketType>::~Listener()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor SocketType called!";
-
         mAcceptor->close();
         mService->stop();
         mAcceptorThread.join();

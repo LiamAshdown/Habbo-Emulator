@@ -36,9 +36,6 @@ namespace Quad
     //-----------------------------------------------//
     Database::~Database()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor Database called!";
-
         mDatabaseCont.clear();
     }
     //-----------------------------------------------//
@@ -51,18 +48,14 @@ namespace Quad
         return nullptr;
     }
     //-----------------------------------------------//
-    void Database::RemoveDatabase(const std::string& database)
-    {
-        DatabaseMap::iterator itr = mDatabaseCont.find(database);
-        if (itr != mDatabaseCont.end())
-            mDatabaseCont.erase(itr);
-    }
-    //-----------------------------------------------//
-    bool Database::InitializeConnectionPool(const char* infoString, const uint32 poolSize)
+    bool Database::CreateDatabase(const char* infoString, const uint32& poolSize)
     {
         try 
         {
-            std::string username, password, database, host;
+            std::string username;
+            std::string password;
+            std::string database;
+            std::string host;
             std::string port; 
 
             Tokens tokens = StrSplit(infoString, ";");
@@ -80,19 +73,24 @@ namespace Quad
             if (iter != tokens.end())
                 database = *iter++;
 
+            // Create our database, and store the database in a map = key "database name", storage "database structure"
             std::shared_ptr<DatabaseHolder> newDatabase = std::make_shared<DatabaseHolder>();
-            newDatabase->sUsername = username;
-            newDatabase->sPassword = password;
-            newDatabase->sDatabaseName = database;
-            newDatabase->sHost = host;
-            newDatabase->sPort = port;
-            newDatabase->sPoolSize = poolSize;
+            newDatabase->mUsername = username;
+            newDatabase->mPassword = password;
+            newDatabase->mDatabaseName = database;
+            newDatabase->mHost = host;
+            newDatabase->mPort = port;
+            newDatabase->mPoolSize = poolSize;
 
-            newDatabase->sConnectionFactory = std::make_shared<MySQLConnectionFactory>(newDatabase->sUsername, newDatabase->sPassword, newDatabase->sDatabaseName,
-                newDatabase->sHost, newDatabase->sPort);
-            newDatabase->sPool = std::make_shared<ConnectionPool<MySQLConnection>>(newDatabase->sPoolSize, newDatabase->sConnectionFactory);
+            newDatabase->mMySQLConnection = std::make_shared<MySQLConnection>(newDatabase->GetName(), newDatabase->GetPassword(), newDatabase->GetDatabase(),
+                newDatabase->GetHost(), newDatabase->GetPort());
+            newDatabase->mPool = std::make_shared<ConnectionPool>(newDatabase->GetMySQLConnection(), newDatabase->GetPoolSize());
 
-            mDatabaseCont[newDatabase->sDatabaseName] = newDatabase;
+            mDatabaseCont[newDatabase->GetDatabase()] = newDatabase;
+
+            database[0] = std::toupper(database[0]);
+            LOG_INFO << "Connected to Database " << database << " Successfully With " << poolSize << " Pool Connections";
+
             return true;
         }
         catch (sql::SQLException &e) 
@@ -102,11 +100,9 @@ namespace Quad
         }
     }
     //-----------------------------------------------//
-    void Database::PrintException(sql::SQLException& e, char* file, char* function, uint32 line)
+    void Database::PrintException(sql::SQLException& e, char* file, char* function, const uint32 line)
     {
         std::string message = e.what();
-
-        LOG_ERROR << message << std::endl;
 
         // Shut down server if database can no longer be reached
         if (message.find("has gone away") != std::string::npos)

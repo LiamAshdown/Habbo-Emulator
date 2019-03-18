@@ -24,84 +24,149 @@
 namespace Quad
 {
     //-----------------------------------------------//
-    Messenger::Messenger()
+    Messenger::Messenger(const uint32& id) : mId(id)
     {
     }
     //-----------------------------------------------//
     Messenger::~Messenger()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor Messenger called!";
     }
     //-----------------------------------------------//
-    void Messenger::LoadMessenger(const uint32& id)
+    void Messenger::LoadMessenger()
+    {
+        LoadMessengerFriends();
+        LoadMessengerFriendRequests();
+    }
+    //-----------------------------------------------//
+    void Messenger::LoadMessengerFriends()
     {
         QueryDatabase database("users");
-        database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN accounts ON messenger_friends.to_id = accounts.id WHERE(messenger_friends.from_id = ?)");
-        database.GetStatement()->setUInt(1, id);
+        database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN account ON messenger_friends.to_id = account.id WHERE(messenger_friends.from_id = ?)");
+        database.GetStatement()->setUInt(1, mId);
         database.ExecuteQuery();
 
         if (!database.GetResult())
             return;
 
-        Field* fields = database.Fetch();
+        Result* result = database.Fetch();
 
         std::unique_ptr<MessengerFriends> messenger = std::make_unique<MessengerFriends>();
-        messenger->mId = fields->GetUint32(1);
-        messenger->mName = fields->GetString(2);
-        messenger->mFigure = fields->GetString(3);
-        messenger->mMotto = fields->GetString(4);
-        messenger->mGender = fields->GetString(5);
-        messenger->mLastOnline = fields->GetString(6);
+        messenger->mId = result->GetUint32(1);
+        messenger->mName = result->GetString(2);
+        messenger->mFigure = result->GetString(3);
+        messenger->mConsoleMotto = result->GetString(4);
+        messenger->mGender = result->GetString(5);
+        messenger->mLastOnline = result->GetString(6);
 
         mMessengerFriends.push_back(std::move(messenger));
     }
     //-----------------------------------------------//
-    void Messenger::ParseFriendData(StringBuffer& buffer)
+    void Messenger::LoadMessengerFriendRequests()
+    {
+        QueryDatabase database("users");
+        database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_requests INNER JOIN account ON messenger_requests.from_id = account.id WHERE(messenger_requests.to_id = ?)");
+        database.GetStatement()->setUInt(1, mId);
+        database.ExecuteQuery();
+
+        if (!database.GetResult())
+            return;
+
+        Result* result = database.Fetch();
+
+        std::unique_ptr<MessengerFriends> messenger = std::make_unique<MessengerFriends>();
+        messenger->mId = result->GetUint32(1);
+        messenger->mName = result->GetString(2);
+        messenger->mFigure = result->GetString(3);
+        messenger->mConsoleMotto = result->GetString(4);
+        messenger->mGender = result->GetString(5);
+        messenger->mLastOnline = result->GetString(6);
+
+        mMessengerFriendRequests.push_back(std::move(messenger));
+    }
+    //-----------------------------------------------//
+    void Messenger::UpdateConsole()
+    {
+        mMessengerFriends.clear();
+
+        // When we recieve console update, query the database
+        QueryDatabase database("users");
+        database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN account ON messenger_friends.to_id = account.id WHERE(messenger_friends.from_id = ?)");
+        database.GetStatement()->setUInt(1, mId);
+        database.ExecuteQuery();
+
+        if (!database.GetResult())
+            return;
+
+        Result* result = database.Fetch();
+
+        std::unique_ptr<MessengerFriends> messenger = std::make_unique<MessengerFriends>();
+        messenger->mId = result->GetUint32(1);
+        messenger->mName = result->GetString(2);
+        messenger->mFigure = result->GetString(3);
+        messenger->mConsoleMotto = result->GetString(4);
+        messenger->mGender = result->GetString(5);
+        messenger->mLastOnline = result->GetString(6);
+
+        mMessengerFriends.push_back(std::move(messenger));
+    }
+    //-----------------------------------------------//
+    void Messenger::ParseMessengerFriends(StringBuffer& buffer)
     {
         buffer.AppendWired(mMessengerFriends.size());
 
-        for (MessengerFriendsMap::const_iterator itr = mMessengerFriends.begin(); itr != mMessengerFriends.end(); itr++)
+        for (MessengerFriendsVector::const_iterator itr = mMessengerFriends.begin(); itr != mMessengerFriends.end(); itr++)
         {
             Player* player = sWorld->FindPlayer((*itr)->GetId());
 
             buffer.AppendWired((*itr)->GetId());
             buffer.AppendString((*itr)->GetName());
-            buffer.AppendWiredBool((*itr)->GetGender() == "Male" ? "m" : "f");
-            buffer.AppendString((*itr)->GetMotto());
+            buffer.AppendWiredBool((*itr)->GetGender() == "Male" ? true : false);
+            buffer.AppendString((*itr)->GetConsoleMotto());
 
+            buffer.AppendWiredBool(player ? true : false);
+
+            // TODO; Do room update
             if (player)
-            {
-                buffer.AppendWiredBool(1);
                 buffer.AppendString("On hotel view");
-            }
             else
-            {
-                buffer.AppendWired(0);
                 buffer.AppendString((*itr)->GetLastOnline());
-            }
 
             buffer.AppendString((*itr)->GetLastOnline());
             buffer.AppendString((*itr)->GetFigure());
         }
     }
     //-----------------------------------------------//
+    void Messenger::ParseMessengerFriendRequests(StringBuffer& buffer)
+    {
+        for (MessengerFriendRequestsVector::const_iterator itr = mMessengerFriendRequests.begin(); itr != mMessengerFriendRequests.end(); itr++)
+        {
+            buffer.AppendWired((*itr)->GetId());
+            buffer.AppendString((*itr)->GetName());
+        }
+    }
+    //-----------------------------------------------//
+    void Messenger::ParseMessengerUpdate(StringBuffer& buffer)
+    {
+        // Query the database again, when we update console
+        UpdateConsole();
+
+        buffer.AppendWired(mMessengerFriends.size());
+
+        for (MessengerFriendsVector::const_iterator itr = mMessengerFriends.begin(); itr != mMessengerFriends.end(); itr++)
+        {
+            Player* player = sWorld->FindPlayer((*itr)->GetId());
+
+            buffer.AppendWired((*itr)->GetId());
+            buffer.AppendString((*itr)->GetConsoleMotto());
+            buffer.AppendWiredBool(player ? true : false);
+
+            // TODO; Do room update
+            if (player)
+                buffer.AppendString("On hotel view");
+            else
+                buffer.AppendString((*itr)->GetLastOnline());
+        }
+    }
+    //-----------------------------------------------//
 }
 //-----------------------------------------------//
-
-/*if (isOnline) 
-{
-    if (player.getRoomUser().getRoom() != null) 
-    {
-        Room room = player.getRoomUser().getRoom();
-
-        if (room.getData().getOwnerId() > 0) 
-            response.writeString("Floor1a");
-        else 
-            response.writeString(room.getData().getPublicName());
-    }
-    else 
-        response.writeString("On hotel view");
-}
-else
-    response.writeString(DateUtil.getDateAsString(this.lastOnline));*/

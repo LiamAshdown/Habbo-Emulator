@@ -35,7 +35,7 @@ namespace Quad
         ~Config() {}
 
     public:
-        bool SetSource(const std::string& file);
+        bool SetFile(const std::string& file);
         bool Reload();
 
         bool IsSet(const std::string& name) const;
@@ -50,7 +50,7 @@ namespace Quad
 
     private:
         std::string mFileName;
-        std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
+        std::unordered_map<std::string, std::string> mEntries; // keys are converted to lower case.  values cannot be.
     };
 }
 #define sConfig Quad::Config::instance()

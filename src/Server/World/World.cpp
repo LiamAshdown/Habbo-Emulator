@@ -25,6 +25,8 @@
 namespace Quad
 {
     //-----------------------------------------------//
+    volatile bool World::mStopWorld = false;
+    //-----------------------------------------------//
     World* World::instance()
     {
         static World instance;
@@ -33,14 +35,10 @@ namespace Quad
     //-----------------------------------------------//
     World::World()
     {
-        mPool.reset(new ThreadPool(1));
-
-        mPool->Enqueue(std::bind(&World::UpdateWorld, this));
     }
     //-----------------------------------------------//
     World::~World()
     {
-        mPool.reset();
     }
     //-----------------------------------------------//
     void World::AddListener(const uint16 port)
@@ -77,32 +75,38 @@ namespace Quad
             itr->second->ToSocket()->CloseSocket();
     }
     //-----------------------------------------------//
+    void World::CleanUp()
+    {
+        for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
+        {
+            Player* player = itr->second;
+
+            itr = mPlayers.erase(itr);
+            delete player;
+        }
+
+        mPlayers.clear();
+        mListener.clear();
+    }
+    //-----------------------------------------------//
+    bool World::StopWorld()
+    {
+        return mStopWorld;
+    }
+    //-----------------------------------------------//
     void World::UpdateWorld()
     {
-        Timer timer;
-        Timer pingTimer;
-
-        while (true)
+        for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
         {
-            for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
-            {
-                Player* player = itr->second;
+            Player* player = itr->second;
 
-                if (!player->Update())
-                {
-                    itr = mPlayers.erase(itr);
-                    delete player;
-                }
-                else
-                    ++itr;
-            }
-
-            // Update the world every 500 ms
-            if (timer.Elasped() < UPDATE_WORLD_TIMER)
+            if (!player->Update())
             {
-                std::this_thread::sleep_for(std::chrono::milliseconds((uint32)(UPDATE_WORLD_TIMER - timer.Elasped())));
-                timer.Reset();
+                itr = mPlayers.erase(itr);
+                delete player;
             }
+            else
+                ++itr;
         }
     }
     //-----------------------------------------------//

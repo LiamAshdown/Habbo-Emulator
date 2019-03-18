@@ -143,5 +143,6 @@ std::string GetDate()
     iss << month;
     iss << "-";
     iss << year;
+
     return iss.str();
 }

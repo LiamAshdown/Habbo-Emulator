@@ -20,7 +20,7 @@
 #define _Quad_QueryDatabase_h_
 #include "../Common/SharedDefines.h"
 #include "Database.h"
-#include "Fields.h"
+#include "Result.h"
 
 namespace Quad
 {
@@ -31,37 +31,28 @@ namespace Quad
         ~QueryDatabase();
 
     public:
-        // Direct Execute
         void DirectExecuteQuery(const std::string& query);
 
-        // Prepare Query
         void PrepareQuery(const std::string& query);
         void ExecuteQuery();
         bool GetResult();
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
-        // Neutral
-        void Release();
-        Field* Fetch();
+        Result* Fetch();
 
     private:
-        // Database
         std::string mDatabase;
-        std::shared_ptr<MySQLConnection> mConnection;
+        std::shared_ptr<Connection> mConnection;
         std::shared_ptr<sql::Connection> mSqlConnection;
 
-        // Direct Execute
         std::shared_ptr<sql::Statement> mStatement;
 
-        // Prepare Query
         std::shared_ptr<sql::PreparedStatement> mPreparedStatement;
 
-        // Neutral
         bool mExecuteResult;
         bool mIsExecuteResult;
-        bool mHasReleased;
         std::unique_ptr<sql::ResultSet> mResultSet;
-        Field mField;
+        Result mResult;
     }; 
 }
 

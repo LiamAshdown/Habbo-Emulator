@@ -26,6 +26,24 @@
 
 namespace Quad
 {
+    typedef struct PlayerBadgesStruct
+    {
+    public:
+        friend class PlayerSocket;
+
+    public:
+        PlayerBadgesStruct() : mBadge(""), mIsActive(false) {}
+        ~PlayerBadgesStruct() {}
+
+    public:
+        std::string GetBadge() const { return mBadge; }
+        bool IsActive() const { return mIsActive; }
+
+    private:
+        std::string mBadge;
+        bool mIsActive;
+    }PlayerBadges;
+
     class Player
     {
     public:
@@ -46,10 +64,9 @@ namespace Quad
         std::string GetGender() const;
         std::string GetCountry() const;
         std::string GetPoolFigure() const;
-        uint32 GetFilms() const;
 
+        uint32 GetFilms() const;
         uint32 GetCredits() const;
-        uint32 GetBadgeType() const;
         uint32 GetId() const;
         uint32 GetTickets() const;
 
@@ -57,13 +74,18 @@ namespace Quad
         bool IsInitialized() const;
         bool GetReadAgreement() const;
         bool GetSpecialRights() const;
+        bool IsSoundEnabled() const;
 
         bool SetRoom(std::shared_ptr<Room> room);
         std::shared_ptr<Room> GetRoom() const;
 
         void SendUserObject();
+        void SendAccountPreferences();
+        void SendAccountBadges();
+        void SendMessengerUpdate();
         void UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation);
 
+        void LoadMessenger();
         void SendInitializeMessenger();
 
         bool IsPonged() const;
@@ -94,10 +116,10 @@ namespace Quad
         bool mSpecialRights;
         bool mDirectMail;
         bool mInitialized;
+        bool mSoundEnabled;
 
         uint32 mId;
         uint32 mCredits;
-        uint32 mBadgeType;
         uint32 mTickets;
         uint32 mFilms;
 
@@ -106,6 +128,7 @@ namespace Quad
         uint16 mPositionZ;
         uint16 mOrientation;
 
+        std::vector<PlayerBadges> mBadges;
         std::shared_ptr<Room> mRoom;
         std::shared_ptr<PlayerSocket> mSocket;
         std::unique_ptr<Messenger> mMessenger;

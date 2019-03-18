@@ -20,32 +20,29 @@
 //-----------------------------------------------//
 namespace Quad
 {
+    //-----------------------------------------------//
     QueryDatabase::QueryDatabase(const std::string database)
     {
         mDatabase = database;
-        mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
-        mSqlConnection = mConnection->SQLConnection;
-        mConnection->connectionState = ConnectionState::Connection_Idle;
-        mIsExecuteResult = false;
-        mHasReleased = false;
     }
+    //-----------------------------------------------//
     QueryDatabase::~QueryDatabase()
     {
-        IF_LOG(plog::debug)
-            LOG_DEBUG << "Destructor QueryDatabase called!";
-
-        if (!mHasReleased)
-            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
     }
     //-----------------------------------------------//
     void QueryDatabase::DirectExecuteQuery(const std::string& query)
     {
         try
         {
+            mIsExecuteResult = false;
+            mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
+            mSqlConnection = mConnection->GetSQLConnection();
+
             mStatement = std::shared_ptr<sql::Statement>(mSqlConnection->createStatement());
             mExecuteResult = mStatement->execute(query.c_str());
-            mConnection->connectionState = ConnectionState::Connection_Query;
             mIsExecuteResult = true;
+
+            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
         }
         catch (sql::SQLException &e)
         {
@@ -55,9 +52,11 @@ namespace Quad
     //-----------------------------------------------//
     void QueryDatabase::PrepareQuery(const std::string& query)
     {
+        mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
+        mSqlConnection = mConnection->GetSQLConnection();
+
         mPreparedStatement = std::shared_ptr<sql::PreparedStatement>(mSqlConnection->prepareStatement(query.c_str()));
         mIsExecuteResult = false;
-        mConnection->connectionState = ConnectionState::Connection_Prepare;
     }
     //-----------------------------------------------//
     void QueryDatabase::ExecuteQuery()
@@ -65,7 +64,7 @@ namespace Quad
         try
         {
             mResultSet = std::unique_ptr<sql::ResultSet>(mPreparedStatement->executeQuery());
-            mConnection->connectionState = ConnectionState::Connection_Query;
+            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
         }
         catch (sql::SQLException &e)
         {
@@ -79,18 +78,10 @@ namespace Quad
             return mExecuteResult;
         else if (mResultSet->next())
         {
-            mField.mResultSet = std::move(mResultSet);
+            mResult.mResultSet = std::move(mResultSet);
             return true;
         }
         return false;
-    }
-    void QueryDatabase::Release()
-    {
-        if (!mHasReleased)
-        {
-            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
-            mHasReleased = true;
-        }
     }
     //-----------------------------------------------//
     std::shared_ptr<sql::PreparedStatement>& QueryDatabase::GetStatement()
@@ -98,9 +89,9 @@ namespace Quad
         return mPreparedStatement;
     }
     //-----------------------------------------------//
-    Field* QueryDatabase::Fetch()
+    Result* QueryDatabase::Fetch()
     {
-        return &mField;
+        return &mResult;
     }
     //-----------------------------------------------//
 }
