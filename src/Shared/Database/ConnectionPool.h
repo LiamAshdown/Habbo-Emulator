@@ -77,6 +77,19 @@ namespace Quad
                     }
 
                 }
+
+                // If all connections are borrowed, then we create a temporary connection and log the error as fatal
+                LOG_FATAL << "All connections are borrowed... attempting to create new temporary connection";
+                try
+                {
+                    std::shared_ptr<Connection> newConnection = mMySQLConnection->CreateDatabase();
+                    mBorrowedPool.insert(newConnection);
+                    return newConnection;
+                }
+                catch (const std::exception&)
+                {
+                    assert(false);
+                }
             }
 
             // We are now borrowing a connection, remove 1 connection from our thread pool
