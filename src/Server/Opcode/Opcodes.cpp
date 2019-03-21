@@ -53,7 +53,7 @@ namespace Quad
         StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_FLAT_CATEGORYS,       "CLIENT_GET_USER_FLAT_CATEGORYS",          &PlayerSocket::HandleGetUserFlatsCategories     );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FAVOURITE_ROOMS,           "CLIENT_GET_FAVOURITE_ROOMS",              &PlayerSocket::HandleGetFavouriteRooms          );
         StoreClientPacket(PacketClientHeader::CLIENT_ADD_FAVOURITE_ROOM,            "CLIENT_ADD_FAVOURITE_ROOM",               &PlayerSocket::HandleAddFavouriteRoom           );
-        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",            &PlayerSocket::HandleDeleteFavouriteRoom        );
+        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",            &PlayerSocket::HandleRemoveFavouriteRoom        );
         StoreClientPacket(PacketClientHeader::CLIENT_SEARCH_ROOMS,                  "CLIENT_SEARCH_ROOMS",                     &PlayerSocket::HandleSearchRooms                );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_INTEREST,                  "CLIENT_GET_INTEREST",                     &PlayerSocket::HandleGetInterest                );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_INIT,                "CLIENT_MESSENGER_INIT",                   &PlayerSocket::HandleMessengerInitialize        );
@@ -66,6 +66,9 @@ namespace Quad
         StoreClientPacket(PacketClientHeader::CLIENT_GET_ACCOUNT_PREFERENCES,       "CLIENT_GET_ACCOUNT_PREFERENCES",          &PlayerSocket::HandleGetAccountPreferences      );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_USERS,                    "CLIENT_ROOM_USERS",                       &PlayerSocket::HandleRoomUsers                  );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_UPDATE,              "CLIENT_MESSENGER_UPDATE",                 &PlayerSocket::HandleMessengerUpdate            );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_ACCEPT_REQUEST,      "CLIENT_MESSENGER_ACCEPT_REQUEST",         &PlayerSocket::HandleMessengerAcceptRequest     );
+        StoreClientPacket(PacketClientHeader::CLIENT_GAME_OBJECTS,                  "CLIENT_GAME_OBJECTS",                     &PlayerSocket::HandleGameObjects                );
+        StoreClientPacket(PacketClientHeader::CLIENT_FURNITURE_REVISIONS,           "CLIENT_FURNITURE_REVISIONS",              &PlayerSocket::HandleFurnitureRevisions         );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &PlayerSocket::HandleServerMessage              );
@@ -74,7 +77,7 @@ namespace Quad
         StoreServerPacket(PacketServerHeader::SERVER_APPROVE_NAME_REPLY,            "SERVER_APPROVE_NAME_REPLY",               &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_APPROVE_PASSWORD_REPLY,        "SERVER_APPROVE_PASSWORD_REPLY",           &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_APPROVE_EMAIL_REPLY,           "SERVER_APPROVE_EMAIL_REPLY",              &PlayerSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_MODERATOR_ALERT,               "SERVER_MODERATOR_ALERT",                  &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_LOCALISED_ERROR,               "SERVER_LOCALISED_ERROR",                  &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_LOGIN,                         "SERVER_LOGIN",                            &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ALERT,                         "SERVER_ALERT",                            &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_NOTICE,                        "SERVER_NOTICE",                           &PlayerSocket::HandleServerMessage              );
@@ -96,6 +99,10 @@ namespace Quad
         StoreServerPacket(PacketServerHeader::SERVER_FRIEND_REQUEST,                "SERVER_FRIEND_REQUEST",                   &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_USER_OBJECTS,             "SERVER_ROOM_USER_OBJECTS",                &PlayerSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_UPDATE,              "SERVER_MESSENGER_UPDATE",                 &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_OBJECTS_WORLD,                 "SERVER_OBJECTS_WORLD",                    &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ACTIVE_OBJECTS,                "SERVER_ACTIVE_OBJECTS",                   &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ALIAS_TOGGLE,                  "SERVER_ALIAS_TOGGLE",                     &PlayerSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_USER_RIGHTS,                   "SERVER_USER_RIGHTS",                      &PlayerSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";

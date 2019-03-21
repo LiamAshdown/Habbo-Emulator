@@ -8,7 +8,7 @@
 #    EXAMPLE CONFIG
 #    SERVER SETTINGS
 #	 MYSQL SETTINGS
-#    CUSTOM SETTINGS
+#    REGISTERATION SETTINGS
 #
 ###################################################################################################
 
@@ -33,32 +33,39 @@
 #    ServerPort
 #        Description: TCP port to reach the auth server.
 #        Default:     37120
-
+#
 ServerPort = 37120
-
+#
 #
 #
 #    BindIP
 #        Description: Bind auth server to IP/hostname
 #        Default:     "127.0.0.1" - (Bind to all IPs on the system)
-
+#
 BindIP = "127.0.0.1"
-
+#
 #
 #
 #    NetworkThreadProcessors
 #        Description: Amount of worker threads to launch NetworkThreadProcessors
 #        Default:     1
-
+#
 NetworkThreadProcessors = 1
-
+#
 #
 #    PongInterval
 #        Description: Pong interval time to sent to clients in milliseconds
 #        Default:     10000
-
+#
 PongInterval = 10000
-
+#
+#
+#    PlayerAccountUpdate
+#        Description: Update player to database in milliseconds
+#        Default:     600000 (10 minutes)
+#
+PlayerAccountUpdate = 600000
+#
 #
 ###################################################################################################
 
@@ -72,16 +79,16 @@ PongInterval = 10000
 #                                                                 "enable-named-pipe" to [mysqld]
 #                                                                 section my.ini)
 #        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
-
+#
 UserDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
-
+#
 #
 #    UserDatabaseInfo.WorkerThreads
 #        Description: The amount of MySQL connections spawned to handle.
 #        Default:     10 - (LoginDatabase.WorkerThreads)
-
+#
 UserDatabaseInfo.WorkerThreads  = 10
-
+#
 #    RoomDatabaseInfo
 #        Description: Database connection settings for the auth server.
 #        Example:     "hostname;port;username;password;database"
@@ -89,49 +96,84 @@ UserDatabaseInfo.WorkerThreads  = 10
 #                                                                 "enable-named-pipe" to [mysqld]
 #                                                                 section my.ini)
 #        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
-
+#
 RoomDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
-
+#
 #
 #    RoomDatabaseInfo.WorkerThreads
 #        Description: The amount of MySQL connections spawned to handle.
 #        Default:     10 - (LoginDatabase.WorkerThreads)
-
+#
 RoomDatabaseInfo.WorkerThreads  = 10
-
+#
 #
 ###################################################################################################
 
 ###################################################################################################
-# CUSTOM SETTINGS
+# REGISTERATION SETTINGS
+#
+#    RegisterationHabboClothing
+#        Description: Allow to use Habbo Club Clothing during registeration
+#        Default:     0 - Disabled | Enabled - 1
+#
+#
+RegisterationHabboClothing = 0
 #
 #    RegisterationCredits
 #        Description: Set credit amount on player registeration
 #        Default:     0
 #
-
+#
 RegisterationCredits = 0
-
-#    BobbaWords
-#        Description: Set words which are not allowed.
+#
+#    RegisterationTickets
+#        Description: Set ticket amount on player registeration
+#        Default:     0
+#
+#
+RegisterationTickets = 0
+#
+#    RegisterationFilms
+#        Description: Set film amount on player registeration
+#        Default:     0
+#
+#
+RegisterationFilms = 0
+#
+#    RegisterationBobbaWords
+#        Description: Set words which are not allowed when registering.
 #        Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
 #
-
-BobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
-
-#    WelcomeMessage
+#
+RegisterationBobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
+#
+#    RegisterationSound
+#        Description: Set whether sound is enabled or not
+#        Default:     0 - Disabled | Enabled - 1
+#
+#
+RegisterationSound= 0
+#
+#    RegisterationMotto
+#        Description: Set whether sound is enabled or not
+#        Default:     "I'm a new user!"
+#
+#
+RegisterationMotto= I'm a new user!
+#
+#    RegisterationConsoleMotto
+#        Description: Set whether sound is enabled or not
+#        Default:     "I'm looking for friends!"
+#
+#
+RegisterationConsoleMotto= I'm looking for friends!
+#
+#    RegisterationWelcomeMessage
 #        Description: Set welcome message when user logging into Habbo
 #        Default:     "Welcome to QuadEmulator!"
 #
-
-WelcomeMessage = Welcome to QuadEmulator!
-
-#    MaxFavouriteRooms
-#        Description: Max of favourite rooms user can have
-#        Default:     50
 #
-
-MaxFavouriteRooms = 50
-
+RegisterationWelcomeMessage = Welcome to QuadEmulator!
+#
 #
 ###################################################################################################

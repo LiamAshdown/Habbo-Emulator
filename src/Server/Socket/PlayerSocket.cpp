@@ -21,7 +21,6 @@
 #include "Database/Result.h"
 #include "Common/SHA1.h"
 #include "Player.h"
-#include "Network/StringBuffer.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -45,9 +44,9 @@ namespace Quad
         mPlayer = nullptr;
     }
     //-----------------------------------------------//
-    void PlayerSocket::SendPacket(const char* buffer, const std::size_t& length)
+    void PlayerSocket::SendPacket(StringBuffer& buffer)
     {
-        Write(buffer, length);
+        Write((const char*)buffer.GetContents(), buffer.GetSize());
     }
     //-----------------------------------------------//
     bool PlayerSocket::ProcessIncomingData()

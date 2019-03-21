@@ -21,6 +21,17 @@
 #include "Common/SharedDefines.h"
 #include "Network/StringBuffer.h"
 
+enum MessengerError
+{
+    ACCEPT_SUCCESS                  = 0,
+    TARGET_FRIEND_LIST_FULL         = 2,
+    TARGET_DOES_NOT_ACCEPT          = 3,
+    FRIEND_REQUEST_NOT_FOUND        = 4,
+    BUDDY_REMOVE_ERROR              = 37,
+    FRIEND_LIST_FULL                = 39,
+    CONCURRENCY_ERROR               = 42
+};
+
 namespace Quad
 {
     typedef struct MessengerFriendsStruct
@@ -29,16 +40,16 @@ namespace Quad
         friend class Messenger;
 
     public:
-        MessengerFriendsStruct() {}
+        MessengerFriendsStruct() : mId(0), mFigure(""), mGender(""), mConsoleMotto(""), mLastOnline("") {}
         ~MessengerFriendsStruct() {}
 
     public:
-        uint32 GetId() const { return mId; }
-        std::string GetFigure() const { return mFigure; }
-        std::string GetName() const { return mName; }
-        std::string GetGender() const { return mGender; }
+        uint32 GetId()                const { return mId; }
+        std::string GetFigure()       const { return mFigure; }
+        std::string GetName()         const { return mName; }
+        std::string GetGender()       const { return mGender; }
         std::string GetConsoleMotto() const { return mConsoleMotto; }
-        std::string GetLastOnline() const { return mLastOnline; }
+        std::string GetLastOnline()   const { return mLastOnline; }
 
     private:
         uint32 mId;
@@ -57,7 +68,7 @@ namespace Quad
     public:
 
     public:
-        Messenger(const uint32& id);
+        explicit Messenger(const uint32& id);
         ~Messenger();
 
     public:
@@ -66,14 +77,17 @@ namespace Quad
         void LoadMessengerFriendRequests();
 
         void UpdateConsole();
+        void AcceptFriendRequest(StringBuffer& buffer, const uint32& senderId);
 
         void ParseMessengerFriends(StringBuffer& buffer);
         void ParseMessengerFriendRequests(StringBuffer& buffer);
         void ParseMessengerUpdate(StringBuffer& buffer);
+        void ParseMessengerAcceptRequest(StringBuffer& buffer, const uint32& senderId, bool success);
 
     private:
         MessengerFriendsVector mMessengerFriends;
         MessengerFriendRequestsVector mMessengerFriendRequests;
+
         uint32 mId;
     };
 }

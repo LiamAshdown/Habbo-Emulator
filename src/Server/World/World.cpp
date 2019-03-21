@@ -21,6 +21,7 @@
 #include "Common/Timer.h"
 #include "Player.h"
 #include "Config/Config.h"
+#include "Database/QueryDatabase.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -35,18 +36,11 @@ namespace Quad
     //-----------------------------------------------//
     World::World()
     {
+      
     }
     //-----------------------------------------------//
     World::~World()
     {
-    }
-    //-----------------------------------------------//
-    void World::AddListener(const uint16 port)
-    {
-        std::unique_ptr<Quad::Listener<Quad::PlayerSocket>> listener = std::make_unique<Quad::Listener<Quad::PlayerSocket>>(sConfig->GetStringDefault("BindIP", "127.0.0.1"), port,
-            sConfig->GetIntDefault("NetworkThreadProcessors", 1));
-
-        mListener.push_back(std::move(listener));
     }
     //-----------------------------------------------//
     Player* World::FindPlayer(const uint32& mId) const
@@ -58,12 +52,15 @@ namespace Quad
         return nullptr;
     }
     //-----------------------------------------------//
-    void World::AddPlayer(const uint32& mId, Player* currentSession)
+    void World::AddPlayer(Player* player)
     {
         std::lock_guard<std::mutex> guard(mMutex);
 
-        if (!mPlayers.count(mId))
-            mPlayers[mId] = currentSession;
+        PlayerMap::const_iterator itr = mPlayers.find(player->GetId());
+        if (itr != mPlayers.end())
+            delete itr->second;
+
+        mPlayers[player->GetId()] = player;
     }
     //-----------------------------------------------//
     void World::RemovePlayer(const uint32& mId)
@@ -71,8 +68,8 @@ namespace Quad
         std::lock_guard<std::mutex> guard(mMutex);
 
         PlayerMap::const_iterator itr = mPlayers.find(mId);
-        if (itr->second && itr != mPlayers.end())
-            itr->second->ToSocket()->CloseSocket();
+        if (itr != mPlayers.end())
+            itr->second->Logout();
     }
     //-----------------------------------------------//
     void World::CleanUp()
@@ -80,13 +77,13 @@ namespace Quad
         for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
         {
             Player* player = itr->second;
+            player->Logout();
 
             itr = mPlayers.erase(itr);
             delete player;
         }
 
         mPlayers.clear();
-        mListener.clear();
     }
     //-----------------------------------------------//
     bool World::StopWorld()
@@ -94,14 +91,16 @@ namespace Quad
         return mStopWorld;
     }
     //-----------------------------------------------//
-    void World::UpdateWorld()
+    void World::UpdateWorld(const uint32& diff)
     {
         for (PlayerMap::iterator itr = mPlayers.begin(); itr != mPlayers.end();)
         {
             Player* player = itr->second;
 
-            if (!player->Update())
+            if (!player->Update(diff))
             {
+                player->Logout();
+
                 itr = mPlayers.erase(itr);
                 delete player;
             }

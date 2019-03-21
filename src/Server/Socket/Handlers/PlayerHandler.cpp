@@ -40,7 +40,7 @@ namespace Quad
         buffer.AppendBase64(PacketServerHeader::SERVER_CREDIT_BALANCE);
         buffer.AppendString(std::to_string(mPlayer->GetCredits()) + ".0");
         buffer.AppendSOH();
-        Write((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleNoDespaceUsers(std::unique_ptr<Packet> packet)
@@ -51,7 +51,7 @@ namespace Quad
         buffer.AppendBase64(PacketClientHeader::CLIENT_NO_DESPACE_USERS);
         buffer.AppendString(mPlayer->GetName());
         buffer.AppendSOH();
-        Write((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleGetClub(std::unique_ptr<Packet> packet)
@@ -69,5 +69,25 @@ namespace Quad
         mPlayer->SendAccountPreferences();
     }
     //-----------------------------------------------//
+    void PlayerSocket::HandleGetFavouriteRooms(std::unique_ptr<Packet> packet)
+    {
+        mPlayer->SendFavouriteRooms();
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleAddFavouriteRoom(std::unique_ptr<Packet> packet)
+    {
+        bool roomType = packet->ReadWiredBool();
+        uint32 roomId = packet->ReadWiredUint() - ROOM_ID_OFFSET;
+
+        mPlayer->AddFavouriteRoom(roomType, roomId);
+    }
+    //-----------------------------------------------//
+    void PlayerSocket::HandleRemoveFavouriteRoom(std::unique_ptr<Packet> packet)
+    {
+        bool roomType = packet->ReadWiredBool();
+        uint32 roomId = packet->ReadWiredUint();
+
+        mPlayer->RemoveFavouriteRoom(roomId);
+    }
 }
 //-----------------------------------------------//

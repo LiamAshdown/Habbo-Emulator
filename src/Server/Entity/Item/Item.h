@@ -34,28 +34,30 @@ namespace Quad
         ~PublicItemStruct() {}
 
     public:
-        uint32 GetId() const { return sId; }
-        uint32 GetDefinitionId() const { return sDefinitionId; }
-        std::string GetSprite() const { return sSprite; }
-        std::string GetModel() const { return sModel; }
-        uint16 GetPositionX() const { return sX; }
-        uint16 GetPositionY() const { return sY; }
-        uint16 GetPositionZ() const { return sZ; }
-        uint8 GetRotation() const { return sRotation; }
-        std::string GetObject() const { return sObject; }
-        std::string GetData() const { return sData; }
+        uint32 GetId() const { return mId; }
+        std::string GetRoomModel() const { return mRoomModel; }
+        std::string GetSprite() const { return mSprite; }
+        int32 GetPositionX() const { return mX; }
+        int32 GetPositionY() const { return mY; }
+        double GetPositionZ() const { return mZ; }
+        int32 GetRotation() const { return mRotation; }
+        float GetTopHeight() const { return mTopHeight; }
+        int32 GetLength() const { return mLength; }
+        int32 GetWidth() const { return mWidth; }
+        std::string GetBehaviour() const { return mBehaviour; }
 
     private:
-        uint32 sId;
-        uint32 sDefinitionId;
-        std::string sSprite;
-        std::string sModel;
-        uint16 sX;
-        uint16 sY;
-        uint16 sZ;
-        uint8 sRotation;
-        std::string sObject;
-        std::string sData;
+        uint32 mId;
+        std::string mRoomModel;
+        std::string mSprite;
+        int32 mX;
+        int32 mY;
+        double mZ;
+        int32 mRotation;
+        float mTopHeight;
+        int32 mLength;
+        int32 mWidth;
+        std::string mBehaviour;
     }PublicItem;
 
     class Item

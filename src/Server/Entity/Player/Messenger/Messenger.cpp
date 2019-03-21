@@ -30,6 +30,8 @@ namespace Quad
     //-----------------------------------------------//
     Messenger::~Messenger()
     {
+        mMessengerFriends.clear();
+        mMessengerFriendRequests.clear();
     }
     //-----------------------------------------------//
     void Messenger::LoadMessenger()
@@ -40,6 +42,7 @@ namespace Quad
     //-----------------------------------------------//
     void Messenger::LoadMessengerFriends()
     {
+        mMessengerFriends.clear();
         QueryDatabase database("users");
         database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN account ON messenger_friends.to_id = account.id WHERE(messenger_friends.from_id = ?)");
         database.GetStatement()->setUInt(1, mId);
@@ -63,6 +66,7 @@ namespace Quad
     //-----------------------------------------------//
     void Messenger::LoadMessengerFriendRequests()
     {
+        mMessengerFriendRequests.clear();
         QueryDatabase database("users");
         database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_requests INNER JOIN account ON messenger_requests.from_id = account.id WHERE(messenger_requests.to_id = ?)");
         database.GetStatement()->setUInt(1, mId);
@@ -86,28 +90,32 @@ namespace Quad
     //-----------------------------------------------//
     void Messenger::UpdateConsole()
     {
-        mMessengerFriends.clear();
-
-        // When we recieve console update, query the database
+        LoadMessengerFriends();
+        LoadMessengerFriendRequests();
+    }
+    //-----------------------------------------------//
+    void Messenger::AcceptFriendRequest(StringBuffer& buffer, const uint32& senderId)
+    {
+        // TODO; Clean this
         QueryDatabase database("users");
-        database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN account ON messenger_friends.to_id = account.id WHERE(messenger_friends.from_id = ?)");
-        database.GetStatement()->setUInt(1, mId);
+        database.PrepareQuery("DELETE FROM messenger_requests WHERE from_id = ? AND to_id = ?");
+        database.GetStatement()->setUInt(1, senderId);
+        database.GetStatement()->setUInt(2, mId);
         database.ExecuteQuery();
 
-        if (!database.GetResult())
-            return;
+        database.PrepareQuery("INSERT INTO messenger_friends(from_id, to_id) VALUES(?, ?)");
+        database.GetStatement()->setUInt(1, mId);
+        database.GetStatement()->setUInt(2, senderId);
+        database.ExecuteQuery();
 
-        Result* result = database.Fetch();
+        database.PrepareQuery("INSERT INTO messenger_friends(from_id, to_id) VALUES(?, ?)");
+        database.GetStatement()->setUInt(1, senderId);
+        database.GetStatement()->setUInt(2, mId);
+        database.ExecuteQuery();
 
-        std::unique_ptr<MessengerFriends> messenger = std::make_unique<MessengerFriends>();
-        messenger->mId = result->GetUint32(1);
-        messenger->mName = result->GetString(2);
-        messenger->mFigure = result->GetString(3);
-        messenger->mConsoleMotto = result->GetString(4);
-        messenger->mGender = result->GetString(5);
-        messenger->mLastOnline = result->GetString(6);
+        UpdateConsole();
 
-        mMessengerFriends.push_back(std::move(messenger));
+        ParseMessengerAcceptRequest(buffer, senderId, database.GetResult());
     }
     //-----------------------------------------------//
     void Messenger::ParseMessengerFriends(StringBuffer& buffer)
@@ -166,6 +174,14 @@ namespace Quad
             else
                 buffer.AppendString((*itr)->GetLastOnline());
         }
+    }
+    //-----------------------------------------------//
+    void Messenger::ParseMessengerAcceptRequest(StringBuffer& buffer, const uint32& senderId, bool success)
+    {
+        MessengerError error = MessengerError::ACCEPT_SUCCESS;
+
+        if (!success)
+            error = MessengerError::FRIEND_REQUEST_NOT_FOUND;
     }
     //-----------------------------------------------//
 }

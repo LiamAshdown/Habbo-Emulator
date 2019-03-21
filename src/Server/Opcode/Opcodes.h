@@ -53,6 +53,9 @@ enum PacketClientHeader : uint16
     CLIENT_GET_ACCOUNT_PREFERENCES        = 228,
     CLIENT_ROOM_USERS                     = 61,
     CLIENT_MESSENGER_UPDATE               = 15,
+    CLIENT_MESSENGER_ACCEPT_REQUEST       = 37,
+    CLIENT_GAME_OBJECTS                   = 62,
+    CLIENT_FURNITURE_REVISIONS            = 213,
 };
 
 enum PacketServerHeader : uint16
@@ -63,7 +66,7 @@ enum PacketServerHeader : uint16
     SERVER_APPROVE_NAME_REPLY             = 36,
     SERVER_APPROVE_PASSWORD_REPLY         = 282,
     SERVER_APPROVE_EMAIL_REPLY            = 271,
-    SERVER_MODERATOR_ALERT                = 33,
+    SERVER_LOCALISED_ERROR                = 33,
     SERVER_LOGIN                          = 3,
     SERVER_ALERT                          = 139,
     SERVER_NOTICE                         = 139,
@@ -88,6 +91,10 @@ enum PacketServerHeader : uint16
     SERVER_FRIEND_REQUEST                 = 132,
     SERVER_ROOM_USER_OBJECTS              = 28,
     SERVER_MESSENGER_UPDATE               = 13,
+    SERVER_OBJECTS_WORLD                  = 30,
+    SERVER_ACTIVE_OBJECTS                 = 32,
+    SERVER_ALIAS_TOGGLE                   = 297,
+    SERVER_USER_RIGHTS                    = 2,
 };
 
 namespace Quad

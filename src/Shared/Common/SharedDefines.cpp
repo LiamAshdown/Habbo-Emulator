@@ -17,6 +17,7 @@
 */
 
 #include "SharedDefines.h"
+#include "Timer.h"
 
 std::string SplitString(const std::string& stringData, const std::string& tokenizer)
 {

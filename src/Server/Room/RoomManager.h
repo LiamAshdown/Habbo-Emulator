@@ -24,11 +24,9 @@
 
 namespace Quad
 {
-    typedef std::map<uint32, std::shared_ptr<RoomCategory>> RoomCategoriesMap;
-    typedef std::map<uint32, std::shared_ptr<Room>> RoomsMap;
-    typedef std::vector<std::shared_ptr<FavouriteRooms>> FavouriteRoomsVector;
-    typedef std::map<uint32, FavouriteRoomsVector> FavouriteRoomsMap;
-    typedef std::map<std::string, std::shared_ptr<RoomModelsStruct>> RoomModelsMap;
+    typedef std::unordered_map<uint32, RoomCategoryData> RoomCategoriesMap;
+    typedef std::unordered_map<uint32, std::shared_ptr<Room>> RoomsMap;
+    typedef std::unordered_map<std::string, RoomModelsData> RoomModelsMap;
 
     class RoomManager
     {
@@ -42,28 +40,19 @@ namespace Quad
     public:
         void LoadRoomCategories();
         void LoadRooms();
-        void LoadFavouriteRooms();
         void LoadRoomModels();
 
-        std::shared_ptr<RoomCategory> GetRoomCategory(const uint32& id);
+        RoomCategoryData* GetRoomCategory(const uint32& id);
         std::shared_ptr<Room> GetRoom(const uint32& id);
-        FavouriteRoomsVector GetFavouriteRooms(const uint32& Id);
-        std::shared_ptr<RoomModelsStruct> GetRoomModel(const std::string& model);
+        RoomModelsData* GetRoomModel(const std::string& model);
             
         RoomCategoriesMap* GetRoomCategories();
         RoomsMap* GetRooms();
 
-        void AddFavouriteRoom(const uint32& accountId, const bool& isPublic, const uint32& roomId);
-        void DeleteFavouriteRoom(const uint32& accountId, const uint32& roomId);
-
     private:
         RoomCategoriesMap mRoomCategories;
         RoomsMap mRooms;
-        FavouriteRoomsMap mFavouriteRooms;
         RoomModelsMap mRoomModels;
-
-    private:
-        std::mutex mMutex;
     };
 }
 

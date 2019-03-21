@@ -21,6 +21,7 @@
 #include "Common/SharedDefines.h"
 #include "Room.h"
 #include "Messenger.h"
+#include "FavouriteRoom.h"
 #include "Common/Timer.h"
 #include <mutex>
 
@@ -42,7 +43,43 @@ namespace Quad
     private:
         std::string mBadge;
         bool mIsActive;
-    }PlayerBadges;
+    }PlayerBadgesData;
+
+    typedef struct PlayerClubSubscriptionStruct
+    {
+    public:
+        friend class PlayerSocket;
+
+    public:
+        PlayerClubSubscriptionStruct() : mDaysRemaining(0), mRemainingPeriods(0), mDaysPassed(0),
+        mLastChecked(0) {}
+        ~PlayerClubSubscriptionStruct() {}
+
+    private:
+        std::string mLastChecked;
+        uint32 mDaysRemaining;
+        uint32 mRemainingPeriods;
+        uint32 mDaysPassed;
+
+    }PlayerClubSubscriptionData;
+
+    typedef struct PlayerFuseRightsStruct
+    {
+    public:
+        friend class PlayerSocket;
+
+    public:
+        PlayerFuseRightsStruct() : mRank(0), mFuseRight("") {}
+        ~PlayerFuseRightsStruct() {}
+
+    public:
+        uint8 GetRank() const { return mRank; }
+        std::string GetFuseRight() const { return mFuseRight; }
+
+    private:
+        uint8 mRank;
+        std::string mFuseRight;
+    }PlayerFuseRightsData;
 
     class Player
     {
@@ -70,6 +107,11 @@ namespace Quad
         uint32 GetId() const;
         uint32 GetTickets() const;
 
+        int32 GetPositionX() const;
+        int32 GetPositionY() const;
+        int32 GetPositionZ() const;
+        int32 GetOrientation() const;
+
         bool CanSendMail() const;
         bool IsInitialized() const;
         bool GetReadAgreement() const;
@@ -80,17 +122,30 @@ namespace Quad
         std::shared_ptr<Room> GetRoom() const;
 
         void SendUserObject();
+        StringBuffer& GetUserRoomObject();
         void SendAccountPreferences();
         void SendAccountBadges();
         void SendMessengerUpdate();
-        void UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation);
+        void SendFuseRights();
 
-        void LoadMessenger();
+        // Favourite Rooms
+        void SendFavouriteRooms();
+        void AddFavouriteRoom(const bool& isPublic, const uint32& roomId);
+        void RemoveFavouriteRoom(const uint32& roomId);
+
+        void UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation);
+
+        void LoadPlayerData();
+
         void SendInitializeMessenger();
+        void MessengerAcceptRequest(const uint32& senderId);
+
+        void SendClubStatus();
 
         bool IsPonged() const;
 
-        bool Update();
+        bool Update(const uint32& diff);
+        void UpdateFavouriteRooms();
 
         void Logout();
 
@@ -122,19 +177,23 @@ namespace Quad
         uint32 mCredits;
         uint32 mTickets;
         uint32 mFilms;
+        uint32 mMaxFriendsLimit;
 
-        uint16 mPositionX;
-        uint16 mPositionY;
-        uint16 mPositionZ;
-        uint16 mOrientation;
+        int32 mPositionX;
+        int32 mPositionY;
+        int32 mPositionZ;
+        int32 mOrientation;
 
-        std::vector<PlayerBadges> mBadges;
-        std::shared_ptr<Room> mRoom;
         std::shared_ptr<PlayerSocket> mSocket;
-        std::unique_ptr<Messenger> mMessenger;
 
-        Timer mPingTimer;
+        std::shared_ptr<Room> mRoom;
+        std::vector<PlayerFuseRightsData> mFuseRights;
+        std::vector<PlayerBadgesData> mBadges;
+        std::unique_ptr<Messenger> mMessenger;
+        std::unique_ptr<FavouriteRoom> mFavouriteRooms;
+
         uint32 mPingInterval;
+        uint32 mUpdateAccount;
         bool mPonged;
         std::mutex mMutex;
     };

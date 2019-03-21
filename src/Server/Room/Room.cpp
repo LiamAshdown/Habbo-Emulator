@@ -114,5 +114,78 @@ namespace Quad
         return mVisitorsMax;
     }
     //-----------------------------------------------//
+    void Room::EnterRoom(Player* player)
+    {
+        if (std::find(mPlayers.begin(), mPlayers.end(), player) != mPlayers.end())
+        {
+            LOG_ERROR << "Player tried to enter room " << GetId() << " but is already inside room!";
+            return;
+        }
+
+        player->UpdatePosition(GetRoomModel()->GetDoorX(), GetRoomModel()->GetDoorY(), GetRoomModel()->GetDoorZ(),
+            GetRoomModel()->GetDoorOrientation());
+
+        mPlayers.push_back(player);
+        SendUserObjects(player);
+        mVisitorsNow++;
+    }
+    //-----------------------------------------------//
+    void Room::LeaveRoom(Player* player)
+    {
+        std::vector<Player*>::const_iterator& itr = std::find(mPlayers.begin(), mPlayers.end(), player);
+
+        if (itr != mPlayers.end())
+        {
+            mPlayers.erase(itr);
+            mVisitorsMax--;
+        }
+        else
+            LOG_INFO << "Player " << player->GetName() << " tried to leave room but player does not exist in room!";
+    }
+    //-----------------------------------------------//
+    RoomModelsStruct* Room::GetRoomModel()
+    {
+        return &mRoomModel;
+    }
+    //-----------------------------------------------//
+    void Room::SendUserObjects(Player* player)
+    {
+        for (std::vector<Player*>::const_iterator& itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
+        {
+            Player* roomPlayer = *itr;
+
+            if (roomPlayer->GetId() != player->GetId())
+                roomPlayer->ToSocket()->SendPacket(player->GetUserRoomObject());
+
+            player->ToSocket()->SendPacket(roomPlayer->GetUserRoomObject());
+            break;
+        }
+    }
+    //-----------------------------------------------//
+    void Room::SendObjectsWorld(Player * player)
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(PacketServerHeader::SERVER_OBJECTS_WORLD);
+        for (auto& itr : sItemMgr->GetPublicRoomItems(GetModel()))
+        {
+            PublicItem* item = &itr;
+
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetId()), " ");
+            buffer.AppendStringDelimiter(item->GetSprite(), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionX()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionY()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionZ()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetRotation()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetLength()), " ");
+            buffer.AppendString("\r", false);
+        }
+
+        buffer.AppendSOH();
+
+        uint8* ptr = &buffer.mStorage[0];
+
+        player->ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
 }
 //-----------------------------------------------//

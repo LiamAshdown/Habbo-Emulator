@@ -24,6 +24,9 @@
 
 namespace Quad
 {
+    typedef std::vector<PublicItem> PublicItemVec;
+    typedef std::map<std::string, PublicItemVec> PublicItemMap;
+
     class ItemManager
     {
     public:
@@ -32,8 +35,14 @@ namespace Quad
     public:
         ItemManager();
         ~ItemManager();
+        
+    public:
+        void LoadPublicRoomItems();
+
+        PublicItemVec GetPublicRoomItems(const std::string& model);
 
     private:
+        PublicItemMap mPublicItems;
         std::mutex mMutex;
     };
 }

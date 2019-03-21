@@ -19,6 +19,7 @@
 #ifndef _Quad_PlayerSocket_h_
 #define _Quad_PlayerSocket_h_
 #include "Network/Socket.h"
+#include "Network/StringBuffer.h"
 #include "Opcodes.h"
 
 namespace Quad
@@ -36,7 +37,7 @@ namespace Quad
         void DestroyPlayer();
 
     public:
-        void SendPacket(const char* buffer, const std::size_t& length);
+        void SendPacket(StringBuffer& buffer);
 
         ////////////////////////
         //      HANDLERS      //
@@ -58,7 +59,7 @@ namespace Quad
         void HandleGetUserFlatsCategories(std::unique_ptr<Packet> packet);
         void HandleGetFavouriteRooms(std::unique_ptr<Packet> packet);
         void HandleAddFavouriteRoom(std::unique_ptr<Packet> packet);
-        void HandleDeleteFavouriteRoom(std::unique_ptr<Packet> packet);
+        void HandleRemoveFavouriteRoom(std::unique_ptr<Packet> packet);
         void HandleSearchRooms(std::unique_ptr<Packet> packet);
         void HandleGetInterest(std::unique_ptr<Packet> packet);
         void HandleMessengerInitialize(std::unique_ptr<Packet> packet);
@@ -70,6 +71,9 @@ namespace Quad
         void HandleGetAccountPreferences(std::unique_ptr<Packet> packet);
         void HandleRoomUsers(std::unique_ptr<Packet> packet);
         void HandleMessengerUpdate(std::unique_ptr<Packet> packet);
+        void HandleMessengerAcceptRequest(std::unique_ptr<Packet> packet);
+        void HandleGameObjects(std::unique_ptr<Packet> packet);
+        void HandleFurnitureRevisions(std::unique_ptr<Packet> packet);
         void HandleServerMessage(std::unique_ptr<Packet> packet);
         void HandleNULL(std::unique_ptr<Packet> packet);
 

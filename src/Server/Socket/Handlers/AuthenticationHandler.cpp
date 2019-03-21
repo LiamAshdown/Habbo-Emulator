@@ -35,7 +35,7 @@ namespace Quad
         buffer.AppendWired(1);
         buffer.AppendWired(0);
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleGenerateKey(std::unique_ptr<Packet> packet)
@@ -43,28 +43,31 @@ namespace Quad
         StringBuffer buffer;
 
         buffer.AppendBase64(SERVER_SESSION_PARAMETERS);
-        buffer.AppendWired(6);
-        buffer.AppendWired(0);
         buffer.AppendWired(1);
         buffer.AppendWired(1);
         buffer.AppendWired(1);
-        buffer.AppendWired(3);
-        buffer.AppendWired(0);
+        buffer.AppendWired(1);
+        buffer.AppendWired(1);
+        buffer.AppendWired(1);
+        buffer.AppendWired(1);
         buffer.AppendWired(2);
         buffer.AppendWired(1);
-        buffer.AppendWired(4);
         buffer.AppendWired(1);
-        buffer.AppendWired(5);
+        buffer.AppendWired(1);
+        buffer.AppendWired(1);
         buffer.AppendString("dd-MM-yyyy", false);
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
 
         buffer.Clear();
 
         buffer.AppendBase64(PacketServerHeader::SERVER_AVAILABLE_SETS);
-        buffer.AppendString("[100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,176,177,178,180,185,190,195,200,205,206,207,210,215,220,225,230,235,240,245,250,255,260,265,266,267,270,275,280,281,285,290,295,300,305,500,505,510,515,520,525,530,535,540,545,550,555,565,570,575,580,585,590,595,596,600,605,610,615,620,625,626,627,630,635,640,645,650,655,660,665,667,669,670,675,680,685,690,695,696,700,705,710,715,720,725,730,735,740,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,869,870,871,872,873]");
+        if (sConfig->GetBoolDefault("RegisterationHabboClothing", 0))
+            buffer.AppendString("[100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,176,177,178,180,185,190,195,200,205,206,207,210,215,220,225,230,235,240,245,250,255,260,265,266,267,270,275,280,281,285,290,295,300,305,500,505,510,515,520,525,530,535,540,545,550,555,565,570,575,580,585,590,595,596,600,605,610,615,620,625,626,627,630,635,640,645,650,655,660,665,667,669,670,675,680,685,690,695,696,700,705,710,715,720,725,730,735,740]");
+        else
+            buffer.AppendString("[100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,176,177,178,180,185,190,195,200,205,206,207,210,215,220,225,230,235,240,245,250,255,260,265,266,267,270,275,280,281,285,290,295,300,305,500,505,510,515,520,525,530,535,540,545,550,555,565,570,575,580,585,590,595,596,600,605,610,615,620,625,626,627,630,635,640,645,650,655,660,665,667,669,670,675,680,685,690,695,696,700,705,710,715,720,725,730,735,740,800,801,802,803,804,805,806,807,808,809,810,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,869,870,871,872,873]");
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleGDate(std::unique_ptr<Packet> packet)
@@ -73,7 +76,7 @@ namespace Quad
         buffer.AppendBase64(PacketClientHeader::CLIENT_GDATE);
         buffer.AppendString(GetDate());
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleApproveUsername(std::unique_ptr<Packet> packet)
@@ -81,7 +84,7 @@ namespace Quad
         std::string username = packet->ReadString();
 
         QueryDatabase database("users");
-        database.PrepareQuery("SELECT user_name FROM accounts WHERE user_name = ?");
+        database.PrepareQuery("SELECT user_name FROM account WHERE user_name = ?");
         database.GetStatement()->setString(1, username.c_str());
         database.ExecuteQuery();
 
@@ -95,11 +98,11 @@ namespace Quad
                 errorCode = ApproveNameError::NAME_UNACCEPTABLE_TO_STAFF;
             else
             {
-                std::string badWords = sConfig->GetStringDefault("BobbaWords");
+                std::string bobbaWords = sConfig->GetStringDefault("RegisterationBobbaWords");
 
-                for (uint8 i = 0; i < badWords.length(); i++)
+                for (uint8 i = 0; i < bobbaWords.length(); i++)
                 {
-                    if (username.find(badWords[i]) != std::string::npos)
+                    if (username.find(bobbaWords[i]) != std::string::npos)
                     {
                         errorCode = ApproveNameError::NAME_UNACCEPTABLE_TO_STAFF_2;;
                         break;
@@ -114,7 +117,7 @@ namespace Quad
         buffer.AppendBase64(PacketServerHeader::SERVER_APPROVE_NAME_REPLY);
         buffer.AppendWired(errorCode);
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleApprovePassword(std::unique_ptr<Packet> packet)
@@ -130,13 +133,13 @@ namespace Quad
             errorCode = ApprovePasswordError::PASSWORD_TOO_LONG;
         else
         {
-            std::string badWords = sConfig->GetStringDefault("BobbaWords");
+            std::string bobbaWords = sConfig->GetStringDefault("bobbaWords");
             bool usedNumber = false;
 
             // Must contain atleast a number
             for (uint8 i = 0; i < 10; i++)
             {
-                if (password.find(badWords[i]) != std::string::npos)
+                if (password.find(bobbaWords[i]) != std::string::npos)
                 {
                     usedNumber = true;
                     break;
@@ -155,7 +158,7 @@ namespace Quad
         buffer.AppendBase64(PacketServerHeader::SERVER_APPROVE_PASSWORD_REPLY);
         buffer.AppendWired(errorCode);
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleApproveEmail(std::unique_ptr<Packet> packet)
@@ -164,7 +167,7 @@ namespace Quad
         StringBuffer buffer;
         buffer.AppendBase64(PacketServerHeader::SERVER_APPROVE_EMAIL_REPLY);
         buffer.AppendSOH();
-        SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        SendPacket(buffer);
     }
     //-----------------------------------------------//
     void PlayerSocket::HandleRegisteration(std::unique_ptr<Packet> packet)
@@ -215,15 +218,20 @@ namespace Quad
             gender = "Female";
 
         QueryDatabase database("users");
-        database.PrepareQuery("INSERT INTO accounts(user_name, hash_pass, email, figure, direct_mail, birthday, gender, credits) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+        database.PrepareQuery("INSERT INTO account(user_name, hash_pass, email, figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         database.GetStatement()->setString(1, username.c_str());
         database.GetStatement()->setString(2, (CalculateSHA1Hash(boost::to_upper_copy(username) + ":" + boost::to_upper_copy(password))).c_str());
         database.GetStatement()->setString(3, email.c_str());
         database.GetStatement()->setString(4, figure.c_str());
-        database.GetStatement()->setBoolean(5, directEmail);
-        database.GetStatement()->setString(6, birth.c_str());
-        database.GetStatement()->setString(7, gender.c_str());
-        database.GetStatement()->setUInt(8, sConfig->GetIntDefault("RegisterationCredits", 0));
+        database.GetStatement()->setString(5, sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
+        database.GetStatement()->setString(6, sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
+        database.GetStatement()->setBoolean(7, directEmail);
+        database.GetStatement()->setString(8, birth.c_str());
+        database.GetStatement()->setString(9, gender.c_str());
+        database.GetStatement()->setUInt(10, sConfig->GetIntDefault("RegisterationCredits", 0));
+        database.GetStatement()->setUInt(11, sConfig->GetIntDefault("RegisterationTickets", 0));
+        database.GetStatement()->setUInt(12, sConfig->GetIntDefault("RegisterationFilms", 0));
+        database.GetStatement()->setBoolean(13, sConfig->GetIntDefault("RegisterationSound", 0));
         database.ExecuteQuery();
     }
     //-----------------------------------------------//
@@ -237,14 +245,14 @@ namespace Quad
         database.GetStatement()->setString(1, username.c_str());
         database.ExecuteQuery();
 
-        // User doesn't exist
+        // Check user exists
         if (!database.GetResult())
         {
             StringBuffer buffer;
-            buffer.AppendBase64(PacketServerHeader::SERVER_MODERATOR_ALERT);
-            buffer.AppendString("Login Incorrect: Wrong Username");
+            buffer.AppendBase64(PacketServerHeader::SERVER_LOCALISED_ERROR);
+            buffer.AppendString("Login incorrect");
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
             return;
         }
 
@@ -255,10 +263,10 @@ namespace Quad
             != result->GetString(2))
         {
             StringBuffer buffer;
-            buffer.AppendBase64(PacketServerHeader::SERVER_MODERATOR_ALERT);
-            buffer.AppendString("Login Incorrect: Wrong Password");
+            buffer.AppendBase64(PacketServerHeader::SERVER_LOCALISED_ERROR);
+            buffer.AppendString("Login incorrect");
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
             return;
         }
 
@@ -275,16 +283,16 @@ namespace Quad
             result = database.Fetch();
 
             StringBuffer buffer;
-            buffer.AppendBase64(PacketServerHeader::SERVER_NOTICE);
-            buffer.AppendString("Banned Reason: ");
+            buffer.AppendBase64(PacketServerHeader::SERVER_LOCALISED_ERROR);
+            buffer.AppendString("Account banned");
             buffer.AppendString(result->GetString(3));
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
             return;
         }
 
         // Success player has logged in
-        database.PrepareQuery("SELECT account.id, account.user_name, account.hash_pass, account.email, account.figure, account.pool_figure, account.motto, account.console_motto, account.direct_mail, account.birthday, account.gender, account.credits, account.tickets, account.films, account.sound_enabled, account_badges.badge, account_badges.active FROM account LEFT JOIN account_badges ON account.id = account_badges.id WHERE account.id = ?");
+        database.PrepareQuery("SELECT account.id, account.user_name, account.hash_pass, account.email, account.figure, account.pool_figure, account.motto, account.console_motto, account.direct_mail, account.birthday, account.gender, account.credits, account.tickets, account.films, account.sound_enabled, account_badges.badge, account_badges.active, rank_fuserights.rank, rank_fuserights.fuseright FROM account LEFT JOIN account_badges ON account.id = account_badges.id LEFT JOIN rank_fuserights ON account.rank = rank_fuserights.rank WHERE account.id = ?");
         database.GetStatement()->setUInt(1, accountId);
         database.ExecuteQuery();
 
@@ -308,48 +316,61 @@ namespace Quad
             mPlayer->mTickets = result->GetUint32(13);
             mPlayer->mFilms = result->GetUint32(14);
             mPlayer->mSoundEnabled = result->GetBool(15);
-            mPlayer->LoadMessenger();
+            mPlayer->LoadPlayerData();
             mPlayer->mInitialized = true;
 
-            if (result->GetString(15) != "")
+            while (result->GetNextResult())
             {
-                do
+                if (result->GetString(16) != "")
                 {
-                    PlayerBadgesStruct playerBadges;
-                    playerBadges.mBadge = result->GetString(16);
-                    playerBadges.mIsActive = result->GetBool(17);
-                    mPlayer->mBadges.push_back(playerBadges);
+                    PlayerBadgesStruct playerBadge;
+                    playerBadge.mBadge = result->GetString(16);
+                    playerBadge.mIsActive = result->GetBool(17);
+                    mPlayer->mBadges.push_back(playerBadge);
+                }
 
-                } while (result->GetNextResult());
+                // Double check if user has rank even though it's set in database as default
+                if (result->GetUint8(18))
+                {
+                    PlayerFuseRightsData playerFuseRight;
+                    playerFuseRight.mRank = result->GetUint8(18);
+                    playerFuseRight.mFuseRight = result->GetString(19);
+                    mPlayer->mFuseRights.push_back(playerFuseRight);
+                }
             }
 
+            // Send Login successfull
             StringBuffer buffer;
-            buffer.AppendBase64(2); // TODO; find out packet name
-            buffer.AppendString("0", false);
+            buffer.AppendBase64(PacketServerHeader::SERVER_LOGIN);
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
+
+            mPlayer->SendFuseRights();
 
             buffer.Clear();
 
-            buffer.AppendBase64(3); // TODO; find out packet name
-            buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
-
-            buffer.Clear();
-
-            buffer.AppendBase64(8); // TODO; find out packet name
+            buffer.AppendBase64(PacketServerHeader::SERVER_AVAILABLE_SETS); // TODO; habbo club
             buffer.AppendString("[100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 176, 177, 178, 180, 185, 190, 195, 200, 205, 206, 207, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 266, 267, 270, 275, 280, 281, 285, 290, 295, 300, 305, 500, 505, 510, 515, 520, 525, 530, 535, 540, 545, 550, 555, 565, 570, 575, 580, 585, 590, 595, 596, 600, 605, 610, 615, 620, 625, 626, 627, 630, 635, 640, 645, 650, 655, 660, 665, 667, 669, 670, 675, 680, 685, 690, 695, 696, 700, 705, 710, 715, 720, 725, 730, 735, 740, 800, 801, 802, 803, 804, 805, 806, 807, 808, 809, 810, 811, 812, 813, 814, 815, 816, 817, 818, 819, 820, 821, 822, 823, 824, 825, 826, 827, 828, 829, 830, 831, 832, 833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843, 844, 845, 846, 847, 848, 849, 850, 851, 852, 853, 854, 855, 856, 857, 858, 859, 860, 861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873]");
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
             
             buffer.Clear();
 
             buffer.AppendBase64(PacketServerHeader::SERVER_ALERT);
             buffer.AppendString(sConfig->GetStringDefault("WelcomeMessage"));
             buffer.AppendSOH();
-            SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+            SendPacket(buffer);
 
-            sWorld->AddPlayer(mPlayer->GetId(), mPlayer);
+            sWorld->AddPlayer(mPlayer);
+        }
+        else
+        {
+            StringBuffer buffer;
+            buffer.AppendBase64(PacketServerHeader::SERVER_LOCALISED_ERROR);
+            buffer.AppendString("Internal system error occured");
+            buffer.AppendString(result->GetString(3));
+            buffer.AppendSOH();
+            SendPacket(buffer);
         }
     }
 }

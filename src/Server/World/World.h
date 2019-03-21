@@ -40,19 +40,16 @@ namespace Quad
         ~World();
 
     public:
-        void AddListener(const uint16 port);
-
         Player* FindPlayer(const uint32& mId) const;
-        void AddPlayer(const uint32& mId, Player* currentSession);
+        void AddPlayer(Player* player);
         void RemovePlayer(const uint32& mId);
 
         static bool StopWorld();
-        void UpdateWorld();
+        void UpdateWorld(const uint32& diff);
 
         void CleanUp();
 
     private:
-        std::vector<std::unique_ptr<Listener<PlayerSocket>>> mListener;
         PlayerMap mPlayers;
         std::mutex mMutex;
 

@@ -20,8 +20,8 @@
 #include "Network/StringBuffer.h"
 #include "PlayerSocket.h"
 #include "Config/Config.h"
-#include "Common/Timer.h"
 #include "World.h"
+#include "Database/QueryDatabase.h"
 //-----------------------------------------------//
 namespace Quad
 {
@@ -29,13 +29,17 @@ namespace Quad
     Player::Player(PlayerSocket* playerSocket)
         : mSocket(playerSocket ? playerSocket->Shared<PlayerSocket>() : nullptr)
     {
-        mPingInterval = sConfig->GetIntDefault("PongInterval", 10000);
-        mPingTimer.Reset();
+        mPingInterval = sConfig->GetIntDefault("PongInterval", 30000);
+        mUpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
+        mMaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
+
         mPonged = true;
     }
+    //-----------------------------------------------//
     Player::~Player()
     {
         mMessenger.reset();
+        mFavouriteRooms.reset();
 
         if (mSocket)
         {
@@ -56,10 +60,31 @@ namespace Quad
         return mTickets;
     }
     //-----------------------------------------------//
+    int32 Player::GetPositionX() const
+    {
+        return mPositionX;
+    }
+    //-----------------------------------------------//
+    int32 Player::GetPositionY() const
+    {
+        return mPositionY;
+    }
+    //-----------------------------------------------//
+    int32 Player::GetPositionZ() const
+    {
+        return mPositionX;
+    }
+    //-----------------------------------------------//
+    int32 Player::GetOrientation() const
+    {
+        return mOrientation;
+    }
+    //-----------------------------------------------//
     std::string Player::GetName() const
     {
         return mName;
     }
+    //-----------------------------------------------//
     uint32 Player::GetCredits() const
     {
         return mCredits;
@@ -166,7 +191,54 @@ namespace Quad
         buffer.AppendString(mPoolFigure);
         buffer.AppendWired(mFilms);
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
+    StringBuffer& Player::GetUserRoomObject()
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_USER_OBJECTS);
+        buffer.AppendString("i:", false);
+        buffer.AppendString("66470", false);
+        buffer.AppendString("\r", false);
+
+        buffer.AppendString("a:", false);
+        buffer.AppendString(std::to_string(GetId()), false);
+        buffer.AppendString("\r", false);
+
+        buffer.AppendString("n:", false);
+        buffer.AppendString(GetName(), false);
+        buffer.AppendString("\r", false);
+
+        buffer.AppendString("f:", false);
+        buffer.AppendString(GetFigure(), false);
+        buffer.AppendString("\r", false);
+
+        buffer.AppendString("s:", false);
+        buffer.AppendString(GetGender() == "Male" ? "M" : "F", false);
+        buffer.AppendString("\r", false);
+
+        buffer.AppendString("l:", false);
+        buffer.AppendString(std::to_string(GetPositionX()), false);
+        buffer.AppendString(" ", false);
+        buffer.AppendString(std::to_string(GetPositionY()), false);
+        buffer.AppendString(" ", false);
+        buffer.AppendString(std::to_string(GetPositionZ()), false);
+        buffer.AppendString("\r", false);
+
+        if (GetMotto().length() > 0)
+        {
+            buffer.AppendString("c:", false);
+            buffer.AppendString(GetMotto(), false);
+            buffer.AppendString("\r", false);
+        }
+
+        buffer.AppendString("b:", false);
+        buffer.AppendSOH();
+
+        uint8* ptr = &buffer.mStorage[0];
+        std::cout << "test" << std::endl;
+        return buffer;
     }
     //-----------------------------------------------//
     void Player::SendAccountPreferences()
@@ -176,7 +248,7 @@ namespace Quad
         buffer.AppendWiredBool(IsSoundEnabled());
         buffer.AppendWiredBool(true); // TODO; Tutorial Finished
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
     }
     //-----------------------------------------------//
     void Player::SendAccountBadges()
@@ -186,7 +258,7 @@ namespace Quad
         buffer.AppendWired(mBadges.size());
 
         uint8 badgesActive = 0;
-        for (std::vector<PlayerBadges>::const_iterator& itr = mBadges.begin(); itr != mBadges.end(); itr++)
+        for (std::vector<PlayerBadgesData>::const_iterator& itr = mBadges.begin(); itr != mBadges.end(); itr++)
         {
             PlayerBadgesStruct playerBadge = (*itr);
 
@@ -198,7 +270,7 @@ namespace Quad
         buffer.AppendWired(badgesActive);
         buffer.AppendWiredBool(mBadges.empty() ? false : true);
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
     }
     //-----------------------------------------------//
     void Player::SendMessengerUpdate()
@@ -207,10 +279,40 @@ namespace Quad
         buffer.AppendBase64(PacketServerHeader::SERVER_MESSENGER_UPDATE);
         mMessenger->ParseMessengerUpdate(buffer);
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
     }
     //-----------------------------------------------//
-    void Player::UpdatePosition(const uint16& x, const uint16& y, const uint16& z, const uint16& orientation)
+    void Player::SendFuseRights()
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(PacketServerHeader::SERVER_FUSE_RIGHTS);
+        for (std::vector<PlayerFuseRightsData>::const_iterator& itr = mFuseRights.begin(); itr != mFuseRights.end(); itr++)
+            buffer.AppendString(itr->GetFuseRight());
+
+        buffer.AppendSOH();
+        ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
+    void Player::SendFavouriteRooms()
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(PacketServerHeader::SERVER_FAVOURITE_ROOMS_RESULT);
+        mFavouriteRooms->ParseSendFavouriteRooms(buffer);
+        buffer.AppendSOH();
+        ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
+    void Player::AddFavouriteRoom(const bool& isPublic, const uint32& roomId)
+    {
+        mFavouriteRooms->AddFavouriteRoom(isPublic, roomId);
+    }
+    //-----------------------------------------------//
+    void Player::RemoveFavouriteRoom(const uint32& roomId)
+    {
+        mFavouriteRooms->RemoveFavouriteRoom(roomId);
+    }
+    //-----------------------------------------------//
+    void Player::UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation)
     {
         mPositionX = x;
         mPositionY = y;
@@ -218,10 +320,13 @@ namespace Quad
         mOrientation = orientation;
     }
     //-----------------------------------------------//
-    void Player::LoadMessenger()
+    void Player::LoadPlayerData()
     {
         mMessenger = std::make_unique<Messenger>(mId);
         mMessenger->LoadMessenger();
+
+        mFavouriteRooms = std::make_unique<FavouriteRoom>(mId);
+        mFavouriteRooms->LoadFavouriteRooms();
     }
     //-----------------------------------------------//
     void Player::SendInitializeMessenger()
@@ -237,14 +342,25 @@ namespace Quad
         mMessenger->ParseMessengerFriends(buffer);
 
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
 
         buffer.Clear();
 
         buffer.AppendBase64(PacketServerHeader::SERVER_FRIEND_REQUEST);
         mMessenger->ParseMessengerFriendRequests(buffer);
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
+    void Player::MessengerAcceptRequest(const uint32& senderId)
+    {
+        StringBuffer buffer;
+
+        mMessenger->AcceptFriendRequest(buffer, senderId);
+    }
+    //-----------------------------------------------//
+    void Player::SendClubStatus()
+    {
     }
     //-----------------------------------------------//
     bool Player::IsPonged() const
@@ -252,16 +368,16 @@ namespace Quad
         return mPonged;
     }
     //-----------------------------------------------//
-    bool Player::Update()
+    bool Player::Update(const uint32& diff)
     {
         if (mSocket && !mSocket->IsClosed())
         {
-            if (mPingTimer.Elasped() > mPingInterval)
+            if (mPingInterval < diff)
             {
                 if (IsPonged())
                 {
                     SendPing();
-                    mPingTimer.Reset();
+                    mPingInterval = sConfig->GetIntDefault("PongInterval", 30000);
                 }
                 else
                 {
@@ -269,6 +385,30 @@ namespace Quad
                     return false;
                 }
             }
+            else
+                mPingInterval -= diff;
+
+            if (mUpdateAccount < diff)
+            {
+                QueryDatabase database("users");
+                database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?");
+                database.GetStatement()->setString(1, GetEmail());
+                database.GetStatement()->setString(2, GetFigure());
+                database.GetStatement()->setString(3, GetPoolFigure());
+                database.GetStatement()->setString(4, GetMotto());
+                database.GetStatement()->setString(5, GetConsoleMotto());
+                database.GetStatement()->setString(6, GetBirthday());
+                database.GetStatement()->setString(7, GetGender());
+                database.GetStatement()->setUInt(8, GetCredits());
+                database.GetStatement()->setUInt(9, GetTickets());
+                database.GetStatement()->setUInt(10, GetFilms());
+                database.GetStatement()->setBoolean(11, IsSoundEnabled());
+                database.ExecuteQuery();
+
+                mUpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
+            }
+            else 
+                mUpdateAccount -= diff;
 
             return true;
         }
@@ -276,8 +416,14 @@ namespace Quad
             return false;
     }
     //-----------------------------------------------//
+    void Player::UpdateFavouriteRooms()
+    {
+        mFavouriteRooms->UpdateFavouriteRooms();
+    }
+    //-----------------------------------------------//
     void Player::Logout()
     {
+        UpdateFavouriteRooms();
     }
     //-----------------------------------------------//
     std::shared_ptr<PlayerSocket> Player::ToSocket()
@@ -292,7 +438,7 @@ namespace Quad
         StringBuffer buffer;
         buffer.AppendBase64(PacketServerHeader::SERVER_PING);
         buffer.AppendSOH();
-        ToSocket()->SendPacket((const char*)buffer.GetContents(), buffer.GetSize());
+        ToSocket()->SendPacket(buffer);
     }
     //-----------------------------------------------//
 }

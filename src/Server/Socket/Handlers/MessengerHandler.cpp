@@ -34,5 +34,12 @@ namespace Quad
         mPlayer->SendMessengerUpdate();
     }
     //-----------------------------------------------//
+    void PlayerSocket::HandleMessengerAcceptRequest(std::unique_ptr<Packet> packet)
+    {
+        uint32 senderId = packet->ReadWiredUint();
+
+        mPlayer->MessengerAcceptRequest(senderId);
+    }
+    //-----------------------------------------------//
 }
 //-----------------------------------------------//

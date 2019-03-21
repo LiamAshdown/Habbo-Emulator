@@ -18,30 +18,38 @@
 
 #ifndef _Quad_Timer_h_
 #define _Quad_Timer_h_
-#include <ctime>
+#include "SharedDefines.h"
+#undef min
+#include <algorithm>
 #include <chrono>
 
-class Timer
+namespace Quad
 {
-public:
-    Timer()
+    namespace Time
     {
-        Reset();
-    }
+        class WorldTimer
+        {
+        public:
+            static WorldTimer* instance();
 
-    double Elasped()
-    {
-        auto now = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration<double, std::milli>(now - mStartTime).count();
-    }
+        public:
+            WorldTimer();
+            ~WorldTimer();
 
-    void Reset()
-    {
-        mStartTime = std::chrono::high_resolution_clock::now();
-    }
+        public:
+            uint32 GetServerTime();
+            inline uint32 GetTimeDifference(const uint32& oldMSTime, const uint32& newMSTime);
 
-private:
-    std::chrono::time_point<std::chrono::steady_clock> mStartTime;
-};
+            uint32 TickTime();
+            uint32 TickPrevTime();
+            uint32 Tick();
+
+        private:
+            uint32 mTime;
+            uint32 mPrevTime;
+        };
+    }
+}
+#define sWorldTimer Quad::Time::WorldTimer::instance() 
 
 #endif /* _Quad_Timer_h_ */
