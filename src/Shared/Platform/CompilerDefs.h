@@ -62,6 +62,7 @@
 #  pragma warning(disable:4244)                             // 'argument' : conversion from 'type1' to 'type2', possible loss of data
 #  pragma warning(disable:4355)                             // 'this' : used in base member initializer list
 #  pragma warning(disable:4251)                             // 'function': was declared deprecated
+#  pragma warning (disable : 4430)                          //  'function' should return a value; 'void' return type assumed
 #endif                                                      // __SHOW_STUPID_WARNINGS__
 #endif                                                      // __GNUC__
 

@@ -16,12 +16,13 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_NetWorkThread_h_
-#define _Quad_NetWorkThread_h_
+#ifndef _NETWORK_NETWORK_THREAD_h
+#define _NETWORK_NETWORK_THREAD_h
 #include "../Common/SharedDefines.h"
 #include "Socket.h"
+#endif /* !_NETWORK_NETWORK_THREAD_h */
 
-namespace Quad
+namespace SteerStone
 {
     template <typename SocketType>
     class NetworkThread
@@ -83,5 +84,3 @@ namespace Quad
         return *i.first;
     }
 }
-
-#endif /* !_Quad_NetWorkThread_h_ */

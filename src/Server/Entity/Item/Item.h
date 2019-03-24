@@ -20,7 +20,7 @@
 #define _Quad_Item_h_
 #include "Common/SharedDefines.h"
 
-namespace Quad
+namespace SteerStone
 {
     ///< We don't need to create a class for public room items, because they will never be changed
     ///< So we will leave it as a struct
@@ -34,7 +34,7 @@ namespace Quad
         ~PublicItemStruct() {}
 
     public:
-        uint32 GetId() const { return mId; }
+        uint32 GetId() const { return m_Id; }
         std::string GetRoomModel() const { return mRoomModel; }
         std::string GetSprite() const { return mSprite; }
         int32 GetPositionX() const { return mX; }
@@ -47,7 +47,7 @@ namespace Quad
         std::string GetBehaviour() const { return mBehaviour; }
 
     private:
-        uint32 mId;
+        uint32 m_Id;
         std::string mRoomModel;
         std::string mSprite;
         int32 mX;
@@ -70,7 +70,7 @@ namespace Quad
         ~Item();
 
     private:
-        uint32 mId;
+        uint32 m_Id;
         std::string mSprite;
         std::string mColor;
         std::string mLength;
@@ -78,7 +78,7 @@ namespace Quad
         float mHeight;
         std::string mDataClass;
         std::string mBehaviour;
-        std::string mName;
+        std::string m_Name;
         std::string mDescription;
     };
 }

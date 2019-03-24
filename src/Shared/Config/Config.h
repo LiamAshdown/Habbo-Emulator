@@ -16,43 +16,66 @@
 * along with this program.If not, see < http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Config_h_
-#define _Quad_Config_h_
-#include <mutex>
-#include <string>
-#include <unordered_map>
+#ifndef _CONFIG_CONFIG_h
+#define _CONFIG_CONFIG_h
 #include "../Common/SharedDefines.h"
+#include <mutex>
+#endif /* _CONFIG_CONFIG_h */
 
-namespace Quad
+namespace SteerStone
 {
+    /// Class which retrieves information from our server.conf file
+    /// Singleton Class 
     class Config
     {
     public:
         static Config* instance();
 
     public:
+        /// Constructor
         Config() {}
+        /// Deconstructor
         ~Config() {}
 
     public:
-        bool SetFile(const std::string& file);
+        /// SetFile
+        /// @p_File : File name
+        bool SetFile(std::string const& p_File);
+
+        /// Reload - Read our server.conf file
         bool Reload();
 
-        bool IsSet(const std::string& name) const;
+        /// IsSet - Check if entry exists
+        /// @p_File : File name
+        bool IsSet(std::string const& p_File) const;
 
-        const std::string GetStringDefault(const std::string& name, const std::string& def = "") const;
-        bool GetBoolDefault(const std::string& name, bool def) const;
-        int32 GetIntDefault(const std::string& name, int32 def) const;
-        float GetFloatDefault(const std::string& name, float def) const;
+        /// GetStringDefault
+        /// @p_Name : Name of entry we are looking for
+        /// @p_Default : If we cannot find p_Name then return the default string
+        std::string GetStringDefault(std::string const& p_Name, std::string const& p_Default = "") const;
 
-        const std::string& GetFilename() const { return mFileName; }
-        std::mutex mConfigLock;
+        /// GetBoolDefault
+        /// @p_Name : Name of entry we are looking for
+        /// @p_Default : If we cannot find p_Name then return the default string
+        bool GetBoolDefault(std::string const& p_Name, bool const& p_Default) const;
+
+        /// GetIntDefault
+        /// @p_Name : Name of entry we are looking for
+        /// @p_Default : If we cannot find p_Name then return the default string
+        int32 GetIntDefault(std::string const& p_Name, int32 const& p_Default) const;
+
+        /// GetFloatDefault
+        /// @p_Name : Name of entry we are looking for
+        /// @p_Default : If we cannot find p_Name then return the default string
+        float GetFloatDefault(std::string const& p_Name, float const& p_Default) const;
+
+        /// GetFileName - Return file name
+        std::string GetFilename() const;
 
     private:
-        std::string mFileName;
-        std::unordered_map<std::string, std::string> mEntries; // keys are converted to lower case.  values cannot be.
+        std::string m_FileName;                                                  ///< File Name
+        std::unordered_map<std::string, std::string> m_Entries;                  ///< Keys are converted to lower case.  values cannot be.
+        std::mutex m_ConfigLock;                                                 ///< Mutex Lock
     };
-}
-#define sConfig Quad::Config::instance()
-
-#endif /* !_Quad_Config_h_ */
+} ///< NAMESPACE STEERSTONE
+#define sConfig SteerStone::Config::instance()

@@ -16,40 +16,53 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Timer_h_
-#define _Quad_Timer_h_
+#ifndef COMMON_TIMER_h
+#define COMMON_TIMER_h
 #include "SharedDefines.h"
 #undef min
 #include <algorithm>
 #include <chrono>
+#endif /* COMMON_TIMER_h */
 
-namespace Quad
+namespace SteerStone
 {
     namespace Time
     {
+        /// Class which holds the update timer in our main thread loop, which updates the world
+        /// Singleton class
         class WorldTimer
         {
         public:
             static WorldTimer* instance();
 
         public:
-            WorldTimer();
-            ~WorldTimer();
+            /// Constructor
+            WorldTimer() {}
+            /// Deconstructor
+            ~WorldTimer() {}
 
         public:
+            /// GetServerTime - Get the time of the server
             uint32 GetServerTime();
-            inline uint32 GetTimeDifference(const uint32& oldMSTime, const uint32& newMSTime);
 
+            /// GetTimeDifference
+            /// @p_OldMSTime : Old Time
+            /// @p_NewMSTime : New Time
+            inline uint32 GetTimeDifference(uint32 const& p_OldMSTime, uint32 const& p_NewMSTime);
+
+            /// TickTime - Get our Tick Time
             uint32 TickTime();
+
+            /// TickPrevTIme - Get our previous Tick Time
             uint32 TickPrevTime();
+
+            /// Tick - Get our Tick
             uint32 Tick();
 
         private:
-            uint32 mTime;
-            uint32 mPrevTime;
+            uint32 m_Time;                               ///< Current Time
+            uint32 m_PrevTime;                           ///< Previous Time
         };
-    }
-}
-#define sWorldTimer Quad::Time::WorldTimer::instance() 
-
-#endif /* _Quad_Timer_h_ */
+    } ///< NAMESPACE TIME
+} ///< NAMESPACE STEERSTONE
+#define sWorldTimer SteerStone::Time::WorldTimer::instance() 

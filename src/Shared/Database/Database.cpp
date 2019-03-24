@@ -15,118 +15,106 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "Database.h"
-//-----------------------------------------------//
-namespace Quad
-{
-    //-----------------------------------------------//
-    Tokens StrSplit(const std::string& src, const std::string& sep);
-    //-----------------------------------------------//
+
+namespace SteerStone
+{ 
+    /// Singleton class
     Database* Database::instance()
     {
         static Database instance;
         return &instance;
     }
-    //-----------------------------------------------//
+    
+    /// Constructor
     Database::Database()
     {
 
     }
-    //-----------------------------------------------//
+    
+    /// Deconstructor
     Database::~Database()
     {
         mDatabaseCont.clear();
-    }
-    //-----------------------------------------------//
-    std::shared_ptr<DatabaseHolder> Database::GetDatabase(const std::string& database)
-    {
-        DatabaseMap::iterator itr = mDatabaseCont.find(database);
-        if (itr != mDatabaseCont.end())
-            return itr->second;
-
-        return nullptr;
-    }
-    //-----------------------------------------------//
-    bool Database::CreateDatabase(const char* infoString, const uint32& poolSize)
+    } 
+    
+    /// CreateDatabase
+    /// @p_InfoString : Database user details; username, password, host, database, l_Port
+    /// @p_PoolSize : How many pool connections database will launch
+    bool Database::CreateDatabase(char const* p_InfoString, std::size_t const& p_PoolSize)
     {
         try 
         {
-            std::string username;
-            std::string password;
-            std::string database;
-            std::string host;
-            std::string port; 
+            std::string l_Username;
+            std::string l_Password;
+            std::string l_Database;
+            std::string l_Host;
+            std::string l_Port; 
 
-            Tokens tokens = StrSplit(infoString, ";");
+            Tokens l_Tokens = StrSplit(p_InfoString, ";");
 
-            Tokens::iterator iter = tokens.begin();
+            Tokens::iterator l_Itr = l_Tokens.begin();
 
-            if (iter != tokens.end())
-                host = *iter++;
-            if (iter != tokens.end())
-                port = *iter++;
-            if (iter != tokens.end())
-                username = *iter++;
-            if (iter != tokens.end())
-                password = *iter++;
-            if (iter != tokens.end())
-                database = *iter++;
+            if (l_Itr != l_Tokens.end())
+                l_Host = *l_Itr++;
+            if (l_Itr != l_Tokens.end())
+                l_Port = *l_Itr++;
+            if (l_Itr != l_Tokens.end())
+                l_Username = *l_Itr++;
+            if (l_Itr != l_Tokens.end())
+                l_Password = *l_Itr++;
+            if (l_Itr != l_Tokens.end())
+                l_Database = *l_Itr++;
 
-            // Create our database, and store the database in a map = key "database name", storage "database structure"
+            /// Create our database, and store the database in a map = key "database name", storage "database structure"
             std::shared_ptr<DatabaseHolder> newDatabase = std::make_shared<DatabaseHolder>();
-            newDatabase->mUsername = username;
-            newDatabase->mPassword = password;
-            newDatabase->mDatabaseName = database;
-            newDatabase->mHost = host;
-            newDatabase->mPort = port;
-            newDatabase->mPoolSize = poolSize;
+            newDatabase->m_Username = l_Username;
+            newDatabase->m_Password = l_Password;
+            newDatabase->m_Database = l_Database;
+            newDatabase->m_Host = l_Host;
+            newDatabase->m_Port = l_Port;
+            newDatabase->m_PoolSize = p_PoolSize;
 
-            newDatabase->mMySQLConnection = std::make_shared<MySQLConnection>(newDatabase->GetName(), newDatabase->GetPassword(), newDatabase->GetDatabase(),
+            newDatabase->m_MySQLConnection = std::make_shared<MySQLConnection>(newDatabase->GetName(), newDatabase->GetPassword(), newDatabase->GetDatabase(),
                 newDatabase->GetHost(), newDatabase->GetPort());
-            newDatabase->mPool = std::make_shared<ConnectionPool>(newDatabase->GetMySQLConnection(), newDatabase->GetPoolSize());
+            newDatabase->m_Pool = std::make_shared<ConnectionPool>(newDatabase->GetMySQLConnection(), newDatabase->GetPoolSize());
 
             mDatabaseCont[newDatabase->GetDatabase()] = newDatabase;
 
-            database[0] = std::toupper(database[0]);
-            LOG_INFO << "Connected to Database " << database << " Successfully With " << poolSize << " Pool Connections";
+            l_Database[0] = std::toupper(l_Database[0]);
+            LOG_INFO << "Connected to Database " << l_Database << " Successfully With " << p_PoolSize << " Pool Connections";
 
             return true;
         }
-        catch (sql::SQLException &e) 
+        catch (sql::SQLException const& p_ErrorCode) 
         {
-            this->PrintException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
+            PrintException(p_ErrorCode, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
             return false;
         }
     }
-    //-----------------------------------------------//
-    void Database::PrintException(sql::SQLException& e, char* file, char* function, const uint32 line)
+    
+    /// PrintException
+    /// @p_ErrorCode : MYSQL Error code
+    /// @p_File : Which file the error occured
+    /// @p_Function : Which function the error occured
+    /// @p_Line : Which line the error occured
+    void Database::PrintException(sql::SQLException const& p_ErrorCode, char const* p_File, char const* p_Function, uint32 const p_Line)
     {
-        std::string message = e.what();
+        std::string const& message = p_ErrorCode.what();
 
-        // Shut down server if database can no longer be reached
+        /// Shut down server if database can no longer be reached
         if (message.find("has gone away") != std::string::npos)
-            assert(false);
-    }
-    //-----------------------------------------------//
-    Tokens StrSplit(const std::string& src, const std::string& sep)
+            assert(false); ///< Assert if one of our database connections are no longer reachable
+    }   
+
+    /// GetDatabase - Get the database
+    std::shared_ptr<DatabaseHolder> Database::GetDatabase(const std::string& database)
     {
-        Tokens r;
-        std::string s;
-        for (char i : src)
-        {
-            if (sep.find(i) != std::string::npos)
-            {
-                if (s.length()) r.push_back(s);
-                s.clear();
-            }
-            else
-            {
-                s += i;
-            }
-        }
-        if (s.length()) r.push_back(s);
-        return r;
+        DatabaseMap::iterator l_Itr = mDatabaseCont.find(database);
+        if (l_Itr != mDatabaseCont.end())
+            return l_Itr->second;
+
+        return nullptr;
     }
-    //-----------------------------------------------//
-}
+} ///< NAMESPACE STEERSTONE

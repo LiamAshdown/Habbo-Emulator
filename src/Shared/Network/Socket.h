@@ -16,17 +16,18 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Socket_h_
-#define _Quad_Socket_h_
+#ifndef _NETWORK_SOCKET_h
+#define _NETWORK_SOCKET_h
+#include "../Common/SharedDefines.h"
+#include "PacketBuffer.h"
 #include <boost/asio.hpp>
 #include <windows.h>
 #include <mutex>
+#endif /* _NETWORK_SOCKET_h */
 
-#include "../Common/SharedDefines.h"
-#include "PacketBuffer.h"
-
-namespace Quad
+namespace SteerStone
 {
+    /// Write States
     enum class WriteState
     {
         Idle,                       ///< NO WRITING IN PROGRESS
@@ -34,80 +35,131 @@ namespace Quad
         Sending,                    ///< A SEND OPERATION IS CURRENTLY UNDERWAY
     };
 
+    /// Read States
     enum class ReadState
     {
         Idle,                       ///< CURRENTLY NOT READING
         Reading                     ///< CURRENTLY READING
     };
 
+    /// Handling incoming/sending data
     class Socket : public std::enable_shared_from_this<Socket>
     {
     public:
-        Socket(boost::asio::io_service &service, std::function<void(Socket *)> closeHandler);
+        /// Constructor
+        /// @p_Service : Socket to pass
+        /// @p_CloseHandler : Custom Handler to handle our function
+        Socket(boost::asio::io_service &p_Service, std::function<void(Socket *)> p_CloseHandler);
         virtual ~Socket() = default;
 
     public:
-        virtual bool Open(uint16 port);
+        /// Open - Open our socket to listen for incoming packets
+        /// @p_Port : Pass our port which is defined by Listener class
+        virtual bool Open(uint16 const& p_Port);
+
+        /// CloseSocket - Close our socket to stop recieving incoming packets
         void CloseSocket();
 
+        /// IsClosed - Check if our socket is open or closed
         bool IsClosed() const;
+
+        /// Deletable - Check if our socket can be deleted
         virtual bool Deletable() const;
 
-        bool Read(char* buffer, const std::size_t& length);
-        void ReadSkip(const std::size_t& length);
+        /// Read - Read the packet
+        /// @p_Buffer : Buffer which holds the data
+        /// @p_Length : The length of the data
+        bool Read(char* p_Buffer, std::size_t const& p_Length);
 
-        void Write(const char *buffer, const std::size_t& length);
+        /// ReadSkip - Skip parts of the packet
+        /// @p_Length : The length of the data to skip
+        void ReadSkip(std::size_t const&  p_Length);
 
-        std::size_t ReadLength() const;
-        std::size_t ReadLengthRemaining() const;
-        uint16 GetPort() const;
+        /// Write - Write the data to be sent
+        /// @p_Buffer : Buffer which holds the data
+        /// @p_Length : The length of the data
+        void Write(const char* p_Buffer, std::size_t const&  p_Length);
 
-        boost::asio::ip::tcp::socket &GetAsioSocket();
+        /// ReadLength - Get the total read length of the packet
+        std::size_t const ReadLength();
 
-        const std::string &GetRemoteEndpoint();
-        const std::string &GetRemoteAddress();
+        /// ReadLengthRemaining - Get the length remaining to read
+        std::size_t const ReadLengthRemaining();
 
+        /// GetPort - Get the port we are listening on
+        uint16 const GetPort();
+
+        /// GetAsioSocket - Get our AsioSocket
+        boost::asio::ip::tcp::socket& GetAsioSocket();
+
+        /// GetAsioSocket - Get our AsioSocket
+        std::string const& GetRemoteEndpoint();
+
+        /// GetAsioSocket - Get our AsioSocket
+        std::string const& GetRemoteAddress();
+
+        /// MyMethods described here.
+        /// @param T Class which derives from Socket class
         template <typename T>
         std::shared_ptr<T> Shared();
 
-    private:
-        void InitializeClientServer();
-
-        void StartAsyncRead();
-        void OnRead(const boost::system::error_code &error, const std::size_t& length);
-
-        void OnWriteComplete(const boost::system::error_code &error, const std::size_t& length);
-        void FlushOut();
-
-        void StartWriteFlushTimer();
-
-        void OnError(const boost::system::error_code &error);
-
-    private:
-        boost::asio::ip::tcp::socket mSocket;
-        std::function<void(Socket*)> mCloseHandler;
-        std::unique_ptr<PacketBuffer> mInBuffer;
-        std::unique_ptr<PacketBuffer> mOutBuffer;
-        boost::asio::deadline_timer mOutBufferFlushTimer;
-        std::mutex mMutex;
-        std::mutex mClosedMutex;
-
-        WriteState mWriteState;
-        ReadState mReadState;
-
-        const std::string m_address;
-        const std::string m_remoteEndpoint;
-
-        static const int32 BufferTimeout = 50;
-
-        uint16 mPort;
-
     protected:
+        /// ProcessIncomingData - Virtual Function which passes into our derived class from Socket
         virtual bool ProcessIncomingData() = 0;
 
-        const uint8* InPeak() const;
+        /// ProcessIncomingData - Get the current read position
+         uint8 const* InPeak();
+
+        /// ForceFlushOut - Send our current data in our buffer
         void ForceFlushOut();
 
+    private:
+        /// InitializeClientServer - Initialize client/server response
+        void InitializeClientServer();
+
+        /// StartAsyncRead - Read incoming packets
+        void StartAsyncRead();
+
+        /// OnRead - Handle the incoming packet
+        /// @p_Error : Error code
+        /// @p_Length : Length of failed buffer
+        void OnRead(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length);
+
+        /// OnWriteComplete - Finished sending out our buffer
+        /// @p_Error : Error code
+        /// @p_Length : Length of failed buffer
+        void OnWriteComplete(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length);
+
+        /// FlushOut - Begin to send out our data in our buffer
+        void FlushOut();
+
+        /// StartWriteFlushTimer - Start the time to send out our data in interval
+        void StartWriteFlushTimer();
+
+        /// OnError - Catch an error if packet is corrupted
+        /// @p_Error : Error code
+        void OnError(boost::system::error_code const& p_ErrorCode);
+
+    private:
+        /// Socket
+        boost::asio::ip::tcp::socket m_Socket;                                    ///< Socket
+        std::function<void(Socket*)> m_CloseHandler;                              ///< Socket Handler         
+        std::string const m_Address;                                              ///< Address of our Listener                           
+        std::string const m_RemoteEndPoint;                                       ///< End point of our Listener
+        uint16 m_Port;                                                            ///< Port Listener is listening on
+        /// Buffer
+        std::unique_ptr<PacketBuffer> m_InBuffer;                                 ///< In Buffer - recieving incoming packets
+        std::unique_ptr<PacketBuffer> m_OutBuffer;                                ///< Out Buffer - sending our packets
+        boost::asio::deadline_timer m_OutBufferFlushTimer;                        ///< Time to send out packets
+        static int32 const m_BufferTimeout = 50;                                  ///< Interval of our flush out timer
+        /// Mutex
+        std::mutex m_Mutex;                                                       ///< Mutex Guard
+        std::mutex m_ClosedMutex;                                                 ///< Mutex Guard
+        /// Write State
+        WriteState m_WriteState;                                                  ///< State of where are at; idle, reading
+        ReadState m_ReadState;                                                    ///< State of where are at; idle, reading, buffering
+
+#pragma region
         private:
             // custom allocator based on example from http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/example/cpp11/allocation/server.cpp
 
@@ -197,6 +249,5 @@ namespace Quad
     {
         return std::static_pointer_cast<T>(shared_from_this());
     }
-}
-
-#endif /* _Quad_Socket_h_ */
+#pragma endregion CustomHandler; TODO
+} ///< NAMESPACE STEERSTONE

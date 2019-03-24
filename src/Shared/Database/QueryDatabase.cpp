@@ -15,83 +15,92 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "QueryDatabase.h"
-//-----------------------------------------------//
-namespace Quad
+
+namespace SteerStone
 {
-    //-----------------------------------------------//
-    QueryDatabase::QueryDatabase(const std::string database)
+    /// Constructor
+    /// @p_Database : Database we are going to query
+    QueryDatabase::QueryDatabase(std::string const& p_Database)
     {
-        mDatabase = database;
+        m_Database = p_Database;
     }
-    //-----------------------------------------------//
+    
+    /// Deconstructor
     QueryDatabase::~QueryDatabase()
     {
     }
-    //-----------------------------------------------//
-    void QueryDatabase::DirectExecuteQuery(const std::string& query)
+    
+    /// DirectExecuteQuery
+    /// @p_Query : Query which will be executed to the database
+    void QueryDatabase::DirectExecuteQuery(std::string const p_Query)
     {
         try
         {
-            mIsExecuteResult = false;
-            mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
-            mSqlConnection = mConnection->GetSQLConnection();
+            m_IsExecuteResult = false;
+            m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
+            m_SqlConnection = m_Connection->GetSQLConnection();
 
-            mStatement = std::shared_ptr<sql::Statement>(mSqlConnection->createStatement());
-            mExecuteResult = mStatement->execute(query.c_str());
-            mIsExecuteResult = true;
+            m_Statement = std::shared_ptr<sql::Statement>(m_SqlConnection->createStatement());
+            m_ExecuteResult = m_Statement->execute(p_Query.c_str());
+            m_IsExecuteResult = true;
 
-            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
+            sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         }
         catch (sql::SQLException &e)
         {
             sDatabase->PrintException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
         }
     }
-    //-----------------------------------------------//
-    void QueryDatabase::PrepareQuery(const std::string& query)
+    
+    /// PrepareQuery
+    /// @p_Query : Query which will be prepared to be executed into the database
+    void QueryDatabase::PrepareQuery(std::string const& p_Query)
     {
-        mConnection = sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->Borrow();
-        mSqlConnection = mConnection->GetSQLConnection();
+        m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
+        m_SqlConnection = m_Connection->GetSQLConnection();
 
-        mPreparedStatement = std::shared_ptr<sql::PreparedStatement>(mSqlConnection->prepareStatement(query.c_str()));
-        mIsExecuteResult = false;
+        m_PreparedStatement = std::shared_ptr<sql::PreparedStatement>(m_SqlConnection->prepareStatement(p_Query.c_str()));
+        m_IsExecuteResult = false;
     }
-    //-----------------------------------------------//
+    
+    /// ExecuteQuery - Execute Prepare query into database
     void QueryDatabase::ExecuteQuery()
     {
         try
         {
-            mResultSet = std::unique_ptr<sql::ResultSet>(mPreparedStatement->executeQuery());
-            sDatabase->GetDatabase(mDatabase)->GetConnectionPool()->UnBorrow(mConnection);
+            m_ResultSet = std::unique_ptr<sql::ResultSet>(m_PreparedStatement->executeQuery());
+            sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         }
         catch (sql::SQLException &e)
         {
             sDatabase->PrintException(e, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
         }
     }
-    //-----------------------------------------------//
+    
+    /// GetResult - Get the result of query
     bool QueryDatabase::GetResult()
     {
-        if (mIsExecuteResult)
-            return mExecuteResult;
-        else if (mResultSet->next())
+        if (m_IsExecuteResult)
+            return m_ExecuteResult;
+        else if (m_ResultSet->next())
         {
-            mResult.mResultSet = std::move(mResultSet);
+            m_Result.m_ResultSet = std::move(m_ResultSet);
             return true;
         }
         return false;
     }
-    //-----------------------------------------------//
+    
+    /// GetStatement - Get Statement of query
     std::shared_ptr<sql::PreparedStatement>& QueryDatabase::GetStatement()
     {
-        return mPreparedStatement;
+        return m_PreparedStatement;
     }
-    //-----------------------------------------------//
+    
+    /// Fetch - Return resultset fromq query
     Result* QueryDatabase::Fetch()
     {
-        return &mResult;
+        return &m_Result;
     }
-    //-----------------------------------------------//
-}
+} ///< NAMESPACE STEERSTONE

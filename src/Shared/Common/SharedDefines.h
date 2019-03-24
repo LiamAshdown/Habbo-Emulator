@@ -16,8 +16,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_SharedDefines_h_
-#define _Quad_SharedDefines_h_
+#ifndef _COMMON_SHARED_DEFINES_h
+#define _COMMON_SHARED_DEFINES_h
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
@@ -28,6 +28,8 @@
 #include <iostream>
 #include <ctype.h>
 #include <memory>
+#include <queue>
+#include <deque>
 #include <string>
 #include <vector>
 #include <set>
@@ -39,15 +41,7 @@
 #include "../Platform/CompilerDefs.h"   
 #include <plog/Log.h>
 #include <plog/Appenders/ColorConsoleAppender.h>
-#endif /* _Quad_SharedDefines_h_ */
-
-#if PLATFORM == PLATFORM_WINDOWS
-#  define WIN32_LEAN_AND_MEAN
-#  include <Windows.h>
-#  ifndef _WIN32_WINNT
-#    define _WIN32_WINNT 0x0603
-#  endif
-#  endif
+#endif /* _COMMON_SHARED_DEFINES_h */
 
 typedef std::int64_t int64;
 typedef std::int32_t int32;
@@ -61,13 +55,19 @@ typedef std::uint8_t uint8;
 typedef std::vector<std::string> Tokens;
 
 #define DEFAULT_SERVER_PORT 37120
-#define UPDATE_WORLD_TIMER 50
-#define ROOM_ID_OFFSET 1000
+#define UPDATE_WORLD_TIMER 500
+#define PUBLIC_ROOM_OFFSET 1000
 
-std::string SplitString(const std::string& stringData, const std::string& tokenizer);
-uint16 ConvertEndian(uint16 value);
+/// Split String
+std::string SplitString(std::string const& p_StringData, std::string const& p_Tokenizer);
+Tokens StrSplit(std::string const& p_Src, std::string const& p_Seperator);
+
+/// Decode Habbo Packet
 int DecodeBase64(const std::string buffer);
 int DecodeWired(std::string buffer);
 std::string EncodeBase64(const uint32 value);
 std::string EncodeWired(int64 value);
+
+/// Misc
 std::string GetDate();
+uint16 ConvertEndian(uint16 value);

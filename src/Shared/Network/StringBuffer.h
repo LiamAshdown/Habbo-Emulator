@@ -16,156 +16,180 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_StringBuffer_h_
-#define _Quad_StringBuffer_h_
+#ifndef _NETWORK_STRING_BUFFER_h_
+#define _NETWORK_STRING_BUFFER_h_
 #include "Common/SharedDefines.h"
+#endif /* _NETWORK_STRING_BUFFER_h_ */
 
-namespace Quad
+#define STORAGE_INITIAL_SIZE 4096
+
+namespace SteerStone
 {
+    /// Buffer which is used to hold data to be sent to the client
     class StringBuffer
     {
     public:
-        explicit StringBuffer(std::size_t reverseSize = 4096) : mWritePosition(0), mReadPosition(0)
+        /// Constructor
+        /// @p_ReserveSize : Reserve size for our m_Storage
+        explicit StringBuffer(std::size_t p_ReserveSize = STORAGE_INITIAL_SIZE) : m_WritePosition(0), m_ReadPosition(0)
         {
-            mStorage.reserve(reverseSize);
+            m_Storage.reserve(STORAGE_INITIAL_SIZE);
         }
+        /// Deconstructor
         ~StringBuffer() {}
 
     public:
-        void AppendWiredBool(bool value)
+        /// AppendWiredBool
+        /// @p_Value : Append a true or false p_Value to our storage
+        void AppendWiredBool(bool p_Value)
         {
-            if (value)
+            if (p_Value)
                 AppendWired(1);
             else
                 AppendWired(0);
         }
 
-        void AppendString(const std::string buffer, bool delimiter = true)
+        /// AppendString
+        /// @p_Value : Append a string to our storage
+        /// @p_Delimeter : Append "/x2" to our storage if true
+        void AppendString(std::string const p_Buffer, bool p_Delimeter = true)
         {
-            if (std::size_t length = buffer.length())
-                Append((uint8 const*)buffer.c_str(), length);
+            if (std::size_t l_Length = p_Buffer.length())
+                Append((uint8 const*)p_Buffer.c_str(), l_Length);
 
-            if (delimiter)
+            if (p_Delimeter)
                 AppendSOT();
         }
 
-        void AppendStringDelimiter(const std::string buffer, const std::string delimiter)
+        /// AppendStringDelimiter
+        /// @p_Buffer : Append a string to our storage
+        /// @p_Delimeter : Append a delimeter to our storage
+        void AppendStringDelimiter(const std::string p_Buffer, const std::string p_Delimeter)
         {
-            if (std::size_t length = buffer.length())
-                Append((uint8 const*)buffer.c_str(), length);
-            AppendString(delimiter, false);
+            if (std::size_t l_Length = p_Buffer.length())
+                Append((uint8 const*)p_Buffer.c_str(), l_Length);
+            AppendString(p_Delimeter, false);
         }
 
-        void AppendBase64(const uint32 value)
+        /// AppendBase64
+        /// @p_Value : Append p_Value in base64
+        void AppendBase64(uint32 const p_Value)
         {
-            std::string encoder = EncodeBase64(value);
+            std::string l_Encoder = EncodeBase64(p_Value);
 
-            if (std::size_t length = encoder.length())
-                Append((uint8 const*)encoder.c_str(), length);
+            if (std::size_t l_Length = l_Encoder.length())
+                Append((uint8 const*)l_Encoder.c_str(), l_Length);
         }
 
-        void AppendWired(const int64 value)
+        /// AppendWired
+        /// @p_Value : Append p_Value in wired
+        void AppendWired(int64 const p_Value)
         {
-            std::string wired = EncodeWired(value);
+            std::string l_Wired = EncodeWired(p_Value);
 
-            if (std::size_t length = wired.length())
-                Append((uint8 const*)wired.c_str(), length);
+            if (std::size_t l_Length = l_Wired.length())
+                Append((uint8 const*)l_Wired.c_str(), l_Length);
         }
 
+        /// Append
+        /// @p_Buffer : Append another StringBuffer into our storage
+        void Append(StringBuffer const& p_Buffer)
+        {
+            if (p_Buffer.GetWritePosition())
+                Append(p_Buffer.GetContents(), p_Buffer.GetWritePosition());
+        }
+
+        /// AppendSOH - Append Start of Header to end of our packet before it will be sent
         void AppendSOH()
         {
-            std::string SOH = "\u0001";
-            if (std::size_t length = SOH.length())
-                Append(SOH.c_str(), length);
+            std::string l_SOH = "\u0001";
+            if (std::size_t l_Length = l_SOH.length())
+                Append(l_SOH.c_str(), l_Length);
         }
 
+        /// AppendSOH - Append Start of Text after each string is appended
         void AppendSOT()
         {
-            std::string SOH = "\u0002";
-            if (std::size_t length = SOH.length())
-                Append(SOH.c_str(), length);
+            std::string l_SOT = "\u0002";
+            if (std::size_t l_Length = l_SOT.length())
+                Append(l_SOT.c_str(), l_Length);
         }
 
-        template <typename T> void Append(T value)
+        /// Append
+        /// @param T the source type to convert.
+        void Append(const char* p_Buffer, const std::size_t& p_Size)
         {
-            Append((uint8*)&value, sizeof(value));
+            return Append((uint8 const*)p_Buffer, p_Size);
         }
 
-        template<class T> void Append(const T* src, std::size_t cnt)
+        /// Append
+        /// @p_Buffer : Buffer which will be appended to into our storage
+        /// @p_Size : Size of our p_Buffer
+        void Append(uint8 const* p_Buffer, std::size_t const& p_Size)
         {
-            return Append((const uint8*)src, cnt * sizeof(T));
-        }
-
-        void Append(const char* buffer, const std::size_t& size)
-        {
-            return Append((const uint8*)buffer, size);
-        }
-
-        void Append(const uint8* buffer, const std::size_t& size)
-        {
-            if (!size)
+            if (!p_Size)
                 return;
 
             assert(GetSize() < 10000000);
 
-            if (mStorage.size() < mWritePosition + size)
-                mStorage.resize(mWritePosition + size);
+            if (m_Storage.size() < m_WritePosition + p_Size)
+                m_Storage.resize(m_WritePosition + p_Size);
 
-            memcpy(&mStorage[mWritePosition], buffer, size);
-            mWritePosition += size;
+            memcpy(&m_Storage[m_WritePosition], p_Buffer, p_Size);
+            m_WritePosition += p_Size;
         }
 
-        void Append(const StringBuffer& buffer)
+        /// Resize
+        /// @p_NewSize : Resize our storage
+        void Resize(std::size_t const p_NewSize)
         {
-            if (buffer.GetWritePosition())
-                Append(buffer.GetContents(), buffer.GetWritePosition());
+            m_Storage.reserve(p_NewSize);
         }
 
-        void Resize(const std::size_t newSize)
+        /// Resize
+        /// @p_NewSize : Reserve our storage
+        void Reserve(std::size_t const p_NewSize)
         {
-            mStorage.reserve(newSize);
-            mReadPosition = 0;
-            mWritePosition = 0;
+            if (p_NewSize > GetSize())
+                m_Storage.reserve(p_NewSize);
         }
 
-        void Reserve(const std::size_t resize)
-        {
-            if (resize > GetSize())
-                mStorage.reserve(resize);
-        }
-
+        /// GetWritePosition - Get our m_WritePosition;
         std::size_t GetWritePosition() const
         {
-            return mWritePosition;
+            return m_WritePosition;
         }
 
+        /// GetReadPositino - Get our m_ReadPosition;
         std::size_t GetReadPositino()
         {
-            return mReadPosition;
+            return m_ReadPosition;
         }
 
+        /// GetSize - Get size of our storage
         std::size_t GetSize() const
         {
-            return mStorage.size();
+            return m_Storage.size();
         }
 
+        /// GetContents - Get the whole contents of our storage
         uint8 const* GetContents() const
         {
-            return &mStorage[0];
+            return &m_Storage[0];
         }
 
+        /// Clear - clear our storage and our m_ReadPosition and m_WritePosition
         void Clear()
         {
-            mWritePosition = 0;
-            mReadPosition = 0;
-            mStorage.clear();
+            m_WritePosition = 0;
+            m_ReadPosition = 0;
+            m_Storage.clear();
         }
 
     private:
-        std::size_t mWritePosition;
-        std::size_t mReadPosition;
-        std::vector<uint8> mStorage;
+        /// Storage
+        std::size_t m_WritePosition;                                                    ///< Write position in our stroage
+        std::size_t m_ReadPosition;                                                     ///< Read position in our storage
+        std::vector<uint8> m_Storage;                                                   ///< Vector Storage
     };
-}
-
-#endif /* _Quad_StringBuffer_ */
+} ///< NAMESPACE STEERSTONE

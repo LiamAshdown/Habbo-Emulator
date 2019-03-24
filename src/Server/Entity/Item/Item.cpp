@@ -19,7 +19,7 @@
 #include "Item.h"
 #include "Network/StringBuffer.h"
 //-----------------------------------------------//
-namespace Quad
+namespace SteerStone
 {
     //-----------------------------------------------//
     Item::Item()

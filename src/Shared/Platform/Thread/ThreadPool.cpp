@@ -15,55 +15,63 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
-#include "ThreadPool.h"
+
 #include "ThreadWorker.h"
-//-----------------------------------------------//
-void Worker::operator()()
+
+namespace SteerStone
 {
-    std::function<void()> task;
-    while (true)
+    /// Launch our Worker thread to be ready to process incoming functions
+    void Worker::LaunchWorkerThread()
+    {
+        std::function<void()> l_Task;
+
+        while (true)
+        {
+            {
+                std::unique_lock<std::mutex> l_Guard(m_Pool.mMutex);
+
+                while (!m_Pool.m_Stop && m_Pool.m_Tasks.empty())
+                    m_Pool.m_Condition.wait(l_Guard);
+
+                if (m_Pool.m_Stop)
+                    break;
+
+                l_Task = m_Pool.m_Tasks.front();
+                m_Pool.m_Tasks.pop_front();
+
+            }
+
+            l_Task();
+        }
+    }
+
+    /// Constructor
+    /// @p_PoolSize : Number of workers to launch
+    ThreadPool::ThreadPool(std::size_t poolSize) : m_Stop(false)
+    {
+        for (size_t i = 0; i < poolSize; ++i)
+            m_Workers.push_back(std::thread(&Worker::LaunchWorkerThread, Worker(*this)));
+    }
+
+    /// Deconstructor
+    ThreadPool::~ThreadPool()
+    {
+        m_Stop = true;
+        m_Condition.notify_all();
+
+        for (size_t i = 0; i < m_Workers.size(); ++i)
+            m_Workers[i].join();
+    }
+
+    /// Constructor
+    /// @p_Task : Function to pass into queue
+    void ThreadPool::Enqueue(std::function<void()> task)
     {
         {
-            std::unique_lock<std::mutex> guard(mPool.mMutex);
-
-            while (!mPool.mStop && mPool.mTasks.empty())
-                mPool.mCondition.wait(guard);
-
-            if (mPool.mStop)
-                break;
-
-            task = mPool.mTasks.front();
-            mPool.mTasks.pop_front();
-
+            std::unique_lock<std::mutex> l_Guard(mMutex);
+            m_Tasks.push_back(std::function<void()>(task));
         }
 
-        task();
+        m_Condition.notify_one();
     }
-}
-//-----------------------------------------------//
-ThreadPool::ThreadPool(std::size_t poolSize) : mStop(false)
-{
-    for (size_t i = 0; i < poolSize; ++i)
-        mWorkers.push_back(std::thread(Worker(*this)));
-}
-//-----------------------------------------------//
-ThreadPool::~ThreadPool()
-{
-    mStop = true;
-    mCondition.notify_all();
-
-    for (size_t i = 0; i < mWorkers.size(); ++i)
-        mWorkers[i].join();
-}
-//-----------------------------------------------//
-void ThreadPool::Enqueue(std::function<void()> task)
-{
-    {
-        std::unique_lock<std::mutex> lock(mMutex);
-        mTasks.push_back(std::function<void()>(task));
-    }
-
-    mCondition.notify_one();
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

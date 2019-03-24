@@ -15,102 +15,124 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include <fstream>
 #include "Config.h"
-//-----------------------------------------------//
-namespace Quad
+
+namespace SteerStone
 {
-    //-----------------------------------------------//
+    /// Singleton Instance
     Config* Config::instance()
     {
         static Config instance;
         return &instance;
     }
-    //-----------------------------------------------//
-    bool Config::SetFile(const std::string& file)
+
+    /// SetFile
+    /// @p_File : File name
+    bool Config::SetFile(std::string const& p_File)
     {
-        mFileName = file;
+        m_FileName = p_File;
 
         return Reload();
     }
-    //-----------------------------------------------//
+
+    /// Reload - Read our server.conf file
     bool Config::Reload()
     {
-        std::ifstream in(mFileName, std::ifstream::in);
+        std::ifstream l_In(m_FileName, std::ifstream::in);
 
-        if (in.fail())
+        if (l_In.fail())
             return false;
 
-        std::unordered_map<std::string, std::string> newEntries;
-        std::lock_guard<std::mutex> guard(mConfigLock);
+        std::unordered_map<std::string, std::string> l_NewEntries;
+        std::lock_guard<std::mutex> l_Guard(m_ConfigLock);
 
         do
         {
-            std::string line;
-            std::getline(in, line);
+            std::string l_Line;
+            std::getline(l_In, l_Line);
 
-            boost::algorithm::trim_left(line);
+            boost::algorithm::trim_left(l_Line);
 
-            if (!line.length())
+            if (!l_Line.length())
                 continue;
 
-            if (line[0] == '#' || line[0] == '[')
+            if (l_Line[0] == '#' || l_Line[0] == '[')
                 continue;
 
-            auto const equals = line.find('=');
-            if (equals == std::string::npos)
+            auto const& l_Equals = l_Line.find('=');
+            if (l_Equals == std::string::npos)
                 return false;
 
-            auto const entry = boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line.substr(0, equals)));
-            auto const value = boost::algorithm::trim_copy_if(boost::algorithm::trim_copy(line.substr(equals + 1)), boost::algorithm::is_any_of("\""));
+            auto const l_Entry = boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(l_Line.substr(0, l_Equals)));
+            auto const l_Value = boost::algorithm::trim_copy_if(boost::algorithm::trim_copy(l_Line.substr(l_Equals + 1)), boost::algorithm::is_any_of("\""));
 
-            newEntries[entry] = value;
-        } while (in.good());
+            l_NewEntries[l_Entry] = l_Value;
+        } while (l_In.good());
 
-        mEntries = std::move(newEntries);
+        m_Entries = std::move(l_NewEntries);
 
         return true;
     }
-    //-----------------------------------------------//
-    bool Config::IsSet(const std::string& name) const
+
+    /// IsSet - Check if l_Entry exists
+    /// @p_File : File name
+    bool Config::IsSet(std::string const& p_File) const
     {
-        auto const nameLower = boost::algorithm::to_lower_copy(name);
-        return mEntries.find(nameLower) != mEntries.cend();
+        auto const l_NameLower = boost::algorithm::to_lower_copy(p_File);
+        return m_Entries.find(l_NameLower) != m_Entries.cend();
     }
-    //-----------------------------------------------//
-    const std::string Config::GetStringDefault(const std::string& name, const std::string& def) const
+
+    /// GetStringDefault
+    /// @p_Name : Name of l_Entry we are looking for
+    /// @p_Default : If we cannot find p_Name then return the default string
+    std::string Config::GetStringDefault(std::string const& p_Name, std::string const& p_Default) const
     {
-        auto const nameLower = boost::algorithm::to_lower_copy(name);
+        auto const l_NameLower = boost::algorithm::to_lower_copy(p_Name);
 
-        auto const entry = mEntries.find(nameLower);
+        auto const l_Entry = m_Entries.find(l_NameLower);
 
-        return entry == mEntries.cend() ? def : entry->second;
+        return l_Entry == m_Entries.cend() ? p_Default : l_Entry->second;
     }
-    //-----------------------------------------------//
-    bool Config::GetBoolDefault(const std::string& name, bool def) const
+
+    /// GetBoolDefault
+    /// @p_Name : Name of l_Entry we are looking for
+    /// @p_Default : If we cannot find p_Name then return the default string
+    bool Config::GetBoolDefault(std::string const& p_Name, bool const& p_Default) const
     {
-        auto const value = GetStringDefault(name, def ? "true" : "false");
+        auto const l_Value = GetStringDefault(p_Name, p_Default ? "true" : "false");
 
-        std::string valueLower;
-        std::transform(value.cbegin(), value.cend(), std::back_inserter(valueLower), ::tolower);
+        std::string l_ValueLower;
+        std::transform(l_Value.cbegin(), l_Value.cend(), std::back_inserter(l_ValueLower), ::tolower);
 
-        return valueLower == "true" || valueLower == "1" || valueLower == "yes";
+        return l_ValueLower == "true" || l_ValueLower == "1" || l_ValueLower == "yes";
     }
-    //-----------------------------------------------//
-    int32 Config::GetIntDefault(const std::string& name, int32 def) const
+
+    /// GetIntDefault
+    /// @p_Name : Name of l_Entry we are looking for
+    /// @p_Default : If we cannot find p_Name then return the default string
+    int32 Config::GetIntDefault(std::string const& p_Name, int32 const& p_Default) const
     {
-        auto const value = GetStringDefault(name, std::to_string(def));
+        auto const l_Value = GetStringDefault(p_Name, std::to_string(p_Default));
 
-        return std::stoi(value);
+        return std::stoi(l_Value);
     }
-    //-----------------------------------------------//
-    float Config::GetFloatDefault(const std::string& name, float def) const
+
+    /// GetFloatDefault
+    /// @p_Name : Name of l_Entry we are looking for
+    /// @p_Default : If we cannot find p_Name then return the default string
+    float Config::GetFloatDefault(std::string const& p_Name, float const& p_Default) const
     {
-        auto const value = GetStringDefault(name, std::to_string(def));
+        auto const l_Value = GetStringDefault(p_Name, std::to_string(p_Default));
 
-        return std::stof(value);
+        return std::stof(l_Value);
     }
-    //-----------------------------------------------//
-}
-//-----------------------------------------------//
+
+    /// GetFileName - Return file name
+    std::string Config::GetFilename() const
+    {
+        return m_FileName;
+    }
+} ///< NAMESPACE STEERSTONE
+

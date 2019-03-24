@@ -16,18 +16,29 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_ThreadWorker_h_
-#define _Quad_ThreadWorker_h_
+#ifndef _THREAD_POOL_WORKER_h
+#define _THREAD_POOL_WORKER_h   
 #include "Common/SharedDefines.h"
 #include "ThreadPool.h"
+#endif /* _THREAD_POOL_WORKER_h */
 
-class Worker 
+namespace SteerStone
 {
-public:
-    Worker(ThreadPool& s) : mPool(s) { }
-    void operator()();
-private:
-    ThreadPool& mPool;
-};
+    /// Class which holds our function queue from Thread Pool
+    class Worker
+    {
+    public:
+        /// Constructor
+        /// @p_ThreadPool : Pass by reference ThreadPool
+        Worker(ThreadPool& p_ThreadPool) : m_Pool(p_ThreadPool)
+        {
+            LaunchWorkerThread();
+        }
 
-#endif /* _Quad_ThreadWorker_h_ */
+        /// Launch our Worker thread to be ready to process incoming functions
+        void LaunchWorkerThread();
+
+    private:
+        ThreadPool& m_Pool;
+    };
+} /// NAMESPACE STEERSTONE

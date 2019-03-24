@@ -62,9 +62,6 @@ endif()
 # Find needed packages and if necessery abort if something important is missing
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
 
-# Find needed packages and if necessery abort if something important is missing
-find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
-
 if(NOT Boost_FOUND)
   message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")
   message(STATUS "BOOST_LIBRARYDIR = $ENV{BOOST_LIBRARYDIR}")

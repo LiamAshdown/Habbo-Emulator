@@ -15,18 +15,18 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "SHA1.h"
-//-----------------------------------------------//
-std::string ByteArrayToHexStr(const uint8* bytes, uint32 arrayLen, bool reverse /* = false */)
+
+std::string ByteArrayToHexStr(uint8 const* p_Bytes, uint32 p_ArrayLen, bool p_Reverse /* = false */)
 {
     int32 init = 0;
-    int32 end = arrayLen;
+    int32 end = p_ArrayLen;
     int8 op = 1;
 
-    if (reverse)
+    if (p_Reverse)
     {
-        init = arrayLen - 1;
+        init = p_Reverse - 1;
         end = -1;
         op = -1;
     }
@@ -35,18 +35,17 @@ std::string ByteArrayToHexStr(const uint8* bytes, uint32 arrayLen, bool reverse 
     for (int32 i = init; i != end; i += op)
     {
         char buffer[4];
-        sprintf(buffer, "%02X", bytes[i]);
+        sprintf(buffer, "%02X", p_Bytes[i]);
         ss << buffer;
     }
 
     return ss.str();
 }
-//-----------------------------------------------//
-std::string CalculateSHA1Hash(const std::string& content)
+
+std::string CalculateSHA1Hash(std::string const& p_Content)
 {
     unsigned char digest[SHA_DIGEST_LENGTH];
-    SHA1((unsigned char*)content.c_str(), content.length(), (unsigned char*)&digest);
+    SHA1((unsigned char*)p_Content.c_str(), p_Content.length(), (unsigned char*)&digest);
 
     return ByteArrayToHexStr(digest, SHA_DIGEST_LENGTH);
 }
-//-----------------------------------------------//

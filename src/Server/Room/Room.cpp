@@ -18,12 +18,12 @@
 //-----------------------------------------------//
 #include "Room.h"
 #include "Player.h"
-#include "PlayerSocket.h"
+#include "HabboSocket.h"
 #include "Network/StringBuffer.h"
 #include "RoomManager.h"
 #include "ItemManager.h"
 //-----------------------------------------------//
-namespace Quad
+namespace SteerStone
 {
     //-----------------------------------------------//
     Room::Room()
@@ -34,9 +34,80 @@ namespace Quad
     {
     }
     //-----------------------------------------------//
+    void Room::EnterRoom(Habbo* player)
+    {
+        if (std::find(mPlayers.begin(), mPlayers.end(), player) != mPlayers.end())
+        {
+            LOG_ERROR << "Habbo tried to enter room " << GetId() << " but is already inside room!";
+            return;
+        }
+
+        player->UpdatePosition(GetRoomModel()->GetDoorX(), GetRoomModel()->GetDoorY(), GetRoomModel()->GetDoorZ(),
+            GetRoomModel()->GetDoorOrientation());
+
+        mPlayers.push_back(player);
+        SendUserObjects(player);
+        mVisitorsNow++;
+    }
+    //-----------------------------------------------//
+    void Room::LeaveRoom(Habbo* player)
+    {
+        std::vector<Habbo*>::const_iterator& itr = std::find(mPlayers.begin(), mPlayers.end(), player);
+
+        if (itr != mPlayers.end())
+        {
+            mPlayers.erase(itr);
+            mVisitorsMax--;
+        }
+        else
+            LOG_INFO << "Player " << player->GetName() << " tried to leave room but player does not exist in room!";
+    }
+    //-----------------------------------------------//
+    void Room::SendUserObjects(Habbo* player)
+    {
+        for (std::vector<Habbo*>::const_iterator& itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
+        {
+            Habbo* roomPlayer = *itr;
+
+            if (roomPlayer->GetId() != player->GetId())
+                roomPlayer->ToSocket()->SendPacket(player->GetUserRoomObject());
+
+            player->ToSocket()->SendPacket(roomPlayer->GetUserRoomObject());
+            break;
+        }
+    }
+    //-----------------------------------------------//
+    void Room::SendObjectsWorld(Habbo * player)
+    {
+        StringBuffer buffer;
+        buffer.AppendBase64(PacketServerHeader::SERVER_OBJECTS_WORLD);
+        for (auto& itr : sItemMgr->GetPublicRoomItems(GetModel()))
+        {
+            PublicItem* item = &itr;
+
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetId()), " ");
+            buffer.AppendStringDelimiter(item->GetSprite(), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionX()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionY()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionZ()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetRotation()), " ");
+            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetLength()), " ");
+            buffer.AppendString("\r", false);
+        }
+
+        buffer.AppendSOH();
+
+        player->ToSocket()->SendPacket(buffer);
+    }
+    //-----------------------------------------------//
+    RoomModel* Room::GetRoomModel()
+    {
+        return &mRoomModel;
+    }
+    //-----------------------------------------------//
     uint32 Room::GetId() const
     {
-        return mId;
+        return m_Id;
     }
     //-----------------------------------------------//
     uint32 Room::GetOwnerId() const
@@ -56,7 +127,7 @@ namespace Quad
     //-----------------------------------------------//
     std::string Room::GetName() const
     {
-        return mName;
+        return m_Name;
     }
     //-----------------------------------------------//
     std::string Room::GetDescription() const
@@ -101,7 +172,7 @@ namespace Quad
     //-----------------------------------------------//
     std::string Room::GetPassword() const
     {
-        return mPassword;
+        return m_Password;
     }
     //-----------------------------------------------//
     uint32 Room::GetVisitorsNow() const
@@ -112,79 +183,6 @@ namespace Quad
     uint32 Room::GetVisitorsMax() const
     {
         return mVisitorsMax;
-    }
-    //-----------------------------------------------//
-    void Room::EnterRoom(Player* player)
-    {
-        if (std::find(mPlayers.begin(), mPlayers.end(), player) != mPlayers.end())
-        {
-            LOG_ERROR << "Player tried to enter room " << GetId() << " but is already inside room!";
-            return;
-        }
-
-        player->UpdatePosition(GetRoomModel()->GetDoorX(), GetRoomModel()->GetDoorY(), GetRoomModel()->GetDoorZ(),
-            GetRoomModel()->GetDoorOrientation());
-
-        mPlayers.push_back(player);
-        SendUserObjects(player);
-        mVisitorsNow++;
-    }
-    //-----------------------------------------------//
-    void Room::LeaveRoom(Player* player)
-    {
-        std::vector<Player*>::const_iterator& itr = std::find(mPlayers.begin(), mPlayers.end(), player);
-
-        if (itr != mPlayers.end())
-        {
-            mPlayers.erase(itr);
-            mVisitorsMax--;
-        }
-        else
-            LOG_INFO << "Player " << player->GetName() << " tried to leave room but player does not exist in room!";
-    }
-    //-----------------------------------------------//
-    RoomModelsStruct* Room::GetRoomModel()
-    {
-        return &mRoomModel;
-    }
-    //-----------------------------------------------//
-    void Room::SendUserObjects(Player* player)
-    {
-        for (std::vector<Player*>::const_iterator& itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
-        {
-            Player* roomPlayer = *itr;
-
-            if (roomPlayer->GetId() != player->GetId())
-                roomPlayer->ToSocket()->SendPacket(player->GetUserRoomObject());
-
-            player->ToSocket()->SendPacket(roomPlayer->GetUserRoomObject());
-            break;
-        }
-    }
-    //-----------------------------------------------//
-    void Room::SendObjectsWorld(Player * player)
-    {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_OBJECTS_WORLD);
-        for (auto& itr : sItemMgr->GetPublicRoomItems(GetModel()))
-        {
-            PublicItem* item = &itr;
-
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetId()), " ");
-            buffer.AppendStringDelimiter(item->GetSprite(), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionX()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionY()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionZ()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetRotation()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetLength()), " ");
-            buffer.AppendString("\r", false);
-        }
-
-        buffer.AppendSOH();
-
-        uint8* ptr = &buffer.mStorage[0];
-
-        player->ToSocket()->SendPacket(buffer);
     }
     //-----------------------------------------------//
 }

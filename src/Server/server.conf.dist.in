@@ -9,6 +9,7 @@
 #    SERVER SETTINGS
 #	 MYSQL SETTINGS
 #    REGISTERATION SETTINGS
+#    MESSENGER SETTINGS
 #
 ###################################################################################################
 
@@ -174,6 +175,24 @@ RegisterationConsoleMotto= I'm looking for friends!
 #
 #
 RegisterationWelcomeMessage = Welcome to QuadEmulator!
+#
+#
+###################################################################################################
+
+###################################################################################################
+# MESSENGER SETTINGS
+#
+#    MessgengerMaxFriendsLimit
+#        Description: Max amount of friends non club member can have
+#        Default:     50
+#
+MessgengerMaxFriendsLimit = 50
+#
+#    MessgengerMaxFriendsClubLimit
+#        Description: Max amount of friends club member can have
+#        Default:     100
+#
+MessgengerMaxFriendsClubLimit = 100
 #
 #
 ###################################################################################################

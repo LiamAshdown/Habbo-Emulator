@@ -16,41 +16,42 @@
 * along with this program.If not, see < http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_result_h_
-#define _Quad_result_h_
+#ifndef _DATABASE_RESULT_h
+#define _DATABASE_RESULT_h
 #include "../Common/SharedDefines.h"
-#include "mysql_connection.h"
-#include "MYSQLConnection.h"
-#include "QueryDatabase.h"
+#endif /* _DATABASE_RESULT_h */
 
-namespace Quad
+namespace SteerStone
 {
+    /// Result class which retrieves ResultSet from Database if successfull query
     class Result
     {
     public:
         friend class QueryDatabase;
 
     public:
+        /// Constructor
         Result() {}
+        /// Deconstructor
         ~Result() {}
 
     public:
-        std::string GetString(uint8 i) const { return mResultSet->getString(i).c_str(); }
-        uint16 GetUint8(uint8 i) const { return (uint8)mResultSet->getUInt(i); }
-        uint16 GetUint16(uint8 i) const { return (uint16)mResultSet->getUInt(i); }
-        int32 GetInt32(uint8 i) const { return (int32)mResultSet->getInt(i); }
-        int64 GetInt64(uint8 i) const { return (int64)mResultSet->getInt64(i); }
-        uint32 GetUint32(uint8 i) const { return (uint32)mResultSet->getUInt(i); }
-        uint32 GetUint64(uint8 i) const { return (uint64)mResultSet->getUInt64(i); }
-        bool GetBool(uint8 i) const { return (bool)mResultSet->getBoolean(i); }
-        double GetDouble(uint8 i) const { return (double)mResultSet->getDouble(i); }
-        float GetFloat(uint8 i) const { return (float)mResultSet->getDouble(i); }
-        bool GetNextResult() const { return mResultSet->next(); }
-        uint32 GetRowCount() const { return (uint32)mResultSet->rowsCount(); }
+        /// Returns data type from database
+        std::string GetString(uint8 p_I) const { return m_ResultSet->getString(p_I).c_str(); }
+        uint16 GetUint8(uint8 p_I)       const { return (uint8)m_ResultSet->getUInt(p_I);    }
+        uint16 GetUint16(uint8 p_I)      const { return (uint16)m_ResultSet->getUInt(p_I);   }
+        int32 GetInt32(uint8 p_I)        const { return (int32)m_ResultSet->getInt(p_I);     }
+        int64 GetInt64(uint8 p_I)        const { return (int64)m_ResultSet->getInt64(p_I);   }
+        uint32 GetUint32(uint8 p_I)      const { return (uint32)m_ResultSet->getUInt(p_I);   }
+        uint32 GetUint64(uint8 p_I)      const { return (uint64)m_ResultSet->getUInt64(p_I); }
+        bool GetBool(uint8 p_I)          const { return (bool)m_ResultSet->getBoolean(p_I);  }
+        double GetDouble(uint8 p_I)      const { return (double)m_ResultSet->getDouble(p_I); }
+        float GetFloat(uint8 p_I)        const { return (float)m_ResultSet->getDouble(p_I);  }
+        /// Get Info about database query
+        bool GetNextResult()             const { return m_ResultSet->next();                 }
+        std::size_t GetRowCount()        const { return m_ResultSet->rowsCount();            }
 
     public:
-        std::unique_ptr<sql::ResultSet> mResultSet;
+        std::unique_ptr<sql::ResultSet> m_ResultSet;                                                       ///< ResultSet from QueryResult class                    
     };
-}
-
-#endif /* !_Quad_result_h_ */
+} ///< NAMESPACE STEERSTONE

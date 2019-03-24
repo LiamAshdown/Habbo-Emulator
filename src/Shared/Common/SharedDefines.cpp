@@ -19,25 +19,45 @@
 #include "SharedDefines.h"
 #include "Timer.h"
 
-std::string SplitString(const std::string& stringData, const std::string& tokenizer)
+std::string SplitString(std::string const& p_StringData, std::string const& p_Tokenizer)
 {
-    std::size_t startPosition = stringData.find(tokenizer);
+    std::size_t l_StartPosition = p_StringData.find(p_Tokenizer);
 
-    if (stringData[startPosition + tokenizer.length()] == '=')
+    if (p_StringData[l_StartPosition + p_Tokenizer.length()] == '=')
     {
-        std::string keyString;
-        for (std::size_t i = startPosition + (tokenizer.length() + 1); i < stringData.length(); i++)
+        std::string l_KeyString;
+        for (std::size_t i = l_StartPosition + (p_Tokenizer.length() + 1); i < p_StringData.length(); i++)
         {
-            if (stringData[i] == '\r')
+            if (p_StringData[i] == '\r')
                 break;
 
-            keyString += stringData[i];
+            l_KeyString += p_StringData[i];
         }
 
-        return keyString;
+        return l_KeyString;
     }
 
     return "0";
+}
+
+Tokens StrSplit(std::string const& p_Src, std::string const& p_Seperator)
+{
+    Tokens l_R;
+    std::string l_S;
+    for (char l_I : p_Src)
+    {
+        if (p_Seperator.find(l_S) != std::string::npos)
+        {
+            if (l_S.length()) l_R.push_back(l_S);
+            l_S.clear();
+        }
+        else
+        {
+            l_S += l_S;
+        }
+    }
+    if (l_S.length()) l_R.push_back(l_S);
+    return l_R;
 }
 
 uint16 ConvertEndian(uint16 value)

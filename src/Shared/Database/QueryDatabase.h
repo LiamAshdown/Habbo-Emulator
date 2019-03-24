@@ -16,44 +16,58 @@
 * along with this program.If not, see < http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_QueryDatabase_h_
-#define _Quad_QueryDatabase_h_
+#ifndef _DATABASE_QUERY_DATABASE_h
+#define _DATABASE_QUERY_DATABASE_h
 #include "../Common/SharedDefines.h"
 #include "Database.h"
 #include "Result.h"
+#endif /* _DATABASE_QUERY_DATABASE_h */
 
-namespace Quad
+namespace SteerStone
 {
+    /// Query the database
     class QueryDatabase
     {
     public:
-       explicit QueryDatabase(const std::string database);
+        /// Constructor
+        /// @p_Database : Database we are going to query
+       explicit QueryDatabase(std::string const& p_Database);
+       /// Deconstructor
         ~QueryDatabase();
 
     public:
-        void DirectExecuteQuery(const std::string& query);
+        /// DirectExecuteQuery
+        /// @p_Query : Query which will be executed to the database
+        void DirectExecuteQuery(std::string const p_Query);
 
-        void PrepareQuery(const std::string& query);
+        /// PrepareQuery
+        /// @p_Query : Query which will be prepared to be executed into the database
+        void PrepareQuery(std::string const& p_Query);
+
+        /// ExecuteQuery - Execute Prepare query into database
         void ExecuteQuery();
+
+        /// GetResult - Get the result of query
         bool GetResult();
+
+        /// GetStatement - Get Statement of query
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
+        /// Fetch - Return resultset fromq query
         Result* Fetch();
 
     private:
-        std::string mDatabase;
-        std::shared_ptr<Connection> mConnection;
-        std::shared_ptr<sql::Connection> mSqlConnection;
+        /// Database
+        std::shared_ptr<Connection> m_Connection;                                  ///< Database Connection
+        std::shared_ptr<sql::Connection> m_SqlConnection;                          ///< Database Sql Connection
+        std::shared_ptr<sql::Statement> m_Statement;                               ///< Database Statement
+        std::shared_ptr<sql::PreparedStatement> m_PreparedStatement;               ///< Database PreparedStatement
+        std::unique_ptr<sql::ResultSet> m_ResultSet;                               ///< ResultSet from query
 
-        std::shared_ptr<sql::Statement> mStatement;
-
-        std::shared_ptr<sql::PreparedStatement> mPreparedStatement;
-
-        bool mExecuteResult;
-        bool mIsExecuteResult;
-        std::unique_ptr<sql::ResultSet> mResultSet;
-        Result mResult;
+        /// Variables
+        Result m_Result;                                                           ///< ResultSet which will be passed into our Result Class
+        std::string m_Database;                                                    ///< Database name we are going to query
+        bool m_ExecuteResult;                                                      ///< If DirectExecuteQuery was used
+        bool m_IsExecuteResult;                                                    ///< If DirectExecuteQuery was used
     }; 
-}
-
-#endif /* !_Quad_QueryDatabase_h_ */
+} ///< NAMESPACE STEERSTONE

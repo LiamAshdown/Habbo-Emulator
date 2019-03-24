@@ -16,75 +16,75 @@
 * along with this program.If not, see < http://www.gnu.org/licenses/>.
 */
 
-/* ConnectionPool manages a connection mPool of some kind.  Worker threads can ask for a connection, and must return it when done.
- * Each connection is guaranteed to be healthy, happy, and free of disease.
- *
- * Connection and ConnectionFactory are virtual classes that should be overridden to their actual type.
- *
- * NOTE: To avoid using templates AND inheritance at the same time in the ConnectionFactory, ConnectionFactory::create must create a derved type
- * but return the base class.
- */
-
-#ifndef _Quad_ConnectionPool_h_
-#define _Quad_ConnectionPool_h_
-#include <deque>
-#include <set>
+#ifndef _DATABASE_CONNECTION_POOL_h
+#define _DATABASE_CONNECTION_POOL_h
+#include "Common/SharedDefines.h"
+#include "MySQLConnection.h"
 #include <exception>
 #include <mutex>
 #include <thread>
-#include "MySQLConnection.h"
-#include "Common/SharedDefines.h"
+#endif /* _DATABASE_CONNECTION_POOL_h */
 
-namespace Quad
+namespace SteerStone
 {
+    /// Class which stores databases in a storage
     class ConnectionPool
     {
     public:
-        ConnectionPool(std::shared_ptr<MySQLConnection> mySQLConnection, const std::size_t& poolSize)
-            : mMySQLConnection(mySQLConnection), mPoolSize(poolSize)
+        /// Constructor
+        /// @p_MysqlConnection : Connection of the database
+        /// @p_PoolSize : Amount of connections to launch database
+        ConnectionPool(std::shared_ptr<MySQLConnection> p_MysqlConnection, std::size_t const& p_PoolSize)
+            : m_MySQLConnection(p_MysqlConnection), m_PoolSize(p_PoolSize)
         {
-            for (std::size_t i = 0; i < mPoolSize; i++)
-                mPool.push_back(mMySQLConnection->CreateDatabase());
+            for (std::size_t l_I = 0; l_I < m_PoolSize; l_I++)
+                m_Pool.push_back(m_MySQLConnection->CreateDatabase());
         }
 
+        /// Deconstructor
+        ~ConnectionPool() {}
+
+        /// Borrow
+        /// Borrow a connection in our m_Pool
         std::shared_ptr<Connection> Borrow()
         {
-            std::lock_guard<std::mutex> guard(mMutex);
+            std::lock_guard<std::mutex> l_Guard(m_Mutex);
 
-            if (mPool.size() == 0)
+            if (m_Pool.size() == 0)
             {
-                for (std::set<std::shared_ptr<Connection>>::iterator itr = mBorrowedPool.begin(); itr != mBorrowedPool.end(); itr++)
+                for (auto& itr = m_BorrowedPool.begin(); itr != m_BorrowedPool.end(); itr++)
                 {
-                    std::shared_ptr<Connection> connection = (*itr);
+                    std::shared_ptr<Connection> l_Connection = (*itr);
 
-                    // If our connection is unique this means that the QueryDatabase is not sharing a pointer from this connection,
-                    // so we will erase the borrowed connection and put back into the pool so QueryDatabase can share it
-                    if (connection.unique())
+                    /// If our connection is unique this means that the QueryDatabase is not sharing a pointer from this connection,
+                    /// so we will erase the borrowed connection and put back into the pool so QueryDatabase can share it
+                    if (l_Connection.unique())
                     {
                         try
                         {
-                            std::shared_ptr<Connection> newConnection = mMySQLConnection->CreateDatabase();
+                            std::shared_ptr<Connection> l_NewConnection = m_MySQLConnection->CreateDatabase();
 
-                            mBorrowedPool.erase(connection);
-                            mBorrowedPool.insert(newConnection);
+                            m_BorrowedPool.erase(l_Connection);
+                            m_BorrowedPool.insert(l_NewConnection);
 
-                            return newConnection;
+                            return l_NewConnection;
                         }
                         catch (const std::exception&)
                         {
-                            assert(false);
+                            assert(false); ///< Assert if we fail in creating a new database, CreateDatabase already throws an error, so don't need
+                                           ///< To log the error twice
                         }
                     }
 
                 }
 
-                // If all connections are borrowed, then we create a temporary connection and log the error as fatal
+                /// If all connections are borrowed, then we create a temporary connection and log the error as fatal
                 LOG_FATAL << "All connections are borrowed... attempting to create new temporary connection";
                 try
                 {
-                    std::shared_ptr<Connection> newConnection = mMySQLConnection->CreateDatabase();
-                    mBorrowedPool.insert(newConnection);
-                    return newConnection;
+                    std::shared_ptr<Connection> l_NewConnection = m_MySQLConnection->CreateDatabase();
+                    m_BorrowedPool.insert(l_NewConnection);
+                    return l_NewConnection;
                 }
                 catch (const std::exception&)
                 {
@@ -92,32 +92,35 @@ namespace Quad
                 }
             }
 
-            // We are now borrowing a connection, remove 1 connection from our thread pool
-            std::shared_ptr<Connection> connection = mPool.front();
-            mPool.pop_front();
+            /// Declare our connection from Pool
+            std::shared_ptr<Connection> l_Connection = m_Pool.front();
 
-            // Insert our borrowed connection into the borrowed pool
-            mBorrowedPool.insert(connection);
+            /// Insert our borrowed connection into the borrowed pool
+            m_BorrowedPool.insert(l_Connection);
 
-            return connection;
+            /// Remove connection from Pool
+            m_Pool.pop_front();
+
+            return l_Connection;
         }
 
-        void UnBorrow(std::shared_ptr<Connection> connection)
+        /// Constructor
+        /// @p_Connection : Remove Connection from Borrowed Pool
+        void UnBorrow(std::shared_ptr<Connection> p_Connection)
         {
-            std::lock_guard<std::mutex> guard(mMutex);
+            std::lock_guard<std::mutex> l_Guard(this->m_Mutex);
 
-            mBorrowedPool.erase(connection);
-            mPool.push_back(connection);
+            m_BorrowedPool.erase(p_Connection);
+            m_Pool.push_back(p_Connection);
         }
 
     private:
-        std::shared_ptr<MySQLConnection> mMySQLConnection;
-        std::deque<std::shared_ptr<Connection>> mPool;
-        std::set<std::shared_ptr<Connection>> mBorrowedPool;
-
-        std::size_t mPoolSize;
-        std::mutex mMutex;
+        /// Database Connections
+        std::shared_ptr<MySQLConnection> m_MySQLConnection;           ///< Mysql Database Conncection 
+        std::deque<std::shared_ptr<Connection>> m_Pool;               ///< MysqlConnections Pool
+        std::set<std::shared_ptr<Connection>> m_BorrowedPool;         ///< MysqlConnections Borrowed Pool               
+        /// Variables
+        std::size_t m_PoolSize;                                       ///< Pool Size of MysqlConnections  
+        std::mutex m_Mutex;                                           ///< Mutex
     };
-}
-
-#endif /* !_Quad_Config_h_ */
+} ///< NAMESPACE STEERSTONE

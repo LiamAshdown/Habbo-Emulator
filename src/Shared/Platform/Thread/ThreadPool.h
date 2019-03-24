@@ -16,37 +16,41 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_ThreadPool_h_
-#define _Quad_ThreadPool_h_
-#include <queue>
+#ifndef _THREADPOOL_THREADPOOL_h
+#define _THREADPOOL_THREADPOOL_h
+#include "Common/SharedDefines.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <future>
-#include <functional>
 #include <stdexcept>
-#include "Common/SharedDefines.h"
+#endif /* _THREADPOOL_THREADPOOL_h */
 
-class ThreadPool
+namespace SteerStone
 {
-public:
-    friend class Worker;
-public:
-    ThreadPool(std::size_t poolSize);
-    ~ThreadPool();
+    /// Thread Pooling class for handling functions
+    class ThreadPool
+    {
+    public:
+        friend class Worker;
 
-public:
-    void Enqueue(std::function<void()> task);
+    public:
+        /// Constructor
+        /// @p_PoolSize : Number of workers to launch
+        ThreadPool(const std::size_t p_PoolSize);
+        /// Deconstructor
+        ~ThreadPool();
 
-private:
-    std::vector<std::thread> mWorkers;
+    public:
+        /// Constructor
+        /// @p_Task : Function to pass into queue
+        void Enqueue(std::function<void()> p_Task);
 
-    // the task queue
-    std::deque<std::function<void()>> mTasks;
-
-    std::mutex mMutex;
-    std::condition_variable mCondition;
-    bool mStop;
-};
-
-#endif /* _Quad_ThreadPool_ */
+    private:
+        std::vector<std::thread> m_Workers;                                    ///< Worker Threads
+        std::deque<std::function<void()>> m_Tasks;                             ///< Task execute
+        std::condition_variable m_Condition;                                   ///< Condition
+        std::mutex mMutex;                                                     ///< Mutex
+        bool m_Stop;                                                            ///< Stop operation of Thread Pool
+    };
+} ///< NAMESPACE STEERSTONE

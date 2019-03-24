@@ -16,12 +16,13 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Listener_h_
-#define _Quad_Listener_h_
+#ifndef _NETWORK_LISTENER_h
+#define _NETWORK_LISTENER_h
 #include "../Common/SharedDefines.h"
 #include "NetworkThread.h"
+#endif /* _NETWORK_LISTENER_h */
 
-namespace Quad
+namespace SteerStone
 {
     template <typename SocketType>
     class Listener
@@ -52,7 +53,6 @@ namespace Quad
 
         void BeginAccept();
         void OnAccept(NetworkThread<SocketType> *worker, std::shared_ptr<SocketType> const& socket, const boost::system::error_code &ec);
-        void CloseListener();
 
     private:
         std::unique_ptr<boost::asio::io_service> mService;
@@ -111,5 +111,3 @@ namespace Quad
         BeginAccept();
     }
 }
-
-#endif /* !_Quad_Listener_h_ */

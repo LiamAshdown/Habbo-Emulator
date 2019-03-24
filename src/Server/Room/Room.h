@@ -19,12 +19,14 @@
 #ifndef _Quad_Room_h_
 #define _Quad_Room_h_
 #include "Common/SharedDefines.h"
+#include "RoomCategory.h"
+#include "RoomModel.h"
 #include "ItemManager.h"
 
-enum RoomFlag
+enum RoomType
 {
-    ROOM_TYPE_PUBLIC                    = 0,
-    ROOM_TYPE_FLATS                     = 2
+    ROOM_TYPE_FLAT                      = 0,
+    ROOM_TYPE_PUBLIC                    = 1
 };
 
 enum RoomConnectionError
@@ -34,76 +36,9 @@ enum RoomConnectionError
     ROOM_IS_IN_QUEUE                    = 3,
 };
 
-namespace Quad
+namespace SteerStone
 {
-    class Player;
-
-    typedef struct RoomCategoryStruct
-    {
-    public:
-        friend class RoomManager;
-
-    public:
-        RoomCategoryStruct() {}
-        ~RoomCategoryStruct() {}
-
-    public:
-        uint32 GetCategory() const { return mCategoryId; }
-        std::string GetName() const { return mName; }
-        bool IsPublicSpace() const { return mPublicSpace; }
-        uint8 GetMinRoleAccess() const { return mMinRoleAccess; }
-        uint8 GetMinRoleSetFlat() const { return mMinRoleSetFlat; }
-        uint8 CanTrade() const { return mAllowTrading; }
-        uint32 GetParentCategory() const { return mParentId; }
-
-    private:
-        uint32 mCategoryId;
-        uint32 mParentId;
-        std::string mName;
-        bool mPublicSpace;
-        bool mAllowTrading;
-        uint16 mMinRoleAccess;
-        uint16 mMinRoleSetFlat;
-
-    }RoomCategoryData;
-
-    typedef struct RoomModelsStruct
-    {
-    public:
-        friend class RoomManager;
-
-    public:
-        RoomModelsStruct() 
-        {
-
-        }
-        ~RoomModelsStruct() 
-        {
-        }
-
-    public:
-        uint32 GetId()             const { return mId; }
-        std::string GetModelId()   const { return mModelId; }
-        std::string GetModel()     const { return mModel; }
-        int32 GetDoorX()           const { return mDoorX; }
-        int32 GetDoorY()           const { return mDoorY; }
-        float GetDoorZ()           const { return mDoorZ; }
-        int32 GetDoorOrientation() const { return mDoorOrientation; }
-        std::string GetHeightMap() const { return mHeightMap; }
-
-    private:
-        uint32 mId;
-        std::string mModelId;
-        std::string mModel;
-        int32 mDoorX;
-        int32 mDoorY;
-        float mDoorZ;
-        int32 mMapSizeX;
-        int32 mMapSizeY;
-        int32 mDoorOrientation;
-        std::string mHeightMap;
-
-    }RoomModelsData;
+    class Habbo;
 
     class Room
     {
@@ -113,6 +48,12 @@ namespace Quad
     public:
         Room();
         ~Room();
+
+    public:
+        void EnterRoom(Habbo* player);
+        void LeaveRoom(Habbo* player);
+        RoomModel* GetRoomModel();
+        void SendObjectsWorld(Habbo* player);
 
     public:
         uint32 GetId() const;
@@ -132,19 +73,15 @@ namespace Quad
         uint32 GetVisitorsNow() const;
         uint32 GetVisitorsMax() const;
 
-        void EnterRoom(Player* player);
-        void LeaveRoom(Player* player);
-        RoomModelsStruct* GetRoomModel();
-        void SendObjectsWorld(Player* player);
     private:
-        void SendUserObjects(Player* player);
+        void SendUserObjects(Habbo* player);
 
     private:
-        uint32 mId;
+        uint32 m_Id;
         uint32 mOwnerId;
         std::string mOwnerName;
         uint32 mCategory;
-        std::string mName;
+        std::string m_Name;
         std::string mDescription;
         std::string mModel;
         std::string mCcts;
@@ -153,14 +90,14 @@ namespace Quad
         bool mShowName;
         bool mSuperUsers;
         std::string mAccessType;
-        std::string mPassword;
+        std::string m_Password;
         uint32 mVisitorsNow;
         uint32 mVisitorsMax;
 
-        RoomModelsData mRoomModel;
+        RoomModel mRoomModel;
         PublicItemVec mPublicItems;
 
-        std::vector<Player*> mPlayers;
+        std::vector<Habbo*> mPlayers;
     };
 }
 
