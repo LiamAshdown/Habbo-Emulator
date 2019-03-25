@@ -23,18 +23,8 @@
 
 namespace SteerStone
 {
-    enum MessengerError
-    {
-        ACCEPT_SUCCESS              = 0,
-        TARGET_FRIEND_LIST_FULL     = 2,
-        TARGET_DOES_NOT_ACCEPT      = 3,
-        FRIEND_REQUEST_NOT_FOUND    = 4,
-        BUDDY_REMOVE_ERROR          = 37,
-        FRIEND_LIST_FULL            = 39,
-        CONCURRENCY_ERROR           = 42
-    };
-
     class StringBuffer;
+    class Habbo;
 
     /// Structure which holds information about Habbo
     typedef struct MessengerFriendsStruct
@@ -99,6 +89,9 @@ namespace SteerStone
         /// HasFriendRequests - Check if we have any friend requests
         bool HasFriendRequest() const;
 
+        /// CanSendFriendRequest - Check if our friend list is full
+        bool CanSendFriendRequest() const;
+
         /// ParseMessengerFriends
         /// @p_Buffer : Buffer which is being parsed
         void ParseMessengerFriends(StringBuffer& p_Buffer);
@@ -120,6 +113,11 @@ namespace SteerStone
         /// @p_Buffer : Buffer which is being parsed
         /// @p_Name : Name of Habbo we are searching for
         void ParseMessengerSearchUser(StringBuffer& p_Buffer, const std::string& p_Name);
+
+        /// ParseMessengerSendFriendRequest
+        /// @p_Habbo : Habbo Class incase we need to send error message to client who sending friend request
+        /// @p_Name : Name of Habbo we are sending friend request too
+        void ParseMessengerSendFriendRequest(Habbo* p_Habbo, const std::string& p_Name);
 
     private:
         /// Variables

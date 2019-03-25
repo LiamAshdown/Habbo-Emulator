@@ -118,6 +118,7 @@ namespace SteerStone
         void MessengerAcceptRequest(uint32 const& p_SenderId);
         void SendMessengerUpdate();
         void SendSearchUserResults(std::string const& p_Name);
+        void MessengerSendFriendRequest(std::string const& p_Name);
 
         /// Objects
         void SendHabboObject();

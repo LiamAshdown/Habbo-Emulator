@@ -22,6 +22,17 @@
 
 namespace SteerStone
 {
+    enum MessengerErrorCode
+    {
+        ACCEPT_SUCCESS              = 0,
+        TARGET_FRIEND_LIST_FULL     = 2,
+        TARGET_DOES_NOT_ACCEPT      = 3,
+        FRIEND_REQUEST_NOT_FOUND    = 4,
+        BUDDY_REMOVE_ERROR          = 37,
+        FRIEND_LIST_FULL            = 39,
+        CONCURRENCY_ERROR           = 42
+    };
+
     namespace HabboPacket
     {
         namespace Messenger
@@ -54,16 +65,19 @@ namespace SteerStone
                 StringBuffer const* Write();
             };
 
-            /// SERVER_MESSENGER_FRIEND_REQUEST packet builder
-            class MessengerFriendRequest final : public ServerPacket
+            /// SERVER_MESSENGER_SEND_FRIEND_REQUEST packet builder
+            class MessengerSendFriendRequest final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerFriendRequest() : ServerPacket(SERVER_MESSENGER_FRIEND_REQUEST) {}
+                MessengerSendFriendRequest() : ServerPacket(SERVER_MESSENGER_SEND_FRIEND_REQUEST) {}
 
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+
+                uint32 Id;
+                std::string Name;
             };
 
             /// SERVER_MESSENGER_FIND_USER_RESULT packet builder
@@ -78,6 +92,21 @@ namespace SteerStone
                 StringBuffer const* Write();
 
                 std::string Messenger;
+            };
+
+            /// SERVER_MESSENGER_ERROR packet builder
+            class MessengerError final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                MessengerError() : ServerPacket(SERVER_MESSENGER_ERROR) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 MessageId;
+                MessengerErrorCode Error;
             };
         } ///< NAMESPACE Messenger
     } ///< NAMESPACE HABBOPACKET

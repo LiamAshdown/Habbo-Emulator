@@ -19,7 +19,7 @@
 #include "Habbo.h"
 #include "Hotel.h"
 #include "Room.h"
-#include "Network/StringBuffer.h"
+#include "Opcode/Packets/Server/MessengerPackets.h"
 
 namespace SteerStone
 {
@@ -111,6 +111,13 @@ namespace SteerStone
     {
         return m_MessengerFriendRequests.size() > 0 ? true : false;
     }
+
+    /// CanSendFriendRequest - Check if our friend list is full
+    bool Messenger::CanSendFriendRequest() const
+    {
+        /// TODO; Habbo Club
+        return m_MessengerFriends.size() >= sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50) ? false : true;
+    }
     
     /// ParseMessengerFriends
     /// @p_Buffer : Buffer which is being parsed
@@ -118,9 +125,9 @@ namespace SteerStone
     {
         p_Buffer.AppendWired(m_MessengerFriends.size());
 
-        for (auto const& l_l_Itr : m_MessengerFriends)
+        for (auto const& l_Itr : m_MessengerFriends)
         {
-            MessengerFriendsData const& messengerFriend = l_l_Itr;
+            MessengerFriendsData const& messengerFriend = l_Itr;
             Habbo const* l_Habbo = sHotel->FindHabbo(messengerFriend.GetId());
 
             p_Buffer.AppendWired(messengerFriend.GetId());
@@ -154,9 +161,9 @@ namespace SteerStone
     /// @p_Buffer : Buffer which is being parsed
     void Messenger::ParseMessengerFriendRequests(StringBuffer& p_Buffer)
     {
-        for (auto const& l_l_Itr : m_MessengerFriendRequests)
+        for (auto const& l_Itr : m_MessengerFriendRequests)
         {
-            MessengerFriendsData const& messengerFriend = l_l_Itr;
+            MessengerFriendsData const& messengerFriend = l_Itr;
 
             p_Buffer.AppendWired(messengerFriend.GetId());
             p_Buffer.AppendString(messengerFriend.GetName());
@@ -172,9 +179,9 @@ namespace SteerStone
 
         p_Buffer.AppendWired(m_MessengerFriends.size());
 
-        for (auto const& l_l_Itr : m_MessengerFriends)
+        for (auto const& l_Itr : m_MessengerFriends)
         {
-            MessengerFriendsData const& messengerFriend = l_l_Itr;
+            MessengerFriendsData const& messengerFriend = l_Itr;
             Habbo const* l_Habbo = sHotel->FindHabbo(messengerFriend.GetId());
 
             p_Buffer.AppendWired(messengerFriend.GetId());
@@ -256,6 +263,88 @@ namespace SteerStone
 
         p_Buffer.AppendString(l_Result->GetString(6));
         p_Buffer.AppendString(l_Result->GetString(3));
+    }
+
+    /// ParseMessengerSendFriendRequest
+    /// @p_Habbo : Habbo Class incase we need to send error message to client who sending friend request
+    /// @p_Name : Name of Habbo we are sending friend request too
+    void Messenger::ParseMessengerSendFriendRequest(Habbo* p_Habbo, const std::string& p_Name)
+    {
+        QueryDatabase l_Database("users");
+        l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");
+        l_Database.GetStatement()->setString(1, p_Name);
+        l_Database.ExecuteQuery();
+
+        /// Target user does not exist
+        if (!l_Database.GetResult())
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::FRIEND_REQUEST_NOT_FOUND;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        Result* l_Result = l_Database.Fetch();
+
+        /// Check if target user friends is full
+        /// TODO; Habbo Club
+        if (l_Result->GetRowCount() >= sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50))
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        /// Does target user already exist on friend request list?
+        if (l_Result->GetUint32(8) == m_Id)
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        /// Does target user already exist on friend  list?
+        if (l_Result->GetUint32(9) == m_Id)
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        /// Does target user accept friend requests?
+        if (!l_Result->GetBool(7))
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        ///< All Good send friend request notification to player if online
+        Habbo* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
+
+        if (l_Habbo)
+        {
+            HabboPacket::Messenger::MessengerSendFriendRequest l_Packet;
+            l_Packet.Id = p_Habbo->GetId();
+            l_Packet.Name = p_Habbo->GetName();
+            l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
+
+        /// Insert friend request into database
+        l_Database.PrepareQuery("INSERT INTO messenger_requests (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = ?");
+        l_Database.GetStatement()->setUInt(1, m_Id);
+        l_Database.GetStatement()->setUInt(2, l_Result->GetUint32(1));
+        l_Database.GetStatement()->setUInt(3, l_Result->GetUint32(1));
+        l_Database.ExecuteQuery();
     }
     
 } ///< NAMESPACE MESSENGER

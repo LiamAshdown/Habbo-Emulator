@@ -57,9 +57,11 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerFriendRequest::Write()
+            StringBuffer const * MessengerSendFriendRequest::Write()
             {
-                /// Handled in Messenger::ParseMessengerFriendRequests
+
+                m_Buffer.AppendWired(Id);
+                m_Buffer.AppendString(Name);
 
                 m_Buffer.AppendSOH();
 
@@ -75,6 +77,19 @@ namespace SteerStone
                 m_Buffer.AppendString(Messenger);
 
                 /// Handled in Messenger::ParseMessengerFriendRequests
+
+                m_Buffer.AppendSOH();
+
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * MessengerError::Write()
+            {
+                m_Buffer.AppendWired(Error);
 
                 m_Buffer.AppendSOH();
 

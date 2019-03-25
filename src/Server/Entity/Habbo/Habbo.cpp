@@ -117,7 +117,7 @@ namespace SteerStone
 
         if (m_Messenger->HasFriendRequest())
         {
-            HabboPacket::Messenger::MessengerFriendRequest l_PacketFriendRequest;
+            HabboPacket::Messenger::MessengerSendFriendRequest l_PacketFriendRequest;
             m_Messenger->ParseMessengerFriendRequests(l_PacketFriendRequest.GetBuffer());
             ToSocket()->SendPacket(l_PacketFriendRequest.Write());
         }
@@ -138,7 +138,7 @@ namespace SteerStone
 
         if (m_Messenger->HasFriendRequest())
         {
-            HabboPacket::Messenger::MessengerFriendRequest l_PacketFriendRequest;
+            HabboPacket::Messenger::MessengerSendFriendRequest l_PacketFriendRequest;
             m_Messenger->ParseMessengerFriendRequests(l_PacketFriendRequest.GetBuffer());
             ToSocket()->SendPacket(l_PacketFriendRequest.Write());
         }
@@ -149,6 +149,21 @@ namespace SteerStone
         HabboPacket::Messenger::MessengerFindUserResult l_Packet;
         m_Messenger->ParseMessengerSearchUser(l_Packet.GetBuffer(), p_Name);
         ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    void Habbo::MessengerSendFriendRequest(std::string const & p_Name)
+    {
+        /// Is friend list full?
+        if (!m_Messenger->CanSendFriendRequest())
+        {
+            HabboPacket::Messenger::MessengerError l_Packet;
+            l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
+            l_Packet.MessageId = 0; ///< Client logs error and needs an Id... not supported by us
+            ToSocket()->SendPacket(l_Packet.Write());   
+            return;
+        }
+
+        m_Messenger->ParseMessengerSendFriendRequest(this, p_Name);
     }
 
     //////////////////////////////////////////////

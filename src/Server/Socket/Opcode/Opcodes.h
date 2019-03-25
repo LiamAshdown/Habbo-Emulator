@@ -92,7 +92,7 @@ enum PacketServerHeader : uint16
     SERVER_FUSE_RIGHTS                    = 2,
     SERVER_AVAILABLE_BADGES               = 229,
     SERVER_ACCOUNT_PREFERENCES            = 308,
-    SERVER_MESSENGER_FRIEND_REQUEST       = 132,
+    SERVER_MESSENGER_SEND_FRIEND_REQUEST  = 132,
     SERVER_ROOM_USER_OBJECTS              = 28,
     SERVER_MESSENGER_UPDATE               = 13,
     SERVER_OBJECTS_WORLD                  = 30,
@@ -102,6 +102,7 @@ enum PacketServerHeader : uint16
     SERVER_HOTEL_LOGOUT                   = 287,
     SERVER_MESSENGER_FIND_USER_RESULT     = 128,
     SERVER_GDATE                          = 49,
+    SERVER_MESSENGER_ERROR                = 260,
 };
 
 namespace SteerStone

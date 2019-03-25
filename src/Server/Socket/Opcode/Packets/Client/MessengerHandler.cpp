@@ -43,4 +43,10 @@ namespace SteerStone
         std::string l_Name = p_Packet->ReadString();
         m_Habbo->SendSearchUserResults(l_Name);
     }
+
+    void HabboSocket::HandleMessengerSendRequest(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Name = p_Packet->ReadString();
+        m_Habbo->MessengerSendFriendRequest(l_Name);
+    }
 } /// NAMESPACE STEERSTONE
