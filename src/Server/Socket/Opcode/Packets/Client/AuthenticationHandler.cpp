@@ -237,23 +237,23 @@ namespace SteerStone
             l_Result = l_Database.Fetch();
 
             m_Habbo = new Habbo(this);
-            m_Habbo->m_Id = l_Result->GetUint32(1);
-            m_Habbo->m_Name = l_Result->GetString(2);
-            m_Habbo->m_Password = l_Result->GetString(3);
-            m_Habbo->m_Email = l_Result->GetString(4);
-            m_Habbo->m_Figure = l_Result->GetString(5);
-            m_Habbo->m_PoolFigure = l_Result->GetString(6);
-            m_Habbo->m_Motto = l_Result->GetString(7);
-            m_Habbo->m_ConsoleMotto = l_Result->GetString(8);
-            m_Habbo->m_DirectMail = l_Result->GetBool(9);
-            m_Habbo->m_Birthday = l_Result->GetString(10);
-            m_Habbo->m_Gender = l_Result->GetString(11);
-            m_Habbo->m_Credits = l_Result->GetUint32(12);
-            m_Habbo->m_Tickets = l_Result->GetUint32(13);
-            m_Habbo->m_Films = l_Result->GetUint32(14);
-            m_Habbo->m_SoundEnabled = l_Result->GetBool(15);
+            m_Habbo->m_Id                   = l_Result->GetUint32(1);
+            m_Habbo->m_Name                 = l_Result->GetString(2);
+            m_Habbo->m_Password             = l_Result->GetString(3);
+            m_Habbo->m_Email                = l_Result->GetString(4);
+            m_Habbo->m_Figure               = l_Result->GetString(5);
+            m_Habbo->m_PoolFigure           = l_Result->GetString(6);
+            m_Habbo->m_Motto                = l_Result->GetString(7);
+            m_Habbo->m_ConsoleMotto         = l_Result->GetString(8);
+            m_Habbo->m_DirectMail           = l_Result->GetBool(9);
+            m_Habbo->m_Birthday             = l_Result->GetString(10);
+            m_Habbo->m_Gender               = l_Result->GetString(11);
+            m_Habbo->m_Credits              = l_Result->GetUint32(12);
+            m_Habbo->m_Tickets              = l_Result->GetUint32(13);
+            m_Habbo->m_Films                = l_Result->GetUint32(14);
+            m_Habbo->m_SoundEnabled         = l_Result->GetBool(15);
             m_Habbo->m_AcceptFriendRequests = l_Result->GetBool(16);
-            m_Habbo->m_Rank = l_Result->GetUint8(17);
+            m_Habbo->m_Rank                 = l_Result->GetUint8(17);
             m_Habbo->LoadHabboInfo();
             m_Habbo->m_Initialized = true;
 
@@ -262,7 +262,7 @@ namespace SteerStone
                 if (l_Result->GetString(16) != "")
                 {
                     HabboBadgesStruct l_HabboBadge;
-                    l_HabboBadge.m_Badge = l_Result->GetString(16);
+                    l_HabboBadge.m_Badge    = l_Result->GetString(16);
                     l_HabboBadge.m_IsActive = l_Result->GetBool(17);
                     m_Habbo->m_Badges.push_back(l_HabboBadge);
                 }
@@ -271,7 +271,7 @@ namespace SteerStone
                 if (l_Result->GetUint8(18))
                 {
                     HabboFuseRightsData l_HabboFuseRight;
-                    l_HabboFuseRight.m_Rank = l_Result->GetUint8(18);
+                    l_HabboFuseRight.m_Rank      = l_Result->GetUint8(18);
                     l_HabboFuseRight.m_FuseRight = l_Result->GetString(19);
                     m_Habbo->m_FuseRights.push_back(l_HabboFuseRight);
                 }
