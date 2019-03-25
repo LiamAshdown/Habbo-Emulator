@@ -46,17 +46,20 @@ Tokens StrSplit(std::string const& p_Src, std::string const& p_Seperator)
     std::string l_S;
     for (char l_I : p_Src)
     {
-        if (p_Seperator.find(l_S) != std::string::npos)
+        if (p_Seperator.find(l_I) != std::string::npos)
         {
-            if (l_S.length()) l_R.push_back(l_S);
+            if (l_S.length()) 
+                l_R.push_back(l_S);
+
             l_S.clear();
         }
         else
-        {
-            l_S += l_S;
-        }
+            l_S += l_I;
     }
-    if (l_S.length()) l_R.push_back(l_S);
+
+    if (l_S.length())
+        l_R.push_back(l_S);
+
     return l_R;
 }
 

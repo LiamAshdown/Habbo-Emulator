@@ -56,14 +56,14 @@ namespace SteerStone
 
         void RemoveSocket(Socket *socket)
         {
-            std::lock_guard<std::mutex> guard(mMutex);
+            std::lock_guard<std::mutex> guard(m_Mutex);
             mSockets.erase(socket->Shared<SocketType>());
         }
 
     private:
         boost::asio::io_service mService;
 
-        std::mutex mMutex;
+        std::mutex m_Mutex;
         std::unordered_set<std::shared_ptr<SocketType>> mSockets;
 
         // Note that the work member *must* be declared after the service member for the work constructor to function correctly
@@ -75,7 +75,7 @@ namespace SteerStone
     template <typename SocketType>
     std::shared_ptr<SocketType> NetworkThread<SocketType>::CreateSocket()
     {
-        std::lock_guard<std::mutex> guard(mMutex);
+        std::lock_guard<std::mutex> guard(m_Mutex);
 
         auto const i = mSockets.emplace(std::make_shared<SocketType>(mService, [this] (Socket *socket) { this->RemoveSocket(socket); }));
 

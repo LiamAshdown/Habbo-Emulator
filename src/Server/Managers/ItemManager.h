@@ -16,37 +16,43 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_ItemManager_h_
-#define _Quad_ItemManager_h_
-#include <mutex>
+#ifndef _ITEM_ITEM_MANAGER_h
+#define _ITEM_ITEM_MANAGER_h
 #include "Common/SharedDefines.h"
 #include "Item.h"
+#include <mutex>
+#endif /* _ITEM_ITEM_MANAGER_h */
 
 namespace SteerStone
 {
     typedef std::vector<PublicItem> PublicItemVec;
     typedef std::map<std::string, PublicItemVec> PublicItemMap;
 
+    /// Class which holds item information
+    /// Singleton
     class ItemManager
     {
     public:
         static ItemManager* instance();
 
     public:
+        /// Constructor
         ItemManager();
+        /// Constructor
         ~ItemManager();
         
     public:
+        /// LoadPublicRoomItems - Load Public items from database
         void LoadPublicRoomItems();
 
-        PublicItemVec GetPublicRoomItems(const std::string& model);
+        /// GetPublicRoomItems#
+        /// @p_Model : Room Model to retrieve furniture data
+        PublicItemVec GetPublicRoomItems(std::string const& p_Model);
 
     private:
-        PublicItemMap mPublicItems;
-        std::mutex mMutex;
+        PublicItemMap m_PublicItems;                     ///< Map which holds Room Model as key and info of the item
+        std::mutex m_Mutex;                             ///< Mutex
     };
-}
+} ///< NAMESPACE STEERSTONE
 
 #define sItemMgr SteerStone::ItemManager::instance()
-
-#endif /* _Quad_ItemManager_h_ */

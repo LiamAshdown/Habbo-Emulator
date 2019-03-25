@@ -186,7 +186,7 @@ namespace SteerStone
             m_Storage.clear();
         }
 
-    private:
+ 
         /// Storage
         std::size_t m_WritePosition;                                                    ///< Write position in our stroage
         std::size_t m_ReadPosition;                                                     ///< Read position in our storage

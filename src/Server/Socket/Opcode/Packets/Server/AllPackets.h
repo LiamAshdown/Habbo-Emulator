@@ -16,18 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+#include "HabboInfoPackets.h"
+#include "MessengerPackets.h"
+#include "AuthenticationPackets.h"
+#include "FavouriteRoomPackets.h"
+#include "MiscPackets.h"
 #include "NavigatorPackets.h"
+#include "RoomPackets.h"
 
-namespace SteerStone
-{
-    namespace HabboPacket
-    {
-        namespace Navigator
-        {
-          
-            //////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////
-
-        } ///< NAMESPACE NAVIGATOR
-    } ///< NAMESPACE HABBOPACKET
-} ///< NAMESPACE STEERSTONE

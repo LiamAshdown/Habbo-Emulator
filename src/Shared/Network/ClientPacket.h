@@ -21,25 +21,6 @@
 #include "Common/SharedDefines.h"
 #endif /* _NETWORK_CLIENT_PACKET_h */
 
-enum ApproveNameError
-{
-    NAME_VALID                      = 0,
-    NAME_TOO_LONG                   = 1,
-    NAME_UNACCEPTABLE_TO_STAFF      = 2,
-    NAME_UNACCEPTABLE_TO_STAFF_2    = 3,
-    NAME_TAKEN                      = 4
-};
-
-enum ApprovePasswordError
-{
-    PASSWORD_VALID                  = 0,
-    PASSWORD_TOO_SHORT              = 1,
-    PASSWORD_TOO_LONG               = 2,
-    PASSWORD_INVALID_CHARS          = 3,
-    PASSWORD_REQUIRES_NUMBERS       = 4,
-    PASSWORD_USER_NAME_SIMILIAR     = 5
-};
-
 namespace SteerStone
 {
     /// ClientPacket class which handles in decoding incoming packets

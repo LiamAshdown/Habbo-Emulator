@@ -20,6 +20,7 @@
 #include "Database/QueryDatabase.h"
 #include "RoomManager.h"
 #include "Config/Config.h"
+#include "Network/StringBuffer.h"
 
 namespace SteerStone
 {
@@ -122,7 +123,7 @@ namespace SteerStone
             l_Database.ExecuteQuery();
         }
 
-        for (const auto& l_Itr : m_DeletedFavouriteRooms)
+        for (auto const& l_Itr : m_DeletedFavouriteRooms)
         {
             l_Database.PrepareQuery("DELETE FROM favourite_rooms WHERE room_id = ?");
             l_Database.GetStatement()->setUInt(1, l_Itr.GetRoomId());
@@ -173,7 +174,7 @@ namespace SteerStone
                     l_SecondBuffer.AppendString(l_Room->GetName());
                     l_SecondBuffer.AppendWired(l_Room->GetVisitorsNow());
                     l_SecondBuffer.AppendWired(l_Room->GetVisitorsMax());
-                    l_SecondBuffer.AppendWired(l_Room->GetCategory());
+                    l_SecondBuffer.AppendWired(l_Room->GetCategoryId());
                     l_SecondBuffer.AppendString(l_Room->GetDescription());
                     l_SecondBuffer.AppendWired(l_Room->GetId());
                     l_SecondBuffer.AppendWired(0);

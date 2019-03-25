@@ -19,11 +19,12 @@
 #ifndef _HABBO_FAVOURITE_ROOM_h
 #define _HABBO_FAVOURITE_ROOM_h
 #include "Common/SharedDefines.h"
-#include "Network/StringBuffer.h"
 #endif /* _HABBO_FAVOURITE_ROOM_h */
 
 namespace SteerStone
 {
+    class StringBuffer;
+
     /// Structure which holds information about room
     typedef struct FavouriteRoomsStruct
     {
@@ -77,8 +78,8 @@ namespace SteerStone
         /// @p_RoomId : Room Id
         void RemoveFavouriteRoom(uint32 const& p_RoomId);
 
-        /// UpdateFavouriteRooms - Update our favourite rooms
-        void UpdateFavouriteRooms();
+        /// SaveToDB - Update our favourite rooms
+        void SaveToDB();
 
         /// ParseSendFavouriteRooms
         /// @p_Buffer : Buffer which is being parsed

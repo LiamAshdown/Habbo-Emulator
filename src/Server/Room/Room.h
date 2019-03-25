@@ -16,89 +16,109 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Room_h_
-#define _Quad_Room_h_
+#ifndef _ROOM_ROOM_h
+#define _ROOM_ROOM_h
 #include "Common/SharedDefines.h"
 #include "RoomCategory.h"
 #include "RoomModel.h"
-#include "ItemManager.h"
-
-enum RoomType
-{
-    ROOM_TYPE_FLAT                      = 0,
-    ROOM_TYPE_PUBLIC                    = 1
-};
-
-enum RoomConnectionError
-{
-    ROOM_IS_FULL                        = 1,
-    ROOM_IS_CLOSED                      = 2,
-    ROOM_IS_IN_QUEUE                    = 3,
-};
+#include <boost/thread/shared_mutex.hpp>
+#endif /* _ROOM_ROOM_h */
 
 namespace SteerStone
 {
+    enum RoomType
+    {
+        ROOM_TYPE_FLAT                      = 0,
+        ROOM_TYPE_PUBLIC                    = 1
+    };
+
     class Habbo;
 
+    /// Class which holds information about hotel room and responsible for handling habbos inside room
     class Room
     {
     public:
         friend class RoomManager;
 
     public:
+        /// Constructor
         Room();
+        
+        /// Deconstructor
         ~Room();
 
     public:
-        void EnterRoom(Habbo* player);
-        void LeaveRoom(Habbo* player);
-        RoomModel* GetRoomModel();
-        void SendObjectsWorld(Habbo* player);
+        /// EnterRoom 
+        /// @p_Habbo : Habbo user entering in room
+        bool EnterRoom(Habbo* p_Habbo);
+
+        /// EnterRoom 
+        /// @p_Habbo : Habbo user leaving room
+        void LeaveRoom(Habbo* p_Habbo);
+
+        /// SendNewUserObjectToRoom
+        /// Send Habbo Figure object to clients in room
+        /// @p_Habbo : p_Habbo
+        void SendNewUserObjectToRoom(Habbo* p_Habbo);
+
+        /// SendUserObjectToRoom - This function is used when habbo leaves room, and we need to update habbo objects again
+        void SendUserObjectToRoom();
+
+        /// SendWorldObjects 
+        /// @p_Habbo : Send Furniture Objects to Habbo client
+        void SendWorldObjects(Habbo* p_Habbo);
+
+        /// SendObjects 
+        /// @p_Habbo : Send Active Furniture Objects to Habbo client
+        void SendActiveObjects(Habbo* p_Habbo);
 
     public:
-        uint32 GetId() const;
-        uint32 GetOwnerId() const;
-        std::string GetOwnerName() const;
-        uint32 GetCategory() const;
-        std::string GetName() const;
-        std::string GetDescription() const;
-        std::string GetModel() const;
-        std::string GetCcts() const;
-        uint32 GetWallPaper() const;
-        uint32 GetFloor() const;
-        bool ShowName() const;
-        bool GetSuperUsers() const;
-        std::string GetAccessType() const;
-        std::string GetPassword() const;
-        uint32 GetVisitorsNow() const;
-        uint32 GetVisitorsMax() const;
+        /// ROOM INFO
+        uint32 GetId()               const { return m_Id;           }
+        uint32 GetOwnerId()          const { return m_OwnerId;      }
+        std::string GetOwnerName()   const { return m_OwnerName;    } 
+        uint32 GetCategoryId()       const { return m_CategoryId;   }
+        std::string GetName()        const { return m_Name;         }
+        std::string GetDescription() const { return m_Description;  }
+        std::string GetModel()       const { return m_Model;        }
+        std::string GetCcts()        const { return m_Ccts;         }
+        uint32 GetWallPaper()        const { return m_WallPaper;    }
+        uint32 GetFloor()            const { return m_Floor;        }
+        bool ShowName()              const { return m_ShowName;     }
+        bool GetSuperUsers()         const { return m_SuperUsers;   }
+        std::string GetAccessType()  const { return m_AccessType;   }
+        std::string GetPassword()    const { return m_Password;     }
+        uint32 GetVisitorsNow()      const { return m_VisitorsNow;  }
+        uint32 GetVisitorsMax()      const { return m_VisitorsMax;  }
+        RoomModel& GetRoomModel()          { return m_RoomModel;    }
+        RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
 
     private:
-        void SendUserObjects(Habbo* player);
-
+        /// GenerateUniqueId - Generate a unique ID for object in room
+        uint32 GenerateUniqueId();
+      
     private:
+        /// ROOM INFO
         uint32 m_Id;
-        uint32 mOwnerId;
-        std::string mOwnerName;
-        uint32 mCategory;
+        uint32 m_OwnerId;
+        std::string m_OwnerName;
+        uint32 m_CategoryId;
         std::string m_Name;
-        std::string mDescription;
-        std::string mModel;
-        std::string mCcts;
-        uint32 mWallPaper;
-        uint32 mFloor;
-        bool mShowName;
-        bool mSuperUsers;
-        std::string mAccessType;
+        std::string m_Description;
+        std::string m_Model;
+        std::string m_Ccts;
+        uint32 m_WallPaper;
+        uint32 m_Floor;
+        bool m_ShowName;
+        bool m_SuperUsers;
+        std::string m_AccessType;
         std::string m_Password;
-        uint32 mVisitorsNow;
-        uint32 mVisitorsMax;
+        uint32 m_VisitorsNow;
+        uint32 m_VisitorsMax;
+        RoomModel m_RoomModel;
+        RoomCategory* m_RoomCategory;
 
-        RoomModel mRoomModel;
-        PublicItemVec mPublicItems;
-
-        std::vector<Habbo*> mPlayers;
+        std::vector<std::pair<uint32, Habbo*>> m_Habbos;     ///< Hold Habbo users in vector
+        boost::shared_mutex m_Mutex;
     };
-}
-
-#endif /* _Quad_Room_h_ */
+} ///< NAMESPACE STEERSTONE

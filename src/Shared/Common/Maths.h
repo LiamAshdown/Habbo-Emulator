@@ -16,18 +16,18 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "NavigatorPackets.h"
+#ifndef _COMMON_MATHS_h
+#define _COMMON_MATHS_h
+#include "SharedDefines.h"
+#include <random>
+#include <ctime>
+#endif /* _COMMON_MATHS_h */
 
 namespace SteerStone
 {
-    namespace HabboPacket
+    namespace Maths
     {
-        namespace Navigator
-        {
-          
-            //////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////
-
-        } ///< NAMESPACE NAVIGATOR
-    } ///< NAMESPACE HABBOPACKET
+        /// GetRandomNumber - Return a random number in specified range
+        uint32 GetRandomUint32(uint32 const p_Min, uint32 const p_Max);
+    } ///< NAMESPACE MATHS
 } ///< NAMESPACE STEERSTONE

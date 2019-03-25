@@ -16,9 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Database/QueryDatabase.h"
 #include "Habbo.h"
 #include "Hotel.h"
+#include "Room.h"
+#include "Network/StringBuffer.h"
 
 namespace SteerStone
 {
@@ -228,6 +229,7 @@ namespace SteerStone
 
         Result* l_Result = l_Database.Fetch();
 
+        p_Buffer.AppendString("MESSENGER");
         p_Buffer.AppendWired(l_Result->GetUint32(1));
         p_Buffer.AppendString(l_Result->GetString(2));
         p_Buffer.AppendWiredBool(l_Result->GetString(5) == "Male" ? true : false);
@@ -254,7 +256,6 @@ namespace SteerStone
 
         p_Buffer.AppendString(l_Result->GetString(6));
         p_Buffer.AppendString(l_Result->GetString(3));
-
     }
     
 } ///< NAMESPACE MESSENGER

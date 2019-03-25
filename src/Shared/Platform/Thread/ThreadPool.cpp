@@ -28,7 +28,7 @@ namespace SteerStone
         while (true)
         {
             {
-                std::unique_lock<std::mutex> l_Guard(m_Pool.mMutex);
+                std::unique_lock<std::mutex> l_Guard(m_Pool.m_Mutex);
 
                 while (!m_Pool.m_Stop && m_Pool.m_Tasks.empty())
                     m_Pool.m_Condition.wait(l_Guard);
@@ -68,7 +68,7 @@ namespace SteerStone
     void ThreadPool::Enqueue(std::function<void()> task)
     {
         {
-            std::unique_lock<std::mutex> l_Guard(mMutex);
+            std::unique_lock<std::mutex> l_Guard(m_Mutex);
             m_Tasks.push_back(std::function<void()>(task));
         }
 

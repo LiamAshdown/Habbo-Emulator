@@ -40,15 +40,16 @@ namespace SteerStone
 
         for (auto const& l_Itr : *sRoomMgr->GetRooms())
         {
-            RoomCategory* l_Category = sRoomMgr->GetRoomCategory(l_Itr.second->GetCategory());
+            RoomCategory* l_Category = sRoomMgr->GetRoomCategory(l_Itr.second->GetCategoryId());
             std::shared_ptr<Room> l_Room = l_Itr.second;
 
             if (l_HideFullRooms)
                 if (l_Room->GetVisitorsNow() == l_Room->GetVisitorsMax())
                     continue;
 
-            if (l_Room->GetCategory() == l_CategoryId)
+            if (l_Room->GetCategoryId() == l_CategoryId)
             {
+                /// Total Now/Max Visitors in specific category
                 l_NowVisitors += l_Room->GetVisitorsNow();
                 l_MaxVisitors += l_Room->GetVisitorsMax();
 
@@ -59,7 +60,7 @@ namespace SteerStone
                     l_ThirdBuffer.AppendString(l_Room->GetName());
                     l_ThirdBuffer.AppendWired(l_Room->GetVisitorsNow());
                     l_ThirdBuffer.AppendWired(l_Room->GetVisitorsMax());
-                    l_ThirdBuffer.AppendWired(l_Room->GetCategory());
+                    l_ThirdBuffer.AppendWired(l_Room->GetCategoryId());
                     l_ThirdBuffer.AppendString(l_Room->GetDescription());
                     l_ThirdBuffer.AppendWired(l_Room->GetId());
                     l_ThirdBuffer.AppendWired(0);
@@ -91,24 +92,21 @@ namespace SteerStone
         l_Buffer.AppendString(l_RoomCategory->GetName());
         l_Buffer.AppendWired(l_NowVisitors);
         l_Buffer.AppendWired(l_MaxVisitors);
-        l_Buffer.AppendWired(l_RoomCategory->GetParentCategory());
+        l_Buffer.AppendWired(l_RoomCategory->GetParentCategoryId());
 
         l_Buffer.Append(l_SecondBuffer);
         l_Buffer.Append(l_ThirdBuffer);
 
-        for (auto const& l_Itr : *sRoomMgr->GetRoomCategories())
+        for (auto& l_Itr : *sRoomMgr->GetRoomCategories())
         {
-            RoomCategory l_RoomCategory = l_Itr.second;
+            RoomCategory* l_RoomCategory = &l_Itr.second;
 
-            if (l_RoomCategory.GetParentCategory() != l_CategoryId)
-                continue;
-
-            l_Buffer.AppendWired(l_RoomCategory.GetCategory());
+            l_Buffer.AppendWired(l_RoomCategory->GetCategoryId());
             l_Buffer.AppendWired(0);
-            l_Buffer.AppendString(l_RoomCategory.GetName());
-            l_Buffer.AppendWired(l_NowVisitors);
-            l_Buffer.AppendWired(l_MaxVisitors);
-            l_Buffer.AppendWired(l_CategoryId);
+            l_Buffer.AppendString(l_RoomCategory->GetName());
+            l_Buffer.AppendWired(l_RoomCategory->GetVisitorsNow());
+            l_Buffer.AppendWired(l_RoomCategory->GetVisitorsMax());
+            l_Buffer.AppendWired(l_RoomCategory->GetParentCategoryId());
         }
 
         l_Buffer.AppendSOH();
@@ -119,7 +117,7 @@ namespace SteerStone
     {
         StringBuffer l_Buffer;
         StringBuffer l_SecondBuffer;
-        int64 l_FlatCategorySize = 0;
+        uint32 l_FlatCategorySize = 0;
 
         for (auto const& l_Itr : *sRoomMgr->GetRoomCategories())
         {
@@ -127,7 +125,7 @@ namespace SteerStone
 
             if (l_RoomCategory.GetRoomType() == RoomType::ROOM_TYPE_FLAT)
             {
-                l_SecondBuffer.AppendWired(l_RoomCategory.GetCategory());
+                l_SecondBuffer.AppendWired(l_RoomCategory.GetCategoryId());
                 l_SecondBuffer.AppendString(l_RoomCategory.GetName());
                 l_FlatCategorySize++;
             }

@@ -18,7 +18,7 @@
 
 #include "Hotel.h"
 #include "Habbo.h"
-#include "Database/QueryDatabase.h"
+#include "Network/StringBuffer.h"
 
 namespace SteerStone
 {

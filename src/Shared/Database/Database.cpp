@@ -36,7 +36,7 @@ namespace SteerStone
     /// Deconstructor
     Database::~Database()
     {
-        mDatabaseCont.clear();
+        m_DatabaseCont.clear();
     } 
     
     /// CreateDatabase
@@ -54,7 +54,7 @@ namespace SteerStone
 
             Tokens l_Tokens = StrSplit(p_InfoString, ";");
 
-            Tokens::iterator l_Itr = l_Tokens.begin();
+            auto& l_Itr = l_Tokens.begin();
 
             if (l_Itr != l_Tokens.end())
                 l_Host = *l_Itr++;
@@ -68,19 +68,19 @@ namespace SteerStone
                 l_Database = *l_Itr++;
 
             /// Create our database, and store the database in a map = key "database name", storage "database structure"
-            std::shared_ptr<DatabaseHolder> newDatabase = std::make_shared<DatabaseHolder>();
-            newDatabase->m_Username = l_Username;
-            newDatabase->m_Password = l_Password;
-            newDatabase->m_Database = l_Database;
-            newDatabase->m_Host = l_Host;
-            newDatabase->m_Port = l_Port;
-            newDatabase->m_PoolSize = p_PoolSize;
+            std::shared_ptr<DatabaseHolder> l_NewDatabase = std::make_shared<DatabaseHolder>();
+            l_NewDatabase->m_Username = l_Username;
+            l_NewDatabase->m_Password = l_Password;
+            l_NewDatabase->m_Database = l_Database;
+            l_NewDatabase->m_Host     = l_Host;
+            l_NewDatabase->m_Port     = l_Port;
+            l_NewDatabase->m_PoolSize = p_PoolSize;
 
-            newDatabase->m_MySQLConnection = std::make_shared<MySQLConnection>(newDatabase->GetName(), newDatabase->GetPassword(), newDatabase->GetDatabase(),
-                newDatabase->GetHost(), newDatabase->GetPort());
-            newDatabase->m_Pool = std::make_shared<ConnectionPool>(newDatabase->GetMySQLConnection(), newDatabase->GetPoolSize());
+            l_NewDatabase->m_MySQLConnection = std::make_shared<MySQLConnection>(l_NewDatabase->GetName(), l_NewDatabase->GetPassword(), l_NewDatabase->GetDatabase(),
+                l_NewDatabase->GetHost(), l_NewDatabase->GetPort());
+            l_NewDatabase->m_Pool = std::make_shared<ConnectionPool>(l_NewDatabase->GetMySQLConnection(), l_NewDatabase->GetPoolSize());
 
-            mDatabaseCont[newDatabase->GetDatabase()] = newDatabase;
+            m_DatabaseCont[l_NewDatabase->GetDatabase()] = l_NewDatabase;
 
             l_Database[0] = std::toupper(l_Database[0]);
             LOG_INFO << "Connected to Database " << l_Database << " Successfully With " << p_PoolSize << " Pool Connections";
@@ -101,18 +101,18 @@ namespace SteerStone
     /// @p_Line : Which line the error occured
     void Database::PrintException(sql::SQLException const& p_ErrorCode, char const* p_File, char const* p_Function, uint32 const p_Line)
     {
-        std::string const& message = p_ErrorCode.what();
+        std::string const& l_Message = p_ErrorCode.what();
 
         /// Shut down server if database can no longer be reached
-        if (message.find("has gone away") != std::string::npos)
+        if (l_Message.find("has gone away") != std::string::npos)
             assert(false); ///< Assert if one of our database connections are no longer reachable
     }   
 
     /// GetDatabase - Get the database
     std::shared_ptr<DatabaseHolder> Database::GetDatabase(const std::string& database)
     {
-        DatabaseMap::iterator l_Itr = mDatabaseCont.find(database);
-        if (l_Itr != mDatabaseCont.end())
+        auto const& l_Itr = m_DatabaseCont.find(database);
+        if (l_Itr != m_DatabaseCont.end())
             return l_Itr->second;
 
         return nullptr;

@@ -58,7 +58,8 @@ enum PacketClientHeader : uint16
     CLIENT_GAME_OBJECTS                   = 62,
     CLIENT_FURNITURE_REVISIONS            = 213,
     CLIENT_MESSENGER_FIND_USER            = 41,
-    CLIENT_MESSENGER_SEND_REQUEST         = 39,  
+    CLIENT_MESSENGER_SEND_REQUEST         = 39,
+    CLIENT_LEAVE_ROOM                     = 53,
 };
 
 enum PacketServerHeader : uint16
@@ -73,7 +74,7 @@ enum PacketServerHeader : uint16
     SERVER_LOGIN                          = 3,
     SERVER_ALERT                          = 139,
     SERVER_NOTICE                         = 139,
-    SERVER_USER_OBJECT                    = 5,
+    SERVER_HABBO_OBJECT                   = 5,
     SERVER_CREDIT_BALANCE                 = 6,
     SERVER_NAVIGATE_NODE_INFO             = 220,
     SERVER_USER_FLAT_CATEGORIES           = 221,
@@ -83,7 +84,7 @@ enum PacketServerHeader : uint16
     SERVER_MESSENGER_INIT                 = 12,
     SERVER_OPEN_CONNECTION                = 19,
     SERVER_ROOM_URL                       = 166,
-    SERVER_CANT_CONNECT                   = 224,
+    SERVER_ROOM_CANT_CONNECT              = 224,
     SERVER_PING                           = 50,
     SERVER_ROOM_READY                     = 69,
     SERVER_ROOM_ADD                       = 208,
@@ -143,6 +144,6 @@ namespace SteerStone
     };
 }
 
-#define sOpcode Quad::Opcodes::instance()
+#define sOpcode SteerStone::Opcodes::instance()
 
 #endif /* _Quad_Opcodes_h_ */

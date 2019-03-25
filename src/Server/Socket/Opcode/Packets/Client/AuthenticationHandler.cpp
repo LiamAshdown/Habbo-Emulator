@@ -16,14 +16,10 @@
 * along with this program.  If not, see <http:///www.gnu.org/licenses/>.
 */
 
-#include "../HabboSocket.h"
-#include "Network/StringBuffer.h"
-#include "Database/QueryDatabase.h"
 #include "Habbo.h"
-#include "Common/SHA1.h"
-#include "Config/Config.h"
-#include "RoomManager.h"
 #include "Hotel.h"
+#include "Common/SHA1.h"
+#include "RoomManager.h"
 #include "Opcode/Packets/Server/AuthenticationPackets.h"
 #include "Opcode/Packets/Server/MiscPackets.h"
 
@@ -108,7 +104,7 @@ namespace SteerStone
             /// Must contain atleast a number 0-9
             for (uint8 l_I = 0; l_I < 10; l_I++)
             {
-                if (l_Packet.Password.find(l_BobbaWords[l_I]) != std::string::npos)
+                if (l_Packet.Password.find(l_BobbaWords[l_I]) == std::string::npos)
                 {
                     l_UsedNumber = true;
                     break;
@@ -268,7 +264,7 @@ namespace SteerStone
                     HabboBadgesStruct l_HabboBadge;
                     l_HabboBadge.m_Badge = l_Result->GetString(16);
                     l_HabboBadge.m_IsActive = l_Result->GetBool(17);
-                    m_Habbo->mBadges.push_back(l_HabboBadge);
+                    m_Habbo->m_Badges.push_back(l_HabboBadge);
                 }
 
                 /// Double check if user has rank even though it's set in database as default
@@ -277,7 +273,7 @@ namespace SteerStone
                     HabboFuseRightsData l_HabboFuseRight;
                     l_HabboFuseRight.m_Rank = l_Result->GetUint8(18);
                     l_HabboFuseRight.m_FuseRight = l_Result->GetString(19);
-                    m_Habbo->mFuseRights.push_back(l_HabboFuseRight);
+                    m_Habbo->m_FuseRights.push_back(l_HabboFuseRight);
                 }
             }
 

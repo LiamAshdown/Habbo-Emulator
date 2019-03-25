@@ -15,172 +15,182 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
-#include <boost/multi_array.hpp>
+
 #include "RoomManager.h"
 #include "Database/QueryDatabase.h"
-#include "World.h"
-#include "ItemManager.h"
-//-----------------------------------------------//
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
+    /// Singleton
     RoomManager* RoomManager::instance()
     {
         static RoomManager instance;
         return &instance;
     }
-    //-----------------------------------------------//
+    
+    /// Constructor
     RoomManager::RoomManager()
     {
     }
-    //-----------------------------------------------//
+    
+    /// Deconstructor
     RoomManager::~RoomManager()
     {
     }
-    //-----------------------------------------------//
+    
+    /// Loadl_RoomCategories - Load l_Room categories from Database
     void RoomManager::LoadRoomCategories()
     {
-        QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT id, parent_id, name, public_spaces, allow_trading, minrole_access, minrole_setflatcat FROM rooms_categories");
-        database.ExecuteQuery();
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, parent_id, name, public_spaces, allow_trading, minrole_access, minrole_setflatcat FROM rooms_categories");
+        l_Database.ExecuteQuery();
 
-        if (!database.GetResult())
+        if (!l_Database.GetResult())
         {
             LOG_ERROR << "room_categories is empty!";
             return;
         }
 
-        Result* result = database.Fetch();
+        Result* l_Result = l_Database.Fetch();
 
         do
         {
-            RoomCategory& roomCategories = mRoomCategories[result->GetInt32(1)];
-            roomCategories.mCategoryId     = result->GetUint32(1);
-            roomCategories.mParentId       = result->GetUint32(2);
-            roomCategories.m_Name           = result->GetString(3);
-            roomCategories.mRoomType       = result->GetBool(4);
-            roomCategories.mAllowTrading   = result->GetUint16(5);
-            roomCategories.mMinRoleAccess  = result->GetBool(6);
-            roomCategories.mMinRoleSetFlat = result->GetBool(7);
+            RoomCategory& l_RoomCategories     = m_RoomCategories[l_Result->GetInt32(1)];
+            l_RoomCategories.m_CategoryId      = l_Result->GetUint32(1);
+            l_RoomCategories.m_ParentId        = l_Result->GetUint32(2);
+            l_RoomCategories.m_Name            = l_Result->GetString(3);
+            l_RoomCategories.m_RoomType        = l_Result->GetBool(4);
+            l_RoomCategories.m_AllowTrading    = l_Result->GetUint16(5);
+            l_RoomCategories.m_MinRoleAccess   = l_Result->GetBool(6);
+            l_RoomCategories.m_MinRoleSetFlat  = l_Result->GetBool(7);
 
-        } while (result->GetNextResult());
+        } while (l_Result->GetNextResult());
 
-        LOG_INFO << "Loaded " << mRoomCategories.size() << " Room Categories";
-    }
-    //-----------------------------------------------//
-    void RoomManager::LoadRooms()
-    {
-        QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, rating FROM rooms");
-        database.ExecuteQuery();
+        LOG_INFO << "Loaded " << m_RoomCategories.size() << " Room Categories";
+    } 
 
-        if (!database.GetResult())
-        {
-            LOG_ERROR << "hotel_rooms is empty!";
-            return;
-        }
-
-        Result* result = database.Fetch();
-
-        do
-        {
-            std::unique_ptr<Room> room = std::make_unique<Room>();
-            room->m_Id                      = result->GetUint32(1);
-            room->mOwnerId                 = result->GetUint32(2);
-            room->mOwnerName               = result->GetString(3);
-            room->mCategory                = result->GetUint32(4);
-            room->m_Name                    = result->GetString(5);
-            room->mDescription             = result->GetString(6);
-            room->mModel                   = result->GetString(7);
-            room->mCcts                    = result->GetString(8);
-            room->mWallPaper               = result->GetUint32(9);
-            room->mFloor                   = result->GetUint32(10);
-            room->mShowName                = result->GetBool(11);
-            room->mSuperUsers              = result->GetBool(12);
-            room->mAccessType              = result->GetString(13);
-            room->m_Password                = result->GetString(14);
-            room->mVisitorsNow             = result->GetUint32(15);
-            room->mVisitorsMax             = result->GetUint32(16);
-            room->mRoomModel               = *GetRoomModel(room->GetModel());
-
-            mRooms[room->GetId()] = std::move(room);
-
-        } while (result->GetNextResult());
-
-        LOG_INFO << "Loaded " << mRooms.size() << " Hotel Rooms";
-    }
-    //-----------------------------------------------//
+    /// LoadRooms - Load rooms from database
     void RoomManager::LoadRoomModels()
     {
-        QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT id, model_id, model_name, door_x, door_y, door_z, door_dir, height_map from room_models");
-        database.ExecuteQuery();
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, model_id, model_name, door_x, door_y, door_z, door_dir, height_map from room_models");
+        l_Database.ExecuteQuery();
 
-        if (!database.GetResult())
+        if (!l_Database.GetResult())
         {
             LOG_ERROR << "height_map is empty!";
             return;
         }
 
-        Result* result = database.Fetch();
+        Result* l_Result = l_Database.Fetch();
 
         do
         {
-            RoomModel& roomModel = mRoomModels[result->GetString(2)];
-            roomModel.m_Id = result->GetUint32(1);
-            roomModel.mModelId = result->GetString(2);
-            roomModel.mModel = result->GetString(3);
-            roomModel.mDoorX = result->GetInt32(4);
-            roomModel.mDoorY = result->GetInt32(5);
-            roomModel.mDoorZ = result->GetFloat(6);
-            roomModel.mDoorOrientation = result->GetInt32(7);
-            roomModel.mHeightMap = result->GetString(8);
-            
-            boost::replace_all(roomModel.mHeightMap, "|", "\r");
+            RoomModel& l_RoomModel          = m_RoomModels[l_Result->GetString(2)];
+            l_RoomModel.m_Id                = l_Result->GetUint32(1);
+            l_RoomModel.m_ModelId           = l_Result->GetString(2);
+            l_RoomModel.m_Model             = l_Result->GetString(3);
+            l_RoomModel.m_DoorX             = l_Result->GetInt32(4);
+            l_RoomModel.m_DoorY             = l_Result->GetInt32(5);
+            l_RoomModel.m_DoorZ             = l_Result->GetFloat(6);
+            l_RoomModel.m_DoorOrientation   = l_Result->GetInt32(7);
+            l_RoomModel.m_HeightMap         = l_Result->GetString(8);
 
-        } while (result->GetNextResult());
+            boost::replace_all(l_RoomModel.m_HeightMap, "|", "\r");
+
+        } while (l_Result->GetNextResult());
 
 
-        LOG_INFO << "Loaded " << mRoomModels.size() << " Room Models";
+        LOG_INFO << "Loaded " << m_RoomModels.size() << " Room Models";
     }
-    //-----------------------------------------------//
-    RoomCategory* RoomManager::GetRoomCategory(const uint32& id)
+
+    /// LoadRooms - Load rooms from database
+    void RoomManager::LoadRooms()
     {
-        RoomCategoriesMap::iterator dataItr = mRoomCategories.find(id);
-        if (dataItr != mRoomCategories.end())
-            return &dataItr->second;
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, rating FROM rooms");
+        l_Database.ExecuteQuery();
+
+        if (!l_Database.GetResult())
+        {
+            LOG_ERROR << "hotel_rooms is empty!";
+            return;
+        }
+
+        Result* l_Result = l_Database.Fetch();
+
+        do
+        {
+            std::unique_ptr<Room> l_Room      = std::make_unique<Room>();
+            l_Room->m_Id                      = l_Result->GetUint32(1);
+            l_Room->m_OwnerId                 = l_Result->GetUint32(2);
+            l_Room->m_OwnerName               = l_Result->GetString(3);
+            l_Room->m_CategoryId              = l_Result->GetUint32(4);
+            l_Room->m_Name                    = l_Result->GetString(5);
+            l_Room->m_Description             = l_Result->GetString(6);
+            l_Room->m_Model                   = l_Result->GetString(7);
+            l_Room->m_Ccts                    = l_Result->GetString(8);
+            l_Room->m_WallPaper               = l_Result->GetUint32(9);
+            l_Room->m_Floor                   = l_Result->GetUint32(10);
+            l_Room->m_ShowName                = l_Result->GetBool(11);
+            l_Room->m_SuperUsers              = l_Result->GetBool(12);
+            l_Room->m_AccessType              = l_Result->GetString(13);
+            l_Room->m_Password                = l_Result->GetString(14);
+            l_Room->m_VisitorsNow             = l_Result->GetUint32(15);
+            l_Room->m_VisitorsMax             = l_Result->GetUint32(16);
+            l_Room->m_RoomModel               = *GetRoomModel(l_Room->GetModel());
+            l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
+            l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
+
+            m_Rooms[l_Room->GetId()] = std::move(l_Room);
+
+        } while (l_Result->GetNextResult());
+
+        LOG_INFO << "Loaded " << m_Rooms.size() << " Hotel Rooms";
+    }
+    
+    /// GetRoomCategory
+    /// @p_Id : Category Id
+    RoomCategory* RoomManager::GetRoomCategory(uint32 const& p_Id)
+    {
+        auto const& l_Itr = m_RoomCategories.find(p_Id);
+        if (l_Itr != m_RoomCategories.end())
+            return &l_Itr->second;
         else
             return nullptr;
     }
-    //-----------------------------------------------//
-    std::shared_ptr<Room> RoomManager::GetRoom(const uint32& id)
+    
+    /// GetRoomCategory
+    /// @p_Id : Model Id
+    RoomModel* RoomManager::GetRoomModel(std::string const& p_Model)
     {
-        RoomsMap::const_iterator itr = mRooms.find(id);
-        if (itr != mRooms.end())
-            return itr->second;
+        auto const& l_Itr = m_RoomModels.find(p_Model);
+        if (l_Itr != m_RoomModels.end())
+            return &l_Itr->second;
         else
             return nullptr;
     }
-    //-----------------------------------------------//
-    RoomModel* RoomManager::GetRoomModel(const std::string& model)
+
+    /// GetRoomCategory
+    /// @p_Id : Room Id
+    std::shared_ptr<Room> RoomManager::GetRoom(uint32 const& p_Id)
     {
-        RoomModelsMap::iterator itr = mRoomModels.find(model);
-        if (itr != mRoomModels.end())
-            return &itr->second;
+        auto const& l_Itr = m_Rooms.find(p_Id);
+        if (l_Itr != m_Rooms.end())
+            return l_Itr->second;
         else
             return nullptr;
     }
-    //-----------------------------------------------//
+    
+    /// GetRoomCategories - Get Room Category Map
     RoomCategoriesMap* RoomManager::GetRoomCategories()
     {
-        return &mRoomCategories;
+        return &m_RoomCategories;
     }
-    //-----------------------------------------------//
+    
+    /// GetRooms - Get Room Map
     RoomsMap* RoomManager::GetRooms()
     {
-        return &mRooms;
+        return &m_Rooms;
     }
-    //-----------------------------------------------//
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

@@ -15,94 +15,82 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
-#include "../HabboSocket.h"
-#include "Network/StringBuffer.h"
-#include "Database/QueryDatabase.h"
-#include "../Entity/Player/Player.h"
+
+#include "Habbo.h"
 #include "RoomManager.h"
-//-----------------------------------------------//
+#include "Opcode/Packets/Server/RoomPackets.h"
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
     void HabboSocket::HandleGetInterest(std::unique_ptr<ClientPacket> p_Packet)
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_INTEREST);
-        buffer.AppendString("0");
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        HabboPacket::Room::RoomInterest l_Packet;
+        SendPacket(l_Packet.Write());
     }
-    //-----------------------------------------------//
+
     void HabboSocket::HandleRoomDirectory(std::unique_ptr<ClientPacket> p_Packet)
     {
-        bool isPublic = packet->ReadBase64Bool();
-        uint32 roomId = packet->ReadWiredUint();
+        bool l_IsPublic = p_Packet->ReadBase64Bool();
+        uint32 l_RoomId = p_Packet->ReadWiredUint();
 
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_OPEN_CONNECTION);
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        /// Initialize room connection with client
+        HabboPacket::Room::OpenConnection l_Packet;
+        SendPacket(l_Packet.Write());
 
-        buffer.Clear();
-        buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_URL);
-        buffer.AppendString("/client/");
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        /// Send Room Advertisement url
+        HabboPacket::Room::RoomUrl l_PacketUrl;
+        SendPacket(l_PacketUrl.Write());
 
-        buffer.Clear();
-        if (mPlayer->SetRoom(sRoomMgr->GetRoom(roomId)))
+        /// Room::EnterRoom handles the error if room is full for example
+        if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
         {
-            buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_READY);
-            buffer.AppendString(mPlayer->GetRoom()->GetModel());
-            buffer.AppendString(" ");
-            buffer.AppendWired(roomId);
+            HabboPacket::Room::RoomReady l_PacketRoomReady;
+            l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
+            l_PacketRoomReady.Id = l_RoomId;
+            SendPacket(l_PacketRoomReady.Write());
         }
         else
         {
-            buffer.AppendBase64(PacketServerHeader::SERVER_CANT_CONNECT);
-            buffer.AppendWired(RoomConnectionError::ROOM_IS_CLOSED);
+            /// If we get to here this means the room does not exist
+            HabboPacket::Room::RoomCantConnect l_PacketCantConnect;
+            l_PacketCantConnect.ErrorCode = RoomConnectionError::ROOM_IS_CLOSED;
+            SendPacket(l_PacketCantConnect.Write());
         }
-
-        buffer.AppendSOH();
-        SendPacket(buffer);
     }
-    //-----------------------------------------------//
+
     void HabboSocket::HandleGetRoomAdd(std::unique_ptr<ClientPacket> p_Packet)
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_ADD);
-        buffer.AppendWired(0);
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        HabboPacket::Room::RoomAdd l_Packet;
+        SendPacket(l_Packet.Write());
     }
-    //-----------------------------------------------//
+
     void HabboSocket::HandleGetRoomHeight(std::unique_ptr<ClientPacket> p_Packet)
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_ROOM_HEIGHT_MAP);
-        buffer.AppendString(mPlayer->GetRoom()->GetRoomModel()->GetHeightMap());
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        HabboPacket::Room::RoomHeight l_Packet;
+        l_Packet.HeightMap = m_Habbo->GetRoom()->GetRoomModel().GetHeightMap();
+        SendPacket(l_Packet.Write());
     }
-    //-----------------------------------------------//
+
     void HabboSocket::HandleRoomUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->GetRoom()->EnterRoom(mPlayer);
+        /// Sending Habbo object so client and other clients can see a new habbo has joined the room
+        m_Habbo->GetRoom()->SendNewUserObjectToRoom(m_Habbo);
     }
-    //-----------------------------------------------//
+
     void HabboSocket::HandleGameObjects(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->GetRoom()->SendObjectsWorld(mPlayer);
-
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_ACTIVE_OBJECTS);
-        buffer.AppendString("H", false);
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        /// Send Furniture and any active furniture to client
+        m_Habbo->GetRoom()->SendWorldObjects(m_Habbo);
+        m_Habbo->GetRoom()->SendActiveObjects(m_Habbo);
     }
 
     void HabboSocket::HandleFurnitureRevisions(std::unique_ptr<ClientPacket> p_Packet)
     {
+    }
+
+    void HabboSocket::HandleLeaveRoom(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (m_Habbo->GetRoom())
+            m_Habbo->GetRoom()->LeaveRoom(m_Habbo);
     }
 }

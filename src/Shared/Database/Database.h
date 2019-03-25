@@ -93,7 +93,7 @@ namespace SteerStone
         std::shared_ptr<DatabaseHolder> GetDatabase(std::string const& database);
 
     private:
-        DatabaseMap mDatabaseCont;                                               ///< Database container holder           
+        DatabaseMap m_DatabaseCont;                                               ///< Database container holder           
     };
 } ///< NAMESPACE STEERSTONE
 

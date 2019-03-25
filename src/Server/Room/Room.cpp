@@ -15,175 +15,174 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "Room.h"
-#include "Player.h"
-#include "HabboSocket.h"
-#include "Network/StringBuffer.h"
-#include "RoomManager.h"
+#include "Habbo.h"
 #include "ItemManager.h"
-//-----------------------------------------------//
+#include "Opcode/Packets/Server/RoomPackets.h"
+#include "Common/Maths.h"
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
-    Room::Room()
+    /// Constructor
+    Room::Room(){}
+    
+    /// Deconstructor
+    Room::~Room(){}
+    
+    /// SendNewUserObjectToRoom
+    /// Send Habbo Figure object to clients in room
+    /// @p_Habbo : p_Habbo
+    bool Room::EnterRoom(Habbo* p_Habbo)
     {
-    }
-    //-----------------------------------------------//
-    Room::~Room()
-    {
-    }
-    //-----------------------------------------------//
-    void Room::EnterRoom(Habbo* player)
-    {
-        if (std::find(mPlayers.begin(), mPlayers.end(), player) != mPlayers.end())
+        /// Check if habbo already exists inside room
+        auto const& l_Itr = std::find_if(m_Habbos.begin(), m_Habbos.end(), [&p_Habbo](const std::pair<uint32, Habbo*> p_Habbos) -> bool { return p_Habbos.second->GetId() == p_Habbo->GetId(); });
+
+        if (l_Itr != m_Habbos.end())
         {
-            LOG_ERROR << "Habbo tried to enter room " << GetId() << " but is already inside room!";
-            return;
+            LOG_ERROR << "Habbo " << p_Habbo->GetName() << " tried to enter Room Id " << GetId() << " but is already inside room!";
+            return true;
         }
 
-        player->UpdatePosition(GetRoomModel()->GetDoorX(), GetRoomModel()->GetDoorY(), GetRoomModel()->GetDoorZ(),
-            GetRoomModel()->GetDoorOrientation());
-
-        mPlayers.push_back(player);
-        SendUserObjects(player);
-        mVisitorsNow++;
-    }
-    //-----------------------------------------------//
-    void Room::LeaveRoom(Habbo* player)
-    {
-        std::vector<Habbo*>::const_iterator& itr = std::find(mPlayers.begin(), mPlayers.end(), player);
-
-        if (itr != mPlayers.end())
+        /// Room is full
+        if (m_VisitorsNow >= m_VisitorsMax)
         {
-            mPlayers.erase(itr);
-            mVisitorsMax--;
+            HabboPacket::Room::RoomCantConnect l_Packet;
+            l_Packet.ErrorCode = RoomConnectionError::ROOM_IS_FULL;
+            return false;
+        }
+
+        /// Update our Habbo Position so habbo appears at the door
+        p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
+            GetRoomModel().GetDoorOrientation());
+
+        /// Push our habbo into our room storage
+        m_Habbos.push_back(std::make_pair(GenerateUniqueId(), p_Habbo));
+
+        /// Increment our visitor counter
+        m_Mutex.lock();
+        m_VisitorsNow++;
+        GetRoomCategory()->GetVisitorsNow()++; ///< Also Increment our category visitor counter
+        m_Mutex.unlock();
+
+        return true;
+    }
+    
+    /// EnterRoom 
+    /// @p_Habbo : Habbo user leaving room
+    void Room::LeaveRoom(Habbo* p_Habbo)
+    {
+        auto const& l_Itr = std::find_if(m_Habbos.begin(), m_Habbos.end(), [&p_Habbo](const std::pair<uint32, Habbo*> p_Habbos) -> bool { return p_Habbos.second->GetId() == p_Habbo->GetId(); });
+
+        if (l_Itr != m_Habbos.end())
+        {
+            /// Set Habbo room to nullptr
+            l_Itr->second->DestroyRoom();
+
+            /// Erase Habbo from room
+            m_Habbos.erase(l_Itr);
+
+            /// Send User Objects packet again to all players, so habbo who left no longer appears on other clients
+            SendUserObjectToRoom();
+
+            /// Decrement our VisitorNow counter, habbo is leaving
+            m_Mutex.lock();
+            m_VisitorsNow--;
+            GetRoomCategory()->GetVisitorsNow()--; ///< Also Decrement our category visitor counter
+            m_Mutex.unlock();
         }
         else
-            LOG_INFO << "Player " << player->GetName() << " tried to leave room but player does not exist in room!";
+            LOG_INFO << "Player " << p_Habbo->GetName() << " tried to leave Room Id " << GetId() << " but player does not exist in room!";
     }
-    //-----------------------------------------------//
-    void Room::SendUserObjects(Habbo* player)
+
+    /// GenerateUniqueId - Generate a unique ID for object in room
+    uint32 Room::GenerateUniqueId()
     {
-        for (std::vector<Habbo*>::const_iterator& itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
+        return Maths::GetRandomUint32(0, 9999);
+    }
+    
+    /// Send Habbo Figure object to clients in room
+     /// @p_Habbo : Habbo
+    void Room::SendNewUserObjectToRoom(Habbo* p_Habbo)
+    {
+        for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* roomPlayer = *itr;
+            Habbo* l_Habbo = l_Itr.second;
 
-            if (roomPlayer->GetId() != player->GetId())
-                roomPlayer->ToSocket()->SendPacket(player->GetUserRoomObject());
+            if (l_Habbo->GetId() != p_Habbo->GetId())
+            {
+                HabboPacket::Room::HabboRoomObject l_Packet;
+                l_Packet.UniqueId   = boost::lexical_cast<std::string>(l_Itr.first);
+                l_Packet.Id         = boost::lexical_cast<std::string>(p_Habbo->GetId());
+                l_Packet.Name       = p_Habbo->GetName();
+                l_Packet.Figure     = p_Habbo->GetFigure();
+                l_Packet.Gender     = p_Habbo->GetGender() == "Male" ? "M" : "F";
+                l_Packet.X          = boost::lexical_cast<std::string>(p_Habbo->GetPositionX());
+                l_Packet.Y          = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
+                l_Packet.Z          = boost::lexical_cast<std::string>(p_Habbo->GetPositionZ());
+                l_Packet.Motto      = p_Habbo->GetMotto();
+                l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            }
 
-            player->ToSocket()->SendPacket(roomPlayer->GetUserRoomObject());
-            break;
+            HabboPacket::Room::HabboRoomObject l_Packet;
+            l_Packet.UniqueId       = boost::lexical_cast<std::string>(l_Itr.first);
+            l_Packet.Id             = boost::lexical_cast<std::string>(l_Habbo->GetId());
+            l_Packet.Name           = l_Habbo->GetName();
+            l_Packet.Figure         = l_Habbo->GetFigure();
+            l_Packet.Gender         = l_Habbo->GetGender() == "Male" ? "M" : "F";
+            l_Packet.X              = boost::lexical_cast<std::string>(l_Habbo->GetPositionX());
+            l_Packet.Y              = boost::lexical_cast<std::string>(l_Habbo->GetPositionY());
+            l_Packet.Z              = boost::lexical_cast<std::string>(l_Habbo->GetPositionZ());
+            l_Packet.Motto          = l_Habbo->GetMotto();
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
     }
-    //-----------------------------------------------//
-    void Room::SendObjectsWorld(Habbo * player)
+
+    /// SendUserObjectToRoom - This function is used when habbo leaves room, and we need to update habbo objects again
+    void Room::SendUserObjectToRoom()
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_OBJECTS_WORLD);
-        for (auto& itr : sItemMgr->GetPublicRoomItems(GetModel()))
+        for (auto const& l_Itr : m_Habbos)
         {
-            PublicItem* item = &itr;
-
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetId()), " ");
-            buffer.AppendStringDelimiter(item->GetSprite(), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionX()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionY()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetPositionZ()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetRotation()), " ");
-            buffer.AppendStringDelimiter(boost::lexical_cast<std::string>(item->GetLength()), " ");
-            buffer.AppendString("\r", false);
+            Habbo* l_Habbo = l_Itr.second;
+            SendNewUserObjectToRoom(l_Habbo);
         }
+    }
+    
+    /// SendWorldObjects 
+    /// @p_Habbo : Send Furniture Objects to Habbo client
+    void Room::SendWorldObjects(Habbo* p_Habbo)
+    {
+        HabboPacket::Room::ObjectsWorld l_Packet;
 
-        buffer.AppendSOH();
+        if (GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
+        {
+            for (auto const& l_Itr : sItemMgr->GetPublicRoomItems(GetModel()))
+            {
+                PublicItem const* l_Item = &l_Itr;
 
-        player->ToSocket()->SendPacket(buffer);
+                WorldObject l_WorldObject;
+                l_WorldObject.Id = boost::lexical_cast<std::string>(l_Item->GetId());
+                l_WorldObject.Sprite = boost::lexical_cast<std::string>(l_Item->GetSprite());
+                l_WorldObject.X = boost::lexical_cast<std::string>(l_Item->GetPositionX());
+                l_WorldObject.Y = boost::lexical_cast<std::string>(l_Item->GetPositionY());
+                l_WorldObject.Z = boost::lexical_cast<std::string>(l_Item->GetPositionZ());
+                l_WorldObject.Rotation = boost::lexical_cast<std::string>(l_Item->GetRotation());
+                l_Packet.WorldObjects.push_back(l_WorldObject);
+            }
+
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
+        else
+        {
+            /// TODO; Flat Furniture
+        }
     }
-    //-----------------------------------------------//
-    RoomModel* Room::GetRoomModel()
+
+    /// SendObjects 
+    /// @p_Habbo : Send Active Furniture Objects to Habbo client
+    void Room::SendActiveObjects(Habbo* p_Habbo)
     {
-        return &mRoomModel;
+        HabboPacket::Room::ActiveObjects l_Packet;
+        p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
-    //-----------------------------------------------//
-    uint32 Room::GetId() const
-    {
-        return m_Id;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetOwnerId() const
-    {
-        return mOwnerId;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetOwnerName() const
-    {
-        return mOwnerName;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetCategory() const
-    {
-        return mCategory;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetName() const
-    {
-        return m_Name;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetDescription() const
-    {
-        return mDescription;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetModel() const
-    {
-        return mModel;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetCcts() const
-    {
-        return mCcts;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetWallPaper() const
-    {
-        return mWallPaper;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetFloor() const
-    {
-        return mFloor;
-    }
-    //-----------------------------------------------//
-    bool Room::ShowName() const
-    {
-        return mShowName;
-    }
-    //-----------------------------------------------//
-    bool Room::GetSuperUsers() const
-    {
-        return mSuperUsers;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetAccessType() const
-    {
-        return mAccessType;
-    }
-    //-----------------------------------------------//
-    std::string Room::GetPassword() const
-    {
-        return m_Password;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetVisitorsNow() const
-    {
-        return mVisitorsNow;
-    }
-    //-----------------------------------------------//
-    uint32 Room::GetVisitorsMax() const
-    {
-        return mVisitorsMax;
-    }
-    //-----------------------------------------------//
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

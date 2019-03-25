@@ -137,6 +137,8 @@ namespace SteerStone
             StringBuffer const * Login::Write()
             {
                 m_Buffer.AppendSOH();
+
+                return &m_Buffer;
             }
 
             //////////////////////////////////////////////////////////////////////////

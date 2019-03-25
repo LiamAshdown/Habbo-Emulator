@@ -78,3 +78,5 @@ namespace SteerStone
         } 
     } ///< NAMESPACE TIME
 } ///< NAMESPACE STEERSTONE
+
+#define sWorldTimer SteerStone::Time::WorldTimer::instance;

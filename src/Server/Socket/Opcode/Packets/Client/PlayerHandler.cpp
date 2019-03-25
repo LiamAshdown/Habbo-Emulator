@@ -15,79 +15,74 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
-#include "../HabboSocket.h"
-#include "Network/StringBuffer.h"
-#include "Database/QueryDatabase.h"
-#include "../Entity/Player/Player.h"
-//-----------------------------------------------//
+
+#include "Habbo.h"
+#include "Opcode/Packets/Server/HabboInfoPackets.h"
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
     void HabboSocket::HandlePong(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->mPonged = true;
+        m_Habbo->m_Ponged = true;
     }
+
     void HabboSocket::HandleGetInfo(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (mPlayer && mPlayer->IsInitialized())
-            mPlayer->SendUserObject();
+        if (m_Habbo && m_Habbo->IsInitialized())
+            m_Habbo->SendHabboObject();
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleCreditBalance(std::unique_ptr<ClientPacket> p_Packet)
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(PacketServerHeader::SERVER_CREDIT_BALANCE);
-        buffer.AppendString(std::to_string(mPlayer->GetCredits()) + ".0");
-        buffer.AppendSOH();
-        SendPacket(buffer);
+        HabboPacket::HabboInfo::CreditBalance l_Packet;
+        l_Packet.Credits = std::to_string(m_Habbo->GetCredits());
+        SendPacket(l_Packet.Write());
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleNoDespaceUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
-        uint32 roomId = packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
 
-        StringBuffer buffer;
+       /* StringBuffer buffer;
         buffer.AppendBase64(PacketClientHeader::CLIENT_NO_DESPACE_USERS);
         buffer.AppendString(mPlayer->GetName());
         buffer.AppendSOH();
-        SendPacket(buffer);
+        SendPacket(buffer);*/
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleGetClub(std::unique_ptr<ClientPacket> p_Packet)
     {
 
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleGetAvailableBadges(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->SendAccountBadges();
+        m_Habbo->SendAccountBadges();
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleGetAccountPreferences(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->SendAccountPreferences();
+        m_Habbo->SendAccountPreferences();
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet)
     {
-        mPlayer->SendFavouriteRooms();
+        m_Habbo->SendFavouriteRooms();
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleAddFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
     {
-        bool roomType = packet->ReadWiredBool();
-        uint32 roomId = packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+        bool l_RoomType = p_Packet->ReadWiredBool();
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
 
-        mPlayer->AddFavouriteRoom(roomType, roomId);
+        m_Habbo->AddFavouriteRoom(l_RoomType, l_RoomId);
     }
-    //-----------------------------------------------//
+    
     void HabboSocket::HandleRemoveFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
     {
-        bool roomType = packet->ReadWiredBool();
-        uint32 roomId = packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+        bool l_RoomType = p_Packet->ReadWiredBool();
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
 
-        mPlayer->RemoveFavouriteRoom(roomId);
+        m_Habbo->RemoveFavouriteRoom(l_RoomId);
     }
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

@@ -16,11 +16,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _NETWORK_SERVER_PACKET_h
-#define _NETWORK_SERVER_PACKET_h
+#pragma once
 #include "Common/SharedDefines.h"
 #include "StringBuffer.h"
-#endif /* _NETWORK_SERVER_PACKET_h */
 
 namespace SteerStone
 {

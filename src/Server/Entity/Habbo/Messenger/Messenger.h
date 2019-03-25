@@ -19,21 +19,22 @@
 #ifndef _HABBO_MESSENGER_h
 #define _HABBO_MESSENGER_h
 #include "Common/SharedDefines.h"
-#include "Network/StringBuffer.h"
 #endif /* _HABBO_MESSENGER_h */
 
 namespace SteerStone
 {
     enum MessengerError
     {
-        ACCEPT_SUCCESS = 0,
-        TARGET_FRIEND_LIST_FULL = 2,
-        TARGET_DOES_NOT_ACCEPT = 3,
-        FRIEND_REQUEST_NOT_FOUND = 4,
-        BUDDY_REMOVE_ERROR = 37,
-        FRIEND_LIST_FULL = 39,
-        CONCURRENCY_ERROR = 42
+        ACCEPT_SUCCESS              = 0,
+        TARGET_FRIEND_LIST_FULL     = 2,
+        TARGET_DOES_NOT_ACCEPT      = 3,
+        FRIEND_REQUEST_NOT_FOUND    = 4,
+        BUDDY_REMOVE_ERROR          = 37,
+        FRIEND_LIST_FULL            = 39,
+        CONCURRENCY_ERROR           = 42
     };
+
+    class StringBuffer;
 
     /// Structure which holds information about Habbo
     typedef struct MessengerFriendsStruct
@@ -74,8 +75,6 @@ namespace SteerStone
     /// This class is responsible for handling Habbo Messenger Console
     class Messenger
     {
-    public:
-
     public:
         /// Constructor
         /// @p_Id : Account Id, we don't use Habbo class here

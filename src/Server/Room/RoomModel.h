@@ -16,42 +16,48 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_RoomModel_h_
-#define _Quad_RoomModel_h_
+#ifndef _ROOM_ROOM_MODEL_h
+#define _ROOM_ROOM_MODEL_h
 #include "Common/SharedDefines.h"
-#endif /* _Quad_RoomModel_h_ */
+#endif /* _ROOM_ROOM_MODEL_h */
 
 namespace SteerStone
 {
+    /// Class which holds Room Model information
     class RoomModel
     {
     public:
         friend class RoomManager;
 
     public:
-        RoomModel();
-        ~RoomModel();
+        /// Constructor
+        RoomModel() {}
+        
+        /// Deconstructor
+        ~RoomModel() {}
 
     public:
-        uint32 GetId() const;
-        std::string GetModelId() const;
-        std::string GetModel() const;
-        int32 GetDoorX() const;
-        int32 GetDoorY() const;
-        float GetDoorZ() const;
-        int32 GetDoorOrientation() const;
-        std::string GetHeightMap() const;
+        /// Room Info
+        uint32 GetId()              const { return m_Id;              }
+        std::string GetModelId()    const { return m_ModelId;         }
+        std::string GetModel()      const { return m_Model;           }
+        int32 GetDoorX()            const { return m_DoorX;           }
+        int32 GetDoorY()            const { return m_DoorY;           }
+        float GetDoorZ()            const { return m_DoorZ;           }
+        int32 GetDoorOrientation()  const { return m_DoorOrientation; }
+        std::string GetHeightMap()  const { return m_HeightMap;       }
 
     private:
+        /// Variables
         uint32 m_Id;
-        std::string mModelId;
-        std::string mModel;
-        int32 mDoorX;
-        int32 mDoorY;
-        float mDoorZ;
-        int32 mMapSizeX;
-        int32 mMapSizeY;
-        int32 mDoorOrientation;
-        std::string mHeightMap;
+        std::string m_ModelId;
+        std::string m_Model;
+        int32 m_DoorX;
+        int32 m_DoorY;
+        float m_DoorZ;
+        int32 m_DoorOrientation;
+        std::string m_HeightMap;
+        int32 m_MapSizeX;
+        int32 m_MapSizeY;
     };
-}
+} ///< NAMESPACE STEERSTONE

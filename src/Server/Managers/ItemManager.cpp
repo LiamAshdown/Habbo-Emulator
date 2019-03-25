@@ -15,61 +15,65 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "ItemManager.h"
 #include "Network/StringBuffer.h"
 #include "Database/QueryDatabase.h"
-//-----------------------------------------------//
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
+    /// Singleton
     ItemManager* ItemManager::instance()
     {
         static ItemManager instance;
         return &instance;
     }
-    //-----------------------------------------------//
+    
+    /// Constructor
     ItemManager::ItemManager()
     {
     }
+
+    /// Deconstructor
     ItemManager::~ItemManager()
     {
     }
-    //-----------------------------------------------//
+    
+    /// LoadPublicRoomItems - Load Public items from l_Database
     void ItemManager::LoadPublicRoomItems()
     {
-        QueryDatabase database("rooms");
-        database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, behaviour FROM public_items");
-        database.ExecuteQuery();
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, behaviour FROM public_items");
+        l_Database.ExecuteQuery();
 
-        if (!database.GetResult())
+        if (!l_Database.GetResult())
         {
             LOG_ERROR << "public_items is empty!";
             return;
         }
 
-        Result* result = database.Fetch();
+        Result* l_Result = l_Database.Fetch();
 
-        std::vector<PublicItem> publicItemVec;
+        std::vector<PublicItem> l_PublicItemVec;
 
         do
         {
-            PublicItem publicItem;
-            publicItem.m_Id = result->GetUint32(1);
-            publicItem.mRoomModel = result->GetString(2);
-            publicItem.mSprite = result->GetString(3);
-            publicItem.mX = result->GetInt32(4);
-            publicItem.mY = result->GetInt32(5);
-            publicItem.mZ = result->GetDouble(6);
-            publicItem.mRotation = result->GetInt32(7);
-            publicItem.mTopHeight = result->GetDouble(8);
-            publicItem.mLength = result->GetInt32(9);
-            publicItem.mWidth = result->GetInt32(10);
-            publicItem.mBehaviour = result->GetString(11);
+            PublicItem l_PublicItem;
+            l_PublicItem.m_Id = l_Result->GetUint32(1);
+            l_PublicItem.mRoomModel = l_Result->GetString(2);
+            l_PublicItem.mSprite = l_Result->GetString(3);
+            l_PublicItem.mX = l_Result->GetInt32(4);
+            l_PublicItem.mY = l_Result->GetInt32(5);
+            l_PublicItem.mZ = l_Result->GetDouble(6);
+            l_PublicItem.mRotation = l_Result->GetInt32(7);
+            l_PublicItem.mTopHeight = l_Result->GetDouble(8);
+            l_PublicItem.mLength = l_Result->GetInt32(9);
+            l_PublicItem.mWidth = l_Result->GetInt32(10);
+            l_PublicItem.mBehaviour = l_Result->GetString(11);
 
-            publicItemVec.push_back(publicItem);
+            l_PublicItemVec.push_back(l_PublicItem);
 
-        } while (result->GetNextResult());
+        } while (l_Result->GetNextResult());
 
         std::vector<PublicItem> picnic;
         std::vector<PublicItem> newbie_lobby;
@@ -136,7 +140,7 @@ namespace SteerStone
         std::vector<PublicItem> emperors;
         std::vector<PublicItem> beauty_salon1;
 
-        for (std::vector<PublicItem>::iterator itr = publicItemVec.begin(); itr != publicItemVec.end(); itr++)
+        for (std::vector<PublicItem>::iterator itr = l_PublicItemVec.begin(); itr != l_PublicItemVec.end(); itr++)
         {
             if (itr->GetRoomModel() == "picnic")
                 picnic.push_back(*itr);
@@ -264,82 +268,82 @@ namespace SteerStone
                 beauty_salon1.push_back(*itr);
         }
 
-        mPublicItems["picnic"] = picnic;
-        mPublicItems["newbie_lobby"] = newbie_lobby;
-        mPublicItems["theater"] = theater;
-        mPublicItems["libary"] = libary;
-        mPublicItems["floatinggarden"] = floatinggarden;
-        mPublicItems["sunset_cafe"] = sunset_cafe;
-        mPublicItems["pool_a"] = pool_a;
-        mPublicItems["pub_a"] = pub_a;
-        mPublicItems["md_a"] = md_a;
-        mPublicItems["park_a"] = park_a;
-        mPublicItems["park_b"] = park_b;
-        mPublicItems["pool_b"] = pool_b;
-        mPublicItems["ballroom"] = ballroom;
-        mPublicItems["cafe_gold0"] = cafe_gold0;
-        mPublicItems["gate_park"] = gate_park;
-        mPublicItems["gate_park_2"] = gate_park_2;
-        mPublicItems["sun_terrace"] = sun_terrace;
-        mPublicItems["space_cafe"] = space_cafe;
-        mPublicItems["beauty_salon0"] = beauty_salon0;
-        mPublicItems["chill"] = chill;
-        mPublicItems["dusty_lounge"] = dusty_lounge;
-        mPublicItems["cr_staff"] = cr_staff;
-        mPublicItems["rooftop"] = rooftop;
-        mPublicItems["rooftop_2"] = rooftop_2;
-        mPublicItems["tearoom"] = tearoom;
-        mPublicItems["cafe_ole"] = cafe_ole;
-        mPublicItems["cr_cafe"] = cr_cafe;
-        mPublicItems["lobby_a"] = lobby_a;
-        mPublicItems["floorlobby_c"] = floorlobby_c;
-        mPublicItems["floorlobby_b"] = floorlobby_b;
-        mPublicItems["cinema_a"] = cinema_a;
-        mPublicItems["old_skool0"] = old_skool0;
-        mPublicItems["malja_bar_a"] = malja_bar_a;
-        mPublicItems["malja_bar_b"] = malja_bar_b;
-        mPublicItems["bar_a"] = bar_a;
-        mPublicItems["bar_b"] = bar_b;
-        mPublicItems["habburger"] = habburger;
-        mPublicItems["pizza"] = pizza;
-        mPublicItems["bb_lobby_1"] = bb_lobby_1;
-        mPublicItems["snowwar_lobby_1"] = snowwar_lobby_1;
-        mPublicItems["tv_studio"] = tv_studio;
-        mPublicItems["club_mammoth"] = club_mammoth;
-        mPublicItems["ice_cafe"] = ice_cafe;
-        mPublicItems["netcafe"] = netcafe;
-        mPublicItems["hallway0"] = hallway0;
-        mPublicItems["hallway9"] = hallway9;
-        mPublicItems["hallway2"] = hallway2;
-        mPublicItems["hallway1"] = hallway1;
-        mPublicItems["hallway3"] = hallway3;
-        mPublicItems["hallway4"] = hallway4;
-        mPublicItems["hallway5"] = hallway5;
-        mPublicItems["hallway8"] = hallway8;
-        mPublicItems["hallway7"] = hallway7;
-        mPublicItems["hallway6"] = hallway6;
-        mPublicItems["hallway10"] = hallway10;
-        mPublicItems["hallway11"] = hallway11;
-        mPublicItems["star_lounge"] = star_lounge;
-        mPublicItems["orient"] = orient;
-        mPublicItems["entryhall"] = entryhall;
-        mPublicItems["hallA"] = hallA;
-        mPublicItems["hallB"] = hallB;
-        mPublicItems["hallD"] = hallD;
-        mPublicItems["emperors"] = emperors;
-        mPublicItems["beauty_salon1"] = beauty_salon1;
+        m_PublicItems["picnic"] = picnic;
+        m_PublicItems["newbie_lobby"] = newbie_lobby;
+        m_PublicItems["theater"] = theater;
+        m_PublicItems["libary"] = libary;
+        m_PublicItems["floatinggarden"] = floatinggarden;
+        m_PublicItems["sunset_cafe"] = sunset_cafe;
+        m_PublicItems["pool_a"] = pool_a;
+        m_PublicItems["pub_a"] = pub_a;
+        m_PublicItems["md_a"] = md_a;
+        m_PublicItems["park_a"] = park_a;
+        m_PublicItems["park_b"] = park_b;
+        m_PublicItems["pool_b"] = pool_b;
+        m_PublicItems["ballroom"] = ballroom;
+        m_PublicItems["cafe_gold0"] = cafe_gold0;
+        m_PublicItems["gate_park"] = gate_park;
+        m_PublicItems["gate_park_2"] = gate_park_2;
+        m_PublicItems["sun_terrace"] = sun_terrace;
+        m_PublicItems["space_cafe"] = space_cafe;
+        m_PublicItems["beauty_salon0"] = beauty_salon0;
+        m_PublicItems["chill"] = chill;
+        m_PublicItems["dusty_lounge"] = dusty_lounge;
+        m_PublicItems["cr_staff"] = cr_staff;
+        m_PublicItems["rooftop"] = rooftop;
+        m_PublicItems["rooftop_2"] = rooftop_2;
+        m_PublicItems["tearoom"] = tearoom;
+        m_PublicItems["cafe_ole"] = cafe_ole;
+        m_PublicItems["cr_cafe"] = cr_cafe;
+        m_PublicItems["lobby_a"] = lobby_a;
+        m_PublicItems["floorlobby_c"] = floorlobby_c;
+        m_PublicItems["floorlobby_b"] = floorlobby_b;
+        m_PublicItems["cinema_a"] = cinema_a;
+        m_PublicItems["old_skool0"] = old_skool0;
+        m_PublicItems["malja_bar_a"] = malja_bar_a;
+        m_PublicItems["malja_bar_b"] = malja_bar_b;
+        m_PublicItems["bar_a"] = bar_a;
+        m_PublicItems["bar_b"] = bar_b;
+        m_PublicItems["habburger"] = habburger;
+        m_PublicItems["pizza"] = pizza;
+        m_PublicItems["bb_lobby_1"] = bb_lobby_1;
+        m_PublicItems["snowwar_lobby_1"] = snowwar_lobby_1;
+        m_PublicItems["tv_studio"] = tv_studio;
+        m_PublicItems["club_mammoth"] = club_mammoth;
+        m_PublicItems["ice_cafe"] = ice_cafe;
+        m_PublicItems["netcafe"] = netcafe;
+        m_PublicItems["hallway0"] = hallway0;
+        m_PublicItems["hallway9"] = hallway9;
+        m_PublicItems["hallway2"] = hallway2;
+        m_PublicItems["hallway1"] = hallway1;
+        m_PublicItems["hallway3"] = hallway3;
+        m_PublicItems["hallway4"] = hallway4;
+        m_PublicItems["hallway5"] = hallway5;
+        m_PublicItems["hallway8"] = hallway8;
+        m_PublicItems["hallway7"] = hallway7;
+        m_PublicItems["hallway6"] = hallway6;
+        m_PublicItems["hallway10"] = hallway10;
+        m_PublicItems["hallway11"] = hallway11;
+        m_PublicItems["star_lounge"] = star_lounge;
+        m_PublicItems["orient"] = orient;
+        m_PublicItems["entryhall"] = entryhall;
+        m_PublicItems["hallA"] = hallA;
+        m_PublicItems["hallB"] = hallB;
+        m_PublicItems["hallD"] = hallD;
+        m_PublicItems["emperors"] = emperors;
+        m_PublicItems["beauty_salon1"] = beauty_salon1;
 
-        LOG_INFO << "Loaded " << publicItemVec.size() << " Room Public Items";
+        LOG_INFO << "Loaded " << l_PublicItemVec.size() << " Room Public Items";
     }
-    //-----------------------------------------------//
+    
+    /// GetPublicRoomItems#
+    /// @p_Model : Room Model to retrieve furniture data
     PublicItemVec ItemManager::GetPublicRoomItems(const std::string& model)
     {
-        PublicItemMap::iterator itr = mPublicItems.find(model);
-        if (itr != mPublicItems.end())
+        PublicItemMap::iterator itr = m_PublicItems.find(model);
+        if (itr != m_PublicItems.end())
             return itr->second;
         else
             return PublicItemVec{};
     }
-    //-----------------------------------------------//
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

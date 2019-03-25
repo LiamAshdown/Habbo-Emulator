@@ -1,5 +1,5 @@
 /*
-* Liam Ashdown
+* Priston Tale EU
 * Copyright (C) 2019
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,18 +16,18 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "NavigatorPackets.h"
+#include "Maths.h"
 
 namespace SteerStone
 {
-    namespace HabboPacket
+    namespace Maths
     {
-        namespace Navigator
-        {
-          
-            //////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////
+        static std::default_random_engine s_Random(time(NULL));
 
-        } ///< NAMESPACE NAVIGATOR
-    } ///< NAMESPACE HABBOPACKET
+        uint32 GetRandomUint32(uint32 const p_Min, uint32 const p_Max)
+        {
+            std::uniform_int_distribution<uint32> l_Random(p_Min, p_Max);
+            return l_Random(s_Random);
+        }
+    } ///< NAMESPACE MATHS
 } ///< NAMESPACE STEERSTONE

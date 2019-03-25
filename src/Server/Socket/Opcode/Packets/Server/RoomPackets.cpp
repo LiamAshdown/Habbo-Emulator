@@ -27,7 +27,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * HabboRoomObject::Write()
+            StringBuffer const* HabboRoomObject::Write()
             {
                 m_Buffer.AppendString("i:", false);
                 m_Buffer.AppendString(UniqueId, false);
@@ -38,7 +38,7 @@ namespace SteerStone
                 m_Buffer.AppendString("\r", false);
 
                 m_Buffer.AppendString("n:", false);
-                m_Buffer.AppendString(Gender, false);
+                m_Buffer.AppendString(Name, false);
                 m_Buffer.AppendString("\r", false);
 
                 m_Buffer.AppendString("f:", false);
@@ -46,7 +46,7 @@ namespace SteerStone
                 m_Buffer.AppendString("\r", false);
 
                 m_Buffer.AppendString("s:", false);
-                m_Buffer.AppendString(Gender == "Male" ? "M" : "F", false);
+                m_Buffer.AppendString(Gender, false);
                 m_Buffer.AppendString("\r", false);
 
                 m_Buffer.AppendString("l:", false);
@@ -65,7 +65,125 @@ namespace SteerStone
                 }
 
                 m_Buffer.AppendString("b:", false);
+                m_Buffer.AppendString("\r", false);
                 m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomInterest::Write()
+            {
+                m_Buffer.AppendString("0");
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+
+            StringBuffer const* OpenConnection::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomUrl::Write()
+            {
+                m_Buffer.AppendString("/client/");
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomCantConnect::Write()
+            {
+                m_Buffer.AppendWired(ErrorCode);
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomReady::Write()
+            {
+                m_Buffer.AppendString(Model);
+                m_Buffer.AppendString(" ");
+                m_Buffer.AppendWired(Id);
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomAdd::Write()
+            {
+                m_Buffer.AppendWired(0);
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* RoomHeight::Write()
+            {
+                m_Buffer.AppendString(HeightMap);
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const* ObjectsWorld::Write()
+            {
+                for (auto const& l_Itr : WorldObjects)
+                {
+                    m_Buffer.AppendStringDelimiter(l_Itr.Id, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Sprite, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.X, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Y, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Z, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Rotation, " ");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Length, " ");
+                    m_Buffer.AppendString("\r", false);
+                }
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * ActiveObjects::Write()
+            {
+                /// TODO
+                m_Buffer.AppendString("H", false);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
             }
 
             //////////////////////////////////////////////////////////////////////////

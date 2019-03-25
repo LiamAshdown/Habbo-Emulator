@@ -16,13 +16,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _SERVER_AUTHENTICATION_PACKETS_h
-#define _SERVER_AUTHENTICATION_PACKETS_h
+#pragma once
 #include "Common/SharedDefines.h"
-#include "Network/ServerPacket.h"
-#include "Opcodes.h"
-#include "Messenger.h"
-#endif /* _SERVER_AUTHENTICATION_PACKETS_h */
+#include "HabboSocket.h"
 
 namespace SteerStone
 {

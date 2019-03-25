@@ -16,12 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _SOCKET_HABBO_SOCKET_h
-#define _SOCKET_HABBO_SOCKET_h
-#include "Network/Socket.h"
-#include "Network/StringBuffer.h"
-#include "Opcodes.h"
-#endif /* _SOCKET_HABBO_SOCKET_h */
+#pragma once
+#include "Network/Listener.h"
+#include "Opcode/Opcodes.h"
+#include "Network/ServerPacket.h"
 
 namespace SteerStone
 {
@@ -85,6 +83,7 @@ namespace SteerStone
         void HandleFurnitureRevisions(std::unique_ptr<ClientPacket> p_Packet);
         void HandleMessengerFindUser(std::unique_ptr<ClientPacket> p_Packet);
         void HandleMessengerSendRequest(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleLeaveRoom(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

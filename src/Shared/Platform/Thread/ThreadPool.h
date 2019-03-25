@@ -50,7 +50,7 @@ namespace SteerStone
         std::vector<std::thread> m_Workers;                                    ///< Worker Threads
         std::deque<std::function<void()>> m_Tasks;                             ///< Task execute
         std::condition_variable m_Condition;                                   ///< Condition
-        std::mutex mMutex;                                                     ///< Mutex
+        std::mutex m_Mutex;                                                     ///< Mutex
         bool m_Stop;                                                            ///< Stop operation of Thread Pool
     };
 } ///< NAMESPACE STEERSTONE

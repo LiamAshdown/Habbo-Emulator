@@ -18,9 +18,9 @@
 
 #include "HabboSocket.h"
 #include "Database/QueryDatabase.h"
-#include "Database/Result.h"
 #include "Common/SHA1.h"
 #include "Habbo.h"
+#include "Opcodes.h"
 
 namespace SteerStone
 {
@@ -84,7 +84,7 @@ namespace SteerStone
     }
     
     /// Client Handlers
-    void HabboSocket::ExecutePacket(const OpcodeHandler& p_Handler, std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::ExecutePacket(OpcodeHandler const& p_Handler, std::unique_ptr<ClientPacket> p_Packet)
     {
         (this->*p_Handler.handler)(std::move(p_Packet));
     }

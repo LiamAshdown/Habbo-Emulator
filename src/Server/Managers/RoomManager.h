@@ -16,11 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_RoomManager_h_
-#define _Quad_RoomManager_h_
-#include <mutex>
+#ifndef _MANAGERS_ROOM_MANAGER_h
+#define _MANAGERS_ROOM_MANAGER_h
 #include "Common/SharedDefines.h"
 #include "Room.h"
+#include <mutex>
+#endif /* _MANAGERS_ROOM_MANAGER_h */
 
 namespace SteerStone
 {
@@ -28,34 +29,53 @@ namespace SteerStone
     typedef std::unordered_map<uint32, std::shared_ptr<Room>> RoomsMap;
     typedef std::unordered_map<std::string, RoomModel> RoomModelsMap;
 
+    /// This class stores information about all rooms, models and heightmap
+    /// Singleton class
     class RoomManager
     {
     public:
         static RoomManager* instance();
 
     public:
+        /// Constructor
         RoomManager();
+
+        /// Constructor
         ~RoomManager();
 
     public:
+        /// LoadRoomCategories - Load room categories from database
         void LoadRoomCategories();
-        void LoadRooms();
+
+        /// LoadRoomModels - Load room models from database
         void LoadRoomModels();
 
-        RoomCategory* GetRoomCategory(const uint32& id);
-        std::shared_ptr<Room> GetRoom(const uint32& id);
-        RoomModel* GetRoomModel(const std::string& model);
-            
+        /// LoadRooms - Load rooms from database
+        void LoadRooms();
+
+        /// GetRoomCategory
+        /// @p_Id : Category Id
+        RoomCategory* GetRoomCategory(uint32 const& p_Id);
+
+        /// GetRoomCategory
+        /// @p_Id : Model Id
+        RoomModel* GetRoomModel(std::string const& p_Model);
+       
+        /// GetRoomCategory
+        /// @p_Id : Room Id
+        std::shared_ptr<Room> GetRoom(uint32 const& p_Id);
+
+        /// GetRoomCategories - Get Room Category Map
         RoomCategoriesMap* GetRoomCategories();
+
+        /// GetRooms - Get Room Map
         RoomsMap* GetRooms();
 
     private:
-        RoomCategoriesMap mRoomCategories;
-        RoomsMap mRooms;
-        RoomModelsMap mRoomModels;
+        RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for category
+        RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for room                               
+        RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for model
     };
 }
 
 #define sRoomMgr SteerStone::RoomManager::instance()
-
-#endif /* _Quad_RoomManager_h_ */

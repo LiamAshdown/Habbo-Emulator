@@ -19,18 +19,17 @@
 #ifndef _MANAGERS_HOTEL_h
 #define _MANAGERS_HOTEL_h
 #include "Common/SharedDefines.h"
-#include "HabboSocket.h"
-#include "Network/Listener.h"
-#include "Config/Config.h"
-#include "Database/Database.h"
-#include "Platform/Thread/ThreadPool.h"
 #include "Common/Timer.h"
+#include "Config/Config.h"
 #include "Database/QueryDatabase.h"
+#include "Platform/Thread/ThreadPool.h"
 #include <mutex>
 #endif /* _MANAGERS_HOTEL_h */
 
 namespace SteerStone
 {
+    class Habbo;
+
     typedef std::unordered_map<uint32, Habbo*> HabboMap;
 
     /// Class which runs the hotel

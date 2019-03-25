@@ -17,6 +17,8 @@
 */
 
 #include "Habbo.h"
+#include "Hotel.h"
+#include "RoomManager.h"
 #include "Opcode/Packets/Server/HabboInfoPackets.h"
 #include "Opcode/Packets/Server/MessengerPackets.h"
 #include "Opcode/Packets/Server/FavouriteRoomPackets.h"
@@ -28,9 +30,9 @@ namespace SteerStone
     Habbo::Habbo(HabboSocket* p_HabboSocket)
         : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr)
     {
-        mPingInterval = sConfig->GetIntDefault("PongInterval", 30000);
-        mUpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
-        mMaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
+        m_PingInterval = sConfig->GetIntDefault("PongInterval", 30000);
+        m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
+        m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
 
         SendPing();
     }
@@ -53,17 +55,25 @@ namespace SteerStone
     //                ROOMS
     /////////////////////////////////////////////
 
-    bool Habbo::SetRoom(std::shared_ptr<Room> room)
+    bool Habbo::SetRoom(std::shared_ptr<Room> p_Room)
     {
-        if (mRoom = room)
-            return true;
-        else
-            return false;
+        m_Room = p_Room;
+        if (auto l_Room = m_Room.lock())
+            if (l_Room->EnterRoom(this))
+                return true;
+
+        return false;
     }
 
     std::shared_ptr<Room> Habbo::GetRoom() const
     {
-        return mRoom;
+        return m_Room.lock();
+    }
+
+    void Habbo::DestroyRoom()
+    {
+        if (auto l_Room = m_Room.lock())
+            l_Room.reset();
     }
 
     //////////////////////////////////////////////
@@ -137,7 +147,6 @@ namespace SteerStone
     void Habbo::SendSearchUserResults(std::string const& p_Name)
     {
         HabboPacket::Messenger::MessengerFindUserResult l_Packet;
-        l_Packet.Messenger = "MESSENGER";
         m_Messenger->ParseMessengerSearchUser(l_Packet.GetBuffer(), p_Name);
         ToSocket()->SendPacket(l_Packet.Write());
     }
@@ -172,7 +181,7 @@ namespace SteerStone
     {
         HabboPacket::HabboInfo::AvailableBadges l_Packet;
 
-        for (auto const& itr : mBadges)
+        for (auto const& itr : m_Badges)
         {
             if (itr.IsActive())
                 l_Packet.ActiveBadges++;
@@ -186,8 +195,8 @@ namespace SteerStone
     void Habbo::SendFuseRights()
     {
         HabboPacket::HabboInfo::FuseRights l_Packet;
-       
-        for (auto const& itr : mFuseRights)
+
+        for (auto const& itr : m_FuseRights)
             l_Packet.HabboFuseRights.push_back(itr.GetFuseRight());
 
         ToSocket()->SendPacket(l_Packet.Write());
@@ -209,17 +218,19 @@ namespace SteerStone
 
     void Habbo::UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation)
     {
-        mPositionX = x;
-        mPositionY = y;
-        mPositionZ = z;
-        mOrientation = orientation;
+        m_PositionX = x;
+        m_PositionY = y;
+        m_PositionZ = z;
+        m_Orientation = orientation;
     }
 
     bool Habbo::Update(const uint32& diff)
     {
+        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+
         if (m_Socket && !m_Socket->IsClosed())
         {
-            if (mUpdateAccount < diff)
+            if (m_UpdateAccount < diff)
             {
                 QueryDatabase database("users");
                 database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?");
@@ -236,17 +247,17 @@ namespace SteerStone
                 database.GetStatement()->setBoolean(11, IsSoundEnabled());
                 database.ExecuteQuery();
 
-                mUpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
+                m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
             }
             else
-                mUpdateAccount -= diff;
+                m_UpdateAccount -= diff;
 
-            if (mPingInterval < diff)
+            if (m_PingInterval < diff)
             {
                 if (IsPonged())
                 {
                     SendPing();
-                    mPingInterval = sConfig->GetIntDefault("PongInterval", 10000);
+                    m_PingInterval = sConfig->GetIntDefault("PongInterval", 10000);
                 }
                 else
                 {
@@ -256,7 +267,7 @@ namespace SteerStone
                 }
             }
             else
-                mPingInterval -= diff;
+                m_PingInterval -= diff;
 
             return true;
         }
@@ -281,147 +292,12 @@ namespace SteerStone
         }
     }
 
-    bool Habbo::IsPonged() const
-    {
-        return mPonged;
-    }
-
-    std::shared_ptr<HabboSocket> Habbo::ToSocket()
-    {
-        return m_Socket;
-    }
-
+    /// SendPing - Send Ping response to client
     void Habbo::SendPing()
     {
-        mPonged = false;
+        m_Ponged = false;
         HabboPacket::Misc::Ping l_Packet;
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
-    uint32 Habbo::GetId() const
-    {
-        return m_Id;
-    }
-
-    uint32 Habbo::GetTickets() const
-    {
-        return m_Tickets;
-    }
-
-    int32 Habbo::GetPositionX() const
-    {
-        return mPositionX;
-    }
-
-    int32 Habbo::GetPositionY() const
-    {
-        return mPositionY;
-    }
-
-    int32 Habbo::GetPositionZ() const
-    {
-        return mPositionX;
-    }
-
-    int32 Habbo::GetOrientation() const
-    {
-        return mOrientation;
-    }
-
-    uint8 Habbo::GetRank() const
-    {
-        return m_Rank;
-    }
-
-    std::string Habbo::GetName() const
-    {
-        return m_Name;
-    }
-
-    uint32 Habbo::GetCredits() const
-    {
-        return m_Credits;
-    }
-
-    std::string Habbo::GetEmail() const
-    {
-        return m_Email;
-    }
-
-    std::string Habbo::GetFigure() const
-    {
-        return m_Figure;
-    }
-
-    std::string Habbo::GetBirthday() const
-    {
-        return m_Birthday;
-    }
-
-    std::string Habbo::GetPhoneNumber() const
-    {
-        return mPhoneNumber;
-    }
-
-    std::string Habbo::GetMotto() const
-    {
-        return m_Motto;
-    }
-
-    std::string Habbo::GetConsoleMotto() const
-    {
-        return m_ConsoleMotto;
-    }
-
-    bool Habbo::GetReadAgreement() const
-    {
-        return mReadAgreement;
-    }
-
-    std::string Habbo::GetGender() const
-    {
-        return m_Gender;
-    }
-
-    std::string Habbo::GetCountry() const
-    {
-        return mCountry;
-    }
-
-    std::string Habbo::GetPoolFigure() const
-    {
-        return m_PoolFigure;
-    }
-
-    uint32 Habbo::GetFilms() const
-    {
-        return m_Films;
-    }
-
-    bool Habbo::GetSpecialRights() const
-    {
-        return mSpecialRights;
-    }
-
-    bool Habbo::IsSoundEnabled() const
-    {
-        return m_SoundEnabled;
-    }
-
-    bool Habbo::AcceptsFriendRequests() const
-    {
-        return m_AcceptFriendRequests;
-    }
-
-    bool Habbo::CanSendMail() const
-    {
-        return m_DirectMail;
-    }
-
-    bool Habbo::IsInitialized() const
-    {
-        return m_Initialized;
-    }
-
-}
-//-----------------------------------------------//
+} ///< NAMESPACE STEERSTONE

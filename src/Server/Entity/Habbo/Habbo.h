@@ -19,22 +19,21 @@
 #ifndef _HABBO_HABBO_h
 #define _HABBO_HABBO_h
 #include "Common/SharedDefines.h"
-#include "Hotel.h"
-#include "Room.h"
 #include "Messenger.h"
 #include "FavouriteRoom.h"
+#include <mutex>
 #endif /* _HABBO_HABBO_h */
-
-enum LogoutReason
-{
-    LOGOUT_DISCONNECTED         = -1,
-    LOGGED_OUT                  = 1,
-    LOGOUT_CONCURRENT           = 2,
-    LOGOUT_TIMEOUT              = 3,
-};
 
 namespace SteerStone
 {
+    enum LogoutReason
+    {
+        LOGOUT_DISCONNECTED         = -1,
+        LOGGED_OUT                  = 1,
+        LOGOUT_CONCURRENT           = 2,
+        LOGOUT_TIMEOUT              = 3,
+    };
+
     /// Holds Habbo Badges
     typedef struct HabboBadgesStruct
     {
@@ -91,6 +90,8 @@ namespace SteerStone
         std::string m_FuseRight;
     }HabboFuseRightsData;
 
+    class Room;
+
     class Habbo
     {
     public:
@@ -102,8 +103,9 @@ namespace SteerStone
 
     public:
         /// Rooms
-        bool SetRoom(std::shared_ptr<Room> room);
+        bool SetRoom(std::shared_ptr<Room> p_Room);
         std::shared_ptr<Room> GetRoom() const;
+        void DestroyRoom();
 
         /// Favourite Rooms
         void SendFavouriteRooms();
@@ -131,44 +133,44 @@ namespace SteerStone
         void UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation);
         bool Update(const uint32& diff);
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);
-        bool IsPonged() const;
-
-        /// Socket
-        std::shared_ptr<HabboSocket> ToSocket();
 
     public:
         /// Habbo Info
-        std::string GetName() const;
-        std::string GetEmail() const;
-        std::string GetFigure() const;
-        std::string GetBirthday() const;
-        std::string GetPhoneNumber() const;
-        std::string GetMotto() const;
-        std::string GetConsoleMotto() const;
-        std::string GetGender() const;
-        std::string GetCountry() const;
-        std::string GetPoolFigure() const;
+        std::string GetName()           const { return m_Name;                 }
+        std::string GetEmail()          const { return m_Email;                }
+        std::string GetFigure()         const { return m_Figure;               }
+        std::string GetBirthday()       const { return m_Birthday;             }
+        std::string GetPhoneNumber()    const { return m_PhoneNumber;          }
+        std::string GetMotto()          const { return m_Motto;                }
+        std::string GetConsoleMotto()   const { return m_ConsoleMotto;         }
+        std::string GetGender()         const { return m_Gender;               }
+        std::string GetCountry()        const { return m_Country;              }
+        std::string GetPoolFigure()     const { return m_PoolFigure;           }
 
-        uint32 GetFilms() const;
-        uint32 GetCredits() const;
-        uint32 GetId() const;
-        uint32 GetTickets() const;
+        uint32 GetFilms()               const { return m_Films;                }
+        uint32 GetCredits()             const { return m_Credits;              }
+        uint32 GetId()                  const { return m_Id;                   }
+        uint32 GetTickets()             const { return m_Credits;              }
 
-        int32 GetPositionX() const;
-        int32 GetPositionY() const;
-        int32 GetPositionZ() const;
-        int32 GetOrientation() const;
+        int32 GetPositionX()            const { return m_PositionX;            }
+        int32 GetPositionY()            const { return m_PositionY;            }
+        int32 GetPositionZ()            const { return m_PositionZ;            }
+        int32 GetOrientation()          const { return m_Orientation;          }
 
-        uint8 GetRank() const;
+        uint8 GetRank()                 const { return m_Rank;                 }
 
-        bool CanSendMail() const;
-        bool IsInitialized() const;
-        bool GetReadAgreement() const;
-        bool GetSpecialRights() const;
-        bool IsSoundEnabled() const;
-        bool AcceptsFriendRequests() const;
+        bool CanSendMail()              const { return m_DirectMail;           }
+        bool IsInitialized()            const { return m_Initialized;          }
+        bool GetReadAgreement()         const { return m_ReadAgreement;        }
+        bool GetSpecialRights()         const { return m_SpecialRights;        }
+        bool IsSoundEnabled()           const { return m_SoundEnabled;         }
+        bool AcceptsFriendRequests()    const { return m_AcceptFriendRequests; }
+        bool IsPonged()                 const { return m_Ponged;               }
+
+        std::shared_ptr<HabboSocket> ToSocket() { return m_Socket; }
 
     private:
+        /// SendPing - Send Ping response to client
         void SendPing();
 
     private:
@@ -178,43 +180,43 @@ namespace SteerStone
         std::string m_Email;
         std::string m_Figure;
         std::string m_Birthday;
-        std::string mPhoneNumber;
+        std::string m_PhoneNumber;
         std::string m_Motto;
         std::string m_ConsoleMotto;
         std::string m_Gender;
-        std::string mCountry;
+        std::string m_Country;
         std::string m_PoolFigure;
 
-        bool mReadAgreement;
-        bool mSpecialRights;
+        bool m_ReadAgreement;
+        bool m_SpecialRights;
         bool m_DirectMail;
         bool m_Initialized;
         bool m_SoundEnabled;
         bool m_AcceptFriendRequests;
-        bool mPonged;
+        bool m_Ponged;
 
         uint32 m_Id;
         uint32 m_Credits;
         uint32 m_Tickets;
         uint32 m_Films;
-        uint32 mMaxFriendsLimit;
-        uint32 mPingInterval;
-        uint32 mUpdateAccount;
+        uint32 m_MaxFriendsLimit;
+        uint32 m_PingInterval;
+        uint32 m_UpdateAccount;
 
-        int32 mPositionX;
-        int32 mPositionY;
-        int32 mPositionZ;
-        int32 mOrientation;
+        int32 m_PositionX;
+        int32 m_PositionY;
+        int32 m_PositionZ;
+        int32 m_Orientation;
 
         uint8 m_Rank;
 
         /// Variables
-        std::shared_ptr<Room> mRoom;
-        std::vector<HabboFuseRightsData> mFuseRights;
-        std::vector<HabboBadgesData> mBadges;
+        std::weak_ptr<Room> m_Room;
+        std::vector<HabboFuseRightsData> m_FuseRights;
+        std::vector<HabboBadgesData> m_Badges;
         std::unique_ptr<Messenger> m_Messenger;
         std::unique_ptr<FavouriteRoom> m_FavouriteRooms;
         std::shared_ptr<HabboSocket> m_Socket;
-        std::mutex mMutex;
+        std::mutex m_Mutex;
     };
 } ///< NAMESPACE STEERSTONE
