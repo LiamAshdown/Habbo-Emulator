@@ -72,6 +72,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_FIND_USER,           "CLIENT_MESSENGER_FIND_USER",              &HabboSocket::HandleMessengerFindUser          );
         StoreClientPacket(PacketClientHeader::CLIENT_LEAVE_ROOM,                    "CLIENT_LEAVE_ROOM",                       &HabboSocket::HandleLeaveRoom                  );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_REQUEST,        "CLIENT_MESSENGER_SEND_REQUEST",           &HabboSocket::HandleMessengerSendRequest       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REMOVE_FRIEND,       "CLIENT_MESSENGER_REMOVE_FRIEND",          &HabboSocket::HandleMessengerRemoveFriend      );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );
@@ -112,6 +113,7 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_ERROR,               "SERVER_MESSENGER_ERROR",                  &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_REQUEST_BUDDY_ERROR,           "SERVER_REQUEST_BUDDY_ERROR",              &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_ADD_FRIEND,          "SERVER_MESSENGER_ADD_FRIEND",             &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_REMOVE_FRIEND,       "SERVER_MESSENGER_REMOVE_FRIEND",          &HabboSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";

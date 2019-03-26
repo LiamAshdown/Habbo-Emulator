@@ -124,6 +124,11 @@ namespace SteerStone
     {
         return m_MessengerFriends.size();
     }
+
+    /// SaveToDB - This function is used to query the database on removing friends etc..
+    void Messenger::SaveToDB()
+    {
+    }
     
     /// ParseMessengerFriends
     /// @p_Buffer : Buffer which is being parsed
@@ -406,6 +411,58 @@ namespace SteerStone
             l_Database.GetStatement()->setUInt(3, l_Result->GetUint32(1));
             l_Database.ExecuteQuery();
         }
+    }
+
+    /// ParseMessengerSendFriendRequest
+    /// @p_Habbo : Habbo Class to send packet too
+    /// @p_Packet : Incoming client packet which we will decode
+    /// @p_Size : Size of how many friends we need to remove
+    void Messenger::ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size)
+    {
+        HabboPacket::Messenger::MessengerRemoveFriend l_Packet;
+
+        /// Read the packet and obtain our friend Ids
+        for (uint8 l_I = 0; l_I < p_Size; l_I++)
+        {
+            uint32 l_Id = p_Packet->ReadWiredUint();
+
+            auto const& l_Itr = std::find_if(m_MessengerFriends.begin(), m_MessengerFriends.end(), [&l_Id](MessengerFriendsData const& p_Friend) -> bool { return p_Friend.GetId() == l_Id; });
+
+            /// Does friend exist in console?
+            if (l_Itr == m_MessengerFriends.end())
+            {
+                LOG_ERROR << "Tried to remove friend: " << l_Id << " from " << p_Habbo->GetName() << " but friend doesn't exist!";
+                HabboPacket::Messenger::MessengerError l_PacketError;
+                l_PacketError.Error = MessengerErrorCode::CONCURRENCY_ERROR;
+                p_Habbo->ToSocket()->SendPacket(l_PacketError.Write());
+                continue;
+            }
+
+            /// TODO; We should move this to SaveToDB function
+            /// We store removed friends into a storage which we can loop through
+            /// when habbo logs out, we need to create a async thread to do this operation,
+            /// so when it comes to updating the database on misc querys we can do it on another thread
+            /// this way we don't cause any lag if a habbo is mass removing friends as we don't do 
+            /// one thread per player
+            QueryDatabase l_Database("users");
+            l_Database.PrepareQuery("DELETE from messenger_friends WHERE from_id = ? AND to_id = ?");
+            l_Database.GetStatement()->setUInt(1, m_Id);
+            l_Database.GetStatement()->setUInt(2, l_Id);
+            l_Database.ExecuteQuery();
+
+            l_Database.ClearParameters();
+
+            l_Database.GetStatement()->setUInt(1, l_Id);
+            l_Database.GetStatement()->setUInt(2, m_Id);
+            l_Database.ExecuteQuery();
+
+            m_MessengerFriends.erase(l_Itr);
+            l_Packet.FriendsId.push_back(l_Id);
+        }
+
+        /// We could also do this if the friend is online aswell, but we will let UpdateConsole()
+        /// do that since messenger console gets updated every couple minutes
+        p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
     
 } ///< NAMESPACE MESSENGER

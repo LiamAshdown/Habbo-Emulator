@@ -91,6 +91,7 @@ namespace SteerStone
     }HabboFuseRightsData;
 
     class Room;
+    class ClientPacket;
 
     class Habbo
     {
@@ -119,6 +120,7 @@ namespace SteerStone
         void SendMessengerUpdate();
         void SendSearchUserResults(std::string const& p_Name);
         void MessengerSendFriendRequest(std::string const& p_Name);
+        void MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size);
 
         /// Objects
         void SendHabboObject();

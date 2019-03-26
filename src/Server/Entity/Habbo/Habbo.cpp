@@ -167,6 +167,11 @@ namespace SteerStone
         m_Messenger->ParseMessengerSendFriendRequest(this, p_Name);
     }
 
+    void Habbo::MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size)
+    {
+        m_Messenger->ParseMessengerRemoveFriend(this, std::move(p_Packet), p_Size);
+    }
+
     //////////////////////////////////////////////
     //              HABBO INFO
     /////////////////////////////////////////////

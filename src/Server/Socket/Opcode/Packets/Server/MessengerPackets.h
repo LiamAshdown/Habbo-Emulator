@@ -136,6 +136,21 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
             };
+
+            /// SERVER_MESSENGER_REMOVE_FRIEND packet builder
+            class MessengerRemoveFriend final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                MessengerRemoveFriend() : ServerPacket(SERVER_MESSENGER_REMOVE_FRIEND) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::vector<uint32> FriendsId;
+            };
+
         } ///< NAMESPACE Messenger
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

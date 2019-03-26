@@ -60,6 +60,7 @@ enum PacketClientHeader : uint16
     CLIENT_MESSENGER_FIND_USER            = 41,
     CLIENT_MESSENGER_SEND_REQUEST         = 39,
     CLIENT_LEAVE_ROOM                     = 53,
+    CLIENT_MESSENGER_REMOVE_FRIEND        = 40,
 };
 
 enum PacketServerHeader : uint16
@@ -105,6 +106,7 @@ enum PacketServerHeader : uint16
     SERVER_MESSENGER_ERROR                = 260,
     SERVER_REQUEST_BUDDY_ERROR            = 315,
     SERVER_MESSENGER_ADD_FRIEND           = 137,
+    SERVER_MESSENGER_REMOVE_FRIEND        = 138,
 };
 
 namespace SteerStone

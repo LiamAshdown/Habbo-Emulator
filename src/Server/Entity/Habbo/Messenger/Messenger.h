@@ -25,6 +25,7 @@ namespace SteerStone
 {
     class StringBuffer;
     class Habbo;
+    class ClientPacket;
 
     /// Structure which holds information about Habbo
     typedef struct MessengerFriendsStruct
@@ -95,6 +96,9 @@ namespace SteerStone
         /// GetMessengerSize - Get size of Messenger
         uint32 GetMessengerSize() const;
 
+        /// SaveToDB - This function is used to query the database on removing friends etc..
+        void SaveToDB();
+
         /// ParseMessengerFriends
         /// @p_Buffer : Buffer which is being parsed
         void ParseMessengerFriends(StringBuffer& p_Buffer);
@@ -115,17 +119,24 @@ namespace SteerStone
         /// ParseMessengerAcceptFriendRequest
         /// @p_Buffer : Buffer which is being parsed
         /// @p_Name : Name of Habbo we are searching for
-        void ParseMessengerSearchUser(StringBuffer& p_Buffer, const std::string& p_Name);
+        void ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const& p_Name);
 
         /// ParseMessengerSendFriendRequest
         /// @p_Habbo : Habbo Class incase we need to send error message to client who sending friend request
         /// @p_Name : Name of Habbo we are sending friend request too
-        void ParseMessengerSendFriendRequest(Habbo* p_Habbo, const std::string& p_Name);
+        void ParseMessengerSendFriendRequest(Habbo* p_Habbo, std::string const& p_Name);
+
+        /// ParseMessengerSendFriendRequest
+        /// @p_Habbo : Habbo Class to send packet too
+        /// @p_Packet : Incoming client packet which we will decode
+        /// @p_Size : Size of how many friends we need to remove
+        void ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size);
 
     private:
         /// Variables
         MessengerFriendsVector m_MessengerFriends;                          ///< Vector storage which holds our messenger friends
         MessengerFriendRequestsVector m_MessengerFriendRequests;            ///< Vector storage which holds our messenger friends requests
+        MessengerFriendsVector M_MessengerRemovedFriends;                   ///< Vector storage which contains removed friends, which gets processed when habbo logs out
         uint32 m_Id;                                                        ///< Account Id, we don't use Habbo class here, not needed
     };
 } ///< NAMESPACE STEERSTONE

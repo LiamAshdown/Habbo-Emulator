@@ -128,6 +128,21 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-        } ///< NAMESPACE MESSENGER
+            StringBuffer const * MessengerRemoveFriend::Write()
+            {
+                m_Buffer.AppendWired(FriendsId.size());
+
+                for (auto const& l_Itr : FriendsId)
+                    m_Buffer.AppendWired(l_Itr);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+} ///< NAMESPACE MESSENGER
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE
