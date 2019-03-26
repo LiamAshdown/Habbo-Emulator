@@ -131,13 +131,13 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_MessengerFriends)
         {
-            MessengerFriendsData const& messengerFriend = l_Itr;
-            Habbo const* l_Habbo = sHotel->FindHabbo(messengerFriend.GetId());
+            MessengerFriendsData const& l_MessengerFriend = l_Itr;
+            Habbo const* l_Habbo = sHotel->FindHabbo(l_MessengerFriend.GetId());
 
-            p_Buffer.AppendWired(messengerFriend.GetId());
-            p_Buffer.AppendString(messengerFriend.GetName());
-            p_Buffer.AppendWiredBool(messengerFriend.GetGender() == "Male" ? true : false);
-            p_Buffer.AppendString(messengerFriend.GetConsoleMotto());
+            p_Buffer.AppendWired(l_MessengerFriend.GetId());
+            p_Buffer.AppendString(l_MessengerFriend.GetName());
+            p_Buffer.AppendWiredBool(l_MessengerFriend.GetGender() == "Male" ? true : false);
+            p_Buffer.AppendString(l_MessengerFriend.GetConsoleMotto());
 
             p_Buffer.AppendWiredBool(l_Habbo ? true : false);  ///< Is user online?
 
@@ -157,10 +157,10 @@ namespace SteerStone
                     p_Buffer.AppendString("On Hotel View");
             }
             else
-                p_Buffer.AppendString(messengerFriend.GetLastOnline()); ///< Last time user was online
+                p_Buffer.AppendString(l_MessengerFriend.GetLastOnline()); ///< Last time user was online
 
-            p_Buffer.AppendString(messengerFriend.GetLastOnline());
-            p_Buffer.AppendString(messengerFriend.GetFigure());
+            p_Buffer.AppendString(l_MessengerFriend.GetLastOnline());
+            p_Buffer.AppendString(l_MessengerFriend.GetFigure());
         }
     }
     
@@ -170,10 +170,10 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_MessengerFriendRequests)
         {
-            MessengerFriendsData const& messengerFriend = l_Itr;
+            MessengerFriendsData const& l_MessengerFriend = l_Itr;
 
-            p_Buffer.AppendWired(messengerFriend.GetId());
-            p_Buffer.AppendString(messengerFriend.GetName());
+            p_Buffer.AppendWired(l_MessengerFriend.GetId());
+            p_Buffer.AppendString(l_MessengerFriend.GetName());
         }
     }
 
@@ -188,11 +188,11 @@ namespace SteerStone
 
         for (auto const& l_Itr : m_MessengerFriends)
         {
-            MessengerFriendsData const& messengerFriend = l_Itr;
-            Habbo const* l_Habbo = sHotel->FindHabbo(messengerFriend.GetId());
+            MessengerFriendsData const& l_MessengerFriend = l_Itr;
+            Habbo const* l_Habbo = sHotel->FindHabbo(l_MessengerFriend.GetId());
 
-            p_Buffer.AppendWired(messengerFriend.GetId());
-            p_Buffer.AppendString(messengerFriend.GetConsoleMotto());
+            p_Buffer.AppendWired(l_MessengerFriend.GetId());
+            p_Buffer.AppendString(l_MessengerFriend.GetConsoleMotto());
             p_Buffer.AppendWiredBool(l_Habbo ? true : false); ///< Is user online?
 
             /// User is online!
@@ -211,7 +211,7 @@ namespace SteerStone
                     p_Buffer.AppendString("On Hotel View");
             }
             else
-                p_Buffer.AppendString(messengerFriend.GetLastOnline()); ///< Last time user was online
+                p_Buffer.AppendString(l_MessengerFriend.GetLastOnline()); ///< Last time user was online
         }
     }
     
