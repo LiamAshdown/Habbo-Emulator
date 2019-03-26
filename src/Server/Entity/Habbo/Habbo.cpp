@@ -277,9 +277,9 @@ namespace SteerStone
                 }
                 else
                 {
-                   // Logout(LOGOUT_TIMEOUT);
-                   // LOG_INFO << "Disconnecting Habbo: " << GetId() << " have not recieved a pong back";
-                    //return false;
+                    Logout(LOGOUT_TIMEOUT);
+                    LOG_INFO << "Disconnecting Habbo: " << GetId() << " have not recieved a pong back";
+                    return false;
                 }
             }
             else
