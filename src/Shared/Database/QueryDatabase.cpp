@@ -103,7 +103,7 @@ namespace SteerStone
     void QueryDatabase::ClearParameters()
     {
         m_PreparedStatement->clearParameters();
-        m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
+        sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         m_IsExecuteResult = false;
     }
 
