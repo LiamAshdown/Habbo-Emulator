@@ -33,8 +33,10 @@ namespace SteerStone
                 m_Buffer.AppendWired(FriendsLimit);
                 m_Buffer.AppendWired(FriendsLimit);
                 m_Buffer.AppendWired(ClubFriendsLimit);
+                m_Buffer.AppendWired(MessengerSize);
 
                 /// Handled in Messenger::ParseMessengerFriends
+                m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
 
@@ -47,6 +49,7 @@ namespace SteerStone
             StringBuffer const * MessengerUpdate::Write()
             {
                 /// Handled in Messenger::ParseMessengerUpdate
+                m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
 
@@ -59,12 +62,10 @@ namespace SteerStone
 
             StringBuffer const * MessengerSendFriendRequest::Write()
             {
-
                 m_Buffer.AppendWired(Id);
                 m_Buffer.AppendString(Name);
 
                 m_Buffer.AppendSOH();
-
 
                 return &m_Buffer;
             }
@@ -77,6 +78,7 @@ namespace SteerStone
                 m_Buffer.AppendString(Messenger);
 
                 /// Handled in Messenger::ParseMessengerFriendRequests
+                m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
 
@@ -90,6 +92,32 @@ namespace SteerStone
             StringBuffer const * MessengerError::Write()
             {
                 m_Buffer.AppendWired(Error);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * MessengerRequestBuddyError::Write()
+            {
+                m_Buffer.AppendWired(Error);
+
+                m_Buffer.AppendSOH();
+
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * MessengerAddFriend::Write()
+            {
+                /// Handled in Messenger::ParseMessengerAcceptFriendRequest
+                m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
 

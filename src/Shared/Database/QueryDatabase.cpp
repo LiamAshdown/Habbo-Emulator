@@ -98,6 +98,15 @@ namespace SteerStone
         return m_PreparedStatement;
     }
     
+    /// ClearParameters - Reset our connection, this is used when we want to use the same object
+    /// and want to query multiple times
+    void QueryDatabase::ClearParameters()
+    {
+        m_PreparedStatement->clearParameters();
+        m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
+        m_IsExecuteResult = false;
+    }
+
     /// Fetch - Return resultset fromq query
     Result* QueryDatabase::Fetch()
     {

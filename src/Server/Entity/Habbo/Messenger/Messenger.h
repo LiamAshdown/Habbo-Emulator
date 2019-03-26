@@ -89,8 +89,11 @@ namespace SteerStone
         /// HasFriendRequests - Check if we have any friend requests
         bool HasFriendRequest() const;
 
-        /// CanSendFriendRequest - Check if our friend list is full
-        bool CanSendFriendRequest() const;
+        /// IsFriendListFull - Check if our friend list is full
+        bool IsFriendListFull() const;
+
+        /// GetMessengerSize - Get size of Messenger
+        uint32 GetMessengerSize() const;
 
         /// ParseMessengerFriends
         /// @p_Buffer : Buffer which is being parsed
@@ -104,12 +107,12 @@ namespace SteerStone
         /// @p_Buffer : Buffer which is being parsed
         void ParseMessengerUpdate(StringBuffer& p_Buffer);
 
-        /// ParseMessengerAcceptRequest
-        /// @p_Buffer : Buffer which is being parsed
+        /// ParseMessengerAcceptFriendRequest
+        /// @p_Habbo : Habbo Class incase we need to send error message to client who sending is accepting friend request
         /// @p_SenderId : Account Id who sent friend request
-        void ParseMessengerAcceptRequest(StringBuffer& p_Buffer, uint32 const& p_SenderId);
+        void ParseMessengerAcceptFriendRequest(Habbo* p_Habbo, uint32 const& p_SenderId);
 
-        /// ParseMessengerAcceptRequest
+        /// ParseMessengerAcceptFriendRequest
         /// @p_Buffer : Buffer which is being parsed
         /// @p_Name : Name of Habbo we are searching for
         void ParseMessengerSearchUser(StringBuffer& p_Buffer, const std::string& p_Name);

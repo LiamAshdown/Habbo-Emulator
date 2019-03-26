@@ -53,6 +53,10 @@ namespace SteerStone
         /// GetStatement - Get Statement of query
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
+        /// ClearParameters - Reset our connection, this is used when we want to use the same object
+        /// and want to query multiple times
+        void ClearParameters();
+
         /// Fetch - Return resultset fromq query
         Result* Fetch();
 

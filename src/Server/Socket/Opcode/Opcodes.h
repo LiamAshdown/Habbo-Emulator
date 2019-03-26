@@ -103,6 +103,8 @@ enum PacketServerHeader : uint16
     SERVER_MESSENGER_FIND_USER_RESULT     = 128,
     SERVER_GDATE                          = 49,
     SERVER_MESSENGER_ERROR                = 260,
+    SERVER_REQUEST_BUDDY_ERROR            = 315,
+    SERVER_MESSENGER_ADD_FRIEND           = 137,
 };
 
 namespace SteerStone

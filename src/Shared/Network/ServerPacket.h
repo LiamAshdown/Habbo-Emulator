@@ -36,9 +36,12 @@ namespace SteerStone
 
     public:
         /// GetBuffer - Return our buffer to insert data outside Server Packet class
-        StringBuffer& GetBuffer() { return m_Buffer; }
+        StringBuffer& GetBuffer()          { return m_Buffer;         }
+        StringBuffer& GetSecondaryBuffer() {return m_SecondaryBuffer; }
 
     protected:
         StringBuffer m_Buffer;                  ///< String buffer which holds our data to be sent to the client
+        StringBuffer m_SecondaryBuffer;         ///< Use Secondary buffer if we are pushing data into buffer outside the class packet
+                                                ///< And want to append the secondary buffer after the first buffer
     };
 } ///< NAMESPACE STEERSTONE

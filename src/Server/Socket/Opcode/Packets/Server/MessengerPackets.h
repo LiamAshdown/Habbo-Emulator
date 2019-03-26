@@ -51,6 +51,7 @@ namespace SteerStone
                 std::string ConsoleMotto;                               ///< Habbo Console Motto
                 uint32 FriendsLimit;                                    ///< Max Normal Friends Limit
                 uint32 ClubFriendsLimit;                                ///< Max Club Friends Limit
+                uint32 MessengerSize;                                   ///< Size of the Messenger
             };
 
             /// SERVER_MESSENGER_UPDATE packet builder
@@ -105,8 +106,35 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
 
+                uint32 MessageId;                   ///< Currently not used... this is used for habbo log
+                MessengerErrorCode Error;           ///< Shows error message if we cannot send friend request
+            };
+
+            /// SERVER_REQUEST_BUDDY_ERROR packet builder
+            class MessengerRequestBuddyError final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                MessengerRequestBuddyError() : ServerPacket(SERVER_REQUEST_BUDDY_ERROR) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
                 uint32 MessageId;
                 MessengerErrorCode Error;
+            };
+
+            /// SERVER_MESSENGER_ADD_FRIEND packet builder
+            class MessengerAddFriend final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                MessengerAddFriend() : ServerPacket(SERVER_MESSENGER_ADD_FRIEND) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
             };
         } ///< NAMESPACE Messenger
     } ///< NAMESPACE HABBOPACKET

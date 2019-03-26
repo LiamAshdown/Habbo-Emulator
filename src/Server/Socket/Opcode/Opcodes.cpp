@@ -110,6 +110,8 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_FIND_USER_RESULT,    "SERVER_MESSENGER_FIND_USER_RESULT",       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_GDATE,                         "SERVER_GDATE",                            &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_ERROR,               "SERVER_MESSENGER_ERROR",                  &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_REQUEST_BUDDY_ERROR,           "SERVER_REQUEST_BUDDY_ERROR",              &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_ADD_FRIEND,          "SERVER_MESSENGER_ADD_FRIEND",             &HabboSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";
