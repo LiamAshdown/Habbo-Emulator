@@ -51,6 +51,7 @@ namespace SteerStone
     {
         HabboPacket::Authentication::ApproveNameReply l_Packet;
         l_Packet.Name = p_Packet->ReadString();
+
         l_Packet.ErrorCode = ApproveNameError::NAME_VALID;
 
         QueryDatabase l_Database("users");

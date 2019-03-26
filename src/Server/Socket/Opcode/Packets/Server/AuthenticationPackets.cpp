@@ -29,6 +29,7 @@ namespace SteerStone
             {
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(0);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -48,12 +49,13 @@ namespace SteerStone
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(1);
-                m_Buffer.AppendWired(2);
+                m_Buffer.AppendWired(0);
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendWired(1);
                 m_Buffer.AppendString("dd-MM-yyyy", false);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -82,6 +84,7 @@ namespace SteerStone
             StringBuffer const * GDate::Write()
             {
                 m_Buffer.AppendString(GetDate());
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -94,6 +97,7 @@ namespace SteerStone
             StringBuffer const * ApproveNameReply::Write()
             {
                 m_Buffer.AppendWired(ErrorCode);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -105,6 +109,7 @@ namespace SteerStone
             StringBuffer const * ApprovePasswordReply::Write()
             {
                 m_Buffer.AppendWired(ErrorCode);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -126,6 +131,7 @@ namespace SteerStone
             StringBuffer const * LocalisedError::Write()
             {
                 m_Buffer.AppendString(Error);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
