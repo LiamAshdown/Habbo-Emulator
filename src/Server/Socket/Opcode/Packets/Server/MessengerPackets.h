@@ -135,6 +135,17 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+
+                uint32 Id;
+                std::string Name;
+                bool Gender;                ///< Male = True | Female = False
+                std::string ConsoleMotto;
+                bool IsOnline;
+                bool IsInRoom;
+                std::string Status;
+                std::string LastOnline;
+                std::string Figure;
+
             };
 
             /// SERVER_MESSENGER_REMOVE_FRIEND packet builder

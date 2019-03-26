@@ -54,8 +54,11 @@ namespace SteerStone
 
     void HabboSocket::HandleMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
     {
-        uint32 l_Size = p_Packet->ReadWiredUint();
+        m_Habbo->MessengerRemoveFriend(std::move(p_Packet));
+    }
 
-        m_Habbo->MessengerRemoveFriend(std::move(p_Packet), l_Size);
+    void HabboSocket::HandleMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Habbo->MessengerRejectRequest(std::move(p_Packet));
     }
 } /// NAMESPACE STEERSTONE

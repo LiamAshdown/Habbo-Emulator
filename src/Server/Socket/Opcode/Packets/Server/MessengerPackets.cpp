@@ -116,11 +116,23 @@ namespace SteerStone
 
             StringBuffer const * MessengerAddFriend::Write()
             {
-                /// Handled in Messenger::ParseMessengerAcceptFriendRequest
-                m_Buffer.Append(m_SecondaryBuffer);
+                m_Buffer.AppendWired(Id);
+                m_Buffer.AppendString(Name);
+                m_Buffer.AppendWiredBool(Gender);
+                m_Buffer.AppendString(ConsoleMotto);
+
+                m_Buffer.AppendWiredBool(IsOnline);
+
+                if (IsOnline)
+                    m_Buffer.AppendString(Status);
+                else
+                    m_Buffer.AppendString(LastOnline);
+
+
+                m_Buffer.AppendString(LastOnline);
+                m_Buffer.AppendString(Figure);
 
                 m_Buffer.AppendSOH();
-
 
                 return &m_Buffer;
             }

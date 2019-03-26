@@ -88,15 +88,19 @@ namespace SteerStone
 
         Result* l_Result = l_Database.Fetch();
 
-        MessengerFriendsData l_Messenger;
-        l_Messenger.m_Id = l_Result->GetUint32(1);
-        l_Messenger.m_Name = l_Result->GetString(2);
-        l_Messenger.m_Figure = l_Result->GetString(3);
-        l_Messenger.m_ConsoleMotto = l_Result->GetString(4);
-        l_Messenger.m_Gender = l_Result->GetString(5);
-        l_Messenger.mLastOnline = l_Result->GetString(6);
+        do
+        {
+            MessengerFriendsData l_Messenger;
+            l_Messenger.m_Id = l_Result->GetUint32(1);
+            l_Messenger.m_Name = l_Result->GetString(2);
+            l_Messenger.m_Figure = l_Result->GetString(3);
+            l_Messenger.m_ConsoleMotto = l_Result->GetString(4);
+            l_Messenger.m_Gender = l_Result->GetString(5);
+            l_Messenger.mLastOnline = l_Result->GetString(6);
 
-        m_MessengerFriendRequests.push_back(l_Messenger);
+            m_MessengerFriendRequests.push_back(l_Messenger);
+
+        } while (l_Result->GetNextResult());
     }
     
     /// UpdateConsole - Reload LoadMessengerFriendRequests and LoadMessengerFriends
@@ -128,6 +132,17 @@ namespace SteerStone
     /// SaveToDB - This function is used to query the database on removing friends etc..
     void Messenger::SaveToDB()
     {
+    }
+
+    /// RemoveFriendRequestFromStorage
+    /// @p_Id : Friend Request Id we are removing from our storage
+    void Messenger::RemoveFriendRequestFromStorage(uint32 const& p_Id)
+    {
+        auto const& l_Itr = std::find_if(m_MessengerFriendRequests.begin(), m_MessengerFriendRequests.end(), [&p_Id](MessengerFriendsData const& p_Friend) -> bool { return p_Friend.GetId() == p_Id; });
+
+        /// Does friend exist in console?
+        if (l_Itr != m_MessengerFriends.end())
+            m_MessengerFriendRequests.erase(l_Itr);
     }
     
     /// ParseMessengerFriends
@@ -171,14 +186,16 @@ namespace SteerStone
     
     /// ParseMessengerFriendRequests
     /// @p_Buffer : Buffer which is being parsed
-    void Messenger::ParseMessengerFriendRequests(StringBuffer& p_Buffer)
+    void Messenger::ParseMessengerFriendRequests(Habbo* p_Habbo)
     {
         for (auto const& l_Itr : m_MessengerFriendRequests)
         {
             MessengerFriendsData const& l_MessengerFriend = l_Itr;
 
-            p_Buffer.AppendWired(l_MessengerFriend.GetId());
-            p_Buffer.AppendString(l_MessengerFriend.GetName());
+            HabboPacket::Messenger::MessengerSendFriendRequest l_Packet;
+            l_Packet.Id = l_MessengerFriend.GetId();
+            l_Packet.Name = l_MessengerFriend.GetName();
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
     }
 
@@ -233,8 +250,11 @@ namespace SteerStone
         HabboPacket::Messenger::MessengerRequestBuddyError l_Packet;
         l_Packet.Error = MessengerErrorCode::ACCEPT_SUCCESS;
 
+        /// Habbo doesn't exist? Internal error
         if (!l_Database.GetResult())
         {
+            LOG_FATAL << "Habbo " << p_Habbo->GetName() << " tried to accept friend request from Habbo Id " << p_SenderId << " but Habbo does not exist!";
+            l_Packet.Error = MessengerErrorCode::CONCURRENCY_ERROR;
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
             return;
         }
@@ -282,12 +302,41 @@ namespace SteerStone
         l_Database.PrepareQuery("DELETE FROM messenger_requests WHERE from_id = ? AND to_id = ?");
         l_Database.GetStatement()->setUInt(1, l_Result->GetUint32(1));
         l_Database.GetStatement()->setUInt(2, m_Id);
+        l_Database.ExecuteQuery();
 
         /// Send Packet to update console with new friend!
         /// TODO; Do we need to do the same to the other client? or let the console update itself later on?
-        UpdateConsole(); /// < Update console to pull in latest friends from database
+
+        /// Is User online?
+        Habbo const* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
+
         HabboPacket::Messenger::MessengerAddFriend l_PacketAddFriend;
-        ParseMessengerFriends(l_PacketAddFriend.GetSecondaryBuffer());
+        l_PacketAddFriend.Id = l_Result->GetUint32(1);
+        l_PacketAddFriend.Name = l_Result->GetString(2);
+        l_PacketAddFriend.Gender = l_Result->GetBool(5);
+        l_PacketAddFriend.ConsoleMotto = l_Result->GetString(4);
+        l_PacketAddFriend.IsOnline = l_Habbo ? true : false;
+        
+        if (l_PacketAddFriend.IsOnline)
+        {
+            /// Is user in room>
+            if (l_Habbo->GetRoom())
+            {
+                /// Is user in a public room or flat?
+                if (l_Habbo->GetRoom()->GetOwnerId() > 0)
+                    l_PacketAddFriend.Status = "Floor1a";
+                else
+                    l_PacketAddFriend.Status = l_Habbo->GetRoom()->GetName();
+            }
+            else
+                l_PacketAddFriend.Status = "On Hotel View";
+        }
+        else
+            l_PacketAddFriend.Status = l_Result->GetString(6);
+
+        l_PacketAddFriend.LastOnline = l_Result->GetString(6);
+        l_PacketAddFriend.Figure = l_Result->GetString(3);
+        
         p_Habbo->ToSocket()->SendPacket(l_PacketAddFriend.Write());
     }
     
@@ -416,13 +465,14 @@ namespace SteerStone
     /// ParseMessengerSendFriendRequest
     /// @p_Habbo : Habbo Class to send packet too
     /// @p_Packet : Incoming client packet which we will decode
-    /// @p_Size : Size of how many friends we need to remove
-    void Messenger::ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size)
+    void Messenger::ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet)
     {
         HabboPacket::Messenger::MessengerRemoveFriend l_Packet;
 
+        uint32 l_Size = p_Packet->ReadWiredUint();
+
         /// Read the packet and obtain our friend Ids
-        for (uint8 l_I = 0; l_I < p_Size; l_I++)
+        for (uint8 l_I = 0; l_I < l_Size; l_I++)
         {
             uint32 l_Id = p_Packet->ReadWiredUint();
 
@@ -463,6 +513,39 @@ namespace SteerStone
         /// We could also do this if the friend is online aswell, but we will let UpdateConsole()
         /// do that since messenger console gets updated every couple minutes
         p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// ParseMessengerSendFriendRequest
+    /// @p_Packet : Incoming client packet which we will decode
+    void Messenger::ParseMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        bool l_DeclineAll = p_Packet->ReadWiredBool();
+
+        /// Remove all friend requests relating to habbo Id
+        if (l_DeclineAll)
+        {
+            QueryDatabase l_Database("users");
+            l_Database.PrepareQuery("DELETE FROM messenger_requests WHERE to_id = ?");
+            l_Database.GetStatement()->setUInt(1, m_Id);
+            l_Database.ExecuteQuery();
+            m_MessengerFriendRequests.clear(); ///< Clear our storage
+            return;
+        }
+
+        uint32 l_Size = p_Packet->ReadWiredUint();
+
+        /// Read the packet and obtain our friend Ids
+        for (uint8 l_I = 0; l_I < l_Size; l_I++)
+        {
+            uint32 l_Id = p_Packet->ReadWiredUint();
+
+            QueryDatabase l_Database("users");
+            l_Database.PrepareQuery("DELETE from messenger_friends WHERE from_id = ? AND to_id = ?");
+            l_Database.GetStatement()->setUInt(1, l_Id);
+            l_Database.GetStatement()->setUInt(2, m_Id);
+            l_Database.ExecuteQuery();
+            RemoveFriendRequestFromStorage(l_Id);
+        }
     }
     
 } ///< NAMESPACE MESSENGER

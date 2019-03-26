@@ -117,11 +117,7 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
 
         if (m_Messenger->HasFriendRequest())
-        {
-            HabboPacket::Messenger::MessengerSendFriendRequest l_PacketFriendRequest;
-            m_Messenger->ParseMessengerFriendRequests(l_PacketFriendRequest.GetBuffer());
-            ToSocket()->SendPacket(l_PacketFriendRequest.Write());
-        }
+            m_Messenger->ParseMessengerFriendRequests(this);
     }
 
     void Habbo::MessengerAcceptRequest(uint32 const& p_SenderId)
@@ -167,9 +163,14 @@ namespace SteerStone
         m_Messenger->ParseMessengerSendFriendRequest(this, p_Name);
     }
 
-    void Habbo::MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size)
+    void Habbo::MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Messenger->ParseMessengerRemoveFriend(this, std::move(p_Packet), p_Size);
+        m_Messenger->ParseMessengerRemoveFriend(this, std::move(p_Packet));
+    }
+
+    void Habbo::MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Messenger->ParseMessengerRejectRequest(std::move(p_Packet));
     }
 
     //////////////////////////////////////////////

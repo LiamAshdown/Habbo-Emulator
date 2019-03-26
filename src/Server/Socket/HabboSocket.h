@@ -85,6 +85,7 @@ namespace SteerStone
         void HandleMessengerSendRequest(std::unique_ptr<ClientPacket> p_Packet);
         void HandleLeaveRoom(std::unique_ptr<ClientPacket> p_Packet);
         void HandleMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

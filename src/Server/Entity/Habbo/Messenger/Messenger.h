@@ -99,13 +99,17 @@ namespace SteerStone
         /// SaveToDB - This function is used to query the database on removing friends etc..
         void SaveToDB();
 
+        /// RemoveFriendRequestFromStorage
+        /// @p_Id : Friend Request Id we are removing from our storage
+        void RemoveFriendRequestFromStorage(uint32 const& p_Id);
+
         /// ParseMessengerFriends
         /// @p_Buffer : Buffer which is being parsed
         void ParseMessengerFriends(StringBuffer& p_Buffer);
 
         /// ParseMessengerFriendRequests
-        /// @p_Buffer : Buffer which is being parsed
-        void ParseMessengerFriendRequests(StringBuffer& p_Buffer);
+        /// @p_Habbo : Habbo Class to send packet too
+        void ParseMessengerFriendRequests(Habbo* p_Habbo);
 
         /// ParseMessengerUpdate
         /// @p_Buffer : Buffer which is being parsed
@@ -129,8 +133,11 @@ namespace SteerStone
         /// ParseMessengerSendFriendRequest
         /// @p_Habbo : Habbo Class to send packet too
         /// @p_Packet : Incoming client packet which we will decode
-        /// @p_Size : Size of how many friends we need to remove
-        void ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet, uint32 const& p_Size);
+        void ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet);
+
+        /// ParseMessengerSendFriendRequest
+        /// @p_Packet : Incoming client packet which we will decode
+        void ParseMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
 
     private:
         /// Variables
