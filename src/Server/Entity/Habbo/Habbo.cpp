@@ -113,11 +113,13 @@ namespace SteerStone
         l_Packet.FriendsLimit = sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50);
         l_Packet.ClubFriendsLimit = sConfig->GetIntDefault("MessgengerMaxFriendsClubLimit", 100);
         l_Packet.MessengerSize = m_Messenger->GetMessengerSize();
-        m_Messenger->ParseMessengerFriends(l_Packet.GetSecondaryBuffer());
+        m_Messenger->ParseMessengerInitialize(l_Packet.GetSecondaryBuffer());
         ToSocket()->SendPacket(l_Packet.Write());
 
-        if (m_Messenger->HasFriendRequest())
-            m_Messenger->ParseMessengerFriendRequests(this);
+        if (m_Messenger->HasFriendRequestPending())
+            m_Messenger->ParseMessengerFriendRequest();
+
+        m_Messenger->LoadMessengerMessages();
     }
 
     void Habbo::MessengerAcceptRequest(uint32 const& p_SenderId)
@@ -131,7 +133,7 @@ namespace SteerStone
             return;
         }
 
-        m_Messenger->ParseMessengerAcceptFriendRequest(this, p_SenderId);
+        m_Messenger->ParseMessengerAcceptFriendRequest(p_SenderId);
     }
 
     void Habbo::SendMessengerUpdate()
@@ -160,18 +162,29 @@ namespace SteerStone
             return;
         }
 
-        m_Messenger->ParseMessengerSendFriendRequest(this, p_Name);
+        m_Messenger->ParseMessengerSendFriendRequest(p_Name);
     }
 
     void Habbo::MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Messenger->ParseMessengerRemoveFriend(this, std::move(p_Packet));
+        m_Messenger->ParseMessengerRemoveFriend(std::move(p_Packet));
     }
 
     void Habbo::MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Messenger->ParseMessengerRejectRequest(std::move(p_Packet));
     }
+
+    void Habbo::MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Messenger->ParseMessengerSendMessage(std::move(p_Packet));
+    }
+
+    void Habbo::MessengerReply(uint32 const& p_MessageId)
+    {
+        m_Messenger->ReadMessage(p_MessageId);
+    }
+
 
     //////////////////////////////////////////////
     //              HABBO INFO
@@ -229,10 +242,10 @@ namespace SteerStone
         // TODO;
     }
 
-    void Habbo::LoadHabboInfo()
+    void Habbo::InitializeHabboData()
     {
-        m_Messenger = std::make_unique<Messenger>(m_Id);
-        m_Messenger->LoadMessenger();
+        m_Messenger = std::make_unique<Messenger>(this);
+        m_Messenger->UpdateConsole();
 
         m_FavouriteRooms = std::make_unique<FavouriteRoom>(m_Id);
         m_FavouriteRooms->LoadFavouriteRooms();

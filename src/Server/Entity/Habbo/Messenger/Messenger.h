@@ -35,19 +35,19 @@ namespace SteerStone
 
     public:
         /// Constructor
-        MessengerFriendsStruct() : m_Id(0), m_Figure(""), m_Gender(""), m_ConsoleMotto(""), mLastOnline(""), mFriendsSize(0) {}
+        MessengerFriendsStruct() : m_Id(0), m_Figure(""), m_Gender(""), m_ConsoleMotto(""), m_LastOnline(""), m_FriendsSize(0) {}
         /// Deconstructor
         ~MessengerFriendsStruct() {}
 
     public:
-        /// Get Info about Habbo
+        /// Get Info about Habbo for console
         uint32 GetId()                const { return m_Id;          }
         std::string GetFigure()       const { return m_Figure;      }
         std::string GetName()         const { return m_Name;        }
         std::string GetGender()       const { return m_Gender;      }
         std::string GetConsoleMotto() const { return m_ConsoleMotto;}
-        std::string GetLastOnline()   const { return mLastOnline;   }
-        uint32 GetFriendsSize()       const { return mFriendsSize;  }
+        std::string GetLastOnline()   const { return m_LastOnline;  }
+        uint32 GetFriendsSize()       const { return m_FriendsSize; }
 
     private:
         /// Variables
@@ -56,94 +56,106 @@ namespace SteerStone
         std::string m_Name;
         std::string m_Gender;
         std::string m_ConsoleMotto;
-        std::string mLastOnline;
-        uint32 mFriendsSize;
-    }MessengerFriendsData;
+        std::string m_LastOnline;
+        uint32 m_FriendsSize;
+    }MessengerFriendData;
 
-    typedef std::vector<MessengerFriendsData> MessengerFriendsVector;
-    typedef std::vector<MessengerFriendsData> MessengerFriendRequestsVector;
+    typedef std::unordered_map<uint32, MessengerFriendData> MessengerFriendsMap;
 
     /// This class is responsible for handling Habbo Messenger Console
     class Messenger
     {
     public:
         /// Constructor
-        /// @p_Id : Account Id, we don't use Habbo class here
-        explicit Messenger(uint32 const& p_Id);
+        /// @p_Habbo : Habbo class
+        explicit Messenger(Habbo* p_Habbo);
 
         /// Deconstructor
         ~Messenger();
 
     public:
-        /// LoadMessenger - Load our messenger
-        void LoadMessenger();
 
-        /// LoadMessengerFriends - Load our Messenger Friends from database
         void LoadMessengerFriends();
 
-        /// LoadMessengerFriendRequests - Load our Messenger Friend requests from database
         void LoadMessengerFriendRequests();
 
-        /// UpdateConsole - Reload LoadMessengerFriendRequests and LoadMessengerFriends
+        void LoadMessengerMessages();
+
+        /// UpdateConsole
+        /// Reload LoadMessengerFriendRequests and LoadMessengerFriends
         void UpdateConsole();
 
-        /// HasFriendRequests - Check if we have any friend requests
-        bool HasFriendRequest() const;
+        bool HasFriendRequestPending() const;
 
-        /// IsFriendListFull - Check if our friend list is full
+        /// IsFriendListFull
         bool IsFriendListFull() const;
 
-        /// GetMessengerSize - Get size of Messenger
+        /// GetMessengerSize
+        /// Returns size of Messenger Friends Map
         uint32 GetMessengerSize() const;
 
-        /// SaveToDB - This function is used to query the database on removing friends etc..
+        /// GetFriend
+        /// @p_Id : Friend Id which returns information about friend
+        MessengerFriendData& GetFriend(uint32 const& p_Id);
+
+        /// SaveToDB
+        /// This function is used to query the database on removing friends etc..
+        /// Currently not used
         void SaveToDB();
 
+        /// ReadMessage
+        /// Message which user read and no longer needs to be notified there's a new message
+        /// @p_MessageId : Id of message
+        void ReadMessage(uint32 const& p_MessageId);
+
         /// RemoveFriendRequestFromStorage
-        /// @p_Id : Friend Request Id we are removing from our storage
+        /// @p_Id : Friend Request Id we are removing from our m_MessengerFriendRequests storage
         void RemoveFriendRequestFromStorage(uint32 const& p_Id);
 
-        /// ParseMessengerFriends
+        /// ParseMessengerInitialize 
+        /// Initialize our console, this is called when habbo logs in
         /// @p_Buffer : Buffer which is being parsed
-        void ParseMessengerFriends(StringBuffer& p_Buffer);
+        void ParseMessengerInitialize(StringBuffer& p_Buffer);
 
-        /// ParseMessengerFriendRequests
-        /// @p_Habbo : Habbo Class to send packet too
-        void ParseMessengerFriendRequests(Habbo* p_Habbo);
+        /// ParseMessengerFriendRequest 
+        /// Update our console if we have any friend requests in our m_MessengerFriendRequests storage
+        void ParseMessengerFriendRequest();
 
         /// ParseMessengerUpdate
+        /// Update what our friends are up to
         /// @p_Buffer : Buffer which is being parsed
         void ParseMessengerUpdate(StringBuffer& p_Buffer);
 
         /// ParseMessengerAcceptFriendRequest
-        /// @p_Habbo : Habbo Class incase we need to send error message to client who sending is accepting friend request
         /// @p_SenderId : Account Id who sent friend request
-        void ParseMessengerAcceptFriendRequest(Habbo* p_Habbo, uint32 const& p_SenderId);
+        void ParseMessengerAcceptFriendRequest(uint32 const& p_SenderId);
 
-        /// ParseMessengerAcceptFriendRequest
+        /// ParseMessengerSearchUser
         /// @p_Buffer : Buffer which is being parsed
         /// @p_Name : Name of Habbo we are searching for
         void ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const& p_Name);
 
         /// ParseMessengerSendFriendRequest
-        /// @p_Habbo : Habbo Class incase we need to send error message to client who sending friend request
         /// @p_Name : Name of Habbo we are sending friend request too
-        void ParseMessengerSendFriendRequest(Habbo* p_Habbo, std::string const& p_Name);
+        void ParseMessengerSendFriendRequest(std::string const& p_Name);
 
-        /// ParseMessengerSendFriendRequest
-        /// @p_Habbo : Habbo Class to send packet too
+        /// ParseMessengerRemoveFriend
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerRemoveFriend(Habbo* p_Habbo, std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
 
-        /// ParseMessengerSendFriendRequest
+        /// ParseMessengerRejectRequest
         /// @p_Packet : Incoming client packet which we will decode
         void ParseMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
 
+        /// ParseMessengerSendMessage
+        /// @p_Packet : Incoming client packet which we will decode
+        void ParseMessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
+
     private:
         /// Variables
-        MessengerFriendsVector m_MessengerFriends;                          ///< Vector storage which holds our messenger friends
-        MessengerFriendRequestsVector m_MessengerFriendRequests;            ///< Vector storage which holds our messenger friends requests
-        MessengerFriendsVector M_MessengerRemovedFriends;                   ///< Vector storage which contains removed friends, which gets processed when habbo logs out
-        uint32 m_Id;                                                        ///< Account Id, we don't use Habbo class here, not needed
+        MessengerFriendsMap m_MessengerFriends;                             ///< Storage which holds our messenger friends
+        MessengerFriendsMap m_MessengerFriendRequests;                      ///< Storage which holds our messenger friends requests
+        MessengerFriendsMap M_MessengerRemovedFriends;                      ///< Storage which contains removed friends, which gets processed when habbo logs out
+        Habbo* m_Habbo;                                                     ///< Habbo Class which is created when player logs in
     };
 } ///< NAMESPACE STEERSTONE

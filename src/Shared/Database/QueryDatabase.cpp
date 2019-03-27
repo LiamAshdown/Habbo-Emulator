@@ -25,11 +25,13 @@ namespace SteerStone
     QueryDatabase::QueryDatabase(std::string const& p_Database)
     {
         m_Database = p_Database;
+        m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
     }
     
     /// Deconstructor
     QueryDatabase::~QueryDatabase()
     {
+        sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
     }
     
     /// DirectExecuteQuery
@@ -39,14 +41,11 @@ namespace SteerStone
         try
         {
             m_IsExecuteResult = false;
-            m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
             m_SqlConnection = m_Connection->GetSQLConnection();
 
             m_Statement = std::shared_ptr<sql::Statement>(m_SqlConnection->createStatement());
             m_ExecuteResult = m_Statement->execute(p_Query.c_str());
             m_IsExecuteResult = true;
-
-            sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         }
         catch (sql::SQLException &e)
         {
@@ -58,20 +57,19 @@ namespace SteerStone
     /// @p_Query : Query which will be prepared to be executed into the database
     void QueryDatabase::PrepareQuery(std::string const& p_Query)
     {
-        m_Connection = sDatabase->GetDatabase(m_Database)->GetConnectionPool()->Borrow();
         m_SqlConnection = m_Connection->GetSQLConnection();
 
         m_PreparedStatement = std::shared_ptr<sql::PreparedStatement>(m_SqlConnection->prepareStatement(p_Query.c_str()));
         m_IsExecuteResult = false;
     }
     
-    /// ExecuteQuery - Execute Prepare query into database
+    /// ExecuteQuery
+    /// Execute Prepare query into database
     void QueryDatabase::ExecuteQuery()
     {
         try
         {
             m_ResultSet = std::unique_ptr<sql::ResultSet>(m_PreparedStatement->executeQuery());
-            sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         }
         catch (sql::SQLException &e)
         {
@@ -79,7 +77,8 @@ namespace SteerStone
         }
     }
     
-    /// GetResult - Get the result of query
+    /// GetResult
+    /// Returns if query is successful or not
     bool QueryDatabase::GetResult()
     {
         if (m_IsExecuteResult)
@@ -98,16 +97,17 @@ namespace SteerStone
         return m_PreparedStatement;
     }
     
-    /// ClearParameters - Reset our connection, this is used when we want to use the same object
+    /// ClearParameters
+    /// Reset our connection, this is used when we want to use the same object
     /// and want to query multiple times
     void QueryDatabase::ClearParameters()
     {
         m_PreparedStatement->clearParameters();
-        sDatabase->GetDatabase(m_Database)->GetConnectionPool()->UnBorrow(m_Connection);
         m_IsExecuteResult = false;
     }
 
-    /// Fetch - Return resultset fromq query
+    /// Fetch
+    /// Returns pointer
     Result* QueryDatabase::Fetch()
     {
         return &m_Result;

@@ -255,7 +255,7 @@ namespace SteerStone
             m_Habbo->m_SoundEnabled         = l_Result->GetBool(15);
             m_Habbo->m_AcceptFriendRequests = l_Result->GetBool(16);
             m_Habbo->m_Rank                 = l_Result->GetUint8(17);
-            m_Habbo->LoadHabboInfo();
+            m_Habbo->InitializeHabboData();
             m_Habbo->m_Initialized = true;
 
             while (l_Result->GetNextResult())

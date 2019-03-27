@@ -162,6 +162,23 @@ namespace SteerStone
                 std::vector<uint32> FriendsId;
             };
 
+            /// SERVER_MESSENGER_SEND_MESSAGE packet builder
+            class MessengerSendMessage final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                MessengerSendMessage() : ServerPacket(SERVER_MESSENGER_SEND_MESSAGE) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 Id;
+                uint32 ToId;
+                std::string Date;
+                std::string Message;
+            };
+
         } ///< NAMESPACE Messenger
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

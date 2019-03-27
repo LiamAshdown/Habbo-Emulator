@@ -35,7 +35,7 @@ namespace SteerStone
                 m_Buffer.AppendWired(ClubFriendsLimit);
                 m_Buffer.AppendWired(MessengerSize);
 
-                /// Handled in Messenger::ParseMessengerFriends
+                /// Handled in Messenger::ParseMessengerInitialize
                 m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
@@ -77,7 +77,7 @@ namespace SteerStone
             {
                 m_Buffer.AppendString(Messenger);
 
-                /// Handled in Messenger::ParseMessengerFriendRequests
+                /// Handled in Messenger::ParseMessengerFriendRequest
                 m_Buffer.Append(m_SecondaryBuffer);
 
                 m_Buffer.AppendSOH();
@@ -146,6 +146,22 @@ namespace SteerStone
 
                 for (auto const& l_Itr : FriendsId)
                     m_Buffer.AppendWired(l_Itr);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * MessengerSendMessage::Write()
+            {
+                m_Buffer.AppendWired(1); ///< Client requires this, not sure why
+                m_Buffer.AppendWired(ToId);
+                m_Buffer.AppendWired(Id);
+                m_Buffer.AppendString(Date);
+                m_Buffer.AppendString(Message);
 
                 m_Buffer.AppendSOH();
 

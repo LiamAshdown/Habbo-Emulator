@@ -122,6 +122,8 @@ namespace SteerStone
         void MessengerSendFriendRequest(std::string const& p_Name);
         void MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
         void MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerReply(uint32 const& p_MessageId);
 
         /// Objects
         void SendHabboObject();
@@ -133,7 +135,7 @@ namespace SteerStone
         void SendClubStatus();
 
         /// Habbo Info
-        void LoadHabboInfo();
+        void InitializeHabboData();
         void UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation);
         bool Update(const uint32& diff);
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);

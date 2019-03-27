@@ -61,4 +61,16 @@ namespace SteerStone
     {
         m_Habbo->MessengerRejectRequest(std::move(p_Packet));
     }
+
+    void HabboSocket::HandleMessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Habbo->MessengerSendMessage(std::move(p_Packet));
+    }
+
+    void HabboSocket::HandleMessengerReply(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        uint32 l_MessageId = p_Packet->ReadWiredUint();
+
+        m_Habbo->MessengerReply(l_MessageId);
+    }
 } /// NAMESPACE STEERSTONE

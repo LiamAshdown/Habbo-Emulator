@@ -44,20 +44,24 @@ namespace SteerStone
         /// @p_Query : Query which will be prepared to be executed into the database
         void PrepareQuery(std::string const& p_Query);
 
-        /// ExecuteQuery - Execute Prepare query into database
+        /// ExecuteQuery
+        /// Execute Prepare query into database
         void ExecuteQuery();
 
-        /// GetResult - Get the result of query
+        /// GetResult
+        /// Returns if query is successful or not
         bool GetResult();
 
         /// GetStatement - Get Statement of query
         std::shared_ptr<sql::PreparedStatement>& GetStatement();
 
-        /// ClearParameters - Reset our connection, this is used when we want to use the same object
+        /// ClearParameters 
+        /// Reset our connection, this is used when we want to use the same object
         /// and want to query multiple times
         void ClearParameters();
 
-        /// Fetch - Return resultset fromq query
+        /// Fetch
+        /// Return resultset fromq query
         Result* Fetch();
 
     private:
