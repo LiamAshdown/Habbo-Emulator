@@ -57,6 +57,7 @@ namespace SteerStone
 
     bool Habbo::SetRoom(std::shared_ptr<Room> p_Room)
     {
+        LOG_INFO << std::this_thread::get_id();
         m_Room = p_Room;
         if (auto l_Room = m_Room.lock())
             if (l_Room->EnterRoom(this))

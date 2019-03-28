@@ -46,6 +46,7 @@ namespace SteerStone
         float GetDoorZ()            const { return m_DoorZ;           }
         int32 GetDoorOrientation()  const { return m_DoorOrientation; }
         std::string GetHeightMap()  const { return m_HeightMap;       }
+        GridArray GetGrid()               { return m_Grid;            }
 
     private:
         /// Variables
@@ -59,5 +60,8 @@ namespace SteerStone
         std::string m_HeightMap;
         int32 m_MapSizeX;
         int32 m_MapSizeY;
+        GridArray m_Grid;
+        uint16 m_GridXSize;
+        uint16 m_GridYSize;
     };
 } ///< NAMESPACE STEERSTONE

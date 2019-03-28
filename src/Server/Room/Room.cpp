@@ -21,6 +21,7 @@
 #include "ItemManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Common/Maths.h"
+#include "PathFinder.h"
 
 namespace SteerStone
 {
@@ -35,6 +36,7 @@ namespace SteerStone
     /// @p_Habbo : p_Habbo
     bool Room::EnterRoom(Habbo* p_Habbo)
     {
+        LOG_INFO << std::this_thread::get_id();
         /// Check if habbo already exists inside room
         auto const& l_Itr = std::find_if(m_Habbos.begin(), m_Habbos.end(), [&p_Habbo](const std::pair<uint32, Habbo*> p_Habbos) -> bool { return p_Habbos.second->GetId() == p_Habbo->GetId(); });
 

@@ -64,6 +64,7 @@ enum PacketClientHeader : uint16
     CLIENT_MESSENGER_REJECT_REQUEST       = 38,
     CLIENT_MESSENGER_SEND_MESSAGE         = 33,
     CLIENT_MESSENGER_REPLY                = 32,
+    CLIENT_MOVE                           = 75,
 };
 
 enum PacketServerHeader : uint16

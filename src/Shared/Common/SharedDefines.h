@@ -22,6 +22,7 @@
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/multi_array.hpp>
 #include <unordered_map>
 #include <functional>
 #include <algorithm>
@@ -53,6 +54,7 @@ typedef std::uint16_t uint16;
 typedef std::uint8_t uint8;
 
 typedef std::vector<std::string> Tokens;
+typedef boost::multi_array<uint8, 2> GridArray; ///< Used for pathfinding
 
 #define DEFAULT_SERVER_PORT 37120
 #define UPDATE_WORLD_TIMER 500

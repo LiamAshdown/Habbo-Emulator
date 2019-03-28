@@ -76,6 +76,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REJECT_REQUEST,      "CLIENT_MESSENGER_REJECT_REQUEST",         &HabboSocket::HandleMessengerRejectRequest     );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_MESSAGE,        "CLIENT_MESSENGER_SEND_MESSAGE",           &HabboSocket::HandleMessengerSendMessage       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REPLY,               "CLIENT_MESSENGER_REPLY",                  &HabboSocket::HandleMessengerReply             );
+        StoreClientPacket(PacketClientHeader::CLIENT_MOVE,                          "CLIENT_MOVE",                             &HabboSocket::HandleMove                       );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );

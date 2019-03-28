@@ -142,6 +142,24 @@ namespace SteerStone
             l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
 
+            std::vector<std::string> l_Split;
+            boost::split(l_Split, l_Room->GetRoomModel().GetHeightMap(), boost::is_any_of("\t "));
+
+            l_Room->GetRoomModel().m_MapSizeY = l_Split.size();
+            l_Room->GetRoomModel().m_MapSizeX = l_Split[0].length();
+            l_Room->GetRoomModel().m_Grid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeY][l_Room->GetRoomModel().m_MapSizeX]);
+      
+            uint8 l_YCounter = 0;
+            for (auto const& l_I : l_Split)
+            {
+                uint8 l_XCounter = 0;
+                for (auto const& l_J : l_I)
+                {
+                    l_Room->GetRoomModel().m_Grid[l_YCounter][l_XCounter] = l_J;
+                    l_XCounter++;
+                }
+                l_YCounter++;
+            }
             m_Rooms[l_Room->GetId()] = std::move(l_Room);
 
         } while (l_Result->GetNextResult());
