@@ -225,6 +225,8 @@ namespace SteerStone
     /// @p_Diff : Update the room
     void Room::Update(uint32 const p_Diff)
     {
+        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
+
         /// Loop through all current paths
         for (auto& l_Itr = m_Paths.begin(); l_Itr != m_Paths.end();)
         {
