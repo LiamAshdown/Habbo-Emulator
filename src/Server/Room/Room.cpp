@@ -21,7 +21,6 @@
 #include "ItemManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Common/Maths.h"
-#include "PathFinder.h"
 
 namespace SteerStone
 {
@@ -36,10 +35,8 @@ namespace SteerStone
     /// @p_Habbo : p_Habbo
     bool Room::EnterRoom(Habbo* p_Habbo)
     {
-        LOG_INFO << std::this_thread::get_id();
         /// Check if habbo already exists inside room
-        auto const& l_Itr = std::find_if(m_Habbos.begin(), m_Habbos.end(), [&p_Habbo](const std::pair<uint32, Habbo*> p_Habbos) -> bool { return p_Habbos.second->GetId() == p_Habbo->GetId(); });
-
+        auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
         if (l_Itr != m_Habbos.end())
         {
             LOG_ERROR << "Habbo " << p_Habbo->GetName() << " tried to enter Room Id " << GetId() << " but is already inside room!";
@@ -58,11 +55,12 @@ namespace SteerStone
         p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
             GetRoomModel().GetDoorOrientation());
 
-        /// Push our habbo into our room storage
-        m_Habbos.push_back(std::make_pair(GenerateUniqueId(), p_Habbo));
+        p_Habbo->SetRoomGUID(GenerateGUID());
 
-        /// Increment our visitor counter
         m_Mutex.lock();
+        /// Push our habbo into our room storage
+        m_Habbos[p_Habbo->GetRoomGUID()] = p_Habbo;
+        /// Increment our visitor counter
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++; ///< Also Increment our category visitor counter
         m_Mutex.unlock();
@@ -74,10 +72,17 @@ namespace SteerStone
     /// @p_Habbo : Habbo user leaving room
     void Room::LeaveRoom(Habbo* p_Habbo)
     {
-        auto const& l_Itr = std::find_if(m_Habbos.begin(), m_Habbos.end(), [&p_Habbo](const std::pair<uint32, Habbo*> p_Habbos) -> bool { return p_Habbos.second->GetId() == p_Habbo->GetId(); });
-
+        auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
         if (l_Itr != m_Habbos.end())
         {
+            /// Check if there's any active path, and clear it
+            auto const& l_ItrPath = m_Paths.find(p_Habbo->GetRoomGUID());
+            if (l_ItrPath != m_Paths.end())
+            {
+                /// Gets removed on next room update
+                l_ItrPath->second.Path.clear();
+            }
+
             /// Set Habbo room to nullptr
             l_Itr->second->DestroyRoom();
 
@@ -97,10 +102,11 @@ namespace SteerStone
             LOG_INFO << "Player " << p_Habbo->GetName() << " tried to leave Room Id " << GetId() << " but player does not exist in room!";
     }
 
-    /// GenerateUniqueId - Generate a unique ID for object in room
-    uint32 Room::GenerateUniqueId()
+    /// GenerateGUID - Generate a unique ID for object in room
+    uint32 Room::GenerateGUID()
     {
-        return Maths::GetRandomUint32(0, 9999);
+        /// TODO; Check whether guid already exists
+        return Maths::GetRandomUint32(1, 9999);
     }
     
     /// Send Habbo Figure object to clients in room
@@ -186,5 +192,57 @@ namespace SteerStone
     {
         HabboPacket::Room::ActiveObjects l_Packet;
         p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// Walk 
+    /// @p_Habbo : Habbo class which is walking
+    /// @p_EndX : End Position habbo is going to
+    /// @p_EndY : End Position habbo is going to
+    void Room::Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY)
+    {
+        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
+
+        /// Calculate the path
+        PathFinder l_Path(GetRoomModel().GetGrid());
+        l_Path.CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY);
+
+        /// Check if user already has an existing path
+        auto& l_Itr = m_Paths.find(p_Habbo->GetRoomGUID());
+        if (l_Itr != m_Paths.end())
+        {
+            /// Clear our paths, and insert in our new path
+            l_Itr->second.Path.clear();
+            l_Itr->second.Path = l_Path.GetPath();
+            return;
+        }
+        
+        PathFindingData& l_Points = m_Paths[p_Habbo->GetRoomGUID()];
+        l_Points.Habbo            = p_Habbo;
+        l_Points.Path             = l_Path.GetPath();
+    }
+
+    /// Update 
+    /// @p_Diff : Update the room
+    void Room::Update(uint32 const p_Diff)
+    {
+        /// Loop through all current paths
+        for (auto& l_Itr = m_Paths.begin(); l_Itr != m_Paths.end();)
+        {
+            PathFindingData& l_Path = l_Itr->second;
+            if (l_Path.Path.empty())
+                l_Itr = m_Paths.erase(l_Itr);
+            else
+            {
+                /// Retrieve our next way point
+                Position& l_Position = l_Path.Path.back();
+
+                /// Remove our way point
+                l_Path.Path.pop_back();
+
+                LOG_DEBUG << l_Position.X << " " << l_Position.Y;
+
+                ++l_Itr;
+            }
+        }
     }
 } ///< NAMESPACE STEERSTONE

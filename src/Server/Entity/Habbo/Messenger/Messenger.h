@@ -96,7 +96,7 @@ namespace SteerStone
 
         /// GetFriend
         /// @p_Id : Friend Id which returns information about friend
-        MessengerFriendData& GetFriend(uint32 const& p_Id);
+        MessengerFriendData& GetFriend(uint32 const p_Id);
 
         /// SaveToDB
         /// This function is used to query the database on removing friends etc..
@@ -106,11 +106,11 @@ namespace SteerStone
         /// ReadMessage
         /// Message which user read and no longer needs to be notified there's a new message
         /// @p_MessageId : Id of message
-        void ReadMessage(uint32 const& p_MessageId);
+        void ReadMessage(uint32 const p_MessageId);
 
         /// RemoveFriendRequestFromStorage
         /// @p_Id : Friend Request Id we are removing from our m_MessengerFriendRequests storage
-        void RemoveFriendRequestFromStorage(uint32 const& p_Id);
+        void RemoveFriendRequestFromStorage(uint32 const p_Id);
 
         /// ParseMessengerInitialize 
         /// Initialize our console, this is called when habbo logs in
@@ -128,16 +128,16 @@ namespace SteerStone
 
         /// ParseMessengerAcceptFriendRequest
         /// @p_SenderId : Account Id who sent friend request
-        void ParseMessengerAcceptFriendRequest(uint32 const& p_SenderId);
+        void ParseMessengerAcceptFriendRequest(uint32 const p_SenderId);
 
         /// ParseMessengerSearchUser
         /// @p_Buffer : Buffer which is being parsed
         /// @p_Name : Name of Habbo we are searching for
-        void ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const& p_Name);
+        void ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const p_Name);
 
         /// ParseMessengerSendFriendRequest
         /// @p_Name : Name of Habbo we are sending friend request too
-        void ParseMessengerSendFriendRequest(std::string const& p_Name);
+        void ParseMessengerSendFriendRequest(std::string const p_Name);
 
         /// ParseMessengerRemoveFriend
         /// @p_Packet : Incoming client packet which we will decode

@@ -144,7 +144,7 @@ namespace SteerStone
 
     /// GetFriend
     /// @p_Id : Friend Id which returns information about friend
-    MessengerFriendData& Messenger::GetFriend(uint32 const & p_Id)
+    MessengerFriendData& Messenger::GetFriend(uint32 const p_Id)
     {
         auto const& l_Itr = m_MessengerFriends.find(p_Id);
         if (l_Itr != m_MessengerFriends.end())
@@ -161,7 +161,7 @@ namespace SteerStone
     /// ReadMessage
     /// Message which user read and no longer needs to be notified there's a new message
     /// @p_MessageId : Id of message
-    void Messenger::ReadMessage(uint32 const & p_MessageId)
+    void Messenger::ReadMessage(uint32 const p_MessageId)
     {
         QueryDatabase l_Database("users");
         l_Database.PrepareQuery("UPDATE messenger_messages SET has_read = 1 WHERE receiver_id = ? ORDER BY id DESC LIMIT 1");
@@ -171,7 +171,7 @@ namespace SteerStone
 
     /// RemoveFriendRequestFromStorage
     /// @p_Id : Friend Request Id we are removing from our m_MessengerFriendRequests storage
-    void Messenger::RemoveFriendRequestFromStorage(uint32 const& p_Id)
+    void Messenger::RemoveFriendRequestFromStorage(uint32 const p_Id)
     {
         auto const& l_Itr = m_MessengerFriendRequests.find(p_Id);
         if (l_Itr != m_MessengerFriendRequests.end())
@@ -274,7 +274,7 @@ namespace SteerStone
     
     /// ParseMessengerAcceptFriendRequest
     /// @p_SenderId : Account Id who sent friend request
-    void Messenger::ParseMessengerAcceptFriendRequest(uint32 const& p_SenderId)
+    void Messenger::ParseMessengerAcceptFriendRequest(uint32 const p_SenderId)
     {
         QueryDatabase l_Database("users");
         l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.id = ?)");
@@ -339,17 +339,15 @@ namespace SteerStone
         l_Database.ExecuteQuery();
 
         /// Send Packet to update console with new friend!
-        /// TODO; Do we need to do the same to the other client? or let the console update itself later on?
-
         /// Is User online?
-        Habbo const* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
+        Habbo* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
 
         HabboPacket::Messenger::MessengerAddFriend l_PacketAddFriend;
-        l_PacketAddFriend.Id = l_Result->GetUint32(1);
-        l_PacketAddFriend.Name = l_Result->GetString(2);
-        l_PacketAddFriend.Gender = l_Result->GetBool(5);
-        l_PacketAddFriend.ConsoleMotto = l_Result->GetString(4);
-        l_PacketAddFriend.IsOnline = l_Habbo ? true : false;
+        l_PacketAddFriend.Id            = l_Result->GetUint32(1);
+        l_PacketAddFriend.Name          = l_Result->GetString(2);
+        l_PacketAddFriend.Gender        = l_Result->GetString(5) == "Male" ? true : false;
+        l_PacketAddFriend.ConsoleMotto  = l_Result->GetString(4);
+        l_PacketAddFriend.IsOnline      = l_Habbo ? true : false;
         
         if (l_PacketAddFriend.IsOnline)
         {
@@ -372,12 +370,39 @@ namespace SteerStone
         l_PacketAddFriend.Figure = l_Result->GetString(3); ///< User Figure
         
         m_Habbo->ToSocket()->SendPacket(l_PacketAddFriend.Write());
+
+        /// Do the same for other user
+        if (l_PacketAddFriend.IsOnline)
+        {
+            HabboPacket::Messenger::MessengerAddFriend l_PacketAddFriendOther;
+            l_PacketAddFriendOther.Id            = m_Habbo->GetId();
+            l_PacketAddFriendOther.Name          = m_Habbo->GetName();
+            l_PacketAddFriendOther.Gender        = m_Habbo->GetGender() == "Male" ? true : false;
+            l_PacketAddFriendOther.ConsoleMotto  = m_Habbo->GetConsoleMotto();
+
+            /// Is user in room>
+            if (m_Habbo->GetRoom())
+            {
+                /// Is user in a public room or flat?
+                if (m_Habbo->GetRoom()->GetOwnerId() > 0)
+                    l_PacketAddFriendOther.Status = "Floor1a";
+                else
+                    l_PacketAddFriendOther.Status = m_Habbo->GetRoom()->GetName();
+            }
+            else
+                l_PacketAddFriendOther.Status = "On Hotel View";
+
+            l_PacketAddFriendOther.LastOnline    = GetDate(); ///< Last time user was online
+            l_PacketAddFriendOther.Figure        = m_Habbo->GetFigure(); ///< User Figure
+
+            l_Habbo->ToSocket()->SendPacket(l_PacketAddFriendOther.Write());
+        }
     }
     
     /// ParseMessengerSearchUser
     /// @p_Buffer : Buffer which is being parsed
     /// @p_Name : Name of Habbo we are searching for
-    void Messenger::ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const& p_Name)
+    void Messenger::ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const p_Name)
     {
         /// TODO; This code is quite bad in terms of performance.
         /// We could possibly create another column in account table which shows if user
@@ -430,7 +455,7 @@ namespace SteerStone
 
     /// ParseMessengerSendFriendRequest
     /// @p_Name : Name of Habbo we are sending friend request too
-    void Messenger::ParseMessengerSendFriendRequest(std::string const& p_Name)
+    void Messenger::ParseMessengerSendFriendRequest(std::string const p_Name)
     {
         QueryDatabase l_Database("users");
         l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");

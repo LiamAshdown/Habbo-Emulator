@@ -28,7 +28,7 @@
 namespace SteerStone
 {
     Habbo::Habbo(HabboSocket* p_HabboSocket)
-        : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr)
+        : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr), m_RoomGUID(0)
     {
         m_PingInterval = sConfig->GetIntDefault("PongInterval", 30000);
         m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
@@ -57,7 +57,9 @@ namespace SteerStone
 
     bool Habbo::SetRoom(std::shared_ptr<Room> p_Room)
     {
-        LOG_INFO << std::this_thread::get_id();
+        if (GetRoom())
+            GetRoom()->LeaveRoom(this);
+
         m_Room = p_Room;
         if (auto l_Room = m_Room.lock())
             if (l_Room->EnterRoom(this))
@@ -252,21 +254,21 @@ namespace SteerStone
         m_FavouriteRooms->LoadFavouriteRooms();
     }
 
-    void Habbo::UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation)
+    void Habbo::UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O)
     {
-        m_PositionX = x;
-        m_PositionY = y;
-        m_PositionZ = z;
-        m_Orientation = orientation;
+        m_PositionX = p_X;
+        m_PositionY = p_Y;
+        m_PositionZ = p_Z;
+        m_Orientation = p_O;
     }
 
-    bool Habbo::Update(const uint32& diff)
+    bool Habbo::Update(uint32 const& p_Diff)
     {
         std::lock_guard<std::mutex> l_Guard(m_Mutex);
 
         if (m_Socket && !m_Socket->IsClosed())
         {
-            if (m_UpdateAccount < diff)
+            if (m_UpdateAccount < p_Diff)
             {
                 QueryDatabase database("users");
                 database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?");
@@ -286,9 +288,9 @@ namespace SteerStone
                 m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
             }
             else
-                m_UpdateAccount -= diff;
+                m_UpdateAccount -= p_Diff;
 
-            if (m_PingInterval < diff)
+            if (m_PingInterval < p_Diff)
             {
                 if (IsPonged())
                 {
@@ -303,7 +305,7 @@ namespace SteerStone
                 }
             }
             else
-                m_PingInterval -= diff;
+                m_PingInterval -= p_Diff;
 
             return true;
         }
@@ -314,6 +316,9 @@ namespace SteerStone
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
         SaveFavouriteRoomToDB();
+
+        if (GetRoom())
+            GetRoom()->LeaveRoom(this);
 
         HabboPacket::Misc::HotelLogout l_Packet;
         l_Packet.Reason = p_Reason;

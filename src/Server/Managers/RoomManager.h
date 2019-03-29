@@ -53,6 +53,11 @@ namespace SteerStone
         /// LoadRooms - Load rooms from database
         void LoadRooms();
 
+        /// UpdateRooms
+        /// Update all active rooms
+        /// @p_Diff - Update tick
+        void UpdateRooms(uint32 const& p_Diff);
+
         /// GetRoomCategory
         /// @p_Id : Category Id
         RoomCategory* GetRoomCategory(uint32 const& p_Id);
@@ -75,6 +80,7 @@ namespace SteerStone
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for room                               
         RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for model
+        std::mutex m_Mutex;                                          ///< Mutex
     };
 }
 

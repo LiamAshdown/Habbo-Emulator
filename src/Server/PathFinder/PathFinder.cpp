@@ -72,7 +72,7 @@ namespace SteerStone
             }
 
             /// Check if we had reached our final destination
-            if (m_Current->GetPositionX() == p_EndX && m_Current->GetPositionY() == p_EndY)
+            if (m_Current->GetPosition().X == p_EndX && m_Current->GetPosition().Y == p_EndY)
                 break;
 
             /// Insert our node into the ClosedList (already evaluted) 
@@ -81,12 +81,12 @@ namespace SteerStone
             m_OpenList.erase(l_CurrentItr);
 
             /// Loop through all 8 directions
-            for (int16 l_I = 0; l_I < m_Directions.size(); ++l_I)
+            for (uint8 l_I = 0; l_I < m_Directions.size(); ++l_I)
             {
                 /// Create our new future position
                 Position l_FuturePosition;
-                l_FuturePosition.X = m_Current->GetPositionX() + m_Directions[l_I].X;
-                l_FuturePosition.Y = m_Current->GetPositionY() + m_Directions[l_I].Y;
+                l_FuturePosition.X = m_Current->GetPosition().X + m_Directions[l_I].X;
+                l_FuturePosition.Y = m_Current->GetPosition().Y + m_Directions[l_I].Y;
 
                 /// Check if our future position has any collision
                 if (!CheckValidTile(l_FuturePosition) || DoesNodeExist(m_ClosedList, l_FuturePosition))
@@ -121,6 +121,7 @@ namespace SteerStone
 
         while (m_Current != nullptr)
         {
+            m_Path.push_back(m_Current->GetPosition());
             m_Current = m_Current->GetParentNode();
         }
 
@@ -129,6 +130,13 @@ namespace SteerStone
         LOG_DEBUG << "Took " << duration << " milliseconds to calculate a path";
 
         CleanUp();
+    }
+
+    /// GetPath
+    /// Returns path we've found
+    std::deque<Position> PathFinder::GetPath()
+    {
+        return m_Path;
     }
 
     /// CheckValidTile
@@ -150,7 +158,7 @@ namespace SteerStone
     {
         for (auto const& l_Itr : p_Nodes)
         {
-            if (l_Itr->GetPositionX() == p_FuturePosition.X && l_Itr->GetPositionY() == p_FuturePosition.Y)
+            if (l_Itr->GetPosition().X == p_FuturePosition.X && l_Itr->GetPosition().Y == p_FuturePosition.Y)
                 return l_Itr;
         }
         return nullptr;
@@ -161,9 +169,9 @@ namespace SteerStone
     /// @p_Current : Current node
     /// @p_EndX : End Position X
     /// @p_EndY : End Position Y
-    uint32 PathFinder::CalculateHeuristic(Node const* p_Current, int16 const& p_EndX, int16 const& p_EndY)
+    uint32 PathFinder::CalculateHeuristic(Node* p_Current, int16 const& p_EndX, int16 const& p_EndY)
     {
-        return (static_cast<unsigned int>(10 * (abs(p_Current->GetPositionX() - p_EndX) + abs(p_Current->GetPositionY() - p_EndY))));
+        return (static_cast<unsigned int>(10 * (abs(p_Current->GetPosition().X - p_EndX) + abs(p_Current->GetPosition().Y - p_EndY))));
     }
 
     /// CleanUp

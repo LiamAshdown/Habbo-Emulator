@@ -21,7 +21,9 @@
 #include "Common/SharedDefines.h"
 #include "RoomCategory.h"
 #include "RoomModel.h"
+#include "PathFinder.h"
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
 #endif /* _ROOM_ROOM_h */
 
 namespace SteerStone
@@ -33,6 +35,17 @@ namespace SteerStone
     };
 
     class Habbo;
+
+    /// Holds information about waypoints
+    typedef struct PathFindingStruct
+    {
+        Habbo* Habbo;
+        std::deque<Position> Path;
+
+    }PathFindingData;
+
+    typedef std::unordered_map<uint32, PathFindingData> PathFinderMap;
+    typedef std::unordered_map<uint32, Habbo*> GUIDUserMap;
 
     /// Class which holds information about hotel room and responsible for handling habbos inside room
     class Room
@@ -72,6 +85,16 @@ namespace SteerStone
         /// @p_Habbo : Send Active Furniture Objects to Habbo client
         void SendActiveObjects(Habbo* p_Habbo);
 
+        /// Walk 
+        /// @p_Habbo : Habbo class which is walking
+        /// @p_EndX : End Position habbo is going to
+        /// @p_EndY : End Position habbo is going to
+        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY);
+
+        /// Update 
+        /// @p_Diff : Update the room
+        void Update(uint32 const p_Diff);
+
     public:
         /// ROOM INFO
         uint32 GetId()               const { return m_Id;           }
@@ -94,8 +117,8 @@ namespace SteerStone
         RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
 
     private:
-        /// GenerateUniqueId - Generate a unique ID for object in room
-        uint32 GenerateUniqueId();
+        /// GenerateGUID - Generate a unique ID for object in room
+        uint32 GenerateGUID();
       
     private:
         /// ROOM INFO
@@ -118,7 +141,8 @@ namespace SteerStone
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
 
-        std::vector<std::pair<uint32, Habbo*>> m_Habbos;     ///< Hold Habbo users in vector
-        boost::shared_mutex m_Mutex;
+        GUIDUserMap m_Habbos;                    ///< Hold Habbo users in vector
+        PathFinderMap m_Paths;                   ///< Stores path points for objects inside room
+        boost::shared_mutex m_Mutex;             ///< Mutex
     };
 } ///< NAMESPACE STEERSTONE

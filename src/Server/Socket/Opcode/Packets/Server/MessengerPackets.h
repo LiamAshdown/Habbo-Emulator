@@ -51,6 +51,7 @@ namespace SteerStone
                 std::string ConsoleMotto;                               ///< Habbo Console Motto
                 uint32 FriendsLimit;                                    ///< Max Normal Friends Limit
                 uint32 ClubFriendsLimit;                                ///< Max Club Friends Limit
+                uint32 ExtendedFriendsLimit;                            ///< Extend limit
                 uint32 MessengerSize;                                   ///< Size of the Messenger
             };
 

@@ -136,8 +136,8 @@ namespace SteerStone
 
         /// Habbo Info
         void InitializeHabboData();
-        void UpdatePosition(const int32& x, const int32& y, const int32& z, const int32& orientation);
-        bool Update(const uint32& diff);
+        void UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O);
+        bool Update(uint32 const& p_Diff);
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);
 
     public:
@@ -158,10 +158,10 @@ namespace SteerStone
         uint32 GetId()                  const { return m_Id;                   }
         uint32 GetTickets()             const { return m_Credits;              }
 
-        int32 GetPositionX()            const { return m_PositionX;            }
-        int32 GetPositionY()            const { return m_PositionY;            }
-        int32 GetPositionZ()            const { return m_PositionZ;            }
-        int32 GetOrientation()          const { return m_Orientation;          }
+        int16 GetPositionX()            const { return m_PositionX;            }
+        int16 GetPositionY()            const { return m_PositionY;            }
+        int16 GetPositionZ()            const { return m_PositionZ;            }
+        int16 GetOrientation()          const { return m_Orientation;          }
 
         uint8 GetRank()                 const { return m_Rank;                 }
 
@@ -172,6 +172,10 @@ namespace SteerStone
         bool IsSoundEnabled()           const { return m_SoundEnabled;         }
         bool AcceptsFriendRequests()    const { return m_AcceptFriendRequests; }
         bool IsPonged()                 const { return m_Ponged;               }
+
+        /// Room Info
+        uint32 GetRoomGUID()             const { return m_RoomGUID;            }
+        void SetRoomGUID(uint32 const& p_GUID) { m_RoomGUID = p_GUID;          }
 
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket; }
 
@@ -208,11 +212,12 @@ namespace SteerStone
         uint32 m_MaxFriendsLimit;
         uint32 m_PingInterval;
         uint32 m_UpdateAccount;
+        uint32 m_RoomGUID;
 
-        int32 m_PositionX;
-        int32 m_PositionY;
-        int32 m_PositionZ;
-        int32 m_Orientation;
+        int16 m_PositionX;
+        int16 m_PositionY;
+        int16 m_PositionZ;
+        int16 m_Orientation;
 
         uint8 m_Rank;
 

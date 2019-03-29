@@ -18,6 +18,7 @@
 
 #include "Hotel.h"
 #include "Habbo.h"
+#include "RoomManager.h"
 #include "Network/StringBuffer.h"
 
 namespace SteerStone
@@ -87,13 +88,13 @@ namespace SteerStone
 
     /// UpdateWorld
     /// @p_Diff : Diff time of updating Hotel
-    void Hotel::UpdateWorld(const uint32& diff)
+    void Hotel::UpdateWorld(uint32 const& p_Diff)
     {
         for (auto& itr = m_Habbos.begin(); itr != m_Habbos.end();)
         {
             Habbo* player = itr->second;
 
-            if (!player->Update(diff))
+            if (!player->Update(p_Diff))
             {
                 itr = m_Habbos.erase(itr);
                 delete player;
@@ -101,6 +102,9 @@ namespace SteerStone
             else
                 ++itr;
         }
+
+        /// Update all of our rooms
+        sRoomMgr->UpdateRooms(p_Diff);
     }
    
     /// Clean Up - Clean up the objects in the hotel before closing down server

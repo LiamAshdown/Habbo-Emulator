@@ -166,6 +166,20 @@ namespace SteerStone
 
         LOG_INFO << "Loaded " << m_Rooms.size() << " Hotel Rooms";
     }
+
+    /// UpdateRooms
+    /// Update all rooms
+    /// @p_Diff - Update tick
+    void RoomManager::UpdateRooms(uint32 const& p_Diff)
+    {
+        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+
+        /// TODO; Don't update rooms which are not active
+        for (auto const& l_Itr : m_Rooms)
+        {
+            l_Itr.second->Update(p_Diff);
+        }
+    }
     
     /// GetRoomCategory
     /// @p_Id : Category Id

@@ -31,7 +31,7 @@ namespace SteerStone
             {
                 m_Buffer.AppendString(ConsoleMotto);
                 m_Buffer.AppendWired(FriendsLimit);
-                m_Buffer.AppendWired(FriendsLimit);
+                m_Buffer.AppendWired(ExtendedFriendsLimit);
                 m_Buffer.AppendWired(ClubFriendsLimit);
                 m_Buffer.AppendWired(MessengerSize);
 

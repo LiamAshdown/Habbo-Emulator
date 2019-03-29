@@ -19,7 +19,6 @@
 #include "Habbo.h"
 #include "RoomManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
-#include "PathFinder.h"
 
 namespace SteerStone
 {
@@ -100,7 +99,7 @@ namespace SteerStone
         int16 l_X = p_Packet->ReadBase64Int();
         int16 l_Y = p_Packet->ReadBase64Int();
 
-        PathFinder l_PathFinder(m_Habbo->GetRoom()->GetRoomModel().GetGrid());
-        l_PathFinder.CalculatePath(m_Habbo->GetPositionX(), m_Habbo->GetPositionY(), l_X, l_Y);
+        if (m_Habbo->GetRoom())
+            m_Habbo->GetRoom()->Walk(m_Habbo, l_X, l_Y);
     }
 }
