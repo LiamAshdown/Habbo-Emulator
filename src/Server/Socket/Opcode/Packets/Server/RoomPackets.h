@@ -216,6 +216,29 @@ namespace SteerStone
                 std::vector<ActiveObject> ObjectsActive;
             };
 
+            /// SERVER_USER_UPDATE_STATUS packet builder
+            class UserUpdateStatus final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                UserUpdateStatus() : ServerPacket(SERVER_USER_UPDATE_STATUS) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string GUID;
+                std::string CurrentX;
+                std::string CurrentY;
+                std::string CurrentZ;
+                std::string HeadRotation;
+                std::string BodyRotation;
+                std::string Status;
+                std::string NewX;
+                std::string NewY;
+                std::string NewZ;
+            };
+
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

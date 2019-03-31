@@ -38,7 +38,8 @@ namespace SteerStone
     {
     }
     
-    /// Loadl_RoomCategories - Load l_Room categories from Database
+    /// LoadRoomCategories
+    /// Load Room categories from Database
     void RoomManager::LoadRoomCategories()
     {
         QueryDatabase l_Database("rooms");
@@ -69,7 +70,8 @@ namespace SteerStone
         LOG_INFO << "Loaded " << m_RoomCategories.size() << " Room Categories";
     } 
 
-    /// LoadRooms - Load rooms from database
+    /// LoadRooms
+    /// Load rooms from database
     void RoomManager::LoadRoomModels()
     {
         QueryDatabase l_Database("rooms");
@@ -104,7 +106,8 @@ namespace SteerStone
         LOG_INFO << "Loaded " << m_RoomModels.size() << " Room Models";
     }
 
-    /// LoadRooms - Load rooms from database
+    /// LoadRooms
+    /// Load rooms from database
     void RoomManager::LoadRooms()
     {
         QueryDatabase l_Database("rooms");
@@ -143,23 +146,40 @@ namespace SteerStone
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
 
             std::vector<std::string> l_Split;
-            boost::split(l_Split, l_Room->GetRoomModel().GetHeightMap(), boost::is_any_of("\t "));
+            boost::split(l_Split, l_Room->GetRoomModel().GetHeightMap(), boost::is_any_of("\r"));
 
             l_Room->GetRoomModel().m_MapSizeY = l_Split.size();
             l_Room->GetRoomModel().m_MapSizeX = l_Split[0].length();
-            l_Room->GetRoomModel().m_Grid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeY][l_Room->GetRoomModel().m_MapSizeX]);
+            l_Room->GetRoomModel().m_TileGrid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeX][l_Room->GetRoomModel().m_MapSizeY]);
+            l_Room->GetRoomModel().m_HeightGrid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeX][l_Room->GetRoomModel().m_MapSizeY]);
       
-            uint8 l_YCounter = 0;
-            for (auto const& l_I : l_Split)
+            for (int32 l_Y = 0; l_Y < l_Room->GetRoomModel().m_MapSizeY; l_Y++)
             {
-                uint8 l_XCounter = 0;
-                for (auto const& l_J : l_I)
+                std::string l_Line = l_Split[l_Y];
+
+                for (int32 l_X = 0; l_X < l_Room->GetRoomModel().m_MapSizeX; l_X++)
                 {
-                    l_Room->GetRoomModel().m_Grid[l_YCounter][l_XCounter] = l_J;
-                    l_XCounter++;
+                    uint8 l_Tile = l_Line[l_X];
+
+                    if (std::isdigit(l_Tile))
+                    {
+                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_OPEN;
+                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = l_Tile - 48;
+                    }
+                    else
+                    {
+                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_CLOSED;
+                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = 0;
+                    }
+
+                    if (l_Room->GetRoomModel().GetDoorX() == l_X && l_Room->GetRoomModel().GetDoorY() == l_Y)
+                    {
+                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_OPEN;
+                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = l_Room->GetRoomModel().GetDoorZ();
+                    }
                 }
-                l_YCounter++;
             }
+
             m_Rooms[l_Room->GetId()] = std::move(l_Room);
 
         } while (l_Result->GetNextResult());
@@ -214,7 +234,8 @@ namespace SteerStone
             return nullptr;
     }
     
-    /// GetRoomCategories - Get Room Category Map
+    /// GetRoomCategories
+    /// Get Room Category Map
     RoomCategoriesMap* RoomManager::GetRoomCategories()
     {
         return &m_RoomCategories;

@@ -189,6 +189,39 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            StringBuffer const * UserUpdateStatus::Write()
+            {
+                m_Buffer.AppendString(GUID, false);
+                m_Buffer.AppendString(" ");
+                m_Buffer.AppendStringDelimiter(CurrentX, ",");
+                m_Buffer.AppendStringDelimiter(CurrentY, ",");
+                m_Buffer.AppendStringDelimiter(CurrentZ, ",");
+                m_Buffer.AppendStringDelimiter(BodyRotation, ",");
+                m_Buffer.AppendStringDelimiter(HeadRotation, "/");
+
+                if (Status == "mv") ///< Walking
+                {
+                    m_Buffer.AppendString(Status, false);
+
+                    LOG_INFO << "Height: " << NewZ;
+
+                    m_Buffer.AppendString(" ");
+                    m_Buffer.AppendStringDelimiter(NewX, ",");
+                    m_Buffer.AppendStringDelimiter(NewY, ",");
+                    m_Buffer.AppendString(NewZ, false);
+                }
+         
+                m_Buffer.AppendStringDelimiter("/", "\r");
+                m_Buffer.AppendSOH();
+
+                uint8* l_Test = &m_Buffer.m_Storage[0];
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

@@ -99,6 +99,8 @@ namespace SteerStone
         int16 l_X = p_Packet->ReadBase64Int();
         int16 l_Y = p_Packet->ReadBase64Int();
 
+        LOG_INFO << "Received: " << l_X << " " << l_Y;
+
         if (m_Habbo->GetRoom())
             m_Habbo->GetRoom()->Walk(m_Habbo, l_X, l_Y);
     }

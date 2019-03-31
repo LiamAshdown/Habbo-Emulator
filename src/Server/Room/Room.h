@@ -35,6 +35,7 @@ namespace SteerStone
     };
 
     class Habbo;
+    class StringBuffer;
 
     /// Holds information about waypoints
     typedef struct PathFindingStruct
@@ -80,6 +81,11 @@ namespace SteerStone
         /// SendWorldObjects 
         /// @p_Habbo : Send Furniture Objects to Habbo client
         void SendWorldObjects(Habbo* p_Habbo);
+
+        /// SendPacketToAll
+        /// Send Packet to all users in room
+        /// @p_Buffer : Data being sent to users in room
+        void SendPacketToAll(StringBuffer& p_Buffer);
 
         /// SendObjects 
         /// @p_Habbo : Send Active Furniture Objects to Habbo client

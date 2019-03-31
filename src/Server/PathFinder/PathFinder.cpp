@@ -23,7 +23,7 @@ namespace SteerStone
 {
     /// Constructor
     /// @p_Grid : Multi-dimensional array which stores the heightmap
-    PathFinder::PathFinder(GridArray const& p_Grid) : m_Grid(p_Grid)
+    PathFinder::PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid) : m_TileGrid(p_TileGrid), m_HeightGrid(p_HeightGrid)
     {
         /// 8 directions we can go
         m_Directions =
@@ -47,9 +47,11 @@ namespace SteerStone
     /// @p_StartY : Start Position Y
     /// @p_EndX : End Position X
     /// @p_EndY : End Position Y
-    void PathFinder::CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const & p_EndX, int16 const & p_EndY)
+    bool PathFinder::CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const & p_EndX, int16 const & p_EndY)
     {
-        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+        /// Check if the destination tile is valid
+        if (!CheckDestination(Position({ p_EndX, p_EndY })))
+            return false;
 
         /// Insert our first node into the storage
         m_OpenList.push_back(new Node(p_StartX, p_StartY));
@@ -81,7 +83,7 @@ namespace SteerStone
             m_OpenList.erase(l_CurrentItr);
 
             /// Loop through all 8 directions
-            for (uint8 l_I = 0; l_I < m_Directions.size(); ++l_I)
+            for (int16 l_I = 0; l_I < m_Directions.size(); l_I++)
             {
                 /// Create our new future position
                 Position l_FuturePosition;
@@ -89,7 +91,7 @@ namespace SteerStone
                 l_FuturePosition.Y = m_Current->GetPosition().Y + m_Directions[l_I].Y;
 
                 /// Check if our future position has any collision
-                if (!CheckValidTile(l_FuturePosition) || DoesNodeExist(m_ClosedList, l_FuturePosition))
+                if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
                     continue;
 
                 /// Work out our G Cost
@@ -113,23 +115,33 @@ namespace SteerStone
                     /// Node doesn't exist, create a new node and push it into our open list to be evaluted
                     Node* l_NewNode = new Node(l_FuturePosition.X, l_FuturePosition.Y, m_Current);
                     l_NewNode->SetGCost(l_GCost);
-                    l_NewNode->SetHCost(CalculateHeuristic(m_Current, p_EndX, p_EndY)); ///< Calculate our H cost from end position to our current position 
+                    l_NewNode->SetHCost(CalculateHeuristic(l_NewNode, p_EndX, p_EndY)); ///< Calculate our H cost from end position to our current position 
                     m_OpenList.push_back(l_NewNode);
+
+                    /// If our new node is already at the final destination then exit the loop
+                    if (l_NewNode->GetPosition().X == p_EndX && l_NewNode->GetPosition().Y == p_EndY)
+                    {
+                        m_Current = l_NewNode;
+                        m_OpenList.clear();
+                        break;
+                    }
                 }
             }
         }
 
         while (m_Current != nullptr)
         {
-            m_Path.push_back(m_Current->GetPosition());
+            Position l_Position;
+            l_Position.X = m_Current->GetPosition().X;
+            l_Position.Y = m_Current->GetPosition().Y;
+            l_Position.Z = static_cast<int16>(m_HeightGrid[l_Position.X][l_Position.Y]);
+            m_Path.push_back(l_Position);
             m_Current = m_Current->GetParentNode();
         }
 
-        std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
-        LOG_DEBUG << "Took " << duration << " milliseconds to calculate a path";
-
         CleanUp();
+
+        return true;
     }
 
     /// GetPath
@@ -142,9 +154,34 @@ namespace SteerStone
     /// CheckValidTile
     /// Check if there's any collision on this tile
     /// @p_Position : Struct which holds x, y coordinates
-    bool PathFinder::CheckValidTile(Position const& p_Position)
+    bool PathFinder::CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition)
     {
-        if (m_Grid[p_Position.Y][p_Position.X] == 'X')
+        int16 l_FutureTileGrid = m_TileGrid[p_FuturePosition.X][p_FuturePosition.Y];
+        int16 l_FutureHeightGrid = m_HeightGrid[p_FuturePosition.X][p_FuturePosition.Y];
+
+        int16 l_CurrentTileGrid = m_TileGrid[p_CurrentPosition.X][p_CurrentPosition.Y];
+        int16 l_CurrentHeightGrid = m_HeightGrid[p_CurrentPosition.X][p_CurrentPosition.Y];
+
+        if (l_FutureTileGrid == TileState::TILE_STATE_CLOSED)
+            return false;
+
+        /// Check height, height is incremented. We cannot walk from a height 1 to height 5, must be 1, 2, 3, 4 ,5
+        if (l_FutureHeightGrid > l_CurrentHeightGrid && l_CurrentHeightGrid + 1 != l_FutureHeightGrid)
+            return false;
+        else if (l_CurrentHeightGrid > l_FutureHeightGrid && l_FutureHeightGrid + 1 != l_CurrentHeightGrid) ///< and vice versa
+            return false;
+
+        return true;
+    }
+
+    /// CheckDestination
+    /// Check if destination coordinates is valid to make a path
+    /// @p_Position : Struct which holds x, y coordinates
+    bool PathFinder::CheckDestination(Position const& p_Position)
+    {
+        int16 l_TileGrid = m_TileGrid[p_Position.X][p_Position.Y];
+
+        if (l_TileGrid == TileState::TILE_STATE_CLOSED)
             return false;
 
         return true;

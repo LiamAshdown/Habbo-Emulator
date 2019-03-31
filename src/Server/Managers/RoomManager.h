@@ -44,13 +44,16 @@ namespace SteerStone
         ~RoomManager();
 
     public:
-        /// LoadRoomCategories - Load room categories from database
+        /// LoadRoomCategories
+        /// Load room categories from database
         void LoadRoomCategories();
 
-        /// LoadRoomModels - Load room models from database
+        /// LoadRoomModels
+        /// Load room models from database
         void LoadRoomModels();
 
-        /// LoadRooms - Load rooms from database
+        /// LoadRooms
+        /// Load rooms from database
         void LoadRooms();
 
         /// UpdateRooms
@@ -70,10 +73,12 @@ namespace SteerStone
         /// @p_Id : Room Id
         std::shared_ptr<Room> GetRoom(uint32 const& p_Id);
 
-        /// GetRoomCategories - Get Room Category Map
+        /// GetRoomCategories
+        /// Get Room Category Map
         RoomCategoriesMap* GetRoomCategories();
 
-        /// GetRooms - Get Room Map
+        /// GetRooms
+        /// Get Room Map
         RoomsMap* GetRooms();
 
     private:

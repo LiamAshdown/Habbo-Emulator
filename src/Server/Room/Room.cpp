@@ -120,7 +120,7 @@ namespace SteerStone
             if (l_Habbo->GetId() != p_Habbo->GetId())
             {
                 HabboPacket::Room::HabboRoomObject l_Packet;
-                l_Packet.UniqueId   = boost::lexical_cast<std::string>(l_Itr.first);
+                l_Packet.UniqueId   = boost::lexical_cast<std::string>(p_Habbo->GetRoomGUID());
                 l_Packet.Id         = boost::lexical_cast<std::string>(p_Habbo->GetId());
                 l_Packet.Name       = p_Habbo->GetName();
                 l_Packet.Figure     = p_Habbo->GetFigure();
@@ -133,7 +133,7 @@ namespace SteerStone
             }
 
             HabboPacket::Room::HabboRoomObject l_Packet;
-            l_Packet.UniqueId       = boost::lexical_cast<std::string>(l_Itr.first);
+            l_Packet.UniqueId       = boost::lexical_cast<std::string>(l_Habbo->GetRoomGUID());
             l_Packet.Id             = boost::lexical_cast<std::string>(l_Habbo->GetId());
             l_Packet.Name           = l_Habbo->GetName();
             l_Packet.Figure         = l_Habbo->GetFigure();
@@ -186,6 +186,18 @@ namespace SteerStone
         }
     }
 
+    /// SendPacketToAll
+    /// Send Packet to all users in room
+    /// @p_Buffer : Data being sent to users in room
+    void Room::SendPacketToAll(StringBuffer& p_Buffer)
+    {
+        for (auto const& l_Itr : m_Habbos)
+        {
+            Habbo* l_Habbo = l_Itr.second;
+            l_Habbo->ToSocket()->SendPacket(&p_Buffer);
+        }
+    }
+
     /// SendObjects 
     /// @p_Habbo : Send Active Furniture Objects to Habbo client
     void Room::SendActiveObjects(Habbo* p_Habbo)
@@ -203,22 +215,29 @@ namespace SteerStone
         boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
 
         /// Calculate the path
-        PathFinder l_Path(GetRoomModel().GetGrid());
-        l_Path.CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY);
-
-        /// Check if user already has an existing path
-        auto& l_Itr = m_Paths.find(p_Habbo->GetRoomGUID());
-        if (l_Itr != m_Paths.end())
+        PathFinder l_Path(GetRoomModel().GetTileGrid(), GetRoomModel().GetHeightGrid());
+        if (l_Path.CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY))
         {
-            /// Clear our paths, and insert in our new path
-            l_Itr->second.Path.clear();
-            l_Itr->second.Path = l_Path.GetPath();
-            return;
+            /// Update user rotation before we send movement packets,
+            /// so we don't look like we're moonwalking
+            p_Habbo->UpdateUserRotation(p_EndX, p_EndY);
+
+            /// Check if user already has an existing path
+            auto& l_Itr = m_Paths.find(p_Habbo->GetRoomGUID());
+            if (l_Itr != m_Paths.end())
+            {
+                /// Clear our paths, and insert in our new path
+                l_Itr->second.Path.clear();
+                l_Itr->second.Path = l_Path.GetPath();
+                return;
+            }
+
+            p_Habbo->SetIsWalking(true);
+
+            PathFindingData& l_Points = m_Paths[p_Habbo->GetRoomGUID()];
+            l_Points.Habbo = p_Habbo;
+            l_Points.Path = l_Path.GetPath();
         }
-        
-        PathFindingData& l_Points = m_Paths[p_Habbo->GetRoomGUID()];
-        l_Points.Habbo            = p_Habbo;
-        l_Points.Path             = l_Path.GetPath();
     }
 
     /// Update 
@@ -232,16 +251,19 @@ namespace SteerStone
         {
             PathFindingData& l_Path = l_Itr->second;
             if (l_Path.Path.empty())
+            {
+                SendPacketToAll(l_Path.Habbo->SendUpdateStatusStop());
                 l_Itr = m_Paths.erase(l_Itr);
+            }
             else
             {
                 /// Retrieve our next way point
                 Position& l_Position = l_Path.Path.back();
 
+                SendPacketToAll(l_Path.Habbo->SendUpdateStatusWalk(l_Position.X, l_Position.Y, l_Position.Z));
+
                 /// Remove our way point
                 l_Path.Path.pop_back();
-
-                LOG_DEBUG << l_Position.X << " " << l_Position.Y;
 
                 ++l_Itr;
             }

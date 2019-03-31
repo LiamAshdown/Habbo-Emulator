@@ -23,6 +23,13 @@
 
 namespace SteerStone
 {
+    /// Determines if tile state is open to walk on or closed
+    enum TileState
+    {
+        TILE_STATE_OPEN         = 0,
+        TILE_STATE_CLOSED       = 1
+    };
+
     /// This stores the 8 directions we can go
     ///<          \|/
     ///<        -- | --
@@ -32,6 +39,7 @@ namespace SteerStone
     {
         int16 X;
         int16 Y;
+        int16 Z;
     };
 
     /// Holds information about node, used to calculate which node is closest to end position
@@ -72,7 +80,7 @@ namespace SteerStone
     public:
         /// Constructor
         /// @p_Grid : Multi-dimensional array which stores the heightmap
-        PathFinder(GridArray const& p_Grid);
+        PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid);
 
         /// Deconstructor
         ~PathFinder();
@@ -83,7 +91,7 @@ namespace SteerStone
         /// @p_StartY : Start Position Y
         /// @p_EndX : End Position X
         /// @p_EndY : End Position Y
-        void CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const& p_EndX, int16 const& p_EndY);
+        bool CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const& p_EndX, int16 const& p_EndY);
 
         /// GetPath
         /// Returns path we've found
@@ -92,8 +100,14 @@ namespace SteerStone
     private:
         /// CheckValidTile
         /// Check if there's any collision on this tile
+        /// @p_FuturePosition : Struct which holds future x, y coordinates
+        /// @p_CurrentPosition : Struct which holds current x, y coordinates
+        bool CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition);
+
+        /// CheckDestination
+        /// Check if destination coordinates is valid to make a path
         /// @p_Position : Struct which holds x, y coordinates
-        bool CheckValidTile(Position const& p_Position);
+        bool CheckDestination(Position const& p_Position);
 
         /// DoesNodeExist
         /// Check if node position exists in storage
@@ -113,7 +127,8 @@ namespace SteerStone
         void CleanUp();
 
     private:
-        GridArray m_Grid;                          ///< Holds height map in multi dimensional array
+        GridArray m_TileGrid;                      ///< Holds Tile Grid in multi dimensional array
+        GridArray m_HeightGrid;                    ///< Holds Height Grid in multi dimensional array
         Node* m_Current;                           ///< Current node we are accessing from m_OpenList or m_ClosedList
         std::vector<Position> m_Directions;        ///< Directions in which we can go
         std::deque<Position> m_Path;               ///< Holds our path points

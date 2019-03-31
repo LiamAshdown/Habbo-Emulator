@@ -41,7 +41,10 @@ namespace SteerStone
         friend class HabboSocket;
 
     public:
+        /// Constructor
         HabboBadgesStruct() : m_Badge(""), m_IsActive(false) {}
+
+        /// Deconstructor
         ~HabboBadgesStruct() {}
 
     public:
@@ -49,8 +52,8 @@ namespace SteerStone
         bool IsActive()        const { return m_IsActive; }
 
     private:
-        std::string m_Badge;
-        bool m_IsActive;
+        std::string m_Badge;                ///< Badge Name
+        bool m_IsActive;                    ///< Is badge active?
     }HabboBadgesData;
 
     /// Holds Habbo Club Subscription
@@ -60,15 +63,18 @@ namespace SteerStone
         friend class HabboSocket;
 
     public:
+        /// Constructor
         HabboClubSubscriptionStruct() : m_DaysRemaining(0), m_RemainingPeriods(0), m_DaysPassed(0),
         m_LastChecked(0) {}
+
+        /// Deconstructor
         ~HabboClubSubscriptionStruct() {}
 
     private:
-        std::string m_LastChecked;
-        uint32 m_DaysRemaining;
-        uint32 m_RemainingPeriods;
-        uint32 m_DaysPassed;
+        std::string m_LastChecked;              ///< Last time server checked if user should have habbo club
+        uint32 m_DaysRemaining;                 ///< Days remaining till habbo club expires
+        uint32 m_RemainingPeriods;              ///< How many periods (months) till habbo club exprires
+        uint32 m_DaysPassed;                    ///< Days passed since user has habbo club
     }HabboClubSubscriptionData;
 
     /// Holds Habbo Fuse Rights
@@ -78,7 +84,10 @@ namespace SteerStone
         friend class HabboSocket;
 
     public:
+        /// Constructor
         HabboFuseRightsStruct() : m_Rank(0), m_FuseRight("") {}
+
+        /// Deconstructor
         ~HabboFuseRightsStruct() {}
 
     public:
@@ -86,8 +95,8 @@ namespace SteerStone
         std::string GetFuseRight() const { return m_FuseRight; }
 
     private:
-        uint8 m_Rank;
-        std::string m_FuseRight;
+        uint8 m_Rank;                       ///< Rank of fuse right
+        std::string m_FuseRight;            ///< Fuse right string (accounts.rank_fuserights)
     }HabboFuseRightsData;
 
     class Room;
@@ -99,49 +108,197 @@ namespace SteerStone
         friend class HabboSocket;
 
     public:
+        /// Constructor
+        /// @p_HabboSocket -Socket is inheriting from
         Habbo(HabboSocket* p_HabboSocket);
+
+        /// Deconstructor
         ~Habbo();
 
     public:
-        /// Rooms
+
+        ///////////////////////////////////////////
+        //                 ROOMS
+        ///////////////////////////////////////////
+
+        /// SetRoom
+        /// @p_Room - Room Id which player is inside room
         bool SetRoom(std::shared_ptr<Room> p_Room);
+
+        /// GetRoom
+        /// Get room
         std::shared_ptr<Room> GetRoom() const;
+
+        /// DestroyRoom
+        /// Set Room to nullptr - player is no longer inside room
         void DestroyRoom();
 
-        /// Favourite Rooms
+        ///////////////////////////////////////////
+        //            FAVOURITE ROOMS
+        ///////////////////////////////////////////
+
+        /// SendFavouriteRooms
+        /// Send Favourite Rooms list to user
         void SendFavouriteRooms();
+
+        /// AddFavouriteRoom
+        /// @p_IsPublic - Is room public
+        /// @p_RoomId - Id of room
         void AddFavouriteRoom(bool const& p_IsPublic, uint32 const& p_RoomId);
+
+        /// RemoveFavouriteRoom
+        /// @p_RoomId - Id of room
         void RemoveFavouriteRoom(uint32 const& p_RoomId);
+
+        /// SaveFavouriteRoomToDB
+        /// Update Favourite Rooms to database
         void SaveFavouriteRoomToDB();
 
-        /// Messenger
-        void SendInitializeMessenger();
-        void MessengerAcceptRequest(uint32 const& p_SenderId);
-        void SendMessengerUpdate();
-        void SendSearchUserResults(std::string const& p_Name);
-        void MessengerSendFriendRequest(std::string const& p_Name);
-        void MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
-        void MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
-        void MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
-        void MessengerReply(uint32 const& p_MessageId);
+        ///////////////////////////////////////////
+        //           MESSENGER CONSOLE
+        ///////////////////////////////////////////
 
-        /// Objects
+        /// SendInitializeMessenger
+        /// Send Initialize console on user login
+        void SendInitializeMessenger();
+
+        /// MessengerAcceptRequest
+        /// @p_SenderId - Id of room
+        void MessengerAcceptRequest(uint32 const p_SenderId);
+
+        /// SendMessengerUpdate
+        /// Update messenger status
+        void SendMessengerUpdate();
+
+        /// SendSearchUserResults
+        /// @p_Name - Room name user is searching for
+        void SendSearchUserResults(std::string const p_Name);
+
+        /// MessengerSendFriendRequest
+        /// @p_Name - Name of friend user is sending request for
+        void MessengerSendFriendRequest(std::string const p_Name);
+
+        /// MessengerRemoveFriend
+        /// @p_Packet - Client packet which is being decoded
+        void MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
+
+        /// MessengerRejectRequest
+        /// @p_Packet - Client packet which is being decoded
+        void MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
+
+        /// MessengerSendMessage
+        /// @p_Packet - Client packet which is being decoded
+        void MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
+
+        /// MessengerReply
+        /// @p_MessageId - Id of message (account id)
+        void MessengerReply(uint32 const p_MessageId);
+
+        ///////////////////////////////////////////
+        //             USER OBJECTS
+        ///////////////////////////////////////////
+
+        /// SendHabboObject
+        /// Send user object on login
         void SendHabboObject();
 
-        /// Account Info
+        /// SendUpdateStatusWalk
+        /// @p_X - X axis on new position
+        /// @p_Y - Y axis on new position
+        /// @p_Z - Z axis on new position
+        StringBuffer SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z);
+
+        /// SendUpdateStatusStop
+        /// Send Status stop when user finishes path
+        StringBuffer SendUpdateStatusStop();
+
+        /// UpdateUserRotation
+        /// @p_X - X Axis current position
+        /// @p_Y - Y Axis current position
+        void UpdateUserRotation(int16 const p_X, int16 const p_Y);
+
+        /// UpdateUserRotation
+        /// @p_X - X axis on new position
+        /// @p_Y - Y axis on new position
+        uint8 CalculateUserRotation(int16 const p_X, int16 const p_Y);
+
+        /// GetStatus
+        /// Get current status on what user is doing
+        std::string GetStatus();
+
+        /// SendUpdateStatusWalk
+        /// @p_X - X axis on new position
+        /// @p_Y - Y axis on new position
+        /// @p_Z - Z axis on new position
+        /// @p_Rotation - New Rotation
+        void UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_Rotation);
+
+        ///////////////////////////////////////////
+        //             ACCOUNT INFO
+        ///////////////////////////////////////////
+
+        /// SendAccountPreferences
+        /// Send user account preferences (set from users.account database)
         void SendAccountPreferences();
+
+        /// SendAccountBadges
+        /// Send user account badges (set from users.account_badges database)
         void SendAccountBadges();
+
+        /// SendFuseRights
+        /// Send user account rights (set from users.rank_fuserights database)
         void SendFuseRights();
+
+        /// SendClubStatus
+        /// Send user account club status (set from users.club_subscriptions database)
         void SendClubStatus();
 
-        /// Habbo Info
+        ///////////////////////////////////////////
+        //             HABBO INFO
+        ///////////////////////////////////////////
+
+        /// InitializeHabboData
+        /// Initialize Habbo Info data when user logs in
         void InitializeHabboData();
-        void UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O);
+
+        /// Update
+        /// Update Habbo user
+        /// @p_Diff - Tick Timer
         bool Update(uint32 const& p_Diff);
+
+        /// Logout
+        /// @p_Reason - Logout reason (enum LogoutReason)
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);
 
     public:
-        /// Habbo Info
+        ///////////////////////////////////////////
+        //                 ROOMS
+        ///////////////////////////////////////////
+
+        void SetIsWalking(bool const p_Walking){ m_Walking = p_Walking;        }
+        bool IsWalking()                  const{ return m_Walking;             }
+        uint32 GetRoomGUID()             const { return m_RoomGUID;            }
+        void SetRoomGUID(uint32 const& p_GUID) { m_RoomGUID = p_GUID;          }
+
+        ///////////////////////////////////////////
+        //           MESSENGER CONSOLE
+        ///////////////////////////////////////////
+
+        bool CanSendMail()              const  { return m_DirectMail;           }
+        bool AcceptsFriendRequests()    const  { return m_AcceptFriendRequests; }
+
+        ///////////////////////////////////////////
+        //             ACCOUNT INFO
+        ///////////////////////////////////////////
+
+        bool IsSoundEnabled()           const { return m_SoundEnabled;         }
+        bool IsPonged()                 const { return m_Ponged;               }
+        uint8 GetRank()                 const { return m_Rank;                 }
+
+        ///////////////////////////////////////////
+        //             HABBO INFO
+        ///////////////////////////////////////////
+
         std::string GetName()           const { return m_Name;                 }
         std::string GetEmail()          const { return m_Email;                }
         std::string GetFigure()         const { return m_Figure;               }
@@ -158,33 +315,30 @@ namespace SteerStone
         uint32 GetId()                  const { return m_Id;                   }
         uint32 GetTickets()             const { return m_Credits;              }
 
-        int16 GetPositionX()            const { return m_PositionX;            }
-        int16 GetPositionY()            const { return m_PositionY;            }
-        int16 GetPositionZ()            const { return m_PositionZ;            }
-        int16 GetOrientation()          const { return m_Orientation;          }
-
-        uint8 GetRank()                 const { return m_Rank;                 }
-
-        bool CanSendMail()              const { return m_DirectMail;           }
         bool IsInitialized()            const { return m_Initialized;          }
         bool GetReadAgreement()         const { return m_ReadAgreement;        }
         bool GetSpecialRights()         const { return m_SpecialRights;        }
-        bool IsSoundEnabled()           const { return m_SoundEnabled;         }
-        bool AcceptsFriendRequests()    const { return m_AcceptFriendRequests; }
-        bool IsPonged()                 const { return m_Ponged;               }
 
-        /// Room Info
-        uint32 GetRoomGUID()             const { return m_RoomGUID;            }
-        void SetRoomGUID(uint32 const& p_GUID) { m_RoomGUID = p_GUID;          }
+        ///////////////////////////////////////////
+        //             USER OBJECTS
+        ///////////////////////////////////////////
+
+        int16 GetPositionX()            const { return m_PositionX;            }
+        int16 GetPositionY()            const { return m_PositionY;            }
+        int16 GetPositionZ()            const { return m_PositionZ;            }
+        uint8 GetBodyRotation()         const { return m_BodyRotation;         }
+        uint8 GetHeadRotation()         const { return m_HeadRotation;         }
 
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket; }
 
     private:
-        /// SendPing - Send Ping response to client
+        /// SendPing
+        /// Send Ping response to client
         void SendPing();
 
     private:
-        /// Habbo Info
+        /// Variables
+        /// This can be in any order
         std::string m_Name;
         std::string m_Password;
         std::string m_Email;
@@ -204,6 +358,7 @@ namespace SteerStone
         bool m_SoundEnabled;
         bool m_AcceptFriendRequests;
         bool m_Ponged;
+        bool m_Walking;
 
         uint32 m_Id;
         uint32 m_Credits;
@@ -217,11 +372,12 @@ namespace SteerStone
         int16 m_PositionX;
         int16 m_PositionY;
         int16 m_PositionZ;
-        int16 m_Orientation;
+        uint8 m_BodyRotation;
+        uint8 m_HeadRotation;
 
         uint8 m_Rank;
 
-        /// Variables
+        /// Storages
         std::weak_ptr<Room> m_Room;
         std::vector<HabboFuseRightsData> m_FuseRights;
         std::vector<HabboBadgesData> m_Badges;

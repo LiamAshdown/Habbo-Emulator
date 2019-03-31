@@ -24,19 +24,23 @@
 #include "Opcode/Packets/Server/FavouriteRoomPackets.h"
 #include "Opcode/Packets/Server/HabboInfoPackets.h"
 #include "Opcode/Packets/Server/MiscPackets.h"
+#include "Opcode/Packets/Server/RoomPackets.h"
 
 namespace SteerStone
 {
+    /// Constructor
+    /// @p_HabboSocket -Socket is inheriting from
     Habbo::Habbo(HabboSocket* p_HabboSocket)
         : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr), m_RoomGUID(0)
     {
-        m_PingInterval = sConfig->GetIntDefault("PongInterval", 30000);
-        m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
+        m_PingInterval    = sConfig->GetIntDefault("PongInterval", 30000);
+        m_UpdateAccount   = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
         m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
 
         SendPing();
     }
 
+    /// Deconstructor
     Habbo::~Habbo()
     {
         m_Messenger.reset();
@@ -51,10 +55,12 @@ namespace SteerStone
         }
     }
 
-    //////////////////////////////////////////////
-    //                ROOMS
-    /////////////////////////////////////////////
+    ///////////////////////////////////////////
+    //                 ROOMS
+    ///////////////////////////////////////////
 
+    /// SetRoom
+    /// @p_Room - Room Id which player is inside room
     bool Habbo::SetRoom(std::shared_ptr<Room> p_Room)
     {
         if (GetRoom())
@@ -68,11 +74,15 @@ namespace SteerStone
         return false;
     }
 
+    /// GetRoom
+    /// Get room
     std::shared_ptr<Room> Habbo::GetRoom() const
     {
         return m_Room.lock();
     }
 
+    /// DestroyRoom
+    /// Set Room to nullptr - player is no longer inside room
     void Habbo::DestroyRoom()
     {
         if (auto l_Room = m_Room.lock())
@@ -80,9 +90,11 @@ namespace SteerStone
     }
 
     //////////////////////////////////////////////
-    //            FAVOURITE ROOM
+    //            FAVOURITE ROOMS
     /////////////////////////////////////////////
 
+    /// SendFavouriteRooms
+    /// Send Favourite Rooms list to user
     void Habbo::SendFavouriteRooms()
     {
         HabboPacket::FavouriteRoom::FavouriteRoomResult l_Packet;
@@ -90,25 +102,34 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
+    /// AddFavouriteRoom
+    /// @p_IsPublic - Is room public
+    /// @p_RoomId - Id of room
     void Habbo::AddFavouriteRoom(bool const& p_IsPublic, uint32 const& p_RoomId)
     {
         m_FavouriteRooms->AddFavouriteRoom(p_IsPublic, p_RoomId);
     }
 
+    /// RemoveFavouriteRoom
+    /// @p_RoomId - Id of room
     void Habbo::RemoveFavouriteRoom(uint32 const& p_RoomId)
     {
         m_FavouriteRooms->RemoveFavouriteRoom(p_RoomId);
     }
 
+    /// SaveFavouriteRoomToDB
+    /// Update Favourite Rooms to database
     void Habbo::SaveFavouriteRoomToDB()
     {
         m_FavouriteRooms->SaveToDB();
     }
 
-    //////////////////////////////////////////////
-    //              MESSENGER
-    /////////////////////////////////////////////
+    ///////////////////////////////////////////
+    //           MESSENGER CONSOLE
+    ///////////////////////////////////////////
 
+    /// SendInitializeMessenger
+    /// Send Initialize console on user login
     void Habbo::SendInitializeMessenger()
     {
         HabboPacket::Messenger::MessengerInitialize l_Packet;
@@ -125,7 +146,9 @@ namespace SteerStone
         m_Messenger->LoadMessengerMessages();
     }
 
-    void Habbo::MessengerAcceptRequest(uint32 const& p_SenderId)
+    /// MessengerAcceptRequest
+    /// @p_SenderId - Id of room
+    void Habbo::MessengerAcceptRequest(uint32 const p_SenderId)
     {
         /// Is friend list full?
         if (m_Messenger->IsFriendListFull())
@@ -139,6 +162,8 @@ namespace SteerStone
         m_Messenger->ParseMessengerAcceptFriendRequest(p_SenderId);
     }
 
+    /// SendMessengerUpdate
+    /// Update messenger status
     void Habbo::SendMessengerUpdate()
     {
         HabboPacket::Messenger::MessengerUpdate l_Packet;
@@ -146,7 +171,9 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
-    void Habbo::SendSearchUserResults(std::string const& p_Name)
+    /// SendSearchUserResults
+    /// @p_Name - Room name user is searching for
+    void Habbo::SendSearchUserResults(std::string const p_Name)
     {
         HabboPacket::Messenger::MessengerFindUserResult l_Packet;
         l_Packet.Messenger = "MESSENGER";
@@ -154,7 +181,9 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
-    void Habbo::MessengerSendFriendRequest(std::string const & p_Name)
+    /// MessengerSendFriendRequest
+    /// @p_Name - Name of friend user is sending request for
+    void Habbo::MessengerSendFriendRequest(std::string const p_Name)
     {
         /// Is friend list full?
         if (m_Messenger->IsFriendListFull())
@@ -168,45 +197,176 @@ namespace SteerStone
         m_Messenger->ParseMessengerSendFriendRequest(p_Name);
     }
 
+    /// MessengerRemoveFriend
+   /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Messenger->ParseMessengerRemoveFriend(std::move(p_Packet));
     }
 
+    /// MessengerRejectRequest
+    /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Messenger->ParseMessengerRejectRequest(std::move(p_Packet));
     }
 
+    /// MessengerSendMessage
+    /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Messenger->ParseMessengerSendMessage(std::move(p_Packet));
     }
 
-    void Habbo::MessengerReply(uint32 const& p_MessageId)
+    /// MessengerReply
+    /// @p_MessageId - Id of message (account id)
+    void Habbo::MessengerReply(uint32 const p_MessageId)
     {
         m_Messenger->ReadMessage(p_MessageId);
     }
 
+    ///////////////////////////////////////////
+    //             USER OBJECTS
+    ///////////////////////////////////////////
 
-    //////////////////////////////////////////////
-    //              HABBO INFO
-    /////////////////////////////////////////////
-
+    /// SendHabboObject
+    /// Send user object on login
     void Habbo::SendHabboObject()
     {
         HabboPacket::HabboInfo::HabboObject l_Packet;
-        l_Packet.Id = std::to_string(m_Id);
-        l_Packet.Name = m_Name;
-        l_Packet.Figure = m_Figure;
-        l_Packet.Gender = m_Gender;
-        l_Packet.Motto = m_Motto;
-        l_Packet.Tickets = m_Tickets;
-        l_Packet.PoolFigure = m_PoolFigure;
-        l_Packet.Films = m_Films;
+        l_Packet.Id             = std::to_string(m_Id);
+        l_Packet.Name           = m_Name;
+        l_Packet.Figure         = m_Figure;
+        l_Packet.Gender         = m_Gender;
+        l_Packet.Motto          = m_Motto;
+        l_Packet.Tickets        = m_Tickets;
+        l_Packet.PoolFigure     = m_PoolFigure;
+        l_Packet.Films          = m_Films;
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
+    /// SendUpdateStatusWalk
+    /// @p_X - X axis on new position
+    /// @p_Y - Y axis on new position
+    /// @p_Z - Z axis on new position
+    StringBuffer Habbo::SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z)
+    {
+        HabboPacket::Room::UserUpdateStatus l_Packet;
+        l_Packet.GUID           = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX       = std::to_string(GetPositionX());
+        l_Packet.CurrentY       = std::to_string(GetPositionY());
+        l_Packet.CurrentZ       = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
+        l_Packet.Status         = GetStatus();
+        l_Packet.NewX           = std::to_string(p_X);
+        l_Packet.NewY           = std::to_string(p_Y);
+        l_Packet.NewZ           = std::to_string(p_Z);
+
+        /// Set our new position
+        int16 l_Rotation = CalculateUserRotation(p_X, p_Y);
+        UpdatePosition(p_X, p_Y, p_Z, l_Rotation);
+        
+        return *l_Packet.Write();
+    }
+
+    /// SendUpdateStatusStop
+    /// Send Status stop when user finishes path
+    StringBuffer Habbo::SendUpdateStatusStop()
+    {
+        SetIsWalking(false);
+
+        HabboPacket::Room::UserUpdateStatus l_Packet;
+        l_Packet.GUID           = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX       = std::to_string(GetPositionX());
+        l_Packet.CurrentY       = std::to_string(GetPositionY());
+        l_Packet.CurrentZ       = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
+        l_Packet.Status         = GetStatus();
+
+        return *l_Packet.Write();
+    }
+
+    /// UpdateUserRotation
+    /// @p_X - X Axis current position
+    /// @p_Y - Y Axis current position
+    void Habbo::UpdateUserRotation(int16 const p_X, int16 const p_Y)
+    {
+        int16 l_Rotation = CalculateUserRotation(p_X, p_Y);
+        m_BodyRotation = l_Rotation;
+        m_HeadRotation = l_Rotation;
+
+        HabboPacket::Room::UserUpdateStatus l_Packet;
+        l_Packet.GUID           = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX       = std::to_string(GetPositionX());
+        l_Packet.CurrentY       = std::to_string(GetPositionY());
+        l_Packet.CurrentZ       = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
+        l_Packet.Status         = GetStatus();
+        
+        ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// UpdateUserRotation
+    /// @p_X - X axis on new position
+    /// @p_Y - Y axis on new position
+    uint8 Habbo::CalculateUserRotation(int16 const p_X, int16 const p_Y)
+    {
+        uint8 l_Rotation = 0;
+        if (GetPositionX() > p_X && GetPositionY() > p_Y)
+            l_Rotation = 7;
+        else if (GetPositionX() < p_X && GetPositionY() < p_Y)
+            l_Rotation = 3;
+        else if (GetPositionX() > p_X && GetPositionY() < p_Y)
+            l_Rotation = 5;
+        else if (GetPositionX() < p_X && GetPositionY() > p_Y)
+            l_Rotation = 1;
+        else if (GetPositionX() > p_X)
+            l_Rotation = 6;
+        else if (GetPositionX() < p_X)
+            l_Rotation = 2;
+        else if (GetPositionY() < p_Y)
+            l_Rotation = 4;
+        else if (GetPositionY() > p_Y)
+            l_Rotation = 0;
+
+        return l_Rotation;
+    }
+
+    /// GetStatus
+    /// Get current status on what user is doing
+    std::string Habbo::GetStatus()
+    {
+        std::string l_Status;
+
+        if (IsWalking())
+            l_Status = "mv";
+
+        return l_Status;
+    }
+
+    /// SendUpdateStatusWalk
+    /// @p_X - X axis on new position
+    /// @p_Y - Y axis on new position
+    /// @p_Z - Z axis on new position
+    /// @p_Rotation - New Rotation
+    void Habbo::UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O)
+    {
+        m_PositionX = p_X;
+        m_PositionY = p_Y;
+        m_PositionZ = p_Z;
+        m_BodyRotation = p_O;
+        m_HeadRotation = p_O;
+    }
+
+    ///////////////////////////////////////////
+    //             ACCOUNT INFO
+    ///////////////////////////////////////////
+
+    /// SendAccountPreferences
+    /// Send user account preferences (set from users.account database)
     void Habbo::SendAccountPreferences()
     {
         HabboPacket::HabboInfo::AccountPreferences l_Packet;
@@ -215,6 +375,8 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
+    /// SendAccountBadges
+    /// Send user account badges (set from users.account_badges database)
     void Habbo::SendAccountBadges()
     {
         HabboPacket::HabboInfo::AvailableBadges l_Packet;
@@ -230,6 +392,8 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
+    /// SendFuseRights
+    /// Send user account rights (set from users.rank_fuserights database)
     void Habbo::SendFuseRights()
     {
         HabboPacket::HabboInfo::FuseRights l_Packet;
@@ -240,11 +404,19 @@ namespace SteerStone
         ToSocket()->SendPacket(l_Packet.Write());
     }
 
+    /// SendClubStatus
+    /// Send user account club status (set from users.club_subscriptions database)
     void Habbo::SendClubStatus()
     {
         // TODO;
     }
 
+    ///////////////////////////////////////////
+    //             HABBO INFO
+    ///////////////////////////////////////////
+
+    /// InitializeHabboData
+    /// Initialize Habbo Info data when user logs in
     void Habbo::InitializeHabboData()
     {
         m_Messenger = std::make_unique<Messenger>(this);
@@ -254,14 +426,9 @@ namespace SteerStone
         m_FavouriteRooms->LoadFavouriteRooms();
     }
 
-    void Habbo::UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O)
-    {
-        m_PositionX = p_X;
-        m_PositionY = p_Y;
-        m_PositionZ = p_Z;
-        m_Orientation = p_O;
-    }
-
+    /// Update
+    /// Update Habbo user
+    /// @p_Diff - Tick Timer
     bool Habbo::Update(uint32 const& p_Diff)
     {
         std::lock_guard<std::mutex> l_Guard(m_Mutex);
@@ -313,6 +480,8 @@ namespace SteerStone
             return false;
     }
 
+    /// Logout
+    /// @p_Reason - Logout reason (enum LogoutReason)
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
         SaveFavouriteRoomToDB();
@@ -333,7 +502,8 @@ namespace SteerStone
         }
     }
 
-    /// SendPing - Send Ping response to client
+    /// SendPing
+    /// Send Ping response to client
     void Habbo::SendPing()
     {
         m_Ponged = false;
