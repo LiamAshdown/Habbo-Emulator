@@ -80,7 +80,7 @@ namespace SteerStone
             if (l_ItrPath != m_Paths.end())
             {
                 /// Gets removed on next room update
-                l_ItrPath->second.Path.clear();
+                l_ItrPath->second->GetPath().clear();
             }
 
             /// Set Habbo room to nullptr
@@ -214,9 +214,10 @@ namespace SteerStone
     {
         boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
 
+        std::unique_ptr<WayPoints> l_WayPoints = std::make_unique<WayPoints>(GetRoomModel().GetTileGrid(), GetRoomModel().GetHeightGrid());
+  
         /// Calculate the path
-        PathFinder l_Path(GetRoomModel().GetTileGrid(), GetRoomModel().GetHeightGrid());
-        if (l_Path.CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY))
+        if (l_WayPoints->CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY))
         {
             /// Update user rotation before we send movement packets,
             /// so we don't look like we're moonwalking
@@ -227,16 +228,15 @@ namespace SteerStone
             if (l_Itr != m_Paths.end())
             {
                 /// Clear our paths, and insert in our new path
-                l_Itr->second.Path.clear();
-                l_Itr->second.Path = l_Path.GetPath();
+                l_Itr->second->GetPath().clear();
+                l_Itr->second->GetPath() = l_WayPoints->GetPath();
                 return;
             }
 
             p_Habbo->SetIsWalking(true);
+            l_WayPoints->m_Habbo = p_Habbo;
 
-            PathFindingData& l_Points = m_Paths[p_Habbo->GetRoomGUID()];
-            l_Points.Habbo = p_Habbo;
-            l_Points.Path = l_Path.GetPath();
+            m_Paths[p_Habbo->GetRoomGUID()] = std::move(l_WayPoints);
         }
     }
 
@@ -249,21 +249,20 @@ namespace SteerStone
         /// Loop through all current paths
         for (auto& l_Itr = m_Paths.begin(); l_Itr != m_Paths.end();)
         {
-            PathFindingData& l_Path = l_Itr->second;
-            if (l_Path.Path.empty())
+            if (l_Itr->second->GetPath().empty())
             {
-                SendPacketToAll(l_Path.Habbo->SendUpdateStatusStop());
+                SendPacketToAll(l_Itr->second->ToHabbo()->SendUpdateStatusStop());
                 l_Itr = m_Paths.erase(l_Itr);
             }
             else
             {
                 /// Retrieve our next way point
-                Position& l_Position = l_Path.Path.back();
+                Position const& l_Position = l_Itr->second->GetPath().back();
 
-                SendPacketToAll(l_Path.Habbo->SendUpdateStatusWalk(l_Position.X, l_Position.Y, l_Position.Z));
+                SendPacketToAll(l_Itr->second->ToHabbo()->SendUpdateStatusWalk(l_Position.X, l_Position.Y, l_Position.Z));
 
                 /// Remove our way point
-                l_Path.Path.pop_back();
+                l_Itr->second->GetPath().pop_back();
 
                 ++l_Itr;
             }

@@ -22,7 +22,8 @@
 namespace SteerStone
 {
     /// Constructor
-    /// @p_Grid : Multi-dimensional array which stores the heightmap
+    /// @p_TileGrid : Multi-dimensional array which stores the TileGrid
+    /// @p_HeightGrid : Multi-dimensional array which stores the HeightGrid
     PathFinder::PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid) : m_TileGrid(p_TileGrid), m_HeightGrid(p_HeightGrid)
     {
         /// 8 directions we can go
@@ -146,7 +147,7 @@ namespace SteerStone
 
     /// GetPath
     /// Returns path we've found
-    std::deque<Position> PathFinder::GetPath()
+    std::deque<Position>& PathFinder::GetPath()
     {
         return m_Path;
     }

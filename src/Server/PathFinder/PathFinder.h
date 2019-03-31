@@ -26,8 +26,9 @@ namespace SteerStone
     /// Determines if tile state is open to walk on or closed
     enum TileState
     {
-        TILE_STATE_OPEN         = 0,
-        TILE_STATE_CLOSED       = 1
+        TILE_STATE_OPEN         = 0,            ///< User can walk on tile
+        TILE_STATE_CLOSED       = 1,            ///< User cannot walk on tile
+        TILE_STATE_SIT          = 2             ///< User can sit on tile
     };
 
     /// This stores the 8 directions we can go
@@ -79,7 +80,8 @@ namespace SteerStone
     {
     public:
         /// Constructor
-        /// @p_Grid : Multi-dimensional array which stores the heightmap
+        /// @p_TileGrid : Multi-dimensional array which stores the TileGrid
+        /// @p_HeightGrid : Multi-dimensional array which stores the HeightGrid
         PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid);
 
         /// Deconstructor
@@ -95,7 +97,7 @@ namespace SteerStone
 
         /// GetPath
         /// Returns path we've found
-        std::deque<Position> GetPath();
+        std::deque<Position>& GetPath();
 
     private:
         /// CheckValidTile

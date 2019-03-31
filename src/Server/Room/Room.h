@@ -24,6 +24,7 @@
 #include "PathFinder.h"
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <memory>
 #endif /* _ROOM_ROOM_h */
 
 namespace SteerStone
@@ -37,15 +38,28 @@ namespace SteerStone
     class Habbo;
     class StringBuffer;
 
-    /// Holds information about waypoints
-    typedef struct PathFindingStruct
+    /// Holds information about path points from PathFinder
+    class WayPoints : public PathFinder
     {
-        Habbo* Habbo;
-        std::deque<Position> Path;
+    public:
+        friend class Room;
 
-    }PathFindingData;
+    public:
+        /// Constructor
+        WayPoints(GridArray const& p_TileGrid, GridArray const& p_HeightGrid) :
+            PathFinder(p_TileGrid, p_HeightGrid) {}
 
-    typedef std::unordered_map<uint32, PathFindingData> PathFinderMap;
+        /// Deconstructor
+        ~WayPoints() {}
+
+    public:
+        Habbo* ToHabbo() { return m_Habbo; }
+
+    private:
+        Habbo* m_Habbo;
+    };
+
+    typedef std::unordered_map<uint32, std::unique_ptr<WayPoints>> PathFinderMap;
     typedef std::unordered_map<uint32, Habbo*> GUIDUserMap;
 
     /// Class which holds information about hotel room and responsible for handling habbos inside room
