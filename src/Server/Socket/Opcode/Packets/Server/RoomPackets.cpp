@@ -203,18 +203,16 @@ namespace SteerStone
                 {
                     m_Buffer.AppendString(Status, false);
 
-                    LOG_INFO << "Height: " << NewZ;
-
                     m_Buffer.AppendString(" ");
                     m_Buffer.AppendStringDelimiter(NewX, ",");
                     m_Buffer.AppendStringDelimiter(NewY, ",");
                     m_Buffer.AppendString(NewZ, false);
                 }
+                else
+                    m_Buffer.AppendString(Status, false);
          
                 m_Buffer.AppendStringDelimiter("/", "\r");
                 m_Buffer.AppendSOH();
-
-                uint8* l_Test = &m_Buffer.m_Storage[0];
 
                 return &m_Buffer;
             }
@@ -222,6 +220,19 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-        } ///< NAMESPACE ROOM
+            StringBuffer const * LeaveRoom::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+} ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

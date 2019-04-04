@@ -24,10 +24,47 @@ namespace SteerStone
     {
         static std::default_random_engine s_Random(time(NULL));
 
+        /// GetRandomNumber
+        /// Return a random number in specified range
         uint32 GetRandomUint32(uint32 const p_Min, uint32 const p_Max)
         {
             std::uniform_int_distribution<uint32> l_Random(p_Min, p_Max);
             return l_Random(s_Random);
+        }
+
+        /// CalculateWalkDirection
+        /// @p_CurrentX - Current X axis
+        /// @p_CurrentY - Current Y axis
+        /// @p_NextX - X axis on new position
+        /// @p_NextY - Y axis on new position
+        /// Credit Quackster
+        inline int16 CalculateWalkDirection(int16 const p_CurrentX, int16 const p_CurrentY, int16 const p_NextX, int16 const p_NextY)
+        {
+            if (p_CurrentX == p_NextX)
+            {
+                if (p_CurrentY < p_NextY)
+                    return 4;
+                else
+                    return 0;
+            }
+            else if (p_CurrentX > p_NextX)
+            {
+                if (p_CurrentY == p_NextY)
+                    return 6;
+                else if (p_CurrentY < p_NextY)
+                    return 5;
+                else
+                    return 7;
+            }
+            else 
+            {
+                if (p_CurrentY == p_NextY)
+                    return 2;
+                else if (p_CurrentY < p_NextY)
+                    return 3;
+                else
+                    return 1;
+            }
         }
     } ///< NAMESPACE MATHS
 } ///< NAMESPACE STEERSTONE

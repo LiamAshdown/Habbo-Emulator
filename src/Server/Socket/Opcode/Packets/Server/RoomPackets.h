@@ -239,6 +239,20 @@ namespace SteerStone
                 std::string NewZ;
             };
 
+            /// SERVER_LEAVE_ROOM packet builder
+            class LeaveRoom final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                LeaveRoom() : ServerPacket(SERVER_LEAVE_ROOM) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 GUID;
+            };
+
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

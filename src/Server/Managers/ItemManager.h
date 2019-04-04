@@ -25,7 +25,7 @@
 
 namespace SteerStone
 {
-    typedef std::vector<PublicItem> PublicItemVec;
+    typedef std::vector<Item> PublicItemVec;
     typedef std::map<std::string, PublicItemVec> PublicItemMap;
 
     /// Class which holds item information
@@ -42,12 +42,18 @@ namespace SteerStone
         ~ItemManager();
         
     public:
-        /// LoadPublicRoomItems - Load Public items from database
+        /// LoadPublicRoomItems
+        /// Load Public items from database
         void LoadPublicRoomItems();
 
-        /// GetPublicRoomItems#
+        /// GetPublicRoomItems
         /// @p_Model : Room Model to retrieve furniture data
         PublicItemVec GetPublicRoomItems(std::string const& p_Model);
+
+        /// GetPublicItemByPosition
+        /// @p_X : X axis of public item position
+        /// @p_X : Y axis of public item position
+        Item* GetPublicItemByPosition(std::string const p_Model, const int16 p_X, int16 const p_Y);
 
     private:
         PublicItemMap m_PublicItems;                     ///< Map which holds Room Model as key and info of the item

@@ -17,7 +17,6 @@
 */
 
 #include "RoomManager.h"
-#include "ItemManager.h"
 #include "Database/QueryDatabase.h"
 
 namespace SteerStone
@@ -145,73 +144,7 @@ namespace SteerStone
             l_Room->m_RoomModel               = *GetRoomModel(l_Room->GetModel());
             l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
-
-            std::vector<std::string> l_Split;
-            boost::split(l_Split, l_Room->GetRoomModel().GetHeightMap(), boost::is_any_of("\r"));
-
-            l_Room->GetRoomModel().m_MapSizeY = l_Split.size();
-            l_Room->GetRoomModel().m_MapSizeX = l_Split[0].length();
-            l_Room->GetRoomModel().m_TileGrid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeX][l_Room->GetRoomModel().m_MapSizeY]);
-            l_Room->GetRoomModel().m_HeightGrid.resize(boost::extents[l_Room->GetRoomModel().m_MapSizeX][l_Room->GetRoomModel().m_MapSizeY]);
-      
-            for (int32 l_Y = 0; l_Y < l_Room->GetRoomModel().m_MapSizeY; l_Y++)
-            {
-                std::string l_Line = l_Split[l_Y];
-
-                for (int32 l_X = 0; l_X < l_Room->GetRoomModel().m_MapSizeX; l_X++)
-                {
-                    uint8 l_Tile = l_Line[l_X];
-
-                    if (std::isdigit(l_Tile))
-                    {
-                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_OPEN;
-                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = l_Tile - 48;
-                    }
-                    else
-                    {
-                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_CLOSED;
-                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = 0;
-                    }
-
-                    if (l_Room->GetRoomModel().GetDoorX() == l_X && l_Room->GetRoomModel().GetDoorY() == l_Y)
-                    {
-                        l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_OPEN;
-                        l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = l_Room->GetRoomModel().GetDoorZ();
-                    }
-                }
-            }
-
-            /// Load our static furniture
-            /// Furniture never changes in public rooms; e.g cannot move a chair
-            if (l_Room->GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
-            {
-                for (int32 l_Y = 0; l_Y < l_Room->GetRoomModel().m_MapSizeY; l_Y++)
-                {
-                    for (int32 l_X = 0; l_X < l_Room->GetRoomModel().m_MapSizeX; l_X++)
-                    {
-                        for (auto const& l_Itr : sItemMgr->GetPublicRoomItems(l_Room->GetModel()))
-                        {
-                            PublicItem const* l_Item = &l_Itr;
-
-                            if (l_Item->GetPositionX() == l_X && l_Item->GetPositionY() == l_Y)
-                            {
-                                if (l_Item->GetBehaviour() == "solid")
-                                {
-                                    l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_CLOSED;
-                                    l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = 0;
-                                }
-                                else if (l_Item->GetBehaviour() == "can_sit_on_top")
-                                {
-                                    l_Room->GetRoomModel().m_TileGrid[l_X][l_Y] = TileState::TILE_STATE_SIT;
-                                    l_Room->GetRoomModel().m_HeightGrid[l_X][l_Y] = l_Item->GetPositionZ();
-                                }
-                            }
-
-                        }
-
-                    }
-                }
-            }
+            l_Room->LoadGridData();
 
             m_Rooms[l_Room->GetId()] = std::move(l_Room);
 

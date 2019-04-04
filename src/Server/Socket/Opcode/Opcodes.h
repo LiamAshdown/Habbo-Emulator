@@ -113,6 +113,7 @@ enum PacketServerHeader : uint16
     SERVER_MESSENGER_REMOVE_FRIEND        = 138,
     SERVER_MESSENGER_SEND_MESSAGE         = 134,
     SERVER_USER_UPDATE_STATUS             = 34,
+    SERVER_LEAVE_ROOM                     = 29,
 };
 
 namespace SteerStone

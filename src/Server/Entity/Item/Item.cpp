@@ -15,19 +15,32 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//-----------------------------------------------//
+
 #include "Item.h"
-#include "Network/StringBuffer.h"
-//-----------------------------------------------//
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
+    /// Constructor
     Item::Item()
     {
+        m_Id = 0;
+        m_SpriteId = 0;
+        m_X = 0;
+        m_Y = 0;
+        m_Z = 0;
+        m_Rotation = 0;
+        m_TopHeight = 0;
+        m_Length = 0;
+        m_Width = 0;
+        m_DrinkId = 0;
+        m_Tradable = false;
+        m_Recycleable = false;
+
     }
+
+    /// Deconstructor
     Item::~Item()
     {
     }
-    //-----------------------------------------------//
+    
 }
-//-----------------------------------------------//

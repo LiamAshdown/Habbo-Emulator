@@ -20,8 +20,7 @@
 #define _ROOM_ROOM_h
 #include "Common/SharedDefines.h"
 #include "RoomCategory.h"
-#include "RoomModel.h"
-#include "PathFinder.h"
+#include "WayPoints.h"
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <memory>
@@ -37,27 +36,6 @@ namespace SteerStone
 
     class Habbo;
     class StringBuffer;
-
-    /// Holds information about path points from PathFinder
-    class WayPoints : public PathFinder
-    {
-    public:
-        friend class Room;
-
-    public:
-        /// Constructor
-        WayPoints(GridArray const& p_TileGrid, GridArray const& p_HeightGrid) :
-            PathFinder(p_TileGrid, p_HeightGrid) {}
-
-        /// Deconstructor
-        ~WayPoints() {}
-
-    public:
-        Habbo* ToHabbo() { return m_Habbo; }
-
-    private:
-        Habbo* m_Habbo;
-    };
 
     typedef std::unordered_map<uint32, std::unique_ptr<WayPoints>> PathFinderMap;
     typedef std::unordered_map<uint32, Habbo*> GUIDUserMap;
@@ -76,6 +54,11 @@ namespace SteerStone
         ~Room();
 
     public:
+
+        /// LoadGridData
+        /// Load Static and dynamic Grid Data
+        void LoadGridData();
+
         /// EnterRoom 
         /// @p_Habbo : Habbo user entering in room
         bool EnterRoom(Habbo* p_Habbo);
@@ -89,8 +72,9 @@ namespace SteerStone
         /// @p_Habbo : p_Habbo
         void SendNewUserObjectToRoom(Habbo* p_Habbo);
 
-        /// SendUserObjectToRoom - This function is used when habbo leaves room, and we need to update habbo objects again
-        void SendUserObjectToRoom();
+        /// SendUserObjectLeftRoom
+        /// This function is used when habbo leaves room, and we need to update habbo objects again
+        void SendUserObjectLeftRoom(uint32 const p_GUID);
 
         /// SendWorldObjects 
         /// @p_Habbo : Send Furniture Objects to Habbo client
@@ -99,7 +83,7 @@ namespace SteerStone
         /// SendPacketToAll
         /// Send Packet to all users in room
         /// @p_Buffer : Data being sent to users in room
-        void SendPacketToAll(StringBuffer& p_Buffer);
+        void SendPacketToAll(StringBuffer const* p_Buffer);
 
         /// SendObjects 
         /// @p_Habbo : Send Active Furniture Objects to Habbo client
@@ -109,7 +93,12 @@ namespace SteerStone
         /// @p_Habbo : Habbo class which is walking
         /// @p_EndX : End Position habbo is going to
         /// @p_EndY : End Position habbo is going to
-        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY);
+        /// @p_CheckDynamicObjects : Check for Dynamic Objects
+        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY, bool p_CheckDynamicObjects = false);
+
+        /// UpdateObjectsPaths
+        /// Update all current paths
+        void UpdateObjectsPaths(const uint32 p_Diff);
 
         /// Update 
         /// @p_Diff : Update the room

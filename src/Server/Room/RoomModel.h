@@ -19,22 +19,36 @@
 #ifndef _ROOM_ROOM_MODEL_h
 #define _ROOM_ROOM_MODEL_h
 #include "Common/SharedDefines.h"
+#include "TileInstance.h"
 #endif /* _ROOM_ROOM_MODEL_h */
 
 namespace SteerStone
 {
+    typedef boost::multi_array<TileInstance*, 2> DynamicTileGridArray;
+
     /// Class which holds Room Model information
     class RoomModel
     {
     public:
         friend class RoomManager;
+        friend class Room;
 
     public:
         /// Constructor
         RoomModel() {}
         
         /// Deconstructor
-        ~RoomModel() {}
+        ~RoomModel() 
+        {
+            /// Delete Tile Instances
+            for (int32 l_Y = 0; l_Y < m_MapSizeY; l_Y++)
+            {
+                for (int32 l_X = 0; l_X < m_MapSizeX; l_X++)
+                {
+                    delete DynamicTileGrid[l_X][l_Y];
+                }
+            }
+        }
 
     public:
         /// Room Info
@@ -46,8 +60,10 @@ namespace SteerStone
         float GetDoorZ()            const { return m_DoorZ;           }
         int32 GetDoorOrientation()  const { return m_DoorOrientation; }
         std::string GetHeightMap()  const { return m_HeightMap;       }
-        GridArray GetTileGrid()           { return m_TileGrid;        }
-        GridArray GetHeightGrid()         { return m_HeightGrid;      }
+        int32 GetMaxGridX()         const { return m_MapSizeX;        }
+        int32 GetMaxGridY()         const { return m_MapSizeY;        }
+
+        DynamicTileGridArray DynamicTileGrid;
 
     private:
         /// Variables
@@ -61,9 +77,5 @@ namespace SteerStone
         std::string m_HeightMap;
         int32 m_MapSizeX;
         int32 m_MapSizeY;
-        GridArray m_TileGrid;
-        GridArray m_HeightGrid;
-        int32 m_GridXSize;
-        int32 m_GridYSize;
     };
 } ///< NAMESPACE STEERSTONE

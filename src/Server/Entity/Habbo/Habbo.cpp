@@ -17,6 +17,7 @@
 */
 
 #include "Habbo.h"
+#include "Common/Maths.h"
 #include "Hotel.h"
 #include "RoomManager.h"
 #include "Opcode/Packets/Server/HabboInfoPackets.h"
@@ -34,7 +35,6 @@ namespace SteerStone
         : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr), m_RoomGUID(0)
     {
         m_PingInterval    = sConfig->GetIntDefault("PongInterval", 30000);
-        m_UpdateAccount   = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
         m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
 
         SendPing();
@@ -86,7 +86,10 @@ namespace SteerStone
     void Habbo::DestroyRoom()
     {
         if (auto l_Room = m_Room.lock())
+        {
             l_Room.reset();
+            m_RoomGUID = 0;
+        }
     }
 
     //////////////////////////////////////////////
@@ -249,30 +252,34 @@ namespace SteerStone
     /// @p_X - X axis on new position
     /// @p_Y - Y axis on new position
     /// @p_Z - Z axis on new position
-    StringBuffer Habbo::SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z)
+    void Habbo::SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z, bool p_SendToRoom /*= true*/)
     {
+        /// Set our new position
+        int16 l_Rotation = Maths::CalculateWalkDirection(GetPositionX(), GetPositionY(), p_X, p_Y);
+
         HabboPacket::Room::UserUpdateStatus l_Packet;
         l_Packet.GUID           = std::to_string(GetRoomGUID());
         l_Packet.CurrentX       = std::to_string(GetPositionX());
         l_Packet.CurrentY       = std::to_string(GetPositionY());
         l_Packet.CurrentZ       = std::to_string(GetPositionZ());
-        l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
-        l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
+        l_Packet.BodyRotation   = std::to_string(l_Rotation);
+        l_Packet.HeadRotation   = std::to_string(l_Rotation);
         l_Packet.Status         = GetStatus();
         l_Packet.NewX           = std::to_string(p_X);
         l_Packet.NewY           = std::to_string(p_Y);
         l_Packet.NewZ           = std::to_string(p_Z);
 
-        /// Set our new position
-        int16 l_Rotation = CalculateUserRotation(p_X, p_Y);
+        if (p_SendToRoom)
+            GetRoom()->SendPacketToAll(l_Packet.Write());
+        else
+            ToSocket()->SendPacket(l_Packet.Write());
+
         UpdatePosition(p_X, p_Y, p_Z, l_Rotation);
-        
-        return *l_Packet.Write();
     }
 
     /// SendUpdateStatusStop
     /// Send Status stop when user finishes path
-    StringBuffer Habbo::SendUpdateStatusStop()
+    void Habbo::SendUpdateStatusStop(bool p_SendToRoom /*= true*/)
     {
         SetIsWalking(false);
 
@@ -285,54 +292,36 @@ namespace SteerStone
         l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
         l_Packet.Status         = GetStatus();
 
-        return *l_Packet.Write();
+        if (p_SendToRoom)
+            GetRoom()->SendPacketToAll(l_Packet.Write());
+        else
+            ToSocket()->SendPacket(l_Packet.Write());
     }
 
-    /// UpdateUserRotation
+    /// SendUpdateStatusSit
     /// @p_X - X Axis current position
     /// @p_Y - Y Axis current position
-    void Habbo::UpdateUserRotation(int16 const p_X, int16 const p_Y)
+    /// @p_Z - Z Axis current position
+    void Habbo::SendUpdateStatusSit(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation, bool p_SendToRoom /*= true*/)
     {
-        int16 l_Rotation = CalculateUserRotation(p_X, p_Y);
-        m_BodyRotation = l_Rotation;
-        m_HeadRotation = l_Rotation;
+        SetIsSitting(true);
+        SetIsWalking(false);
+
+        UpdatePosition(p_X, p_Y, p_Z, p_Rotation);
 
         HabboPacket::Room::UserUpdateStatus l_Packet;
-        l_Packet.GUID           = std::to_string(GetRoomGUID());
-        l_Packet.CurrentX       = std::to_string(GetPositionX());
-        l_Packet.CurrentY       = std::to_string(GetPositionY());
-        l_Packet.CurrentZ       = std::to_string(GetPositionZ());
-        l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
-        l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
-        l_Packet.Status         = GetStatus();
-        
-        ToSocket()->SendPacket(l_Packet.Write());
-    }
+        l_Packet.GUID = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX = std::to_string(GetPositionX());
+        l_Packet.CurrentY = std::to_string(GetPositionY());
+        l_Packet.CurrentZ = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation = std::to_string(GetHeadRotation());
+        l_Packet.Status = GetStatus();
 
-    /// UpdateUserRotation
-    /// @p_X - X axis on new position
-    /// @p_Y - Y axis on new position
-    uint8 Habbo::CalculateUserRotation(int16 const p_X, int16 const p_Y)
-    {
-        uint8 l_Rotation = 0;
-        if (GetPositionX() > p_X && GetPositionY() > p_Y)
-            l_Rotation = 7;
-        else if (GetPositionX() < p_X && GetPositionY() < p_Y)
-            l_Rotation = 3;
-        else if (GetPositionX() > p_X && GetPositionY() < p_Y)
-            l_Rotation = 5;
-        else if (GetPositionX() < p_X && GetPositionY() > p_Y)
-            l_Rotation = 1;
-        else if (GetPositionX() > p_X)
-            l_Rotation = 6;
-        else if (GetPositionX() < p_X)
-            l_Rotation = 2;
-        else if (GetPositionY() < p_Y)
-            l_Rotation = 4;
-        else if (GetPositionY() > p_Y)
-            l_Rotation = 0;
-
-        return l_Rotation;
+        if (p_SendToRoom)
+            GetRoom()->SendPacketToAll(l_Packet.Write());
+        else
+            ToSocket()->SendPacket(l_Packet.Write());
     }
 
     /// GetStatus
@@ -343,6 +332,8 @@ namespace SteerStone
 
         if (IsWalking())
             l_Status = "mv";
+        else if (IsSitting())
+            l_Status += "sit 1";
 
         return l_Status;
     }
@@ -352,13 +343,13 @@ namespace SteerStone
     /// @p_Y - Y axis on new position
     /// @p_Z - Z axis on new position
     /// @p_Rotation - New Rotation
-    void Habbo::UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_O)
+    void Habbo::UpdatePosition(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation)
     {
         m_PositionX = p_X;
         m_PositionY = p_Y;
         m_PositionZ = p_Z;
-        m_BodyRotation = p_O;
-        m_HeadRotation = p_O;
+        m_BodyRotation = p_Rotation;
+        m_HeadRotation = p_Rotation;
     }
 
     ///////////////////////////////////////////
@@ -435,28 +426,6 @@ namespace SteerStone
 
         if (m_Socket && !m_Socket->IsClosed())
         {
-            if (m_UpdateAccount < p_Diff)
-            {
-                QueryDatabase database("users");
-                database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?");
-                database.GetStatement()->setString(1, GetEmail());
-                database.GetStatement()->setString(2, GetFigure());
-                database.GetStatement()->setString(3, GetPoolFigure());
-                database.GetStatement()->setString(4, GetMotto());
-                database.GetStatement()->setString(5, GetConsoleMotto());
-                database.GetStatement()->setString(6, GetBirthday());
-                database.GetStatement()->setString(7, GetGender());
-                database.GetStatement()->setUInt(8, GetCredits());
-                database.GetStatement()->setUInt(9, GetTickets());
-                database.GetStatement()->setUInt(10, GetFilms());
-                database.GetStatement()->setBoolean(11, IsSoundEnabled());
-                database.ExecuteQuery();
-
-                m_UpdateAccount = sConfig->GetIntDefault("PlayerAccountUpdate", 600000);
-            }
-            else
-                m_UpdateAccount -= p_Diff;
-
             if (m_PingInterval < p_Diff)
             {
                 if (IsPonged())
@@ -484,7 +453,7 @@ namespace SteerStone
     /// @p_Reason - Logout reason (enum LogoutReason)
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
-        SaveFavouriteRoomToDB();
+        SaveToDB();
 
         if (GetRoom())
             GetRoom()->LeaveRoom(this);
@@ -500,6 +469,28 @@ namespace SteerStone
 
             m_Socket->DestroyHabbo();
         }
+    }
+
+    /// SaveToDB
+    /// Save Habbo data to database on logout
+    void Habbo::SaveToDB()
+    {
+        QueryDatabase database("users");
+        database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?");
+        database.GetStatement()->setString(1, GetEmail());
+        database.GetStatement()->setString(2, GetFigure());
+        database.GetStatement()->setString(3, GetPoolFigure());
+        database.GetStatement()->setString(4, GetMotto());
+        database.GetStatement()->setString(5, GetConsoleMotto());
+        database.GetStatement()->setString(6, GetBirthday());
+        database.GetStatement()->setString(7, GetGender());
+        database.GetStatement()->setUInt(8, GetCredits());
+        database.GetStatement()->setUInt(9, GetTickets());
+        database.GetStatement()->setUInt(10, GetFilms());
+        database.GetStatement()->setBoolean(11, IsSoundEnabled());
+        database.ExecuteQuery();
+
+        SaveFavouriteRoomToDB();
     }
 
     /// SendPing

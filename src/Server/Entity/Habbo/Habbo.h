@@ -206,21 +206,17 @@ namespace SteerStone
         /// @p_X - X axis on new position
         /// @p_Y - Y axis on new position
         /// @p_Z - Z axis on new position
-        StringBuffer SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z);
+        void SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z, bool p_SendToRoom = true);
 
         /// SendUpdateStatusStop
         /// Send Status stop when user finishes path
-        StringBuffer SendUpdateStatusStop();
+        void SendUpdateStatusStop(bool p_SendToRoom = true);
 
-        /// UpdateUserRotation
+        /// SendUpdateStatusSit
         /// @p_X - X Axis current position
         /// @p_Y - Y Axis current position
-        void UpdateUserRotation(int16 const p_X, int16 const p_Y);
-
-        /// UpdateUserRotation
-        /// @p_X - X axis on new position
-        /// @p_Y - Y axis on new position
-        uint8 CalculateUserRotation(int16 const p_X, int16 const p_Y);
+        /// @p_Z - Z Axis current position
+        void SendUpdateStatusSit(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation, bool p_SendToRoom = true);
 
         /// GetStatus
         /// Get current status on what user is doing
@@ -231,7 +227,7 @@ namespace SteerStone
         /// @p_Y - Y axis on new position
         /// @p_Z - Z axis on new position
         /// @p_Rotation - New Rotation
-        void UpdatePosition(int16 const& p_X, int16 const& p_Y, int16 const& p_Z, int16 const& p_Rotation);
+        void UpdatePosition(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation);
 
         ///////////////////////////////////////////
         //             ACCOUNT INFO
@@ -270,13 +266,14 @@ namespace SteerStone
         /// @p_Reason - Logout reason (enum LogoutReason)
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);
 
+        /// SaveToDB
+        /// Save Habbo data to database on logout
+        void SaveToDB();
+
     public:
         ///////////////////////////////////////////
         //                 ROOMS
         ///////////////////////////////////////////
-
-        void SetIsWalking(bool const p_Walking){ m_Walking = p_Walking;        }
-        bool IsWalking()                  const{ return m_Walking;             }
         uint32 GetRoomGUID()             const { return m_RoomGUID;            }
         void SetRoomGUID(uint32 const& p_GUID) { m_RoomGUID = p_GUID;          }
 
@@ -329,6 +326,12 @@ namespace SteerStone
         uint8 GetBodyRotation()         const { return m_BodyRotation;         }
         uint8 GetHeadRotation()         const { return m_HeadRotation;         }
 
+        void SetIsWalking(bool const p_Walking) { m_Walking = p_Walking;       }
+        bool IsWalking()                const { return m_Walking;              }
+
+        void SetIsSitting(bool const p_Sitting) { m_Sitting = p_Sitting;       }
+        bool IsSitting()                const { return m_Sitting;              }
+
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket; }
 
     private:
@@ -359,6 +362,7 @@ namespace SteerStone
         bool m_AcceptFriendRequests;
         bool m_Ponged;
         bool m_Walking;
+        bool m_Sitting;
 
         uint32 m_Id;
         uint32 m_Credits;
@@ -366,7 +370,6 @@ namespace SteerStone
         uint32 m_Films;
         uint32 m_MaxFriendsLimit;
         uint32 m_PingInterval;
-        uint32 m_UpdateAccount;
         uint32 m_RoomGUID;
 
         int16 m_PositionX;

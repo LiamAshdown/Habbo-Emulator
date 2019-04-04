@@ -120,6 +120,7 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_REMOVE_FRIEND,       "SERVER_MESSENGER_REMOVE_FRIEND",          &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_SEND_MESSAGE,        "SERVER_MESSENGER_SEND_MESSAGE",           &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_USER_UPDATE_STATUS,            "SERVER_USER_UPDATE_STATUS",               &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_LEAVE_ROOM,                    "SERVER_LEAVE_ROOM",                       &HabboSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";

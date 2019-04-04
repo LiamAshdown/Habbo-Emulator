@@ -17,14 +17,15 @@
 */
 
 #include "PathFinder.h"
-#include <chrono>
 
 namespace SteerStone
 {
     /// Constructor
-    /// @p_TileGrid : Multi-dimensional array which stores the TileGrid
-    /// @p_HeightGrid : Multi-dimensional array which stores the HeightGrid
-    PathFinder::PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid) : m_TileGrid(p_TileGrid), m_HeightGrid(p_HeightGrid)
+    /// @p_TileGrid : Dynamic Multi-dimensional array which stores the TileGrid
+    /// @p_MaxGridX : Max X Tile Grid
+    /// @p_MaxGridY : Max Y Tile Grid
+    PathFinder::PathFinder(DynamicTileGridArray const& p_TileGrid, int32 const p_MaxGridX, int32 const p_MaxGridY) : TileGrid(p_TileGrid), m_MaxGridX(p_MaxGridX),
+        m_MaxGridY(p_MaxGridY)
     {
         /// 8 directions we can go
         m_Directions =
@@ -48,7 +49,8 @@ namespace SteerStone
     /// @p_StartY : Start Position Y
     /// @p_EndX : End Position X
     /// @p_EndY : End Position Y
-    bool PathFinder::CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const & p_EndX, int16 const & p_EndY)
+    /// @p_CheckDynamicObjects : Check for Dynamic Objects
+    bool PathFinder::CalculatePath(int16 const p_StartX, int16 const p_StartY, int16 const p_EndX, int16 const p_EndY, bool p_CheckDynamicObjects /*= false*/)
     {
         /// Check if the destination tile is valid
         if (!CheckDestination(Position({ p_EndX, p_EndY })))
@@ -92,7 +94,7 @@ namespace SteerStone
                 l_FuturePosition.Y = m_Current->GetPosition().Y + m_Directions[l_I].Y;
 
                 /// Check if our future position has any collision
-                if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
+                if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition(), p_CheckDynamicObjects) || DoesNodeExist(m_ClosedList, l_FuturePosition))
                     continue;
 
                 /// Work out our G Cost
@@ -114,7 +116,7 @@ namespace SteerStone
                 else
                 {
                     /// Node doesn't exist, create a new node and push it into our open list to be evaluted
-                    Node* l_NewNode = new Node(l_FuturePosition.X, l_FuturePosition.Y, m_Current);
+                    Node* l_NewNode = new Node(l_FuturePosition.X, l_FuturePosition.Y, TileGrid[l_FuturePosition.X][l_FuturePosition.Y]->GetTileHeight(), m_Current);
                     l_NewNode->SetGCost(l_GCost);
                     l_NewNode->SetHCost(CalculateHeuristic(l_NewNode, p_EndX, p_EndY)); ///< Calculate our H cost from end position to our current position 
                     m_OpenList.push_back(l_NewNode);
@@ -132,11 +134,7 @@ namespace SteerStone
 
         while (m_Current != nullptr)
         {
-            Position l_Position;
-            l_Position.X = m_Current->GetPosition().X;
-            l_Position.Y = m_Current->GetPosition().Y;
-            l_Position.Z = static_cast<int16>(m_HeightGrid[l_Position.X][l_Position.Y]);
-            m_Path.push_back(l_Position);
+            m_Path.push_back(m_Current->GetPosition());
             m_Current = m_Current->GetParentNode();
         }
 
@@ -145,24 +143,98 @@ namespace SteerStone
         return true;
     }
 
+    /// ReCalculatePath
+    /// Recaculate 1 waypoint if there's a object blocking our original path
+    /// @p_Position : Holds current position of X and Y
+    /// @p_NextX : Next Position X
+    /// @p_NextY : Next Position Y
+    bool PathFinder::ReCalculatePath(Position& p_Position, int16 const p_NextX, int16 const p_NextY)
+    {
+        /// Loop through all 8 directions
+        for (int16 l_I = 0; l_I < m_Directions.size(); l_I++)
+        {
+            /// Create our new future position
+            Position l_FuturePosition;
+            l_FuturePosition.X = p_Position.X + m_Directions[l_I].X;
+            l_FuturePosition.Y = p_Position.Y + m_Directions[l_I].Y;
+
+            /// Check if our future position has any collision
+            if (!CheckValidTile(l_FuturePosition, p_Position, true))
+                continue;
+
+            /// Work out our G Cost
+            /// If we are moving diagnol our cost would be 14 since diagnol will be the closest
+            /// to the end point
+            uint32 l_GCost = l_I < 4 ? 10 : 14;
+
+            /// Node doesn't exist, create a new node and push it into our open list to be evaluted
+            Node* l_NewNode = new Node(l_FuturePosition.X, l_FuturePosition.Y, TileGrid[l_FuturePosition.X][l_FuturePosition.Y]->GetTileHeight(), m_Current);
+            l_NewNode->SetGCost(l_GCost);
+            l_NewNode->SetHCost(CalculateHeuristic(l_NewNode, p_NextX, p_NextY)); ///< Calculate our H cost from end position to our current position
+            m_OpenList.push_back(l_NewNode);
+        }
+
+        /// Go through our OpenList storage and find the lowest f cost
+        /// The lowest means its the closest to the end position
+        auto l_Node = m_OpenList.begin();
+        for (auto& l_Itr = m_OpenList.begin(); l_Itr != m_OpenList.end(); l_Itr++)
+        {
+            if ((*l_Itr)->GetTotalCost() <= (*l_Node)->GetTotalCost())
+                l_Node = l_Itr;
+        }
+
+        p_Position = (*l_Node)->GetPosition();
+
+        CleanUp();
+
+        /// Check if our new waypoint is one grid apart from the next waypoint
+        if (!CheckDistanceBetween(p_Position.X, p_Position.Y, p_NextX, p_NextY))
+            return false;
+
+        return true;
+    }
+
     /// GetPath
-    /// Returns path we've found
+    /// Returns path points we've found
     std::deque<Position>& PathFinder::GetPath()
     {
         return m_Path;
     }
 
+    /// GetCurrentTileState
+    /// @p_X : X Axis of grid
+    /// @p_Y : Y Axis of grid
+    TileInstance* PathFinder::GetCurrentTileState(int16 const p_X, int16 const p_Y) const
+    {
+        return TileGrid[p_X][p_Y];
+    }
+
     /// CheckValidTile
     /// Check if there's any collision on this tile
     /// @p_Position : Struct which holds x, y coordinates
-    bool PathFinder::CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition)
+    bool PathFinder::CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition, bool p_CheckDynamicObject /*= false*/)
     {
-        int16 l_FutureTileGrid = m_TileGrid[p_FuturePosition.X][p_FuturePosition.Y];
-        int16 l_FutureHeightGrid = m_HeightGrid[p_FuturePosition.X][p_FuturePosition.Y];
+        /// Check if future axis is above the max grid we can scan from
+        if (p_FuturePosition.X >= m_MaxGridX || p_FuturePosition.Y >= m_MaxGridY || p_FuturePosition.X < 0 || p_FuturePosition.Y < 0)
+            return false;
 
-        int16 l_CurrentTileGrid = m_TileGrid[p_CurrentPosition.X][p_CurrentPosition.Y];
-        int16 l_CurrentHeightGrid = m_HeightGrid[p_CurrentPosition.X][p_CurrentPosition.Y];
+        /// Check Dynamic Object if specified
+        if (p_CheckDynamicObject)
+        {
+            /// Check if there's a object occupying the waypoint
+            if (TileGrid[p_FuturePosition.X][p_FuturePosition.Y]->IsTileOccupied())
+                return false;
+        }
 
+        /// Get our next tile position
+        int16 l_FutureTileGrid = TileGrid[p_FuturePosition.X][p_FuturePosition.Y]->GetTileState();
+        int16 l_FutureHeightGrid = TileGrid[p_FuturePosition.X][p_FuturePosition.Y]->GetTileHeight();
+
+        /// Get our current tile position
+        int16 l_CurrentTileGrid = TileGrid[p_CurrentPosition.X][p_CurrentPosition.Y]->GetTileState();
+        int16 l_CurrentHeightGrid = TileGrid[p_CurrentPosition.X][p_CurrentPosition.Y]->GetTileHeight();
+
+        /// Check if our next tile position and current tile position is allowed to be accessed
         if (l_FutureTileGrid == TileState::TILE_STATE_CLOSED)
             return false;
 
@@ -180,7 +252,7 @@ namespace SteerStone
     /// @p_Position : Struct which holds x, y coordinates
     bool PathFinder::CheckDestination(Position const& p_Position)
     {
-        int16 l_TileGrid = m_TileGrid[p_Position.X][p_Position.Y];
+        int16 l_TileGrid = TileGrid[p_Position.X][p_Position.Y]->GetTileState();
 
         if (l_TileGrid == TileState::TILE_STATE_CLOSED)
             return false;
@@ -212,6 +284,27 @@ namespace SteerStone
         return (static_cast<unsigned int>(10 * (abs(p_Current->GetPosition().X - p_EndX) + abs(p_Current->GetPosition().Y - p_EndY))));
     }
 
+    /// CheckDistanceBetween
+    /// Check the distance between two way points
+    /// if the distance is 1 grid apart, return true if not return false
+    /// @m_CurrentX : Current X axis
+    /// @m_CurrentY : Current X axis
+    /// @p_EndX : Next X Axis
+    /// @p_EndY : Next Y Axis
+    bool PathFinder::CheckDistanceBetween(int16 const m_CurrentX, int16 m_CurrentY, int16 const p_NextX, int16 const p_NextY)
+    {
+        for (int16 l_I = 0; l_I < m_Directions.size(); l_I++)
+        {
+            Position l_Position;
+            l_Position.X = m_CurrentX + m_Directions[l_I].X;
+            l_Position.Y = m_CurrentY + m_Directions[l_I].Y;
+
+            if (l_Position.X == p_NextX && l_Position.Y == p_NextY)
+                return true;
+        }
+        return false;
+    }
+
     /// CleanUp
     /// Clean up allocated memory in m_OpenList and m_ClosedList
     void PathFinder::CleanUp()
@@ -221,6 +314,9 @@ namespace SteerStone
 
         for (auto& l_Itr : m_OpenList)
             delete l_Itr;
+
+        m_ClosedList.clear();
+        m_OpenList.clear();
     }
 
 } ///< NAMESPACE STEERSTONE

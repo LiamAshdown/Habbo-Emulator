@@ -19,6 +19,7 @@
 #ifndef _PATHFINDER_PATHFINDER_h
 #define _PATHFINDER_PATHFINDER_h
 #include "Common/SharedDefines.h"
+#include "RoomModel.h"
 #endif /* _PATHFINDER_PATHFINDER_h */
 
 namespace SteerStone
@@ -28,7 +29,8 @@ namespace SteerStone
     {
         TILE_STATE_OPEN         = 0,            ///< User can walk on tile
         TILE_STATE_CLOSED       = 1,            ///< User cannot walk on tile
-        TILE_STATE_SIT          = 2             ///< User can sit on tile
+        TILE_STATE_SIT          = 2,            ///< User can sit on tile
+        TILE_STATE_OCCUPIED     = 3             ///< Tile is being used by another object            
     };
 
     /// This stores the 8 directions we can go
@@ -51,7 +53,7 @@ namespace SteerStone
         /// @p_X : Start Position of node X
         /// @p_Y : Start Position of node Y
         /// @p_Parent : Parent node
-        Node(int16 const& p_X, int16 const& p_Y, Node* p_Parent = nullptr) : m_Position{ p_X, p_Y }, m_F(0), m_G(0), m_H(0), m_Parent(p_Parent){}
+        Node(int16 const p_X, int16 const p_Y, int16 p_Z = 0, Node* p_Parent = nullptr) : m_Position{ p_X, p_Y, p_Z }, m_F(0), m_G(0), m_H(0), m_Parent(p_Parent){}
         
     public:
         /// Node Info
@@ -80,9 +82,10 @@ namespace SteerStone
     {
     public:
         /// Constructor
-        /// @p_TileGrid : Multi-dimensional array which stores the TileGrid
-        /// @p_HeightGrid : Multi-dimensional array which stores the HeightGrid
-        PathFinder(GridArray const& p_TileGrid, GridArray const& p_HeightGrid);
+        /// @p_TileGrid : Dynamic Multi-dimensional array which stores the TileGrid
+        /// @p_MaxGridX : Max X Tile Grid
+        /// @p_MaxGridY : Max Y Tile Grid
+        PathFinder(DynamicTileGridArray const& p_TileGrid, int32 const p_MaxGridX, int32 const p_MaxGridY);
 
         /// Deconstructor
         ~PathFinder();
@@ -93,18 +96,31 @@ namespace SteerStone
         /// @p_StartY : Start Position Y
         /// @p_EndX : End Position X
         /// @p_EndY : End Position Y
-        bool CalculatePath(int16 const& p_StartX, int16 const& p_StartY, int16 const& p_EndX, int16 const& p_EndY);
+        /// @p_CheckDynamicObjects : Check for Dynamic Objects
+        bool CalculatePath(int16 const p_StartX, int16 const p_StartY, int16 const p_EndX, int16 const p_EndY, bool p_CheckDynamicObjects = false);
+
+        /// ReCalculatePath
+        /// Recaculate 1 waypoint if there's a object blocking our original path
+        /// @p_Position : Holds current position of X and Y
+        /// @p_NextX : Next Position X
+        /// @p_NextY : Next Position Y
+        bool ReCalculatePath(Position& p_Position, int16 const p_NextX, int16 const p_NextY);
 
         /// GetPath
-        /// Returns path we've found
+        /// Returns path points we've found
         std::deque<Position>& GetPath();
+
+        /// GetCurrentTileState
+        /// @p_X : X Axis of grid
+        /// @p_Y : Y Axis of grid
+        TileInstance* GetCurrentTileState(int16 const p_X, int16 const p_Y) const;
 
     private:
         /// CheckValidTile
         /// Check if there's any collision on this tile
         /// @p_FuturePosition : Struct which holds future x, y coordinates
         /// @p_CurrentPosition : Struct which holds current x, y coordinates
-        bool CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition);
+        bool CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition, bool p_CheckDynamicObject = false);
 
         /// CheckDestination
         /// Check if destination coordinates is valid to make a path
@@ -124,17 +140,28 @@ namespace SteerStone
         /// @p_EndY : End Position Y
         uint32 CalculateHeuristic(Node* p_Current, int16 const& p_EndX, int16 const& p_EndY);
 
+        /// CheckDistanceBetween
+        /// Check the distance between two way points
+        /// if the distance is 1 grid apart, return true if not return false
+        /// @m_CurrentX : Current X axis
+        /// @m_CurrentY : Current X axis
+        /// @p_EndX : Next X Axis
+        /// @p_EndY : Next Y Axis
+        bool CheckDistanceBetween(int16 const m_CurrentX, int16 m_CurrentY, int16 const p_NextX, int16 const p_NextY);
+
         /// CleanUp
         /// Clean up allocated memory in m_OpenList and m_ClosedList
         void CleanUp();
 
     private:
-        GridArray m_TileGrid;                      ///< Holds Tile Grid in multi dimensional array
-        GridArray m_HeightGrid;                    ///< Holds Height Grid in multi dimensional array
+        DynamicTileGridArray TileGrid;             ///< Holds dynamic objects in multi dimensional array
         Node* m_Current;                           ///< Current node we are accessing from m_OpenList or m_ClosedList
         std::vector<Position> m_Directions;        ///< Directions in which we can go
         std::deque<Position> m_Path;               ///< Holds our path points
         std::vector<Node*> m_OpenList;             ///< Holds nodes which needs to evaluted
         std::vector<Node*> m_ClosedList;           ///< Holds nodes which are already evaluted
+
+        int32 m_MaxGridX;                          ///< Holds Max Grid of X axis
+        int32 m_MaxGridY;                          ///< Holds Max Grid of Y axis
     };
 } ///< NAMESPACE STEERSTONE

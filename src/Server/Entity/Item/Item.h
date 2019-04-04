@@ -16,71 +16,67 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Item_h_
-#define _Quad_Item_h_
+#ifndef _ITEM_ITEM_h
+#define _ITEM_ITEM_h
 #include "Common/SharedDefines.h"
+#endif /* _ITEM_ITEM_h */
 
 namespace SteerStone
 {
-    ///< We don't need to create a class for public room items, because they will never be changed
-    ///< So we will leave it as a struct
-    typedef struct PublicItemStruct
-    {
-    public:
-        friend class ItemManager;
-
-    public:
-        PublicItemStruct() {}
-        ~PublicItemStruct() {}
-
-    public:
-        uint32 GetId() const { return m_Id; }
-        std::string GetRoomModel() const { return mRoomModel; }
-        std::string GetSprite() const { return mSprite; }
-        int32 GetPositionX() const { return mX; }
-        int32 GetPositionY() const { return mY; }
-        double GetPositionZ() const { return mZ; }
-        int32 GetRotation() const { return mRotation; }
-        float GetTopHeight() const { return mTopHeight; }
-        int32 GetLength() const { return mLength; }
-        int32 GetWidth() const { return mWidth; }
-        std::string GetBehaviour() const { return mBehaviour; }
-
-    private:
-        uint32 m_Id;
-        std::string mRoomModel;
-        std::string mSprite;
-        int32 mX;
-        int32 mY;
-        double mZ;
-        int32 mRotation;
-        float mTopHeight;
-        int32 mLength;
-        int32 mWidth;
-        std::string mBehaviour;
-    }PublicItem;
-
     class Item
     {
     public:
         friend class ItemManager;
 
     public:
+        /// Constructor
         Item();
+
+        /// Deconstructor
         ~Item();
 
+    public:
+        /// Item Info
+        uint32 GetId()                  const { return m_Id;                }
+        uint32 GetSpriteId()            const { return m_SpriteId;          }
+        std::string GetName()           const { return m_Name;              }
+        std::string GetDescription()    const { return m_Description;       }
+        std::string GetColour()         const { return m_Colour;            }
+        std::string GetRoomModel()      const { return m_RoomModel;         }
+        std::string GetSprite()         const { return m_Sprite;            }
+        int16 GetPositionX()            const { return m_X;                 }
+        int16 GetPositionY()            const { return m_Y;                 }
+        double GetPositionZ()           const { return m_Z;                 }
+        int16 GetRotation()             const { return m_Rotation;          }
+        float GetTopHeight()            const { return m_TopHeight;         }
+        int16 GetLength()               const { return m_Length;            }
+        int16 GetWidth()                const { return m_Width;             }
+        std::string GetBehaviour()      const { return m_Behaviour;         }
+        std::string GetInteractor()     const { return m_Interactor;        }
+        bool IsTradable()               const { return m_Tradable;          }
+        bool IsRecycleable()            const { return m_Recycleable;       }
+        uint32 GetDrinkId()             const { return m_DrinkId;           }
+
     private:
+        /// Variables
         uint32 m_Id;
-        std::string mSprite;
-        std::string mColor;
-        std::string mLength;
-        uint16 mWidth;
-        float mHeight;
-        std::string mDataClass;
-        std::string mBehaviour;
+        uint32 m_SpriteId;
         std::string m_Name;
-        std::string mDescription;
+        std::string m_Description;
+        std::string m_Colour;
+        std::string m_RoomModel;
+        std::string m_Sprite;
+        int16 m_X;
+        int16 m_Y;
+        double m_Z;
+        int16 m_Rotation;
+        float m_TopHeight;
+        int16 m_Length;
+        int16 m_Width;
+        std::string m_Behaviour;
+        std::string m_Interactor;
+        bool m_Tradable;
+        bool m_Recycleable;
+        uint32 m_DrinkId;
     };
 }
-
-#endif /* _Quad_Item_h_ */
