@@ -233,7 +233,10 @@ namespace SteerStone
                 std::string CurrentZ;
                 std::string HeadRotation;
                 std::string BodyRotation;
-                std::string Status;
+                bool Dancing;
+                bool Sitting;
+                bool Walking;
+                std::string Status = "";
                 std::string NewX;
                 std::string NewY;
                 std::string NewZ;

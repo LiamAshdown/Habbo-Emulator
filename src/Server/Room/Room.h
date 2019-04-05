@@ -67,14 +67,19 @@ namespace SteerStone
         /// @p_Habbo : Habbo user leaving room
         void LeaveRoom(Habbo* p_Habbo);
 
-        /// SendNewUserObjectToRoom
+        /// SendNewHabboEntering
         /// Send Habbo Figure object to clients in room
-        /// @p_Habbo : p_Habbo
-        void SendNewUserObjectToRoom(Habbo* p_Habbo);
+        /// @p_Habbo : Habbo which is joining room
+        void SendNewHabboEntering(Habbo* p_Habbo);
 
-        /// SendUserObjectLeftRoom
+        /// SendHabboRoomStatuses
+        /// Send Habbo user statuses in room to new Habbo joining room
+        /// @p_Habbo : Habbo which is joining room
+        void SendHabboRoomStatuses(Habbo* p_Habbo);
+
+        /// SendHabboLeftRoom
         /// This function is used when habbo leaves room, and we need to update habbo objects again
-        void SendUserObjectLeftRoom(uint32 const p_GUID);
+        void SendHabboLeftRoom(uint32 const p_GUID);
 
         /// SendWorldObjects 
         /// @p_Habbo : Send Furniture Objects to Habbo client
@@ -105,7 +110,7 @@ namespace SteerStone
         void Update(uint32 const p_Diff);
 
     public:
-        /// ROOM INFO
+        /// Room Info
         uint32 GetId()               const { return m_Id;           }
         uint32 GetOwnerId()          const { return m_OwnerId;      }
         std::string GetOwnerName()   const { return m_OwnerName;    } 

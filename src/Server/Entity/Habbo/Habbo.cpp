@@ -37,6 +37,10 @@ namespace SteerStone
         m_PingInterval    = sConfig->GetIntDefault("PongInterval", 30000);
         m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
 
+        m_Walking = false;
+        m_Sitting = false;
+        m_Dancing = false;
+
         SendPing();
     }
 
@@ -252,6 +256,7 @@ namespace SteerStone
     /// @p_X - X axis on new position
     /// @p_Y - Y axis on new position
     /// @p_Z - Z axis on new position
+    /// @p_SendToRoom : Send packet to all in room
     void Habbo::SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z, bool p_SendToRoom /*= true*/)
     {
         /// Set our new position
@@ -264,10 +269,12 @@ namespace SteerStone
         l_Packet.CurrentZ       = std::to_string(GetPositionZ());
         l_Packet.BodyRotation   = std::to_string(l_Rotation);
         l_Packet.HeadRotation   = std::to_string(l_Rotation);
-        l_Packet.Status         = GetStatus();
         l_Packet.NewX           = std::to_string(p_X);
         l_Packet.NewY           = std::to_string(p_Y);
         l_Packet.NewZ           = std::to_string(p_Z);
+        l_Packet.Sitting        = IsSitting();
+        l_Packet.Walking        = IsWalking();
+        l_Packet.Dancing        = IsDancing();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -279,6 +286,7 @@ namespace SteerStone
 
     /// SendUpdateStatusStop
     /// Send Status stop when user finishes path
+    /// @p_SendToRoom : Send packet to all in room
     void Habbo::SendUpdateStatusStop(bool p_SendToRoom /*= true*/)
     {
         SetIsWalking(false);
@@ -290,7 +298,9 @@ namespace SteerStone
         l_Packet.CurrentZ       = std::to_string(GetPositionZ());
         l_Packet.BodyRotation   = std::to_string(GetBodyRotation());
         l_Packet.HeadRotation   = std::to_string(GetHeadRotation());
-        l_Packet.Status         = GetStatus();
+        l_Packet.Sitting        = IsSitting();
+        l_Packet.Walking        = IsWalking();
+        l_Packet.Dancing        = IsDancing();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -302,12 +312,39 @@ namespace SteerStone
     /// @p_X - X Axis current position
     /// @p_Y - Y Axis current position
     /// @p_Z - Z Axis current position
+    /// @p_SendToRoom : Send packet to all in room
     void Habbo::SendUpdateStatusSit(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation, bool p_SendToRoom /*= true*/)
     {
+        if (IsWalking())
+            SetIsWalking(false);
+
         SetIsSitting(true);
-        SetIsWalking(false);
 
         UpdatePosition(p_X, p_Y, p_Z, p_Rotation);
+
+        HabboPacket::Room::UserUpdateStatus l_Packet;
+        l_Packet.GUID          = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX      = std::to_string(GetPositionX());
+        l_Packet.CurrentY      = std::to_string(GetPositionY());
+        l_Packet.CurrentZ      = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation  = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation  = std::to_string(GetHeadRotation());
+        l_Packet.Sitting       = IsSitting();
+        l_Packet.Walking       = IsWalking();
+        l_Packet.Dancing       = IsDancing();
+
+        if (p_SendToRoom)
+            GetRoom()->SendPacketToAll(l_Packet.Write());
+        else
+            ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// SendUpdateStatusDance
+    /// @p_SendToRoom : Send packet to all in room
+    void Habbo::SendUpdateStatusDance(bool p_SendToRoom)
+    {
+        if (IsWalking() || IsSitting())
+            return;
 
         HabboPacket::Room::UserUpdateStatus l_Packet;
         l_Packet.GUID = std::to_string(GetRoomGUID());
@@ -316,26 +353,14 @@ namespace SteerStone
         l_Packet.CurrentZ = std::to_string(GetPositionZ());
         l_Packet.BodyRotation = std::to_string(GetBodyRotation());
         l_Packet.HeadRotation = std::to_string(GetHeadRotation());
-        l_Packet.Status = GetStatus();
+        l_Packet.Sitting = IsSitting();
+        l_Packet.Walking = IsWalking();
+        l_Packet.Dancing = IsDancing();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
         else
             ToSocket()->SendPacket(l_Packet.Write());
-    }
-
-    /// GetStatus
-    /// Get current status on what user is doing
-    std::string Habbo::GetStatus()
-    {
-        std::string l_Status;
-
-        if (IsWalking())
-            l_Status = "mv";
-        else if (IsSitting())
-            l_Status += "sit 1";
-
-        return l_Status;
     }
 
     /// SendUpdateStatusWalk

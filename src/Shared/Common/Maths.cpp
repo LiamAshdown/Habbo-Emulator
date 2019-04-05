@@ -38,7 +38,7 @@ namespace SteerStone
         /// @p_NextX - X axis on new position
         /// @p_NextY - Y axis on new position
         /// Credit Quackster
-        inline int16 CalculateWalkDirection(int16 const p_CurrentX, int16 const p_CurrentY, int16 const p_NextX, int16 const p_NextY)
+        int16 CalculateWalkDirection(int16 const p_CurrentX, int16 const p_CurrentY, int16 const p_NextX, int16 const p_NextY)
         {
             if (p_CurrentX == p_NextX)
             {

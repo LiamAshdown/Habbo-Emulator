@@ -197,21 +197,27 @@ namespace SteerStone
                 m_Buffer.AppendStringDelimiter(CurrentY, ",");
                 m_Buffer.AppendStringDelimiter(CurrentZ, ",");
                 m_Buffer.AppendStringDelimiter(BodyRotation, ",");
-                m_Buffer.AppendStringDelimiter(HeadRotation, "/");
+                m_Buffer.AppendString(HeadRotation, false);
 
-                if (Status == "mv") ///< Walking
+                if (Dancing)
+                    Status = "/Dance";
+                if (Walking)
                 {
-                    m_Buffer.AppendString(Status, false);
+                    Status += "/mv";
 
-                    m_Buffer.AppendString(" ");
-                    m_Buffer.AppendStringDelimiter(NewX, ",");
-                    m_Buffer.AppendStringDelimiter(NewY, ",");
-                    m_Buffer.AppendString(NewZ, false);
+                    m_SecondaryBuffer.AppendString(" ");
+                    m_SecondaryBuffer.AppendStringDelimiter(NewX, ",");
+                    m_SecondaryBuffer.AppendStringDelimiter(NewY, ",");
+                    m_SecondaryBuffer.AppendString(NewZ, false);
                 }
-                else
-                    m_Buffer.AppendString(Status, false);
-         
-                m_Buffer.AppendStringDelimiter("/", "\r");
+                if (Sitting)
+                    Status = "/sit 1";
+
+                m_Buffer.AppendString(Status, false);
+
+                m_Buffer.Append(m_SecondaryBuffer);
+
+                m_Buffer.AppendString("\r", false);
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;

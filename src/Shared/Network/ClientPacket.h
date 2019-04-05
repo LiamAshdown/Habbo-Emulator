@@ -41,7 +41,8 @@ namespace SteerStone
             m_Content = p_Buffer.substr(2);
         }
 
-        /// ReadString - Read the string
+        /// ReadString
+        /// Read the string
         std::string ReadString()
         {
             std::size_t l_Length = DecodeBase64(m_Content.substr(m_ReadPosition, 2));
@@ -51,7 +52,8 @@ namespace SteerStone
             return l_Temp;
         }
 
-        /// ReadBase64Int - Read a base64 interger
+        /// ReadBase64Int
+        /// Read a base64 interger
         int32 ReadBase64Int()
         {
             int32 l_I = DecodeBase64(m_Content.substr(m_ReadPosition, 2));
@@ -60,7 +62,8 @@ namespace SteerStone
             return l_I;
         }
 
-        /// ReadWiredInt - Read a wired interger
+        /// ReadWiredInt
+        /// Read a wired interger
         int32 ReadWiredInt()
         {
             int32 l_I = DecodeWired(m_Content.substr(m_ReadPosition));
@@ -70,7 +73,8 @@ namespace SteerStone
         }
 
 
-        /// ReadBase64Uint - Read a wired unsigned interger
+        /// ReadBase64Uint
+        /// Read a wired unsigned interger
         uint32 ReadBase64Uint()
         {
             uint32 i = DecodeBase64(m_Content.substr(m_ReadPosition, 2));
@@ -79,7 +83,8 @@ namespace SteerStone
             return i;
         }
 
-        /// ReadWiredInt - Read a wired unsigned interger
+        /// ReadWiredInt
+        /// Read a wired unsigned interger
         uint32 ReadWiredUint()
         {
             uint32 i = DecodeWired(m_Content.substr(m_ReadPosition));
@@ -88,7 +93,8 @@ namespace SteerStone
             return i;
         }
 
-        /// ReadWiredBool - Read bool
+        /// ReadWiredBool
+        /// Read bool
         bool ReadWiredBool()
         {
             int64 i = DecodeWired(m_Content.substr(m_ReadPosition));
@@ -100,7 +106,8 @@ namespace SteerStone
                 return false;
         }
 
-        /// ReadBase64Bool - Read bool in base64
+        /// ReadBase64Bool
+        /// Read bool in base64
         bool ReadBase64Bool()
         {
             int64 i = DecodeBase64(m_Content.substr(m_ReadPosition++, 1));
@@ -123,16 +130,25 @@ namespace SteerStone
             }
         }
 
-        /// GetReadLength - Get read length of storage
+        /// GetReadLength
+        /// Get read length of storage
         std::size_t GetReadLength() const
         {
             return m_ReadPosition;
         }
 
-        /// GetHeader - Get the header of the packet
+        /// GetHeader
+        /// Get the header of the packet
         uint32 GetHeader() const
         {
             return m_Header;
+        }
+
+        /// GetContent
+        /// Returns body content
+        std::string GetContent()
+        {
+            return m_Content;
         }
 
     private:

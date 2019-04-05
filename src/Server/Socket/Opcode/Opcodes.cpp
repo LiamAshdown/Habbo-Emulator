@@ -59,7 +59,6 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_INIT,                "CLIENT_MESSENGER_INIT",                   &HabboSocket::HandleMessengerInitialize        );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_DIRECTORY,                "CLIENT_ROOM_DIRECTORY",                   &HabboSocket::HandleRoomDirectory              );
         StoreClientPacket(PacketClientHeader::CLIENT_PONG,                          "CLIENT_PONG",                             &HabboSocket::HandlePong                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_STOP,                          "CLIENT_STOP",                             &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",                     &HabboSocket::HandleGetRoomAdd                 );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_HEIGHT_MAP,               "CLIENT_ROOM_HEIGHT_MAP",                  &HabboSocket::HandleGetRoomHeight              );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_AVAILABLE_BADGES,          "CLIENT_GET_AVAILABLE_BADGES",             &HabboSocket::HandleGetAvailableBadges         );
@@ -76,7 +75,10 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REJECT_REQUEST,      "CLIENT_MESSENGER_REJECT_REQUEST",         &HabboSocket::HandleMessengerRejectRequest     );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_MESSAGE,        "CLIENT_MESSENGER_SEND_MESSAGE",           &HabboSocket::HandleMessengerSendMessage       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REPLY,               "CLIENT_MESSENGER_REPLY",                  &HabboSocket::HandleMessengerReply             );
-        StoreClientPacket(PacketClientHeader::CLIENT_MOVE,                          "CLIENT_MOVE",                             &HabboSocket::HandleMove                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_HABBO_MOVE,                    "CLIENT_HABBO_MOVE",                       &HabboSocket::HandleHabboMove                  );
+        StoreClientPacket(PacketClientHeader::CLIENT_HABBO_DANCE,                   "CLIENT_HABBO_DANCE",                      &HabboSocket::HandleUserDance                  );
+        StoreClientPacket(PacketClientHeader::CLIENT_HABBO_STOP_DANCE,              "CLIENT_HABBO_STOP_DANCE",                 &HabboSocket::HandleHabboStopDance             );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_HABBO_STATUSES,           "CLIENT_ROOM_HABBO_STATUSES",              &HabboSocket::HandleRoomHabboStatuses          );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );

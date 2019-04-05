@@ -91,7 +91,7 @@ namespace SteerStone
         }    
     }
 
-    /// SendNewUserObjectToRoom
+    /// SendNewHabboEntering
     /// Send Habbo Figure object to clients in room
     /// @p_Habbo : p_Habbo
     bool Room::EnterRoom(Habbo* p_Habbo)
@@ -145,7 +145,7 @@ namespace SteerStone
             }
 
             /// Send User Objects packet again to all players, so habbo who left no longer appears on other clients
-            SendUserObjectLeftRoom(l_Itr->second->GetRoomGUID());
+            SendHabboLeftRoom(l_Itr->second->GetRoomGUID());
 
             /// Set Habbo room to nullptr
             l_Itr->second->DestroyRoom();
@@ -171,8 +171,8 @@ namespace SteerStone
     }
     
     /// Send Habbo Figure object to clients in room
-     /// @p_Habbo : Habbo
-    void Room::SendNewUserObjectToRoom(Habbo* p_Habbo)
+    /// @p_Habbo : Habbo which is joining room
+    void Room::SendNewHabboEntering(Habbo* p_Habbo)
     {
         for (auto const& l_Itr : m_Habbos)
         {
@@ -207,8 +207,32 @@ namespace SteerStone
         }
     }
 
-    /// SendUserObjectLeftRoom - This function is used when habbo leaves room, and we need to update habbo objects again
-    void Room::SendUserObjectLeftRoom(uint32 const p_GUID)
+    /// SendHabboRoomStatuses
+    /// Send Habbo user statuses in room to new Habbo joining room
+    /// @p_Habbo : Habbo which is joining room
+    void Room::SendHabboRoomStatuses(Habbo * p_Habbo)
+    {
+        for (auto const& l_Itr : m_Habbos)
+        {
+            Habbo* l_Habbo = l_Itr.second;
+
+            HabboPacket::Room::UserUpdateStatus l_Packet;
+            l_Packet.GUID = std::to_string(l_Habbo->GetRoomGUID());
+            l_Packet.CurrentX = std::to_string(l_Habbo->GetPositionX());
+            l_Packet.CurrentY = std::to_string(l_Habbo->GetPositionY());
+            l_Packet.CurrentZ = std::to_string(l_Habbo->GetPositionZ());
+            l_Packet.BodyRotation = std::to_string(l_Habbo->GetBodyRotation());
+            l_Packet.HeadRotation = std::to_string(l_Habbo->GetHeadRotation());
+            l_Packet.Sitting = l_Habbo->IsSitting();
+            l_Packet.Walking = l_Habbo->IsWalking();
+            l_Packet.Dancing = l_Habbo->IsDancing();
+
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
+    }
+
+    /// SendHabboLeftRoom - This function is used when habbo leaves room, and we need to update habbo objects again
+    void Room::SendHabboLeftRoom(uint32 const p_GUID)
     {
         for (auto const& l_Itr : m_Habbos)
         {

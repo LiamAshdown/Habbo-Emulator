@@ -36,6 +36,6 @@ namespace SteerStone
         /// @p_CurrentY - Current Y axis
         /// @p_NextX - X axis on new position
         /// @p_NextY - Y axis on new position
-        inline int16 CalculateWalkDirection(int16 const p_CurrentX, int16 const p_CurrentY, int16 const p_NextX, int16 const p_NextY);
+        int16 CalculateWalkDirection(int16 const p_CurrentX, int16 const p_CurrentY, int16 const p_NextX, int16 const p_NextY);
     } ///< NAMESPACE MATHS
 } ///< NAMESPACE STEERSTONE

@@ -47,7 +47,6 @@ enum PacketClientHeader : uint16
     CLIENT_MESSENGER_INIT                 = 12,
     CLIENT_ROOM_DIRECTORY                 = 2,
     CLIENT_PONG                           = 196,
-    CLIENT_STOP                           = 88,
     CLIENT_GET_ROOM_ADD                   = 126,
     CLIENT_ROOM_HEIGHT_MAP                = 60,
     CLIENT_GET_AVAILABLE_BADGES           = 157,
@@ -64,7 +63,10 @@ enum PacketClientHeader : uint16
     CLIENT_MESSENGER_REJECT_REQUEST       = 38,
     CLIENT_MESSENGER_SEND_MESSAGE         = 33,
     CLIENT_MESSENGER_REPLY                = 32,
-    CLIENT_MOVE                           = 75,
+    CLIENT_HABBO_MOVE                     = 75,
+    CLIENT_HABBO_DANCE                    = 93,  
+    CLIENT_HABBO_STOP_DANCE               = 88,
+    CLIENT_ROOM_HABBO_STATUSES            = 64,
 };
 
 enum PacketServerHeader : uint16
