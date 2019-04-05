@@ -206,6 +206,7 @@ namespace SteerStone
             l_Packet.Sitting = l_Habbo->IsSitting();
             l_Packet.Walking = l_Habbo->IsWalking();
             l_Packet.Dancing = l_Habbo->IsDancing();
+            l_Packet.Waving = l_Habbo->IsWaving();
 
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }

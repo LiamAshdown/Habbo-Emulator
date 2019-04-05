@@ -236,6 +236,7 @@ namespace SteerStone
                 bool Dancing;
                 bool Sitting;
                 bool Walking;
+                bool Waving;
                 std::string Status = "";
                 std::string NewX;
                 std::string NewY;

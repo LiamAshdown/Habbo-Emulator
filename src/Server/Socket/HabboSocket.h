@@ -92,6 +92,7 @@ namespace SteerStone
         void HandleUserDance(std::unique_ptr<ClientPacket> p_Packet);
         void HandleHabboStopDance(std::unique_ptr<ClientPacket> p_Packet);
         void HandleRoomHabboStatuses(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleHabboWave(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

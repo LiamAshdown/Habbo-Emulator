@@ -107,6 +107,9 @@ namespace SteerStone
 
     void HabboSocket::HandleUserDance(std::unique_ptr<ClientPacket> p_Packet)
     {
+        if (m_Habbo->IsWaving())
+            m_Habbo->SetIsWaving(false);
+
         m_Habbo->SetIsDancing(true);
 
         m_Habbo->SendUpdateStatusDance();
@@ -122,5 +125,10 @@ namespace SteerStone
     void HabboSocket::HandleRoomHabboStatuses(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Habbo->GetRoom()->SendHabboRoomStatuses(m_Habbo);
+    }
+
+    void HabboSocket::HandleHabboWave(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Habbo->SendUpdateStatusWave();
     }
 }

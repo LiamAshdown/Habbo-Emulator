@@ -40,6 +40,7 @@ namespace SteerStone
         m_Walking = false;
         m_Sitting = false;
         m_Dancing = false;
+        m_Waving  = false;
 
         SendPing();
     }
@@ -275,6 +276,7 @@ namespace SteerStone
         l_Packet.Sitting        = IsSitting();
         l_Packet.Walking        = IsWalking();
         l_Packet.Dancing        = IsDancing();
+        l_Packet.Waving = IsWaving();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -301,6 +303,7 @@ namespace SteerStone
         l_Packet.Sitting        = IsSitting();
         l_Packet.Walking        = IsWalking();
         l_Packet.Dancing        = IsDancing();
+        l_Packet.Waving = IsWaving();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -332,6 +335,7 @@ namespace SteerStone
         l_Packet.Sitting       = IsSitting();
         l_Packet.Walking       = IsWalking();
         l_Packet.Dancing       = IsDancing();
+        l_Packet.Waving = IsWaving();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -343,7 +347,7 @@ namespace SteerStone
     /// @p_SendToRoom : Send packet to all in room
     void Habbo::SendUpdateStatusDance(bool p_SendToRoom)
     {
-        if (IsWalking() || IsSitting())
+        if (IsSitting())
             return;
 
         HabboPacket::Room::UserUpdateStatus l_Packet;
@@ -356,6 +360,37 @@ namespace SteerStone
         l_Packet.Sitting = IsSitting();
         l_Packet.Walking = IsWalking();
         l_Packet.Dancing = IsDancing();
+        l_Packet.Waving = IsWaving();
+
+        if (p_SendToRoom)
+            GetRoom()->SendPacketToAll(l_Packet.Write());
+        else
+            ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// SendUpdateStatusWave
+    /// @p_SendToRoom : Send packet to all in room
+    void Habbo::SendUpdateStatusWave(bool p_SendToRoom)
+    {
+        if (IsDancing())
+            SetIsDancing(false);
+
+        if (IsWaving())
+            SetIsWaving(false);
+        else
+            SetIsWaving(true);
+
+        HabboPacket::Room::UserUpdateStatus l_Packet;
+        l_Packet.GUID = std::to_string(GetRoomGUID());
+        l_Packet.CurrentX = std::to_string(GetPositionX());
+        l_Packet.CurrentY = std::to_string(GetPositionY());
+        l_Packet.CurrentZ = std::to_string(GetPositionZ());
+        l_Packet.BodyRotation = std::to_string(GetBodyRotation());
+        l_Packet.HeadRotation = std::to_string(GetHeadRotation());
+        l_Packet.Sitting = IsSitting();
+        l_Packet.Walking = IsWalking();
+        l_Packet.Dancing = IsDancing();
+        l_Packet.Waving = IsWaving();
 
         if (p_SendToRoom)
             GetRoom()->SendPacketToAll(l_Packet.Write());

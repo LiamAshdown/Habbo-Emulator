@@ -67,6 +67,7 @@ enum PacketClientHeader : uint16
     CLIENT_HABBO_DANCE                    = 93,  
     CLIENT_HABBO_STOP_DANCE               = 88,
     CLIENT_ROOM_HABBO_STATUSES            = 64,
+    CLIENT_HABBO_WAVE                     = 94,  
 };
 
 enum PacketServerHeader : uint16

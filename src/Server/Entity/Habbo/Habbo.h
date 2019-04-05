@@ -218,12 +218,16 @@ namespace SteerStone
         /// @p_X - X Axis current position
         /// @p_Y - Y Axis current position
         /// @p_Z - Z Axis current position
-                /// @p_SendToRoom : Send packet to all in room
+        /// @p_SendToRoom : Send packet to all in room
         void SendUpdateStatusSit(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation, bool p_SendToRoom = true);
 
         /// SendUpdateStatusDance
         /// @p_SendToRoom : Send packet to all in room
         void SendUpdateStatusDance(bool p_SendToRoom = true);
+
+        /// SendUpdateStatusWave
+        /// @p_SendToRoom : Send packet to all in room
+        void SendUpdateStatusWave(bool p_SendToRoom = true);
 
         /// SendUpdateStatusWalk
         /// @p_X - X axis on new position
@@ -338,6 +342,9 @@ namespace SteerStone
         void SetIsDancing(bool const p_Dancing) { m_Dancing = p_Dancing;       }
         bool IsDancing()                const   { return m_Dancing;            }
 
+        void SetIsWaving(bool const p_Waving)   { m_Waving = p_Waving;         }  
+        bool IsWaving()                 const   { return m_Waving;             }      
+
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket;             }
 
     private:
@@ -370,6 +377,7 @@ namespace SteerStone
         bool m_Walking;
         bool m_Sitting;
         bool m_Dancing;
+        bool m_Waving;
 
         uint32 m_Id;
         uint32 m_Credits;

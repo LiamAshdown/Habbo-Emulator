@@ -79,6 +79,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_HABBO_DANCE,                   "CLIENT_HABBO_DANCE",                      &HabboSocket::HandleUserDance                  );
         StoreClientPacket(PacketClientHeader::CLIENT_HABBO_STOP_DANCE,              "CLIENT_HABBO_STOP_DANCE",                 &HabboSocket::HandleHabboStopDance             );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_HABBO_STATUSES,           "CLIENT_ROOM_HABBO_STATUSES",              &HabboSocket::HandleRoomHabboStatuses          );
+        StoreClientPacket(PacketClientHeader::CLIENT_HABBO_WAVE,                    "CLIENT_HABBO_WAVE",                       &HabboSocket::HandleHabboWave                  );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );
@@ -91,14 +92,14 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_LOGIN,                         "SERVER_LOGIN",                            &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ALERT,                         "SERVER_ALERT",                            &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_NOTICE,                        "SERVER_NOTICE",                           &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_HABBO_OBJECT,                   "SERVER_HABBO_OBJECT",                    &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_HABBO_OBJECT,                  "SERVER_HABBO_OBJECT",                     &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_CREDIT_BALANCE,                "SERVER_CREDIT_BALANCE",                   &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_USER_FLAT_CATEGORIES,          "SERVER_USER_FLAT_CATEGORIES",             &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_SEARCH_RESULTS,                "SERVER_SEARCH_RESULTS",                   &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_INTEREST,                 "SERVER_ROOM_INTEREST",                    &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_OPEN_CONNECTION,               "SERVER_OPEN_CONNECTION",                  &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_URL,                      "SERVER_OPEN_CONNECTION",                  &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_ROOM_CANT_CONNECT,                  "SERVER_ROOM_CANT_CONNECT",           &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ROOM_CANT_CONNECT,             "SERVER_ROOM_CANT_CONNECT",                &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PING,                          "SERVER_PING",                             &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_READY,                    "SERVER_ROOM_READY",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_ADD,                      "SERVER_ROOM_ADD",                         &HabboSocket::HandleServerMessage              );
