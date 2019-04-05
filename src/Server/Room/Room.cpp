@@ -30,7 +30,6 @@ namespace SteerStone
     Room::~Room(){}
     
     /// LoadGridData
-    /// Load Static and dynamic Grid Data
     void Room::LoadGridData()
     {
         std::vector<std::string> l_Split;
@@ -38,55 +37,40 @@ namespace SteerStone
 
         GetRoomModel().m_MapSizeY = l_Split.size();
         GetRoomModel().m_MapSizeX = l_Split[0].length();
-        GetRoomModel().DynamicTileGrid.resize(boost::extents[GetRoomModel().m_MapSizeX][GetRoomModel().m_MapSizeY]);
+        GetRoomModel().TileGrid.resize(boost::extents[GetRoomModel().m_MapSizeX][GetRoomModel().m_MapSizeY]);
 
+        /// Load Static Grid Data
         for (int32 l_Y = 0; l_Y < GetRoomModel().m_MapSizeY; l_Y++)
         {
             std::string l_Line = l_Split[l_Y];
 
             for (int32 l_X = 0; l_X < GetRoomModel().m_MapSizeX; l_X++)
             {
-                /// Initialize our Tile Grid
-                GetRoomModel().DynamicTileGrid[l_X][l_Y] = new TileInstance(l_X, l_Y);
+                
+                GetRoomModel().TileGrid[l_X][l_Y] = new TileInstance(l_X, l_Y);
 
                 uint8 l_Tile = l_Line[l_X];
 
                 if (std::isdigit(l_Tile)) ///< If the tile is a number, it means we can use it
                 {
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_OPEN;
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileHeight = l_Tile - 48; ///< Ascii format
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_OPEN;
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileHeight = l_Tile - 48; ///< Ascii format
                 }
                 else ///< Else the tile is closed
                 {
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_CLOSED;
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileHeight = 0;
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_CLOSED;
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileHeight = 0;
                 }
 
                 if (GetRoomModel().GetDoorX() == l_X && GetRoomModel().GetDoorY() == l_Y)
                 {
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_OPEN;
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileHeight = GetRoomModel().GetDoorZ();
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_OPEN;
+                    GetRoomModel().TileGrid[l_X][l_Y]->m_TileHeight = GetRoomModel().GetDoorZ();
                 }
 
-
+                /// Add Item to Tile
                 if (GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
-                {
-                    GetRoomModel().DynamicTileGrid[l_X][l_Y]->AddItem(sItemMgr->GetPublicItemByPosition(GetModel(), l_X, l_Y));
-
-                    if (GetRoomModel().DynamicTileGrid[l_X][l_Y]->GetItem())
-                    {
-                        /// Load our solid objects as static as they will never be moved
-                        if (GetRoomModel().DynamicTileGrid[l_X][l_Y]->GetItem()->GetBehaviour() == "solid")
-                        {
-                            GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileState = TileState::TILE_STATE_CLOSED;
-                            GetRoomModel().DynamicTileGrid[l_X][l_Y]->m_TileHeight = 0;
-                        }
-                    }
-                }
-                else
-                {
-
-                }
+                    GetRoomModel().TileGrid[l_X][l_Y]->AddItem(sItemMgr->GetPublicItemByPosition(GetModel(), l_X, l_Y));
             }
         }    
     }
@@ -112,18 +96,16 @@ namespace SteerStone
             return false;
         }
 
-        /// Update our Habbo Position so habbo appears at the door
+        /// Update our Habbo Position to be at the door
         p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
             GetRoomModel().GetDoorOrientation());
 
         p_Habbo->SetRoomGUID(GenerateGUID());
 
         m_Mutex.lock();
-        /// Push our habbo into our room storage
         m_Habbos[p_Habbo->GetRoomGUID()] = p_Habbo;
-        /// Increment our visitor counter
         m_VisitorsNow++;
-        GetRoomCategory()->GetVisitorsNow()++; ///< Also Increment our category visitor counter
+        GetRoomCategory()->GetVisitorsNow()++;
         m_Mutex.unlock();
 
         return true;
@@ -151,19 +133,17 @@ namespace SteerStone
             l_Itr->second->DestroyRoom();
 
             m_Mutex.lock();
-            /// Erase Habbo from room
             m_Habbos.erase(l_Itr);
-
-            /// Decrement our VisitorNow counter, habbo is leaving
             m_VisitorsNow--;
-            GetRoomCategory()->GetVisitorsNow()--; ///< Also Decrement our category visitor counter
+            GetRoomCategory()->GetVisitorsNow()--;
             m_Mutex.unlock();
         }
         else
             LOG_INFO << "Player " << p_Habbo->GetName() << " tried to leave Room Id " << GetId() << " but player does not exist in room!";
     }
 
-    /// GenerateGUID - Generate a unique ID for object in room
+    /// GenerateGUID 
+    /// Generate a unique ID for object in room
     uint32 Room::GenerateGUID()
     {
         /// TODO; Check whether guid already exists
@@ -231,7 +211,7 @@ namespace SteerStone
         }
     }
 
-    /// SendHabboLeftRoom - This function is used when habbo leaves room, and we need to update habbo objects again
+    /// SendHabboLeftRoom
     void Room::SendHabboLeftRoom(uint32 const p_GUID)
     {
         for (auto const& l_Itr : m_Habbos)
@@ -298,15 +278,14 @@ namespace SteerStone
     /// @p_Habbo : Habbo class which is walking
     /// @p_EndX : End Position habbo is going to
     /// @p_EndY : End Position habbo is going to
-    /// @p_CheckDynamicObjects : Check for Dynamic Objects
-    void Room::Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY, bool p_CheckDynamicObjects /*= false*/)
+    void Room::Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY)
     {
         boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
 
-        std::unique_ptr<WayPoints> l_WayPoints = std::make_unique<WayPoints>(GetRoomModel().DynamicTileGrid, GetRoomModel().GetMaxGridX(), GetRoomModel().GetMaxGridY());
+        std::unique_ptr<WayPoints> l_WayPoints = std::make_unique<WayPoints>(&GetRoomModel());
   
         /// Calculate the path
-        if (l_WayPoints->CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY, p_CheckDynamicObjects))
+        if (l_WayPoints->CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY))
         {
             /// Check if user already has an existing path
             auto& l_Itr = m_Paths.find(p_Habbo->GetRoomGUID());
@@ -316,7 +295,7 @@ namespace SteerStone
                 l_Itr->second->GetPath().clear();
                 l_Itr->second->GetPath() = l_WayPoints->GetPath();
 
-                /// Remove last iteration which is the current user position
+                /// Remove iteration which is the current user position
                 l_Itr->second->GetPath().pop_back();
                 return;
             }
@@ -327,7 +306,7 @@ namespace SteerStone
             l_WayPoints->m_Habbo->SetIsSitting(false);
             l_WayPoints->m_Habbo->SetIsWalking(true);
 
-            /// Remove last iteration which is the current user position
+            /// Remove iteration which is the current user position
             l_WayPoints->GetPath().pop_back();
 
             m_Paths[p_Habbo->GetRoomGUID()] = std::move(l_WayPoints);
@@ -348,37 +327,34 @@ namespace SteerStone
             }
             else
             {
-                /// Retrieve our next way point
                 Position& l_Position = l_Itr->second->GetPath().back();
-                TileInstance* l_TileInstance = l_Itr->second->GetCurrentTileState(l_Position.X, l_Position.Y);
+                TileInstance* l_TileInstance = GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
 
                 if (!l_TileInstance)
                     continue;
 
-                if (l_TileInstance->IsTileOccupied())
+                if (!l_TileInstance->CanWalkOnTile())
                 {
-                    /// Set our current position to formulate a new way point
                     l_Position.X = l_Itr->second->ToHabbo()->GetPositionX();
                     l_Position.Y = l_Itr->second->ToHabbo()->GetPositionY();
 
                     if (l_Itr->second->GetPath().size() > 2)
                     {
                         if (!l_Itr->second->ReCalculatePath(l_Position, (l_Itr->second->GetPath().end() - 2)->X, (l_Itr->second->GetPath().end() - 2)->Y))
-                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY(), true);
+                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY());
                             continue;
                     }
                     else
                         if (!l_Itr->second->ReCalculatePath(l_Position, l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY()))
-                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY(), true);
+                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY());
                             continue;
                 }
                 else
                     l_TileInstance->SetTileOccupied(true, l_Itr->second->ToHabbo());
 
-                /// Send movement to everyone in the room
+
                 l_Itr->second->ToHabbo()->SendUpdateStatusWalk(l_Position.X, l_Position.Y, l_Position.Z);
 
-                /// Remove our way point
                 l_Itr->second->GetPath().pop_back();
 
                 ++l_Itr;
@@ -392,8 +368,6 @@ namespace SteerStone
     {
         boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
 
-        /// Update PathFinder
         UpdateObjectsPaths(p_Diff);
-        
     }
 } ///< NAMESPACE STEERSTONE

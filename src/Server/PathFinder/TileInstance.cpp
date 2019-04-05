@@ -24,6 +24,7 @@ namespace SteerStone
     /// Constructor
     TileInstance::TileInstance(int16 const p_X, int16 const p_Y) : m_TileX(p_X), m_TileY(p_Y), m_TileHeight(0), m_TileState(TileState::TILE_STATE_CLOSED)
     {
+        m_Habbo.reset();
     }
 
     /// Deconstructor
@@ -77,21 +78,28 @@ namespace SteerStone
             m_Habbo.reset();
     }
 
-    /// IsTileOccupied
-    /// Is tile being occupied
-    bool TileInstance::IsTileOccupied()
+    /// CanWalkOnTile
+    /// Can Habbo walk on tile
+    bool TileInstance::CanWalkOnTile()
     {
         if (m_Habbo.is_initialized())
+        {
             if (Habbo* l_Habbo = m_Habbo.get())
+            {
                 if (GetTilePositionX() != l_Habbo->GetPositionX() || GetTilePositionY() != l_Habbo->GetPositionY()) ///< User is no longer on the tile
-                {
                     SetTileOccupied(false);
-                    return false;   
-                }
                 else
-                    return true;
+                    return false;
+            }
+        }
+        else
+        {
+            if (Item* l_Item = GetItem())
+                if (!l_Item->CanBeWalkedOn())
+                    return false;
+        }
 
-        return false;
+        return true;
     }
 
 } ///< NAMESPACE STEERSTONE

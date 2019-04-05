@@ -45,7 +45,7 @@ namespace SteerStone
             {
                 for (int32 l_X = 0; l_X < m_MapSizeX; l_X++)
                 {
-                    delete DynamicTileGrid[l_X][l_Y];
+                    delete TileGrid[l_X][l_Y];
                 }
             }
         }
@@ -63,7 +63,18 @@ namespace SteerStone
         int32 GetMaxGridX()         const { return m_MapSizeX;        }
         int32 GetMaxGridY()         const { return m_MapSizeY;        }
 
-        DynamicTileGridArray DynamicTileGrid;
+        TileInstance* GetTileInstance(int16 const p_X, int16 const p_Y)
+        {
+            if (p_X >= GetMaxGridX() || p_Y >= GetMaxGridY()
+                || p_X < 0 || p_Y < 0)
+                return nullptr;
+
+            else
+                return TileGrid[p_X][p_Y];
+        }
+
+    protected:
+        DynamicTileGridArray TileGrid;
 
     private:
         /// Variables

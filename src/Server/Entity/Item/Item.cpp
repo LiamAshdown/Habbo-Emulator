@@ -42,5 +42,13 @@ namespace SteerStone
     Item::~Item()
     {
     }
+
+    bool Item::CanBeWalkedOn()
+    {
+        if (GetBehaviour() == "solid")
+            return false;
+
+        return true;
+    }
     
 }

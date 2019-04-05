@@ -26,7 +26,7 @@ namespace SteerStone
     /// @p_TileGrid - Tile Grid array which stores instance of tile
     /// @p_MaxGridX : Max X Tile Grid
     /// @p_MaxGridY : Max Y Tile Grid
-    WayPoints::WayPoints(DynamicTileGridArray const& p_TileGrid, int32 const p_MaxGridX, int32 const p_MaxGridY) : PathFinder(p_TileGrid, p_MaxGridX, p_MaxGridY), m_Habbo(nullptr)
+    WayPoints::WayPoints(RoomModel* p_RoomModel) : PathFinder(p_RoomModel), m_Habbo(nullptr), m_RoomModel(p_RoomModel)
     {
     }
 
@@ -40,7 +40,7 @@ namespace SteerStone
     void WayPoints::CheckForInteractiveObjects()
     {
         /// Get the current tile instance from Habbo position
-        if (TileInstance* l_TileInstance = GetCurrentTileState(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
+        if (TileInstance* l_TileInstance = m_RoomModel->GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
         {
             if (Item* l_Item = l_TileInstance->GetItem())
             {

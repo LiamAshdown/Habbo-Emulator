@@ -36,6 +36,9 @@ namespace SteerStone
         ~Item();
 
     public:
+
+        bool CanBeWalkedOn();
+
         /// Item Info
         uint32 GetId()                  const { return m_Id;                }
         uint32 GetSpriteId()            const { return m_SpriteId;          }

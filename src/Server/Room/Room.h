@@ -56,7 +56,6 @@ namespace SteerStone
     public:
 
         /// LoadGridData
-        /// Load Static and dynamic Grid Data
         void LoadGridData();
 
         /// EnterRoom 
@@ -78,7 +77,6 @@ namespace SteerStone
         void SendHabboRoomStatuses(Habbo* p_Habbo);
 
         /// SendHabboLeftRoom
-        /// This function is used when habbo leaves room, and we need to update habbo objects again
         void SendHabboLeftRoom(uint32 const p_GUID);
 
         /// SendWorldObjects 
@@ -99,7 +97,7 @@ namespace SteerStone
         /// @p_EndX : End Position habbo is going to
         /// @p_EndY : End Position habbo is going to
         /// @p_CheckDynamicObjects : Check for Dynamic Objects
-        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY, bool p_CheckDynamicObjects = false);
+        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY);
 
         /// UpdateObjectsPaths
         /// Update all current paths
@@ -131,7 +129,8 @@ namespace SteerStone
         RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
 
     private:
-        /// GenerateGUID - Generate a unique ID for object in room
+        /// GenerateGUID
+        /// Generate a unique ID for object in room
         uint32 GenerateGUID();
       
     private:

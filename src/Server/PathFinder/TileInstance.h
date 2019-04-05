@@ -61,9 +61,13 @@ namespace SteerStone
         /// @p_Habbo : Habbo user being added to the tile
         void SetTileOccupied(bool p_Occupied, Habbo* p_Habbo = nullptr);
 
-        /// IsTileOccupied
-        /// Is tile being occupied
-        bool IsTileOccupied();
+        /// CanWalkOnTile
+        /// Can Habbo walk on tile
+        bool CanWalkOnTile();
+
+        /// TileContainsSolidObject
+        /// If tile contains a solid object
+        bool TileContainsSolidObject();
 
         int16 GetTilePositionX() const { return m_TileX; }
         int16 GetTilePositionY() const { return m_TileY; }
