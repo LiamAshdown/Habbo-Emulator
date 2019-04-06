@@ -196,8 +196,8 @@ namespace SteerStone
                 m_Buffer.AppendStringDelimiter(CurrentX, ",");
                 m_Buffer.AppendStringDelimiter(CurrentY, ",");
                 m_Buffer.AppendStringDelimiter(CurrentZ, ",");
-                m_Buffer.AppendStringDelimiter(BodyRotation, ",");
-                m_Buffer.AppendString(HeadRotation, false);
+                m_Buffer.AppendStringDelimiter(HeadRotation, ",");
+                m_Buffer.AppendString(BodyRotation, false);
 
                 if (Dancing)
                     m_Buffer.AppendString("/Dance", false);

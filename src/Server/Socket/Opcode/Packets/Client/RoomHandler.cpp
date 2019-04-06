@@ -126,4 +126,12 @@ namespace SteerStone
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
         m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
     }
+
+    void HabboSocket::HandleLookTo(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::vector<std::string> l_Split;
+        boost::split(l_Split, p_Packet->GetContent(), boost::is_any_of(" "));
+
+        m_Habbo->LookTo(std::stoi(l_Split[0]), std::stoi(l_Split[1]));
+    }
 }

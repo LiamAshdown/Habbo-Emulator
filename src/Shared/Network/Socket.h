@@ -92,10 +92,10 @@ namespace SteerStone
         /// GetAsioSocket - Get our AsioSocket
         boost::asio::ip::tcp::socket& GetAsioSocket();
 
-        /// GetAsioSocket - Get our AsioSocket
+        /// GetAsioSocket - Get our EndPoint
         std::string const& GetRemoteEndpoint();
 
-        /// GetAsioSocket - Get our AsioSocket
+        /// GetAsioSocket - Get our Remote Address
         std::string const& GetRemoteAddress();
 
         /// MyMethods described here.
@@ -104,7 +104,7 @@ namespace SteerStone
         std::shared_ptr<T> Shared();
 
     protected:
-        /// ProcessIncomingData - Virtual Function which passes into our derived class from Socket
+        /// ProcessIncomingData - Virtual Function which passes into our derived class Socket
         virtual bool ProcessIncomingData() = 0;
 
         /// ProcessIncomingData - Get the current read position

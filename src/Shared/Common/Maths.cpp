@@ -66,5 +66,57 @@ namespace SteerStone
                     return 1;
             }
         }
+
+        /// CalculateHumanDirection
+        /// @p_CurrentX - Current X axis
+        /// @p_CurrentY - Current Y axis
+        /// @p_LookToX - Look To X axis
+        /// @p_LookToY - Look To Y axis
+        /// Credit Quackster
+        int16 CalculateHumanDirection(int16 const m_CurrentX, int16 const m_CurrentY, int16 const p_LookToX, int16 const p_LookToY)
+        {
+            int16 l_Rotation = 0;
+
+            if (m_CurrentX > p_LookToX && m_CurrentY > p_LookToY)
+                l_Rotation = 7;
+            else if (m_CurrentX < p_LookToX && m_CurrentY < p_LookToY)
+                l_Rotation = 3;
+            else if (m_CurrentX > p_LookToX && m_CurrentY < p_LookToY)
+                l_Rotation = 5;
+            else if (m_CurrentX < p_LookToX && m_CurrentY > p_LookToY)
+                l_Rotation = 1;
+            else if (m_CurrentX > p_LookToX)
+                l_Rotation = 6;
+            else if (m_CurrentX < p_LookToX)
+                l_Rotation = 2;
+            else if (m_CurrentY < p_LookToY)
+                l_Rotation = 4;
+
+            return l_Rotation;
+        }
+
+        /// CalculateHeadRotation
+        /// @p_Rotation - Current Rotation
+        /// @p_CurrentX - Current X axis
+        /// @p_CurrentY - Current Y axis
+        /// @p_LookToX - Look To X axis
+        /// @p_LookToY - Look To Y axis
+        /// Credit Quackster
+        int16 CalculateHeadRotation(int16 const p_Rotation, int16 const m_CurrentX, int16 const m_CurrentY, int16 const p_LookToX, int16 const p_LookToY)
+        {
+            int16 l_HeadRotation = p_Rotation;
+            int16 l_Diff = p_Rotation - CalculateHumanDirection(m_CurrentX, m_CurrentY, p_LookToX, p_LookToY);
+
+            if ((p_Rotation % 2) == 0) {
+                if (l_Diff > 0) {
+                    l_HeadRotation = (p_Rotation - 1);
+                }
+                else if (l_Diff < 0) {
+                    l_HeadRotation = (p_Rotation + 1);
+                }
+            }
+
+            return l_HeadRotation;
+        }
     } ///< NAMESPACE MATHS
 } ///< NAMESPACE STEERSTONE

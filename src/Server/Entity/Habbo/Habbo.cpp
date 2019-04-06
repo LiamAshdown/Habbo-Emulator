@@ -266,6 +266,19 @@ namespace SteerStone
         m_HeadRotation = p_Rotation;
     }
 
+    /// LookTo
+    /// @p_X : X axis to face targeted user
+    /// @p_Y : Y axis to face targeted user
+    void Habbo::LookTo(int16 const p_X, int16 const p_Y)
+    {
+        if (GetRoom()->HasStatus(GetRoomGUID(), Status::STATUS_SITTING))
+            SetHeadRotation(Maths::CalculateHeadRotation(GetHeadRotation(), GetPositionX(), GetPositionY(), p_X, p_Y));
+        else
+            UpdatePosition(GetPositionX(), GetPositionY(), GetPositionZ(), Maths::CalculateHumanDirection(GetPositionX(), GetPositionY(), p_X, p_Y));
+
+        GetRoom()->AddStatus(GetRoomGUID(), Status::STATUS_ROTATION);
+    }
+
     ///////////////////////////////////////////
     //             ACCOUNT INFO
     ///////////////////////////////////////////

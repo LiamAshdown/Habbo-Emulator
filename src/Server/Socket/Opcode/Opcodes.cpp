@@ -29,7 +29,7 @@ namespace SteerStone
     //-----------------------------------------------//
     OpcodeHandler const Opcodes::emptyHandler =
     {
-        "<none>",
+        "NULL",
         &HabboSocket::HandleNULL
     };
     //-----------------------------------------------//
@@ -80,6 +80,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_HABBO_STOP_DANCE,              "CLIENT_HABBO_STOP_DANCE",                 &HabboSocket::HandleHabboStopDance             );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_HABBO_STATUSES,           "CLIENT_ROOM_HABBO_STATUSES",              &HabboSocket::HandleRoomHabboStatuses          );
         StoreClientPacket(PacketClientHeader::CLIENT_HABBO_WAVE,                    "CLIENT_HABBO_WAVE",                       &HabboSocket::HandleHabboWave                  );
+        StoreClientPacket(PacketClientHeader::CLIENT_LOOK_TO,                       "CLIENT_LOOK_TO",                          &HabboSocket::HandleLookTo                     );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );

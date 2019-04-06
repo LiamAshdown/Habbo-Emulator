@@ -107,6 +107,12 @@ namespace SteerStone
         /// @p_Status : Habbo Status to be removed
         void RemoveStatus(uint32 const p_RoomGUID, uint32 const p_Status);
 
+        /// HasStatus
+        /// Check if user has an active status
+        /// @p_RoomGUID : Room GUID of user
+        /// @p_Status : Status to check
+        bool HasStatus(uint32 const p_RoomGUID, uint32 const p_Status) const;
+
         /// ProcessUserActions
         /// Process Habbo Actions; Status, pathfinding, etc..
         void ProcessUserActions(const uint32 p_Diff);

@@ -42,6 +42,7 @@ namespace SteerStone
         STATUS_SITTING           = 2,
         STATUS_WAVING            = 4,
         STATUS_DANCING           = 8,
+        STATUS_ROTATION          = 16,
     };
 
     /// Holds Habbo Badges
@@ -219,6 +220,11 @@ namespace SteerStone
         /// @p_Rotation - New Rotation
         void UpdatePosition(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation);
 
+        /// LookTo
+        /// @p_X : X axis to face targeted user
+        /// @p_Y : Y axis to face targeted user
+        void LookTo(int16 const p_X, int16 const p_Y);
+
         ///////////////////////////////////////////
         //             ACCOUNT INFO
         ///////////////////////////////////////////
@@ -313,20 +319,11 @@ namespace SteerStone
         int16 GetPositionX()            const { return m_PositionX;            }
         int16 GetPositionY()            const { return m_PositionY;            }
         int16 GetPositionZ()            const { return m_PositionZ;            }
-        uint8 GetBodyRotation()         const { return m_BodyRotation;         }
-        uint8 GetHeadRotation()         const { return m_HeadRotation;         }
+        int16 GetBodyRotation()         const { return m_BodyRotation;         }
+        int16 GetHeadRotation()         const { return m_HeadRotation;         }
 
-        void SetIsWalking(bool const p_Walking) { m_Walking = p_Walking;       }
-        bool IsWalking()                const { return m_Walking;              }
-
-        void SetIsSitting(bool const p_Sitting) { m_Sitting = p_Sitting;       }
-        bool IsSitting()                const { return m_Sitting;              }
-
-        void SetIsDancing(bool const p_Dancing) { m_Dancing = p_Dancing;       }
-        bool IsDancing()                const   { return m_Dancing;            }
-
-        void SetIsWaving(bool const p_Waving)   { m_Waving = p_Waving;         }  
-        bool IsWaving()                 const   { return m_Waving;             }      
+        void SetBodyRotation(int16 const l_Rotation) { m_BodyRotation = l_Rotation; }
+        void SetHeadRotation(int16 const l_Rotation) { m_HeadRotation = l_Rotation; }
 
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket;             }
 
@@ -373,8 +370,8 @@ namespace SteerStone
         int16 m_PositionX;
         int16 m_PositionY;
         int16 m_PositionZ;
-        uint8 m_BodyRotation;
-        uint8 m_HeadRotation;
+        int16 m_BodyRotation;
+        int16 m_HeadRotation;
 
         uint8 m_Rank;
 

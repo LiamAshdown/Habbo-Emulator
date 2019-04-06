@@ -200,13 +200,13 @@ namespace SteerStone
         return m_Socket;
     }
     
-    /// GetAsioSocket - Get our AsioSocket
+    /// GetAsioSocket - Get our EndPoint
     std::string const& Socket::GetRemoteEndpoint()
     {
         return m_RemoteEndPoint;
     }
     
-    /// GetAsioSocket - Get our AsioSocket
+    /// GetAsioSocket - Get our Remote Address
     std::string const& Socket::GetRemoteAddress()
     {
         return m_Address;

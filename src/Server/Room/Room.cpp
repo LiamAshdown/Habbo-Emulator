@@ -188,16 +188,16 @@ namespace SteerStone
             Habbo* l_Habbo = l_Itr.second->ToHabbo();
 
             HabboPacket::Room::UserUpdateStatus l_Packet;
-            l_Packet.GUID = std::to_string(l_Habbo->GetRoomGUID());
-            l_Packet.CurrentX = std::to_string(l_Habbo->GetPositionX());
-            l_Packet.CurrentY = std::to_string(l_Habbo->GetPositionY());
-            l_Packet.CurrentZ = std::to_string(l_Habbo->GetPositionZ());
-            l_Packet.BodyRotation = std::to_string(l_Habbo->GetBodyRotation());
-            l_Packet.HeadRotation = std::to_string(l_Habbo->GetHeadRotation());
-            l_Packet.Sitting = l_Habbo->IsSitting();
-            l_Packet.Walking = l_Habbo->IsWalking();
-            l_Packet.Dancing = l_Habbo->IsDancing();
-            l_Packet.Waving = l_Habbo->IsWaving();
+            l_Packet.GUID           = std::to_string(l_Habbo->GetRoomGUID());
+            l_Packet.CurrentX       = std::to_string(l_Habbo->GetPositionX());
+            l_Packet.CurrentY       = std::to_string(l_Habbo->GetPositionY());
+            l_Packet.CurrentZ       = std::to_string(l_Habbo->GetPositionZ());
+            l_Packet.BodyRotation   = std::to_string(l_Habbo->GetBodyRotation());
+            l_Packet.HeadRotation   = std::to_string(l_Habbo->GetHeadRotation());
+            l_Packet.Sitting        = l_Itr.second->HasStatus(Status::STATUS_SITTING);
+            l_Packet.Walking        = l_Itr.second->HasStatus(Status::STATUS_WALKING);
+            l_Packet.Dancing        = l_Itr.second->HasStatus(Status::STATUS_DANCING);
+            l_Packet.Waving         = l_Itr.second->HasStatus(Status::STATUS_WAVING);
 
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
@@ -294,6 +294,17 @@ namespace SteerStone
         auto const& l_Itr = m_Habbos.find(p_RoomGUID);
         if (l_Itr != m_Habbos.end())
             l_Itr->second->RemoveStatus(p_Status);
+    }
+
+    /// HasStatus
+    /// Check if user has an active status
+    /// @p_RoomGUID : Room GUID of user
+    /// @p_Status : Status to check
+    bool Room::HasStatus(uint32 const p_RoomGUID, uint32 const p_Status) const
+    {
+        auto& l_Itr = m_Habbos.find(p_RoomGUID);
+        if (l_Itr != m_Habbos.end())
+            return l_Itr->second->HasStatus(p_Status);
     }
 
     /// ProcessUserActions

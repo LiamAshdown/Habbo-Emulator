@@ -95,6 +95,14 @@ namespace SteerStone
         CheckTimers(p_Diff);
     }
 
+    /// HasStatus
+    /// Check if user has an active status
+    /// @p_Status : Status to check
+    bool RoomHabboInfo::HasStatus(uint32 p_Status) const
+    {
+        return (m_Statuses & p_Status) == p_Status ? true : false;
+    }
+
     /// ProcessNextWayPoint
     /// Process next waypoint
     void RoomHabboInfo::ProcessNextWayPoint()
@@ -149,10 +157,10 @@ namespace SteerStone
             l_Packet.NewX           = std::to_string(l_Position.X);
             l_Packet.NewY           = std::to_string(l_Position.Y);
             l_Packet.NewZ           = std::to_string(l_Position.Z);
-            l_Packet.Sitting        = IsSitting();
-            l_Packet.Walking        = IsWalking();
-            l_Packet.Dancing        = IsDancing();
-            l_Packet.Waving         = IsWaving();
+            l_Packet.Sitting        = HasStatus(Status::STATUS_SITTING);
+            l_Packet.Walking        = HasStatus(Status::STATUS_WALKING);
+            l_Packet.Dancing        = HasStatus(Status::STATUS_DANCING);
+            l_Packet.Waving         = HasStatus(Status::STATUS_WAVING);
             m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
             m_Habbo->UpdatePosition(l_Position.X, l_Position.Y, l_Position.Z, l_Rotation);
@@ -165,7 +173,7 @@ namespace SteerStone
     /// Process Habbo Status
     void RoomHabboInfo::ProcessStatusUpdates()
     {
-        if (!CanSendStatusUpdate() || IsWalking())
+        if (!CanSendStatusUpdate() || HasStatus(Status::STATUS_WALKING))
             return;
 
         HabboPacket::Room::UserUpdateStatus l_Packet;
@@ -175,10 +183,10 @@ namespace SteerStone
         l_Packet.CurrentZ           = std::to_string(m_Habbo->GetPositionZ());
         l_Packet.BodyRotation       = std::to_string(m_Habbo->GetBodyRotation());
         l_Packet.HeadRotation       = std::to_string(m_Habbo->GetHeadRotation());
-        l_Packet.Sitting            = IsSitting();
-        l_Packet.Walking            = IsWalking();
-        l_Packet.Dancing            = IsDancing();
-        l_Packet.Waving             = IsWaving();
+        l_Packet.Sitting            = HasStatus(Status::STATUS_SITTING);
+        l_Packet.Walking            = HasStatus(Status::STATUS_WALKING);
+        l_Packet.Dancing            = HasStatus(Status::STATUS_DANCING);
+        l_Packet.Waving             = HasStatus(Status::STATUS_WAVING);
         m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
         m_UpdateClient = false;
@@ -188,7 +196,7 @@ namespace SteerStone
     /// Check durations of user; Waving, AFK etc..
     void RoomHabboInfo::CheckTimers(uint32 const p_Diff)
     {
-        if (IsWaving())
+        if (HasStatus(Status::STATUS_WAVING))
         {
             if (m_WaveTimer <= p_Diff)
             {

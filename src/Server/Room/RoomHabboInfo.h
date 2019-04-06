@@ -61,12 +61,10 @@ namespace SteerStone
         /// @p_Diff : Hotel last tick time
         void ProcessActions(uint32 const p_Diff);
 
-    public:
-        /// Status Info
-        bool IsWalking()  const { return (m_Statuses & 1)  == 1  ? true : false; }
-        bool IsSitting()  const { return (m_Statuses & 2)  == 2  ? true : false; }
-        bool IsWaving()   const { return (m_Statuses & 4)  == 4  ? true : false; }
-        bool IsDancing()  const { return (m_Statuses & 8)  == 8  ? true : false; }
+        /// HasStatus
+        /// Check if user has an active status
+        /// @p_Status : Status to check
+        bool HasStatus(uint32 p_Status) const;
 
     private:
         /// ProcessWayPoints

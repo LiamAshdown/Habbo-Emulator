@@ -55,8 +55,8 @@ namespace SteerStone
     bool HabboSocket::ProcessIncomingData()
     {
         std::vector<uint8> l_BufferVec;
-        l_BufferVec.resize(ReadLengthRemaining());
-        if (Read((char*)&l_BufferVec[0], ReadLengthRemaining()))
+        l_BufferVec.resize(ReadLength());
+        if (Read((char*)&l_BufferVec[0], ReadLength()))
         {
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
@@ -67,12 +67,11 @@ namespace SteerStone
             {
                 std::string l_TrimBuffer = l_TempBuffer.substr(3, DecodeBase64(l_TempBuffer.substr(1, 2)));
 
-                std::unique_ptr<ClientPacket> l_Packet = std::make_unique<ClientPacket>();
-                l_Packet->Parse(l_TrimBuffer);
+                std::unique_ptr<ClientPacket> l_Packet = std::make_unique<ClientPacket>(l_TrimBuffer);
 
-                LOG_INFO << "Processing Packet: " << l_Packet->GetHeader();
+                LOG_INFO << "[INCOMING] >> " << "[" << l_Packet->GetHeader() << "] [" << sOpcode->GetClientPacket(l_Packet->GetHeader()).name << "]";
 
-                ExecutePacket(sOpcode->GetClientPacket(l_Packet->GetHeader()), std::move(l_Packet));
+                ExecutePacket(sOpcode->GetClientPacket(l_Packet->GetHeader()), std::make_unique<ClientPacket>(l_TrimBuffer));
 
                 l_TempBuffer = l_TempBuffer.substr(l_TrimBuffer.length() + 3);
             }
@@ -92,6 +91,5 @@ namespace SteerStone
     /// ClientPacket is not handled yet
     void HabboSocket::HandleNULL(std::unique_ptr<ClientPacket> p_Packet)
     {
-        LOG_ERROR << "Packet: " << p_Packet->GetHeader() << " is not handled";
     }
 }

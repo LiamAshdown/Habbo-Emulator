@@ -28,20 +28,18 @@ namespace SteerStone
     {
     public:
         /// Constructor
-        ClientPacket() : m_ReadPosition(0), m_Header(0), m_Content("") {}
+        /// @p_Contents : Contents of packet we have just recieved
+        ClientPacket(std::string const p_Contents) : m_ReadPosition(0), m_Header(0), m_Content("") 
+        {
+            /// Seperate the buffer into Header and content
+            m_Header = DecodeBase64(p_Contents.substr(0, 2));
+            m_Content = p_Contents.substr(2);
+        }
 
         ~ClientPacket() {}
 
     public:
-        /// Parse
-        /// @p_Buffer : Seperate the buffer into Header and content
-        void Parse(std::string const& p_Buffer)
-        {
-            m_Header = DecodeBase64(p_Buffer.substr(0, 2));
-            m_Content = p_Buffer.substr(2);
-        }
-
-        /// ReadString
+       /// ReadString
         /// Read the string
         std::string ReadString()
         {
