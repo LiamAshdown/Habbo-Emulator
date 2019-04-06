@@ -34,6 +34,16 @@ namespace SteerStone
         LOGOUT_TIMEOUT              = 3,
     };
 
+    /// Used to send Status update to client(s)
+    enum Status
+    {
+        STATUS_NONE              = 0,             
+        STATUS_WALKING           = 1,
+        STATUS_SITTING           = 2,
+        STATUS_WAVING            = 4,
+        STATUS_DANCING           = 8,
+    };
+
     /// Holds Habbo Badges
     typedef struct HabboBadgesStruct
     {
@@ -201,33 +211,6 @@ namespace SteerStone
         /// SendHabboObject
         /// Send user object on login
         void SendHabboObject();
-
-        /// SendUpdateStatusWalk
-        /// @p_X - X axis on new position
-        /// @p_Y - Y axis on new position
-        /// @p_Z - Z axis on new position
-        /// @p_SendToRoom : Send packet to all in room
-        void SendUpdateStatusWalk(int16 const p_X, int16 const p_Y, int16 const p_Z, bool p_SendToRoom = true);
-
-        /// SendUpdateStatusStop
-        /// Send Status stop when user finishes path
-        /// @p_SendToRoom : Send packet to all in room
-        void SendUpdateStatusStop(bool p_SendToRoom = true);
-
-        /// SendUpdateStatusSit
-        /// @p_X - X Axis current position
-        /// @p_Y - Y Axis current position
-        /// @p_Z - Z Axis current position
-        /// @p_SendToRoom : Send packet to all in room
-        void SendUpdateStatusSit(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation, bool p_SendToRoom = true);
-
-        /// SendUpdateStatusDance
-        /// @p_SendToRoom : Send packet to all in room
-        void SendUpdateStatusDance(bool p_SendToRoom = true);
-
-        /// SendUpdateStatusWave
-        /// @p_SendToRoom : Send packet to all in room
-        void SendUpdateStatusWave(bool p_SendToRoom = true);
 
         /// SendUpdateStatusWalk
         /// @p_X - X axis on new position

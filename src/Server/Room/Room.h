@@ -20,7 +20,7 @@
 #define _ROOM_ROOM_h
 #include "Common/SharedDefines.h"
 #include "RoomCategory.h"
-#include "WayPoints.h"
+#include "RoomHabboInfo.h"
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <memory>
@@ -38,9 +38,8 @@ namespace SteerStone
     class StringBuffer;
 
     typedef std::unordered_map<uint32, std::unique_ptr<WayPoints>> PathFinderMap;
-    typedef std::unordered_map<uint32, Habbo*> GUIDUserMap;
+    typedef std::unordered_map<uint32, std::unique_ptr<RoomHabboInfo>> GUIDUserMap;
 
-    /// Class which holds information about hotel room and responsible for handling habbos inside room
     class Room
     {
     public:
@@ -62,22 +61,22 @@ namespace SteerStone
         /// @p_Habbo : Habbo user entering in room
         bool EnterRoom(Habbo* p_Habbo);
 
-        /// EnterRoom 
+        /// LeaveRoom 
         /// @p_Habbo : Habbo user leaving room
         void LeaveRoom(Habbo* p_Habbo);
 
-        /// SendNewHabboEntering
-        /// Send Habbo Figure object to clients in room
+        /// AddFigure
+        /// Send Habbo Figure to clients in room
         /// @p_Habbo : Habbo which is joining room
-        void SendNewHabboEntering(Habbo* p_Habbo);
+        void AddFigure(Habbo* p_Habbo);
 
-        /// SendHabboRoomStatuses
-        /// Send Habbo user statuses in room to new Habbo joining room
-        /// @p_Habbo : Habbo which is joining room
-        void SendHabboRoomStatuses(Habbo* p_Habbo);
+        /// SendRoomStatuses
+        /// Send Habbo Statuses to user joining room
+        /// @p_Habbo : User joining room
+        void SendRoomStatuses(Habbo* p_Habbo);
 
-        /// SendHabboLeftRoom
-        void SendHabboLeftRoom(uint32 const p_GUID);
+        /// SendUserLeftRoom
+        void SendUserLeftRoom(uint32 const p_GUID);
 
         /// SendWorldObjects 
         /// @p_Habbo : Send Furniture Objects to Habbo client
@@ -89,22 +88,32 @@ namespace SteerStone
         void SendPacketToAll(StringBuffer const* p_Buffer);
 
         /// SendObjects 
-        /// @p_Habbo : Send Active Furniture Objects to Habbo client
+        /// @p_Habbo : Send Active Furniture Objects to Habbo user
         void SendActiveObjects(Habbo* p_Habbo);
 
         /// Walk 
-        /// @p_Habbo : Habbo class which is walking
+        /// @p_Habbo : Habbo user who is walking
         /// @p_EndX : End Position habbo is going to
         /// @p_EndY : End Position habbo is going to
-        /// @p_CheckDynamicObjects : Check for Dynamic Objects
-        void Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY);
+        void Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY);
 
-        /// UpdateObjectsPaths
-        /// Update all current paths
-        void UpdateObjectsPaths(const uint32 p_Diff);
+        /// AddStatus
+        /// @p_RoomGUID : Room GUID of user
+        /// @p_Status : Habbo Status to be added
+        void AddStatus(uint32 const p_RoomGUID, uint32 const p_Status);
+
+        /// RemoveStatus
+        /// @p_RoomGUID : Room GUID of user
+        /// @p_Status : Habbo Status to be removed
+        void RemoveStatus(uint32 const p_RoomGUID, uint32 const p_Status);
+
+        /// ProcessUserActions
+        /// Process Habbo Actions; Status, pathfinding, etc..
+        void ProcessUserActions(const uint32 p_Diff);
 
         /// Update 
-        /// @p_Diff : Update the room
+        /// Update all objects in room
+        /// @p_Diff : Hotel last tick time
         void Update(uint32 const p_Diff);
 
     public:
@@ -130,11 +139,11 @@ namespace SteerStone
 
     private:
         /// GenerateGUID
-        /// Generate a unique ID for object in room
+        /// Generate a unique ID for new object in room
         uint32 GenerateGUID();
       
     private:
-        /// ROOM INFO
+        /// Room Info
         uint32 m_Id;
         uint32 m_OwnerId;
         std::string m_OwnerName;
@@ -154,8 +163,7 @@ namespace SteerStone
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
 
-        GUIDUserMap m_Habbos;                    ///< Hold Habbo users in vector
-        PathFinderMap m_Paths;                   ///< Stores path points for objects inside room
-        boost::shared_mutex m_Mutex;             ///< Mutex
+        GUIDUserMap m_Habbos;                    ///< Hold Habbo users
+        boost::shared_mutex m_Mutex;
     };
 } ///< NAMESPACE STEERSTONE

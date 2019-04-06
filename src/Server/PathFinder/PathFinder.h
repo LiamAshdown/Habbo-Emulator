@@ -57,36 +57,33 @@ namespace SteerStone
         
     public:
         /// Node Info
-        int16 GetTotalCost()             const { return m_H + m_G; }         ///< Add H and G to get total cost
-        uint32 GetHCost()                const { return m_H;       }         ///< Calculate end position to current position
-        uint32 GetGCost()                const { return m_G;       }         ///< Calculate start position to current position
-        Node* GetParentNode()                  { return m_Parent;  }         ///< Returns our parent node
-        Position GetPosition()                 { return m_Position;}         ///< Get Position of current node
+        int16 GetTotalCost()             const { return m_H + m_G; }
+        uint32 GetHCost()                const { return m_H;       }
+        uint32 GetGCost()                const { return m_G;       }
+        Node* GetParentNode()                  { return m_Parent;  }
+        Position GetPosition()                 { return m_Position;}
 
-        void SetHCost(uint32 const& p_Cost)    { m_H = p_Cost;      }        ///< Set H Cost
-        void SetGCost(uint32 const& p_Cost)    { m_G = p_Cost;      }        ///< Set G Cost
-        void SetParentNode(Node* p_Node)       { m_Parent = p_Node; }        ///< Set our parent node which is used to gather all path points
+        void SetHCost(uint32 const& p_Cost)    { m_H = p_Cost;      }
+        void SetGCost(uint32 const& p_Cost)    { m_G = p_Cost;      }
+        void SetParentNode(Node* p_Node)       { m_Parent = p_Node; }
 
     private:
         /// Variables
-        uint32 m_H;
-        uint32 m_G;
-        uint32 m_F;
-        Position m_Position;
-        Node* m_Parent;
+        uint32 m_H;            ///< Estimated movement cost from current position to end position                     
+        uint32 m_G;            ///< Movement cost from start position to current position
+        uint32 m_F;            ///< Total cost of m_H + m_G
+        Position m_Position;   ///< Node Position
+        Node* m_Parent;        ///< Parent node which is used to gather all path points
     };
 
     class RoomModel;
 
-    /// Class which calculates user path to a specific grid in the room
-    /// using A* Algorithm
+    /// Caculates a path using A* Algorithm
     class PathFinder
     {
     public:
         /// Constructor
-        /// @p_TileGrid : Dynamic Multi-dimensional array which stores the TileGrid
-        /// @p_MaxGridX : Max X Tile Grid
-        /// @p_MaxGridY : Max Y Tile Grid
+        /// @p_RoomModel : Room Model of the room we are calculating a path from
         PathFinder(RoomModel* p_RoomModel);
 
         /// Deconstructor
@@ -126,7 +123,7 @@ namespace SteerStone
         /// DoesNodeExist
         /// Check if node position exists in storage
         /// @p_Nodes : Vector which contains Nodes
-        /// @p_FuturePosition : new position we are about to take
+        /// @p_FuturePosition : New position we are about to take
         Node* DoesNodeExist(std::vector<Node*> const& p_Nodes, Position const& p_FuturePosition);
 
         /// CalculateHeuristic
@@ -150,7 +147,7 @@ namespace SteerStone
         void CleanUp();
 
     private:
-        RoomModel* m_RoomModel;                     ///< Holds dynamic objects in multi dimensional array
+        RoomModel* m_RoomModel;                    ///< Holds dynamic objects in multi dimensional array
         Node* m_Current;                           ///< Current node we are accessing from m_OpenList or m_ClosedList
         std::vector<Position> m_Directions;        ///< Directions in which we can go
         std::deque<Position> m_Path;               ///< Holds our path points

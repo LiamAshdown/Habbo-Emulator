@@ -74,7 +74,7 @@ namespace SteerStone
     void HabboSocket::HandleRoomUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
         /// Sending Habbo object so client and other clients can see a new habbo has joined the room
-        m_Habbo->GetRoom()->SendNewHabboEntering(m_Habbo);
+        m_Habbo->GetRoom()->AddFigure(m_Habbo);
     }
 
     void HabboSocket::HandleGameObjects(std::unique_ptr<ClientPacket> p_Packet)
@@ -102,33 +102,28 @@ namespace SteerStone
         LOG_INFO << l_X << " " << l_Y;
 
         if (m_Habbo->GetRoom())
-            m_Habbo->GetRoom()->Walk(m_Habbo, l_X, l_Y);
+            m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), l_X, l_Y);
     }
 
     void HabboSocket::HandleUserDance(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (m_Habbo->IsWaving())
-            m_Habbo->SetIsWaving(false);
-
-        m_Habbo->SetIsDancing(true);
-
-        m_Habbo->SendUpdateStatusDance();
+        m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
+        m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
     void HabboSocket::HandleHabboStopDance(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Habbo->SetIsDancing(false);
-
-        m_Habbo->SendUpdateStatusDance();
+        m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
     void HabboSocket::HandleRoomHabboStatuses(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Habbo->GetRoom()->SendHabboRoomStatuses(m_Habbo);
+        m_Habbo->GetRoom()->SendRoomStatuses(m_Habbo);
     }
 
     void HabboSocket::HandleHabboWave(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Habbo->SendUpdateStatusWave();
+        m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
+        m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
     }
 }

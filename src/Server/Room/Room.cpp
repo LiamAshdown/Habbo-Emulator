@@ -45,8 +45,7 @@ namespace SteerStone
             std::string l_Line = l_Split[l_Y];
 
             for (int32 l_X = 0; l_X < GetRoomModel().m_MapSizeX; l_X++)
-            {
-                
+            {     
                 GetRoomModel().TileGrid[l_X][l_Y] = new TileInstance(l_X, l_Y);
 
                 uint8 l_Tile = l_Line[l_X];
@@ -75,7 +74,7 @@ namespace SteerStone
         }    
     }
 
-    /// SendNewHabboEntering
+    /// AddFigure
     /// Send Habbo Figure object to clients in room
     /// @p_Habbo : p_Habbo
     bool Room::EnterRoom(Habbo* p_Habbo)
@@ -103,7 +102,7 @@ namespace SteerStone
         p_Habbo->SetRoomGUID(GenerateGUID());
 
         m_Mutex.lock();
-        m_Habbos[p_Habbo->GetRoomGUID()] = p_Habbo;
+        m_Habbos[p_Habbo->GetRoomGUID()] = std::make_unique<RoomHabboInfo>(p_Habbo);
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++;
         m_Mutex.unlock();
@@ -118,19 +117,11 @@ namespace SteerStone
         auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
         if (l_Itr != m_Habbos.end())
         {
-            /// Check if there's any active path, and clear it
-            auto const& l_ItrPath = m_Paths.find(p_Habbo->GetRoomGUID());
-            if (l_ItrPath != m_Paths.end())
-            {
-                /// Gets removed on next room update
-                l_ItrPath->second->GetPath().clear();
-            }
-
-            /// Send User Objects packet again to all players, so habbo who left no longer appears on other clients
-            SendHabboLeftRoom(l_Itr->second->GetRoomGUID());
+            /// Notify other users that we left the room
+            SendUserLeftRoom(l_Itr->second->ToHabbo()->GetRoomGUID());
 
             /// Set Habbo room to nullptr
-            l_Itr->second->DestroyRoom();
+            l_Itr->second->ToHabbo()->DestroyRoom();
 
             m_Mutex.lock();
             m_Habbos.erase(l_Itr);
@@ -143,20 +134,20 @@ namespace SteerStone
     }
 
     /// GenerateGUID 
-    /// Generate a unique ID for object in room
+    /// Generate a unique ID for new object in room
     uint32 Room::GenerateGUID()
     {
         /// TODO; Check whether guid already exists
         return Maths::GetRandomUint32(1, 9999);
     }
     
-    /// Send Habbo Figure object to clients in room
+    /// Send Habbo Figure to clients in room
     /// @p_Habbo : Habbo which is joining room
-    void Room::SendNewHabboEntering(Habbo* p_Habbo)
+    void Room::AddFigure(Habbo* p_Habbo)
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* l_Habbo = l_Itr.second;
+            Habbo* l_Habbo = l_Itr.second->ToHabbo();
 
             if (l_Habbo->GetId() != p_Habbo->GetId())
             {
@@ -187,14 +178,14 @@ namespace SteerStone
         }
     }
 
-    /// SendHabboRoomStatuses
-    /// Send Habbo user statuses in room to new Habbo joining room
+    /// SendRoomStatuses
+    /// Send Habbo Statuses to user joining room
     /// @p_Habbo : Habbo which is joining room
-    void Room::SendHabboRoomStatuses(Habbo * p_Habbo)
+    void Room::SendRoomStatuses(Habbo * p_Habbo)
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* l_Habbo = l_Itr.second;
+            Habbo* l_Habbo = l_Itr.second->ToHabbo();
 
             HabboPacket::Room::UserUpdateStatus l_Packet;
             l_Packet.GUID = std::to_string(l_Habbo->GetRoomGUID());
@@ -212,12 +203,12 @@ namespace SteerStone
         }
     }
 
-    /// SendHabboLeftRoom
-    void Room::SendHabboLeftRoom(uint32 const p_GUID)
+    /// SendUserLeftRoom
+    void Room::SendUserLeftRoom(uint32 const p_GUID)
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* l_Habbo = l_Itr.second;
+            Habbo* l_Habbo = l_Itr.second->ToHabbo();
 
             HabboPacket::Room::LeaveRoom l_Packet;
             l_Packet.GUID = p_GUID;
@@ -262,13 +253,12 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* l_Habbo = l_Itr.second;
-            l_Habbo->ToSocket()->SendPacket(p_Buffer);
+            l_Itr.second->ToHabbo()->ToSocket()->SendPacket(p_Buffer);
         }
     }
 
     /// SendObjects 
-    /// @p_Habbo : Send Active Furniture Objects to Habbo client
+    /// @p_Habbo : Send Active Furniture Objects to Habbo user
     void Room::SendActiveObjects(Habbo* p_Habbo)
     {
         HabboPacket::Room::ActiveObjects l_Packet;
@@ -276,99 +266,51 @@ namespace SteerStone
     }
 
     /// Walk 
-    /// @p_Habbo : Habbo class which is walking
+    /// @p_Habbo : Habbo user who is walking
     /// @p_EndX : End Position habbo is going to
     /// @p_EndY : End Position habbo is going to
-    void Room::Walk(Habbo* p_Habbo, uint16 const p_EndX, uint16 const p_EndY)
+    void Room::Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY)
     {
-        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
-
-        std::unique_ptr<WayPoints> l_WayPoints = std::make_unique<WayPoints>(&GetRoomModel());
-  
-        /// Calculate the path
-        if (l_WayPoints->CalculatePath(p_Habbo->GetPositionX(), p_Habbo->GetPositionY(), p_EndX, p_EndY))
-        {
-            /// Check if user already has an existing path
-            auto& l_Itr = m_Paths.find(p_Habbo->GetRoomGUID());
-            if (l_Itr != m_Paths.end())
-            {
-                /// Clear our waypoints and add a newly created path
-                l_Itr->second->GetPath().clear();
-                l_Itr->second->GetPath() = l_WayPoints->GetPath();
-
-                /// Remove iteration which is the current user position
-                l_Itr->second->GetPath().pop_back();
-                return;
-            }
-
-            l_WayPoints->m_Habbo = p_Habbo;
-            l_WayPoints->m_EndX = p_EndX;
-            l_WayPoints->m_EndY = p_EndY;
-            l_WayPoints->m_Habbo->SetIsSitting(false);
-            l_WayPoints->m_Habbo->SetIsWalking(true);
-
-            /// Remove iteration which is the current user position
-            l_WayPoints->GetPath().pop_back();
-
-            m_Paths[p_Habbo->GetRoomGUID()] = std::move(l_WayPoints);
-        }
+        auto const& l_Itr = m_Habbos.find(p_RoomGUID);
+        if (l_Itr != m_Habbos.end())
+            l_Itr->second->CreatePath(p_EndX, p_EndY);
     }
 
-    /// UpdateObjectsPaths
-    /// Update all current paths
-    void Room::UpdateObjectsPaths(const uint32 p_Diff)
+    /// AddStatus
+    /// @p_RoomGUID : Room GUID of user
+    /// @p_Status : Habbo Status to be added
+    void Room::AddStatus(uint32 const p_RoomGUID, uint32 const p_Status)
     {
-        /// Loop through all current paths
-        for (auto& l_Itr = m_Paths.begin(); l_Itr != m_Paths.end();)
+        auto const& l_Itr = m_Habbos.find(p_RoomGUID);
+        if (l_Itr != m_Habbos.end())
+            l_Itr->second->AddStatus(p_Status);
+    }
+
+    /// RemoveStatus
+    /// @p_RoomGUID : Room GUID of user
+    /// @p_Status : Habbo Status to be removed
+    void Room::RemoveStatus(uint32 const p_RoomGUID, uint32 const p_Status)
+    {
+        auto const& l_Itr = m_Habbos.find(p_RoomGUID);
+        if (l_Itr != m_Habbos.end())
+            l_Itr->second->RemoveStatus(p_Status);
+    }
+
+    /// ProcessUserActions
+    /// Process Habbo Actions; Status, pathfinding, etc..
+    void Room::ProcessUserActions(const uint32 p_Diff)
+    {
+        for (auto& l_Itr : m_Habbos)
         {
-            if (l_Itr->second->GetPath().empty())
-            {
-                l_Itr->second->CheckForInteractiveObjects();
-                l_Itr = m_Paths.erase(l_Itr);
-            }
-            else
-            {
-                Position& l_Position = l_Itr->second->GetPath().back();
-                TileInstance* l_TileInstance = GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
-
-                if (!l_TileInstance)
-                    continue;
-
-                if (!l_TileInstance->CanWalkOnTile())
-                {
-                    l_Position.X = l_Itr->second->ToHabbo()->GetPositionX();
-                    l_Position.Y = l_Itr->second->ToHabbo()->GetPositionY();
-
-                    if (l_Itr->second->GetPath().size() > 2)
-                    {
-                        if (!l_Itr->second->ReCalculatePath(l_Position, (l_Itr->second->GetPath().end() - 2)->X, (l_Itr->second->GetPath().end() - 2)->Y))
-                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY());
-                            continue;
-                    }
-                    else
-                        if (!l_Itr->second->ReCalculatePath(l_Position, l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY()))
-                            Walk(l_Itr->second->ToHabbo(), l_Itr->second->GetEndPositionX(), l_Itr->second->GetEndPositionY());
-                            continue;
-                }
-                else
-                    l_TileInstance->SetTileOccupied(true, l_Itr->second->ToHabbo());
-
-
-                l_Itr->second->ToHabbo()->SendUpdateStatusWalk(l_Position.X, l_Position.Y, l_Position.Z);
-
-                l_Itr->second->GetPath().pop_back();
-
-                ++l_Itr;
-            }
+            l_Itr.second->ProcessActions(p_Diff);
         }
     }
 
     /// Update 
-    /// @p_Diff : Update the room
+    /// Update all objects in room
+    /// @p_Diff : Hotel last tick time
     void Room::Update(uint32 const p_Diff)
     {
-        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
-
-        UpdateObjectsPaths(p_Diff);
+        ProcessUserActions(p_Diff);
     }
 } ///< NAMESPACE STEERSTONE

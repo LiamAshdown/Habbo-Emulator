@@ -10,6 +10,7 @@
 #	 MYSQL SETTINGS
 #    REGISTERATION SETTINGS
 #    MESSENGER SETTINGS
+#	 ROOM SETTINGS
 #
 ###################################################################################################
 
@@ -193,6 +194,24 @@ MessgengerMaxFriendsLimit = 50
 #        Default:     100
 #
 MessgengerMaxFriendsClubLimit = 100
+#
+#
+###################################################################################################
+
+###################################################################################################
+# ROOM SETTINGS
+#
+#    AwayFromKeyboardTimer
+#        Description: Last time user sent a Status Update
+#        Default:     900000 (15 minutes)
+#
+AwayFromKeyboardTimer = 900000
+#
+#    WaveTimer
+#        Description: How long user can wave for
+#        Default:     4000
+#
+WaveTimer = 4000
 #
 #
 ###################################################################################################

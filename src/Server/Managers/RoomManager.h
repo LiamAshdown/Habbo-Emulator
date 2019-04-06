@@ -85,7 +85,7 @@ namespace SteerStone
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for room                               
         RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for model
-        std::mutex m_Mutex;                                          ///< Mutex
+        std::mutex m_Mutex;
     };
 }
 

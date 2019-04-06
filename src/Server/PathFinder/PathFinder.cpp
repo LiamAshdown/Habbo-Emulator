@@ -21,9 +21,7 @@
 namespace SteerStone
 {
     /// Constructor
-    /// @p_TileGrid : Dynamic Multi-dimensional array which stores the TileGrid
-    /// @p_MaxGridX : Max X Tile Grid
-    /// @p_MaxGridY : Max Y Tile Grid
+    /// @p_RoomModel : Room Model of the room we are calculating a path from
     PathFinder::PathFinder(RoomModel* p_RoomModel) : m_RoomModel(p_RoomModel)
     {
         /// 8 directions we can go
@@ -32,8 +30,7 @@ namespace SteerStone
             { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 },
             { -1, -1 }, { 1, 1 }, { -1, 1 }, { 1, -1 }
         };
-
-        /// Reserve our storage, which prevents from having to resize every time we push a new element = performance increase!
+    
         m_OpenList.reserve(200);        
         m_ClosedList.reserve(200);
     }
@@ -48,7 +45,6 @@ namespace SteerStone
     /// @p_StartY : Start Position Y
     /// @p_EndX : End Position X
     /// @p_EndY : End Position Y
-    /// @p_CheckDynamicObjects : Check for Dynamic Objects
     bool PathFinder::CalculatePath(int16 const p_StartX, int16 const p_StartY, int16 const p_EndX, int16 const p_EndY)
     {
         /// Check if the destination tile is valid
@@ -166,7 +162,6 @@ namespace SteerStone
             /// to the end point
             uint32 l_GCost = l_I < 4 ? 10 : 14;
 
-            /// Node doesn't exist, create a new node and push it into our open list to be evaluted
             Node* l_NewNode = new Node(l_FuturePosition.X, l_FuturePosition.Y, m_RoomModel->GetTileInstance(l_FuturePosition.X, l_FuturePosition.Y)->GetTileHeight(), m_Current);
             l_NewNode->SetGCost(l_GCost);
             l_NewNode->SetHCost(CalculateHeuristic(l_NewNode, p_NextX, p_NextY)); ///< Calculate our H cost from end position to our current position
@@ -253,7 +248,7 @@ namespace SteerStone
     /// DoesNodeExist
     /// Check if node position exists in storage
     /// @p_Nodes : Vector which contains Nodes
-    /// @p_FuturePosition : new position we are about to take
+    /// @p_FuturePosition : New position we are about to take
     Node* PathFinder::DoesNodeExist(std::vector<Node*> const& p_Nodes, Position const& p_FuturePosition)
     {
         for (auto const& l_Itr : p_Nodes)
@@ -285,11 +280,7 @@ namespace SteerStone
     {
         for (int16 l_I = 0; l_I < m_Directions.size(); l_I++)
         {
-            Position l_Position;
-            l_Position.X = m_CurrentX + m_Directions[l_I].X;
-            l_Position.Y = m_CurrentY + m_Directions[l_I].Y;
-
-            if (l_Position.X == p_NextX && l_Position.Y == p_NextY)
+            if ((m_CurrentX + m_Directions[l_I].X == p_NextX) && (m_CurrentY + m_Directions[l_I].Y == p_NextY))
                 return true;
         }
         return false;

@@ -17,22 +17,31 @@
 */
 
 #include "Habbo.h"
-#include "WayPoints.h"
+#include "Room.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 
 namespace SteerStone
 {
     /// Constructor
-    /// @p_TileGrid - Tile Grid array which stores instance of tile
-    /// @p_MaxGridX : Max X Tile Grid
-    /// @p_MaxGridY : Max Y Tile Grid
-    WayPoints::WayPoints(RoomModel* p_RoomModel) : PathFinder(p_RoomModel), m_Habbo(nullptr), m_RoomModel(p_RoomModel)
+    /// @p_Habbo :
+    /// @p_RoomModel :
+    WayPoints::WayPoints(Habbo* p_Habbo, RoomModel* p_RoomModel) : m_Habbo(p_Habbo), PathFinder(p_RoomModel), m_RoomModel(p_RoomModel)
     {
+        m_ActivePath = false;
     }
 
     /// Deconstructor
     WayPoints::~WayPoints()
     {
+    }
+
+    /// SetEndPosition
+    /// @p_X : End Position X
+    /// @p_Y : End Position Y
+    void WayPoints::SetEndPosition(int16 const p_X, int16 const p_Y)
+    {
+        m_EndX = p_X;
+        m_EndY = p_Y;
     }
 
     /// CheckForInteractiveObjects
@@ -46,13 +55,12 @@ namespace SteerStone
             {
                 /// If Habbo is ontop of an item which we can sit on, execute the sit function
                 if (l_Item->GetBehaviour() == "can_sit_on_top")
-                    m_Habbo->SendUpdateStatusSit(l_Item->GetPositionX(), l_Item->GetPositionY(), l_Item->GetPositionZ(), l_Item->GetRotation());
+                {
+                    m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
+                    m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_SITTING);
+                    m_Habbo->UpdatePosition(l_Item->GetPositionX(), l_Item->GetPositionY(), l_Item->GetPositionZ(), l_Item->GetRotation());
+                }
             }
-            else
-                m_Habbo->SendUpdateStatusStop(); ///< Nothing else? Then send stop status
         }
-        else
-            m_Habbo->SendUpdateStatusStop();
     }
-
 } ///< NAMESPACE STEERSTONE

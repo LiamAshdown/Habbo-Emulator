@@ -30,14 +30,10 @@ namespace SteerStone
     class WayPoints : public PathFinder
     {
     public:
-        friend class Room;
-
-    public:
         /// Constructor
-        /// @p_TileGrid - Tile Grid array which stores instance of tile
-        /// @p_MaxGridX : Max X Tile Grid
-        /// @p_MaxGridY : Max Y Tile Grid
-        WayPoints(RoomModel* p_RoomModel);
+        /// @p_Habbo :
+        /// @p_RoomModel :
+        WayPoints(Habbo* p_Habbo, RoomModel* p_RoomModel);
 
         /// Deconstructor
         ~WayPoints();
@@ -48,12 +44,25 @@ namespace SteerStone
         Habbo* ToHabbo() { return m_Habbo; }
 
         /// GetEndPositionX
-        /// Returns end waypoint
+        /// Returns end position X
         int16 GetEndPositionX() const { return m_EndX; }
 
         /// GetEndPositionY
-        /// Returns end waypoint
+        /// Returns end position Y
         int16 GetEndPositionY() const { return m_EndY; }
+
+        /// SetEndPosition
+        /// @p_X : End Position X
+        /// @p_Y : End Position Y
+        void SetEndPosition(int16 const p_X, int16 const p_Y);
+
+        /// HasActivePath
+        /// Check if user has an active path
+        bool HasActivePath() const { return m_ActivePath; }
+
+        /// SetActivePath
+        /// @p_ActivePath : True if active path, false if there's no path active
+        void SetActivePath(bool const p_ActivePath) { m_ActivePath = p_ActivePath; }
 
         /// CheckForInteractiveObjects
         /// Check if user is sitting or standing ontop any objects which user can interact with (automatically)
@@ -62,8 +71,10 @@ namespace SteerStone
     private:
         int16 m_EndX;               ///< Keep a reference of end position in case we need to recaculate path
         int16 m_EndY;
-        RoomModel* m_RoomModel;
-        Habbo* m_Habbo;             ///< Habbo user who has an active path
-    };
 
+        bool m_ActivePath;          ///< Check if there's an active path
+
+        RoomModel* m_RoomModel;
+        Habbo* m_Habbo;
+    };
 } ///< NAMESPACE STEERSTONE
