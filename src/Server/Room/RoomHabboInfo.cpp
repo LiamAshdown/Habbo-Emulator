@@ -132,14 +132,16 @@ namespace SteerStone
                     if (!m_Path->ReCalculatePath(l_Position = Position({ m_Habbo->GetPositionX(), m_Habbo->GetPositionY() }), (m_Path->GetPath().end() - 2)->X, (m_Path->GetPath().end() - 2)->Y))
                     {
                         CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY());
-                        return;
+
+                        l_Position = m_Path->GetPath().back();
                     }
                 }
                 else
                     if (!m_Path->ReCalculatePath(l_Position = Position({ m_Habbo->GetPositionX(), m_Habbo->GetPositionY() }), m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
                     {
                         CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY());
-                        return;
+
+                        l_Position = m_Path->GetPath().back();
                     }
             }
             else
