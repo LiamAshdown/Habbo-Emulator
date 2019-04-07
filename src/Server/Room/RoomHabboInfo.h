@@ -20,8 +20,7 @@
 #define _ROOM_ROOM_HABBO_INFO_h
 #include "Common/SharedDefines.h"
 #include "WayPoints.h"
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/locks.hpp>
+#include <atomic>
 #endif /* _ROOM_ROOM_HABBO_INFO_h */
 
 namespace SteerStone
@@ -54,7 +53,7 @@ namespace SteerStone
         /// CreatePath
         /// @p_EndX : End position X
         /// @p_EndY : End position Y
-        void CreatePath(uint16 const p_EndX, uint16 const p_EndY);
+        bool CreatePath(uint16 const p_EndX, uint16 const p_EndY);
 
         /// ProcessActions 
         /// Process all actions
@@ -90,13 +89,12 @@ namespace SteerStone
 
     private:
         Habbo* m_Habbo;
-        uint32 m_Statuses;             ///< Holds Statuses which needs to be processed on Room::Update
-        bool m_UpdateClient;           ///< Check if we can send status update to client(s)
+        std::atomic<uint32> m_Statuses;             ///< Holds user statuses
+        std::atomic<bool> m_UpdateClient;           ///< Check if we can send status update to client(s)
 
-        int32 m_WaveTimer;
-        int32 m_AFKTimer;
+        uint32 m_WaveTimer;                         ///< Time user can wave for
+        uint32 m_AFKTimer;                          ///< Last time user sent a update status packet
 
-        std::unique_ptr<WayPoints> m_Path;
-        boost::shared_mutex m_Mutex;
+        std::unique_ptr<WayPoints> m_Path;          ///< Holds Waypoints to walk a path
     };
 } ///< NAMESPACE STEERSTONE

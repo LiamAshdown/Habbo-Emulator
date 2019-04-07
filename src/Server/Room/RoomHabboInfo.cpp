@@ -46,8 +46,7 @@ namespace SteerStone
     /// @p_Status : Add Status to be processed on next room update
     void RoomHabboInfo::AddStatus(uint32 const p_Status)
     {
-        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
-
+        LOG_INFO << "Add Status: " << std::this_thread::get_id();
         m_Statuses |= p_Status;
 
         m_UpdateClient = true;
@@ -57,8 +56,7 @@ namespace SteerStone
     /// @p_Status : Status to be removed
     void RoomHabboInfo::RemoveStatus(uint32 const p_Status)
     {
-        boost::shared_lock<boost::shared_mutex> l_Lock(m_Mutex);
-
+        LOG_INFO << "Add Status: " << std::this_thread::get_id();
         m_Statuses &= ~p_Status;
 
         m_UpdateClient = true;
@@ -67,7 +65,7 @@ namespace SteerStone
     /// CreatePath
     /// @p_EndX : End position X
     /// @p_EndY : End position Y
-    void RoomHabboInfo::CreatePath(uint16 const p_EndX, uint16 const p_EndY)
+    bool RoomHabboInfo::CreatePath(uint16 const p_EndX, uint16 const p_EndY)
     {
         m_Path->GetPath().clear();
 
@@ -82,7 +80,11 @@ namespace SteerStone
 
             /// Remove iteration which is the current user position
             m_Path->GetPath().pop_back();
+
+            return true;
         }
+
+        return false;
     }
 
     /// ProcessActions 
@@ -131,7 +133,8 @@ namespace SteerStone
                 {
                     if (!m_Path->ReCalculatePath(l_Position = Position({ m_Habbo->GetPositionX(), m_Habbo->GetPositionY() }), (m_Path->GetPath().end() - 2)->X, (m_Path->GetPath().end() - 2)->Y))
                     {
-                        CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY());
+                        if (!CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
+                            return;
 
                         l_Position = m_Path->GetPath().back();
                     }
@@ -139,7 +142,8 @@ namespace SteerStone
                 else
                     if (!m_Path->ReCalculatePath(l_Position = Position({ m_Habbo->GetPositionX(), m_Habbo->GetPositionY() }), m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
                     {
-                        CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY());
+                        if (!CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
+                            return;
 
                         l_Position = m_Path->GetPath().back();
                     }
