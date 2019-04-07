@@ -307,6 +307,19 @@ namespace SteerStone
             return l_Itr->second->HasStatus(p_Status);
     }
 
+    /// FindHabboByName
+    /// @p_Name : Name of user to find
+    Habbo * Room::FindHabboByName(std::string const p_Name)
+    {
+        for (auto const& l_Itr : m_Habbos)
+        {
+            if (l_Itr.second->ToHabbo()->GetName() == p_Name)
+                return l_Itr.second->ToHabbo();
+        }
+
+        return nullptr;
+    }
+
     /// ProcessUserActions
     /// Process Habbo Actions; Status, pathfinding, etc..
     void Room::ProcessUserActions(const uint32 p_Diff)

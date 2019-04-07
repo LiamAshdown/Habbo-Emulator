@@ -179,18 +179,18 @@ namespace SteerStone
 
         QueryDatabase l_Database("users");
         l_Database.PrepareQuery("INSERT INTO account(user_name, hash_pass, email, figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        l_Database.GetStatement()->setString(1, l_Username.c_str());
-        l_Database.GetStatement()->setString(2, (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
-        l_Database.GetStatement()->setString(3, l_Email.c_str());
-        l_Database.GetStatement()->setString(4, l_Figure.c_str());
-        l_Database.GetStatement()->setString(5, sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
-        l_Database.GetStatement()->setString(6, sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
-        l_Database.GetStatement()->setBoolean(7, l_DirectEmail);
-        l_Database.GetStatement()->setString(8, l_Birthday.c_str());
-        l_Database.GetStatement()->setString(9, l_Gender.c_str());
-        l_Database.GetStatement()->setUInt(10, sConfig->GetIntDefault("RegisterationCredits", 0));
-        l_Database.GetStatement()->setUInt(11, sConfig->GetIntDefault("RegisterationTickets", 0));
-        l_Database.GetStatement()->setUInt(12, sConfig->GetIntDefault("RegisterationFilms", 0));
+        l_Database.GetStatement()->setString(1,   l_Username.c_str());
+        l_Database.GetStatement()->setString(2,   (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
+        l_Database.GetStatement()->setString(3,   l_Email.c_str());
+        l_Database.GetStatement()->setString(4,   l_Figure.c_str());
+        l_Database.GetStatement()->setString(5,   sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
+        l_Database.GetStatement()->setString(6,   sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
+        l_Database.GetStatement()->setBoolean(7,  l_DirectEmail);
+        l_Database.GetStatement()->setString(8,   l_Birthday.c_str());
+        l_Database.GetStatement()->setString(9,   l_Gender.c_str());
+        l_Database.GetStatement()->setUInt(10,    sConfig->GetIntDefault("RegisterationCredits", 0));
+        l_Database.GetStatement()->setUInt(11,    sConfig->GetIntDefault("RegisterationTickets", 0));
+        l_Database.GetStatement()->setUInt(12,    sConfig->GetIntDefault("RegisterationFilms", 0));
         l_Database.GetStatement()->setBoolean(13, sConfig->GetIntDefault("RegisterationSound", 0));
         l_Database.ExecuteQuery();
     }

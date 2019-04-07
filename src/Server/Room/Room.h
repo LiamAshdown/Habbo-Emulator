@@ -113,6 +113,10 @@ namespace SteerStone
         /// @p_Status : Status to check
         bool HasStatus(uint32 const p_RoomGUID, uint32 const p_Status) const;
 
+        /// FindHabboByName
+        /// @p_Name : Name of user to find
+        Habbo* FindHabboByName(std::string const p_Name);
+
         /// ProcessUserActions
         /// Process Habbo Actions; Status, pathfinding, etc..
         void ProcessUserActions(const uint32 p_Diff);

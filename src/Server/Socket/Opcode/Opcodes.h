@@ -69,6 +69,9 @@ enum PacketClientHeader : uint16
     CLIENT_ROOM_HABBO_STATUSES            = 64,
     CLIENT_HABBO_WAVE                     = 94,  
     CLIENT_LOOK_TO                        = 79,
+    CLIENT_ROOM_CHAT                      = 52,
+    CLIENT_ROOM_SHOUT                     = 55,
+    CLIENT_ROOM_WHISPER                   = 56,
 };
 
 enum PacketServerHeader : uint16
@@ -118,6 +121,9 @@ enum PacketServerHeader : uint16
     SERVER_MESSENGER_SEND_MESSAGE         = 134,
     SERVER_USER_UPDATE_STATUS             = 34,
     SERVER_LEAVE_ROOM                     = 29,
+    SERVER_ROOM_CHAT                      = 24,
+    SERVER_ROOM_SHOUT                     = 26,
+    SERVER_ROOM_WHISPER                   = 25,
 };
 
 namespace SteerStone

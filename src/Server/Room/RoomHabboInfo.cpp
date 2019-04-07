@@ -46,7 +46,6 @@ namespace SteerStone
     /// @p_Status : Add Status to be processed on next room update
     void RoomHabboInfo::AddStatus(uint32 const p_Status)
     {
-        LOG_INFO << "Add Status: " << std::this_thread::get_id();
         m_Statuses |= p_Status;
 
         m_UpdateClient = true;
@@ -56,7 +55,6 @@ namespace SteerStone
     /// @p_Status : Status to be removed
     void RoomHabboInfo::RemoveStatus(uint32 const p_Status)
     {
-        LOG_INFO << "Add Status: " << std::this_thread::get_id();
         m_Statuses &= ~p_Status;
 
         m_UpdateClient = true;

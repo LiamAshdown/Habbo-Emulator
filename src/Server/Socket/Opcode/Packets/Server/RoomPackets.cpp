@@ -230,12 +230,51 @@ namespace SteerStone
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
-
             }
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-} ///< NAMESPACE ROOM
+            StringBuffer const * Chat::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+                m_Buffer.AppendString(Message);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+
+            StringBuffer const * Shout::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+                m_Buffer.AppendString(Message);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * Whisper::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+                m_Buffer.AppendString(Message);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+        } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

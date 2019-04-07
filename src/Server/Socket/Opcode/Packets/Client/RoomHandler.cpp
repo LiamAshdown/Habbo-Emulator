@@ -134,4 +134,46 @@ namespace SteerStone
 
         m_Habbo->LookTo(std::stoi(l_Split[0]), std::stoi(l_Split[1]));
     }
+
+    void HabboSocket::HandleRoomChat(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        HabboPacket::Room::Chat l_Packet;
+        l_Packet.Message = p_Packet->ReadString();
+        l_Packet.GUID = m_Habbo->GetRoomGUID();
+        m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleRoomShout(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        HabboPacket::Room::Shout l_Packet;
+        l_Packet.Message = p_Packet->ReadString();
+        l_Packet.GUID = m_Habbo->GetRoomGUID();
+        m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleRoomWhisper(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Contents = p_Packet->ReadString();
+
+        HabboPacket::Room::Whisper l_Packet;
+        l_Packet.GUID = m_Habbo->GetRoomGUID();
+
+        auto const l_Position = l_Contents.find_first_of(' ');
+        if (l_Position != std::string::npos)
+        {
+            std::string l_Name = l_Contents.substr(0, l_Position);
+            
+            if (Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Name))
+            {
+                l_Packet.Message = l_Contents.substr(l_Position + 1);
+                l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+                m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            }
+            else
+            {
+                l_Packet.Message = l_Contents; ///< If there's no username, send it to everyone in room
+                m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
+            }
+        }
+    }
 }

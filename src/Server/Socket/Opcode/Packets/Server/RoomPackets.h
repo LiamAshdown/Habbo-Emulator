@@ -257,6 +257,50 @@ namespace SteerStone
                 uint32 GUID;
             };
 
+            /// SERVER_ROOM_CHAT packet builder
+            class Chat final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                Chat() : ServerPacket(SERVER_ROOM_CHAT) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 GUID;
+                std::string Message;
+            };
+
+            /// SERVER_ROOM_SHOUT packet builder
+            class Shout final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                Shout() : ServerPacket(SERVER_ROOM_SHOUT) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 GUID;
+                std::string Message;
+            };
+
+            /// SERVER_ROOM_WHISPER packet builder
+            class Whisper final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                Whisper() : ServerPacket(SERVER_ROOM_WHISPER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 GUID;
+                std::string Message;
+            };
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE
