@@ -20,11 +20,13 @@
 #define _PATHFINDER_TILE_INSTANCE_h
 #include "Common/SharedDefines.h"
 #include "ItemManager.h"
+#include <atomic>
 #endif /* _PATHFINDER_TILE_INSTANCE_h */
 
 namespace SteerStone
 {
     class Habbo;
+    class WalkWay;
     
     /// This class is responsible for holding dynamic objects on the grid
     class TileInstance
@@ -34,6 +36,8 @@ namespace SteerStone
 
     public:
         /// Constructor
+        /// @p_X : Tile position X
+        /// @p_Y : Tile position Y
         TileInstance(int16 const p_X, int16 const p_Y);
 
         /// Deconstructor
@@ -61,27 +65,35 @@ namespace SteerStone
         /// @p_Habbo : Habbo user being added to the tile
         void SetTileOccupied(bool p_Occupied, Habbo* p_Habbo = nullptr);
 
+        /// AddWalkWay
+        /// @p_WalkWay : Walkway tile being added to tile
+        void AddWalkWay(WalkWay* p_WalkWay);
+
+        /// GetWalkWay
+        /// Check if tile is a walk way
+        WalkWay* GetWalkWay();
+
         /// CanWalkOnTile
         /// Can Habbo walk on tile
         bool CanWalkOnTile();
 
-        /// TileContainsSolidObject
-        /// If tile contains a solid object
-        bool TileContainsSolidObject();
-
+        /// GetTilePositionX
+        /// Get Tile Position X
         int16 GetTilePositionX() const { return m_TileX; }
+
+        /// GetTilePositionY
+        /// Get Tile Position Y
         int16 GetTilePositionY() const { return m_TileY; }
 
     private:
-        Item* m_Item;
-        int16 m_TileState;              ///< Whether the tile is closed or open to use
-        int16 m_TileHeight;             ///< Max height of the tile
+        WalkWay* m_WalkWay;              ///< WalkWay which is used to enter another room or on a trigger event
+        Item* m_Item;                    ///< Item which is on the tile
+        int16 m_TileState;               ///< Whether the tile is closed or open to use
+        int16 m_TileHeight;              ///< Max height of the tile
         boost::optional<Habbo*> m_Habbo;///< Active user on tile
 
-        int16 m_TileX;                  ///< Tile instance X Position
-        int16 m_TileY;                  ///< ///< Tile instance X Position
-
-        std::mutex m_Mutex;
+        int16 m_TileX;                   ///< Tile instance X Position
+        int16 m_TileY;                   ///< ///< Tile instance X Position
     };
 
 } ///< NAMESPACE STEERSTONE

@@ -28,6 +28,7 @@ namespace SteerStone
     typedef std::unordered_map<uint32, RoomCategory> RoomCategoriesMap;
     typedef std::unordered_map<uint32, std::shared_ptr<Room>> RoomsMap;
     typedef std::unordered_map<std::string, RoomModel> RoomModelsMap;
+    typedef std::unordered_map<uint32, WalkWay> RoomWalkWayMap;
 
     /// This class stores information about all rooms, models and heightmap
     /// Singleton class
@@ -52,6 +53,10 @@ namespace SteerStone
         /// Load room models from database
         void LoadRoomModels();
 
+        /// LoadRoomWalkWays
+        /// Load Walk way positions (used to walk into another room)
+        void LoadRoomWalkWays();
+
         /// LoadRooms
         /// Load rooms from database
         void LoadRooms();
@@ -63,15 +68,21 @@ namespace SteerStone
 
         /// GetRoomCategory
         /// @p_Id : Category Id
-        RoomCategory* GetRoomCategory(uint32 const& p_Id);
+        RoomCategory* GetRoomCategory(uint32 const p_Id);
 
         /// GetRoomCategory
         /// @p_Id : Model Id
-        RoomModel* GetRoomModel(std::string const& p_Model);
+        RoomModel* GetRoomModel(std::string const p_Model);
+
+        /// GetWalkWay
+        /// @p_Id : Model Id
+        /// @p_X : Tile Position X
+        /// @p_Y : Tile Position Y
+        WalkWay* GetWalkWay(uint32 const p_Id, int16 const p_X, int16 p_Y);
        
         /// GetRoomCategory
         /// @p_Id : Room Id
-        std::shared_ptr<Room> GetRoom(uint32 const& p_Id);
+        std::shared_ptr<Room> GetRoom(uint32 const p_Id);
 
         /// GetRoomCategories
         /// Get Room Category Map
@@ -82,9 +93,10 @@ namespace SteerStone
         RoomsMap* GetRooms();
 
     private:
-        RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for category
-        RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for room                               
-        RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for model
+        RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category
+        RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for Room                               
+        RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for Model
+        RoomWalkWayMap m_RoomWalkWays;                               ///< Map Storage which holds key RoomId and structure for Waypoint
         std::mutex m_Mutex;
     };
 }

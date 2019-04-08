@@ -65,14 +65,16 @@ namespace SteerStone
 
     /// SetRoom
     /// @p_Room - Room Id which player is inside room
-    bool Habbo::SetRoom(std::shared_ptr<Room> p_Room)
+    /// @p_WalkWay - Walk Way tile user will spawn ontop on
+    bool Habbo::SetRoom(std::shared_ptr<Room> p_Room, WalkWay* p_WalkWay /*= nullptr*/)
     {
+        /// Are we already inside a room? Leave room if so
         if (GetRoom())
             GetRoom()->LeaveRoom(this);
 
         m_Room = p_Room;
         if (auto l_Room = m_Room.lock())
-            if (l_Room->EnterRoom(this))
+            if (l_Room->EnterRoom(this, p_WalkWay))
                 return true;
 
         return false;

@@ -42,14 +42,7 @@ namespace SteerStone
         SendPacket(l_PacketUrl.Write());
 
         /// Room::EnterRoom handles the error if room is full for example
-        if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
-        {
-            HabboPacket::Room::RoomReady l_PacketRoomReady;
-            l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
-            l_PacketRoomReady.Id = l_RoomId;
-            SendPacket(l_PacketRoomReady.Write());
-        }
-        else
+        if (!m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
         {
             /// If we get to here this means the room does not exist
             HabboPacket::Room::RoomCantConnect l_PacketCantConnect;

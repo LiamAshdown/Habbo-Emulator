@@ -68,7 +68,6 @@ namespace SteerStone
             if (p_X >= GetMaxGridX() || p_Y >= GetMaxGridY()
                 || p_X < 0 || p_Y < 0)
                 return nullptr;
-
             else
                 return TileGrid[p_X][p_Y];
         }

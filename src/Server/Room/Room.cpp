@@ -16,10 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Room.h"
 #include "Habbo.h"
+#include "RoomManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Common/Maths.h"
+#include <functional>
 
 namespace SteerStone
 {
@@ -67,17 +68,20 @@ namespace SteerStone
                     GetRoomModel().TileGrid[l_X][l_Y]->m_TileHeight = GetRoomModel().GetDoorZ();
                 }
 
-                /// Add Item to Tile
+                /// Add static Public Item to tile
                 if (GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
+                {
                     GetRoomModel().TileGrid[l_X][l_Y]->AddItem(sItemMgr->GetPublicItemByPosition(GetModel(), l_X, l_Y));
+                    GetRoomModel().TileGrid[l_X][l_Y]->AddWalkWay(sRoomMgr->GetWalkWay(GetId(), l_X, l_Y));
+                }
             }
         }    
     }
 
-    /// AddFigure
-    /// Send Habbo Figure object to clients in room
-    /// @p_Habbo : p_Habbo
-    bool Room::EnterRoom(Habbo* p_Habbo)
+    /// EnterRoom 
+    /// @p_Habbo : Habbo user entering in room
+    /// @p_WalkWay : Walkway tile position
+    bool Room::EnterRoom(Habbo* p_Habbo, WalkWay* p_WalkWay /*= nullptr*/)
     {
         /// Check if habbo already exists inside room
         auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
@@ -92,22 +96,38 @@ namespace SteerStone
         {
             HabboPacket::Room::RoomCantConnect l_Packet;
             l_Packet.ErrorCode = RoomConnectionError::ROOM_IS_FULL;
+            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
             return false;
         }
 
-        /// Update our Habbo Position to be at the door
-        p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
-            GetRoomModel().GetDoorOrientation());
+        /// If we were on a walk way tile, use walk way position
+        if (p_WalkWay)
+            p_Habbo->UpdatePosition(p_WalkWay->GetPositionX(), p_WalkWay->GetPositionY(), p_WalkWay->GetPositionZ(), p_WalkWay->GetRotation());
+        else ///< else player will appear at the door
+            p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
+                GetRoomModel().GetDoorOrientation());
 
         p_Habbo->SetRoomGUID(GenerateGUID());
 
-        m_Mutex.lock();
+        m_FunctionCallBack.AddCallBack(std::bind(&Room::EnterRoomCallBack, this, p_Habbo));
+
+        return true;
+    }
+
+    /// EnterRoomCallBack 
+    /// Gets processed on Room::Update
+    /// @p_Habbo : Habbo user entering in room
+    void Room::EnterRoomCallBack(Habbo* p_Habbo)
+    {
         m_Habbos[p_Habbo->GetRoomGUID()] = std::make_unique<RoomHabboInfo>(p_Habbo);
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++;
-        m_Mutex.unlock();
 
-        return true;
+        /// Send Packet to user that room is ready to be entered!
+        HabboPacket::Room::RoomReady l_PacketRoomReady;
+        l_PacketRoomReady.Model = GetRoomModel().GetModel();
+        l_PacketRoomReady.Id = GetId();
+        p_Habbo->ToSocket()->SendPacket(l_PacketRoomReady.Write());
     }
     
     /// EnterRoom 
@@ -123,14 +143,20 @@ namespace SteerStone
             /// Set Habbo room to nullptr
             l_Itr->second->ToHabbo()->DestroyRoom();
 
-            m_Mutex.lock();
-            m_Habbos.erase(l_Itr);
-            m_VisitorsNow--;
-            GetRoomCategory()->GetVisitorsNow()--;
-            m_Mutex.unlock();
+            m_FunctionCallBack.AddCallBack(std::bind(&Room::LeaveRoomCallBack, this, l_Itr));
         }
         else
             LOG_INFO << "Player " << p_Habbo->GetName() << " tried to leave Room Id " << GetId() << " but player does not exist in room!";
+    }
+
+    /// LeaveRoomCallBack
+    /// Gets processed on Room::Update
+    /// @p_Itr : Iteration of habbo which going to be removed
+    void Room::LeaveRoomCallBack(GUIDUserMap::iterator& p_Itr)
+    {
+        m_Habbos.erase(p_Itr);
+        m_VisitorsNow--;
+        GetRoomCategory()->GetVisitorsNow()--;
     }
 
     /// GenerateGUID 
@@ -305,6 +331,8 @@ namespace SteerStone
         auto& l_Itr = m_Habbos.find(p_RoomGUID);
         if (l_Itr != m_Habbos.end())
             return l_Itr->second->HasStatus(p_Status);
+        else
+            return false;
     }
 
     /// FindHabboByName
@@ -335,6 +363,9 @@ namespace SteerStone
     /// @p_Diff : Hotel last tick time
     void Room::Update(uint32 const p_Diff)
     {
+        /// Process any pending functions
+        m_FunctionCallBack.ProcessFunctions();
+
         ProcessUserActions(p_Diff);
     }
 } ///< NAMESPACE STEERSTONE

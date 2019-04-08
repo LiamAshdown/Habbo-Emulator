@@ -149,6 +149,8 @@ namespace SteerStone
         auto const& l_Itr = m_MessengerFriends.find(p_Id);
         if (l_Itr != m_MessengerFriends.end())
             return l_Itr->second;
+        else
+            return MessengerFriendData{};
     }
 
     /// SaveToDB

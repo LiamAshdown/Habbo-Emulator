@@ -106,6 +106,56 @@ namespace SteerStone
         LOG_INFO << "Loaded " << m_RoomModels.size() << " Room Models";
     }
 
+    /// LoadRoomWalkWays
+    /// Load Walk way positions (used to walk into another room)
+    void RoomManager::LoadRoomWalkWays()
+    {
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT from_id, to_id, from_model, to_model, from_position, to_position FROM room_walk_way");
+        l_Database.ExecuteQuery();
+
+        if (!l_Database.GetResult())
+        {
+            LOG_ERROR << "room_walk_way is empty!";
+            return;
+        }
+
+        Result* l_Result = l_Database.Fetch();
+        
+        do
+        {
+            WalkWay& l_RoomWalkWay = m_RoomWalkWays[l_Result->GetUint32(1)];
+            l_RoomWalkWay.m_FromId         = l_Result->GetUint32(1);
+            l_RoomWalkWay.m_ToId           = l_Result->GetUint32(2);
+            l_RoomWalkWay.m_WalkWayFromMod = l_Result->GetString(3);
+            l_RoomWalkWay.m_WalkWayToMod   = l_Result->GetString(4);
+
+            std::vector<std::string> l_SpaceSplit;
+            boost::split(l_SpaceSplit, l_Result->GetString(5), boost::is_any_of(" "));
+
+            for (auto& l_Itr : l_SpaceSplit)
+            {
+                std::vector<std::string> l_CommaSplit;
+                boost::split(l_CommaSplit, l_Itr, boost::is_any_of(","));
+
+                WalkWayPosition l_Position;
+                l_Position.X = std::stoi(l_CommaSplit[0]);
+                l_Position.Y = std::stoi(l_CommaSplit[1]);
+
+                l_RoomWalkWay.m_WalkWayFromPos.push_back(l_Position);
+            }
+
+            std::vector<std::string> l_CommaSplit;
+            boost::split(l_CommaSplit, l_Result->GetString(6), boost::is_any_of(","));
+
+            l_RoomWalkWay.m_WalkWayToPos.X = std::stoi(l_CommaSplit[0]);
+            l_RoomWalkWay.m_WalkWayToPos.Y = std::stoi(l_CommaSplit[1]);
+            l_RoomWalkWay.m_WalkWayToPos.Z = std::stoi(l_CommaSplit[2]);
+            l_RoomWalkWay.m_WalkWayToPos.Rotation = std::stoi(l_CommaSplit[3]);
+
+        } while (l_Result->GetNextResult());
+    }
+
     /// LoadRooms
     /// Load rooms from database
     void RoomManager::LoadRooms()
@@ -169,7 +219,7 @@ namespace SteerStone
     
     /// GetRoomCategory
     /// @p_Id : Category Id
-    RoomCategory* RoomManager::GetRoomCategory(uint32 const& p_Id)
+    RoomCategory* RoomManager::GetRoomCategory(uint32 const p_Id)
     {
         auto const& l_Itr = m_RoomCategories.find(p_Id);
         if (l_Itr != m_RoomCategories.end())
@@ -180,7 +230,7 @@ namespace SteerStone
     
     /// GetRoomCategory
     /// @p_Id : Model Id
-    RoomModel* RoomManager::GetRoomModel(std::string const& p_Model)
+    RoomModel* RoomManager::GetRoomModel(std::string const p_Model)
     {
         auto const& l_Itr = m_RoomModels.find(p_Model);
         if (l_Itr != m_RoomModels.end())
@@ -191,7 +241,7 @@ namespace SteerStone
 
     /// GetRoomCategory
     /// @p_Id : Room Id
-    std::shared_ptr<Room> RoomManager::GetRoom(uint32 const& p_Id)
+    std::shared_ptr<Room> RoomManager::GetRoom(uint32 const p_Id)
     {
         auto const& l_Itr = m_Rooms.find(p_Id);
         if (l_Itr != m_Rooms.end())
@@ -200,6 +250,24 @@ namespace SteerStone
             return nullptr;
     }
     
+    /// GetWalkWay
+    /// @p_Id : Model Id
+    /// @p_X : Tile Position X
+    /// @p_Y : Tile Position Y
+    WalkWay* RoomManager::GetWalkWay(uint32 const p_Id, int16 const p_X, int16 const p_Y)
+    {
+        auto const& l_Itr = m_RoomWalkWays.find(p_Id);
+        if (l_Itr != m_RoomWalkWays.end())
+        {
+            for (auto& l_WalkWayItr : l_Itr->second.m_WalkWayFromPos)
+            {
+                if (l_WalkWayItr.X == p_X && l_WalkWayItr.Y == p_Y)
+                    return &l_Itr->second;
+            }
+        }
+        return nullptr;
+    }
+
     /// GetRoomCategories
     /// Get Room Category Map
     RoomCategoriesMap* RoomManager::GetRoomCategories()

@@ -71,10 +71,8 @@ namespace SteerStone
     private:
         int16 m_EndX;               ///< Keep a reference of end position in case we need to recaculate path
         int16 m_EndY;
-
         bool m_ActivePath;          ///< Check if there's an active path
-
-        RoomModel* m_RoomModel;
-        Habbo* m_Habbo;
+        RoomModel* m_RoomModel;     ///< Room Model we are currently in
+        Habbo* m_Habbo;             ///< Habbo
     };
 } ///< NAMESPACE STEERSTONE

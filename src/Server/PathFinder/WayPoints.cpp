@@ -17,7 +17,7 @@
 */
 
 #include "Habbo.h"
-#include "Room.h"
+#include "RoomManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 
 namespace SteerStone
@@ -59,6 +59,27 @@ namespace SteerStone
                     m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
                     m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_SITTING);
                     m_Habbo->UpdatePosition(l_Item->GetPositionX(), l_Item->GetPositionY(), l_Item->GetPositionZ(), l_Item->GetRotation());
+                }
+            }
+
+            /// If we are on WalkWay tile - move to new room
+            if (WalkWay* l_WalkWay = l_TileInstance->GetWalkWay())
+            {
+                /// Initialize room connection with client
+                HabboPacket::Room::OpenConnection l_Packet;
+                m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+
+                /// Send Room Advertisement url
+                HabboPacket::Room::RoomUrl l_PacketUrl;
+                m_Habbo->ToSocket()->SendPacket(l_PacketUrl.Write());
+
+                /// Room::EnterRoom handles the error if room is full for example
+                if (!m_Habbo->SetRoom(sRoomMgr->GetRoom(l_WalkWay->GetToId()), l_WalkWay))
+                {
+                    /// If we get to here this means the room does not exist
+                    HabboPacket::Room::RoomCantConnect l_PacketCantConnect;
+                    l_PacketCantConnect.ErrorCode = RoomConnectionError::ROOM_IS_CLOSED;
+                    m_Habbo->ToSocket()->SendPacket(l_PacketCantConnect.Write());
                 }
             }
         }

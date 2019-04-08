@@ -112,6 +112,7 @@ namespace SteerStone
 
     class Room;
     class ClientPacket;
+    class WalkWay;
 
     class Habbo
     {
@@ -134,7 +135,8 @@ namespace SteerStone
 
         /// SetRoom
         /// @p_Room - Room Id which player is inside room
-        bool SetRoom(std::shared_ptr<Room> p_Room);
+        /// @p_WalkWay - Walk Way tile user will spawn ontop on
+        bool SetRoom(std::shared_ptr<Room> p_Room, WalkWay* p_WalkWay = nullptr);
 
         /// GetRoom
         /// Get room

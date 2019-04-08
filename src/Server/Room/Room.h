@@ -20,7 +20,9 @@
 #define _ROOM_ROOM_h
 #include "Common/SharedDefines.h"
 #include "RoomCategory.h"
+#include "RoomWalkWay.h"
 #include "RoomHabboInfo.h"
+#include "Platform/Thread/FunctionCallBack.h"
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
 #include <memory>
@@ -59,11 +61,22 @@ namespace SteerStone
 
         /// EnterRoom 
         /// @p_Habbo : Habbo user entering in room
-        bool EnterRoom(Habbo* p_Habbo);
+        /// @p_WalkWay : Walkway tile position 
+        bool EnterRoom(Habbo* p_Habbo, WalkWay* p_WalkWay = nullptr);
+       
+        /// EnterRoomCallBack 
+        /// Gets processed on Room::Update
+        /// @p_Habbo : Habbo user entering in room
+        void EnterRoomCallBack(Habbo* p_Habbo);
 
         /// LeaveRoom 
         /// @p_Habbo : Habbo user leaving room
         void LeaveRoom(Habbo* p_Habbo);
+
+        /// LeaveRoomCallBack
+        /// Gets processed on Room::Update
+        /// @p_Itr : Iteration of habbo which going to be removed
+        void LeaveRoomCallBack(GUIDUserMap::iterator& p_Itr);
 
         /// AddFigure
         /// Send Habbo Figure to clients in room
@@ -174,6 +187,6 @@ namespace SteerStone
         RoomCategory* m_RoomCategory;
 
         GUIDUserMap m_Habbos;                    ///< Hold Habbo users
-        boost::shared_mutex m_Mutex;
+        FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
     };
 } ///< NAMESPACE STEERSTONE

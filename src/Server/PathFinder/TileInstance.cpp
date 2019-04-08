@@ -18,11 +18,15 @@
 
 #include "Habbo.h"
 #include "PathFinder.h"
+#include "RoomWalkWay.h"
 
 namespace SteerStone
 {
     /// Constructor
-    TileInstance::TileInstance(int16 const p_X, int16 const p_Y) : m_TileX(p_X), m_TileY(p_Y), m_TileHeight(0), m_TileState(TileState::TILE_STATE_CLOSED)
+    /// @p_X : Tile position X
+    /// @p_Y : Tile position Y
+    TileInstance::TileInstance(int16 const p_X, int16 const p_Y) : m_TileX(p_X), m_TileY(p_Y), m_TileHeight(0), m_TileState(TileState::TILE_STATE_CLOSED),
+        m_WalkWay(nullptr)
     {
         m_Habbo.reset();
     }
@@ -66,16 +70,29 @@ namespace SteerStone
     /// Set the tile is being used by another habbo or object
     /// @p_Occupied : Set tile is being occupied or not
     /// @p_Habbo : Habbo user being added to the tile
-    void TileInstance::SetTileOccupied(bool p_Occupied, Habbo* p_Habbo)
+    void TileInstance::SetTileOccupied(bool p_Occupied, Habbo* p_Habbo /*= nullptr*/)
     {
-        /// Lock guard this function because this can be accessed from PathFinder
-        /// and from Room Update
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
         if (p_Occupied)
             m_Habbo = p_Habbo;
         else
             m_Habbo.reset();
+    }
+
+    /// AddWalkWay
+    /// @p_WalkWay : Walkway tile being added to tile
+    void TileInstance::AddWalkWay(WalkWay* p_WalkWay)
+    {
+        m_WalkWay = p_WalkWay;
+    }
+
+    /// GetWalkWay
+    /// Check if tile is a walk way
+    WalkWay* TileInstance::GetWalkWay()
+    {
+        if (m_WalkWay)
+            return m_WalkWay;
+        else
+            return nullptr;
     }
 
     /// CanWalkOnTile
