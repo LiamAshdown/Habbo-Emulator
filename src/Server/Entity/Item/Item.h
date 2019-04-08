@@ -37,7 +37,10 @@ namespace SteerStone
 
     public:
 
-        bool CanBeWalkedOn();
+        /// CanBeWalkedOn
+        /// Check if tile can be walked on
+        /// @p_Extra : If true do extra checks
+        bool CanBeWalkedOn(bool m_Extra = false);
 
         /// Item Info
         uint32 GetId()                  const { return m_Id;                }

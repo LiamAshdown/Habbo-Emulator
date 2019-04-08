@@ -55,12 +55,12 @@ namespace SteerStone
 
     public:
         /// WalkWay Info
-        uint32 GetFromId()   const { return m_FromId;                }
-        uint32 GetToId()     const { return m_ToId;                  }
-        int16 GetPositionX() const { return m_WalkWayToPos.X;        }
-        int16 GetPositionY() const { return m_WalkWayToPos.Y;        }
-        int16 GetPositionZ() const { return m_WalkWayToPos.Z;        }
-        int16 GetRotation()  const { return m_WalkWayToPos.Rotation; }
+        uint32 GetFromId()       const { return m_FromId;               }
+        uint32 GetToId()         const { return m_ToId;                 }
+        int16 GetToPositionX()   const { return m_WalkWayToPos.X;       }
+        int16 GetToPositionY()   const { return m_WalkWayToPos.Y;       }
+        int16 GetToPositionZ()   const { return m_WalkWayToPos.Z;       }
+        int16 GetToRotation()    const { return m_WalkWayToPos.Rotation;}
 
     private:
         uint32 m_FromId;                                    ///< Room Id user is coming from

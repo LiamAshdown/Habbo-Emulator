@@ -43,10 +43,17 @@ namespace SteerStone
     {
     }
 
-    bool Item::CanBeWalkedOn()
+    /// CanBeWalkedOn
+    /// Check if tile can be walked on
+    /// @p_Extra : If true do extra checks
+    bool Item::CanBeWalkedOn(bool p_Extra /*= false*/)
     {
         if (GetBehaviour() == "solid")
             return false;
+
+        if (p_Extra)
+            if (GetBehaviour() == "can_sit_on_top")
+                return false;
 
         return true;
     }

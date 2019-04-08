@@ -72,6 +72,8 @@ enum PacketClientHeader : uint16
     CLIENT_ROOM_CHAT                      = 52,
     CLIENT_ROOM_SHOUT                     = 55,
     CLIENT_ROOM_WHISPER                   = 56,
+    CLIENT_TRY_INFO_BUS                   = 113,
+    CLIENT_CHANGE_WORLD                   = 111,
 };
 
 enum PacketServerHeader : uint16

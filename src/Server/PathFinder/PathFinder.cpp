@@ -88,9 +88,11 @@ namespace SteerStone
                 l_FuturePosition.X = m_Current->GetPosition().X + m_Directions[l_I].X;
                 l_FuturePosition.Y = m_Current->GetPosition().Y + m_Directions[l_I].Y;
 
-                /// Check if our future position has any collision
-                if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
-                    continue;
+                /// We don't want to check the tile if it's our final point, because
+                /// we check it at the start and the checks are different
+                if (l_FuturePosition.X != p_EndX || l_FuturePosition.Y != p_EndY)
+                    if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
+                        continue;
 
                 /// Work out our G Cost
                 /// If we are moving diagnol our cost would be 14 since diagnol will be the closest
@@ -115,14 +117,6 @@ namespace SteerStone
                     l_NewNode->SetGCost(l_GCost);
                     l_NewNode->SetHCost(CalculateHeuristic(l_NewNode, p_EndX, p_EndY)); ///< Calculate our H cost from end position to our current position 
                     m_OpenList.push_back(l_NewNode);
-
-                    /// If our new node is already at the final destination then exit the loop
-                    if (l_NewNode->GetPosition().X == p_EndX && l_NewNode->GetPosition().Y == p_EndY)
-                    {
-                        m_Current = l_NewNode;
-                        m_OpenList.clear();
-                        break;
-                    }
                 }
             }
         }
@@ -206,7 +200,7 @@ namespace SteerStone
         if (!l_NextTileInstance || !l_CurrentTileInstance)
             return false;
 
-        if (!l_NextTileInstance->CanWalkOnTile())
+        if (!l_NextTileInstance->CanWalkOnTile(true))
             return false;
 
         int16 l_FutureTileGrid = l_NextTileInstance->GetTileState();

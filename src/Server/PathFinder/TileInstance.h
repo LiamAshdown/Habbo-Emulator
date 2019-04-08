@@ -20,7 +20,6 @@
 #define _PATHFINDER_TILE_INSTANCE_h
 #include "Common/SharedDefines.h"
 #include "ItemManager.h"
-#include <atomic>
 #endif /* _PATHFINDER_TILE_INSTANCE_h */
 
 namespace SteerStone
@@ -75,7 +74,8 @@ namespace SteerStone
 
         /// CanWalkOnTile
         /// Can Habbo walk on tile
-        bool CanWalkOnTile();
+        /// @p_Extra : If true do extra checks
+        bool CanWalkOnTile(bool p_Extra = false);
 
         /// GetTilePositionX
         /// Get Tile Position X

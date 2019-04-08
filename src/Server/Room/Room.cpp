@@ -102,7 +102,7 @@ namespace SteerStone
 
         /// If we were on a walk way tile, use walk way position
         if (p_WalkWay)
-            p_Habbo->UpdatePosition(p_WalkWay->GetPositionX(), p_WalkWay->GetPositionY(), p_WalkWay->GetPositionZ(), p_WalkWay->GetRotation());
+            p_Habbo->UpdatePosition(p_WalkWay->GetToPositionX(), p_WalkWay->GetToPositionY(), p_WalkWay->GetToPositionZ(), p_WalkWay->GetToRotation());
         else ///< else player will appear at the door
             p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
                 GetRoomModel().GetDoorOrientation());

@@ -73,14 +73,8 @@ namespace SteerStone
                 HabboPacket::Room::RoomUrl l_PacketUrl;
                 m_Habbo->ToSocket()->SendPacket(l_PacketUrl.Write());
 
-                /// Room::EnterRoom handles the error if room is full for example
-                if (!m_Habbo->SetRoom(sRoomMgr->GetRoom(l_WalkWay->GetToId()), l_WalkWay))
-                {
-                    /// If we get to here this means the room does not exist
-                    HabboPacket::Room::RoomCantConnect l_PacketCantConnect;
-                    l_PacketCantConnect.ErrorCode = RoomConnectionError::ROOM_IS_CLOSED;
-                    m_Habbo->ToSocket()->SendPacket(l_PacketCantConnect.Write());
-                }
+                /// Enter the room
+                m_Habbo->SetRoom(sRoomMgr->GetRoom(l_WalkWay->GetToId()), l_WalkWay);
             }
         }
     }

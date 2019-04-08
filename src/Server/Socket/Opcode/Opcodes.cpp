@@ -84,6 +84,8 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_CHAT,                     "CLIENT_ROOM_CHAT",                        &HabboSocket::HandleRoomChat                   );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_SHOUT,                    "CLIENT_ROOM_SHOUT",                       &HabboSocket::HandleRoomShout                  );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",                     &HabboSocket::HandleRoomWhisper                );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRY_INFO_BUS,                  "CLIENT_TRY_INFO_BUS",                     &HabboSocket::HandleInfoBus                    );
+        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_WORLD,                  "CLIENT_CHANGE_WORLD",                     &HabboSocket::HandleChangeWorld                );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );

@@ -28,7 +28,6 @@ namespace SteerStone
     typedef std::unordered_map<uint32, RoomCategory> RoomCategoriesMap;
     typedef std::unordered_map<uint32, std::shared_ptr<Room>> RoomsMap;
     typedef std::unordered_map<std::string, RoomModel> RoomModelsMap;
-    typedef std::unordered_map<uint32, WalkWay> RoomWalkWayMap;
 
     /// This class stores information about all rooms, models and heightmap
     /// Singleton class
@@ -96,7 +95,7 @@ namespace SteerStone
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for Room                               
         RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for Model
-        RoomWalkWayMap m_RoomWalkWays;                               ///< Map Storage which holds key RoomId and structure for Waypoint
+        std::vector<WalkWay> m_RoomWalkWays;                         ///< Stores Walk Way tiles
         std::mutex m_Mutex;
     };
 }

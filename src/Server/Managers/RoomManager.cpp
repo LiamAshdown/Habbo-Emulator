@@ -111,7 +111,7 @@ namespace SteerStone
     void RoomManager::LoadRoomWalkWays()
     {
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT from_id, to_id, from_model, to_model, from_position, to_position FROM room_walk_way");
+        l_Database.PrepareQuery("SELECT from_id, to_id, from_model, to_model, from_position, to_position FROM room_walk_way WHERE is_active = 1");
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -124,7 +124,7 @@ namespace SteerStone
         
         do
         {
-            WalkWay& l_RoomWalkWay = m_RoomWalkWays[l_Result->GetUint32(1)];
+            WalkWay l_RoomWalkWay;
             l_RoomWalkWay.m_FromId         = l_Result->GetUint32(1);
             l_RoomWalkWay.m_ToId           = l_Result->GetUint32(2);
             l_RoomWalkWay.m_WalkWayFromMod = l_Result->GetString(3);
@@ -148,12 +148,16 @@ namespace SteerStone
             std::vector<std::string> l_CommaSplit;
             boost::split(l_CommaSplit, l_Result->GetString(6), boost::is_any_of(","));
 
-            l_RoomWalkWay.m_WalkWayToPos.X = std::stoi(l_CommaSplit[0]);
-            l_RoomWalkWay.m_WalkWayToPos.Y = std::stoi(l_CommaSplit[1]);
-            l_RoomWalkWay.m_WalkWayToPos.Z = std::stoi(l_CommaSplit[2]);
+            l_RoomWalkWay.m_WalkWayToPos.X        = std::stoi(l_CommaSplit[0]);
+            l_RoomWalkWay.m_WalkWayToPos.Y        = std::stoi(l_CommaSplit[1]);
+            l_RoomWalkWay.m_WalkWayToPos.Z        = std::stoi(l_CommaSplit[2]);
             l_RoomWalkWay.m_WalkWayToPos.Rotation = std::stoi(l_CommaSplit[3]);
 
+            m_RoomWalkWays.push_back(l_RoomWalkWay);
+
         } while (l_Result->GetNextResult());
+
+        LOG_INFO << "Loaded " << m_RoomWalkWays.size() << " Room Walk Ways";
     }
 
     /// LoadRooms
@@ -256,13 +260,12 @@ namespace SteerStone
     /// @p_Y : Tile Position Y
     WalkWay* RoomManager::GetWalkWay(uint32 const p_Id, int16 const p_X, int16 const p_Y)
     {
-        auto const& l_Itr = m_RoomWalkWays.find(p_Id);
-        if (l_Itr != m_RoomWalkWays.end())
+        for (auto& l_Itr : m_RoomWalkWays)
         {
-            for (auto& l_WalkWayItr : l_Itr->second.m_WalkWayFromPos)
+            for (auto const& l_PosItr : l_Itr.m_WalkWayFromPos)
             {
-                if (l_WalkWayItr.X == p_X && l_WalkWayItr.Y == p_Y)
-                    return &l_Itr->second;
+                if (l_Itr.GetFromId() == p_Id && l_PosItr.X == p_X && l_PosItr.Y == p_Y)
+                    return &l_Itr;
             }
         }
         return nullptr;

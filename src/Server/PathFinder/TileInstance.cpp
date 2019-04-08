@@ -97,7 +97,8 @@ namespace SteerStone
 
     /// CanWalkOnTile
     /// Can Habbo walk on tile
-    bool TileInstance::CanWalkOnTile()
+    /// @p_Extra : If true do extra checks
+    bool TileInstance::CanWalkOnTile(bool p_Extra /*= false*/)
     {
         if (m_Habbo.is_initialized())
         {
@@ -112,7 +113,7 @@ namespace SteerStone
         else
         {
             if (Item* l_Item = GetItem())
-                if (!l_Item->CanBeWalkedOn())
+                if (!l_Item->CanBeWalkedOn(p_Extra))
                     return false;
         }
 

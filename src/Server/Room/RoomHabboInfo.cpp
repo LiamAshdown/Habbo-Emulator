@@ -124,7 +124,7 @@ namespace SteerStone
             if (!l_TileInstance)
                 return;
 
-            if (!l_TileInstance->CanWalkOnTile())
+            /*if (!l_TileInstance->CanWalkOnTile())
             {
                 /// If there's a next waypoint calculate new nearest waypoint to next waypoint
                 if (m_Path->GetPath().size() > 2)
@@ -147,7 +147,7 @@ namespace SteerStone
                     }
             }
             else
-                l_TileInstance->SetTileOccupied(true, m_Habbo);
+                l_TileInstance->SetTileOccupied(true, m_Habbo);*/
 
             int16 l_Rotation = Maths::CalculateWalkDirection(m_Habbo->GetPositionX(), m_Habbo->GetPositionY(), l_Position.X, l_Position.Y);
 
