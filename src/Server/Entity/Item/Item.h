@@ -57,7 +57,7 @@ namespace SteerStone
         float GetTopHeight()            const { return m_TopHeight;         }
         int16 GetLength()               const { return m_Length;            }
         int16 GetWidth()                const { return m_Width;             }
-        std::string GetBehaviour()      const { return m_Behaviour;         }
+        std::string GetTrigger()        const { return m_Trigger;           }
         std::string GetInteractor()     const { return m_Interactor;        }
         bool IsTradable()               const { return m_Tradable;          }
         bool IsRecycleable()            const { return m_Recycleable;       }
@@ -79,10 +79,10 @@ namespace SteerStone
         float m_TopHeight;
         int16 m_Length;
         int16 m_Width;
-        std::string m_Behaviour;
+        std::string m_Trigger;
         std::string m_Interactor;
         bool m_Tradable;
         bool m_Recycleable;
         uint32 m_DrinkId;
     };
-}
+} ///< NAMESPACE STEERSTONE

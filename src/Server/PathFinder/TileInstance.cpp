@@ -120,4 +120,24 @@ namespace SteerStone
         return true;
     }
 
+    /// AddTrigger
+    /// Add Trigger to tile
+    /// @p_BaseTriggerEvent : Trigger Event which is being added to tile
+    void TileInstance::AddTrigger(BaseTriggerEvent * p_BaseTriggerEvent)
+    {
+        m_Trigger.push_back(p_BaseTriggerEvent);
+    }
+
+    /// ExecuteTrigger
+    /// Execute Trigger if exists
+    /// @p_Habbo : Habbo user which activated the event
+    /// @p_Room : Habbo user which is inside the room
+    /// @p_Item : Item which may be apart of the trigger
+    void TileInstance::ExecuteTrigger(Habbo* p_Habbo, std::shared_ptr<Room> p_Room /*= nullptr*/, Item* p_Item /*= nullptr*/)
+    {
+        for (auto const& l_Itr : m_Trigger)
+        {
+            l_Itr->OnTriggerEvent(p_Habbo, p_Room, p_Item);
+        }
+    }
 } ///< NAMESPACE STEERSTONE

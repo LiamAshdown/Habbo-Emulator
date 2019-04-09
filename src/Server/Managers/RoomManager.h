@@ -16,12 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MANAGERS_ROOM_MANAGER_h
-#define _MANAGERS_ROOM_MANAGER_h
+#pragma once
 #include "Common/SharedDefines.h"
 #include "Room.h"
 #include <mutex>
-#endif /* _MANAGERS_ROOM_MANAGER_h */
 
 namespace SteerStone
 {

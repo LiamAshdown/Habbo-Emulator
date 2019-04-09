@@ -44,7 +44,7 @@ namespace SteerStone
     void ItemManager::LoadPublicRoomItems()
     {
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, behaviour FROM public_items");
+        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, trigger_state FROM public_items");
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -70,7 +70,7 @@ namespace SteerStone
             l_PublicItem.m_TopHeight    = l_Result->GetDouble(8);
             l_PublicItem.m_Length       = l_Result->GetInt32(9);
             l_PublicItem.m_Width        = l_Result->GetInt32(10);
-            l_PublicItem.m_Behaviour    = l_Result->GetString(11);
+            l_PublicItem.m_Trigger      = l_Result->GetString(11);
 
             l_PublicItemVec.push_back(l_PublicItem);
 

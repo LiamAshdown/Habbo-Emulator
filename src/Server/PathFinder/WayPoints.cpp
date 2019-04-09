@@ -51,16 +51,8 @@ namespace SteerStone
         /// Get the current tile instance from Habbo position
         if (TileInstance* l_TileInstance = m_RoomModel->GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
         {
-            if (Item* l_Item = l_TileInstance->GetItem())
-            {
-                /// If Habbo is ontop of an item which we can sit on, execute the sit function
-                if (l_Item->GetBehaviour() == "can_sit_on_top")
-                {
-                    m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
-                    m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_SITTING);
-                    m_Habbo->UpdatePosition(l_Item->GetPositionX(), l_Item->GetPositionY(), l_Item->GetPositionZ(), l_Item->GetRotation());
-                }
-            }
+            /// Execute trigger event if there's any
+            l_TileInstance->ExecuteTrigger(m_Habbo, m_Habbo->GetRoom(), l_TileInstance->GetItem());
 
             /// If we are on WalkWay tile - move to new room
             if (WalkWay* l_WalkWay = l_TileInstance->GetWalkWay())

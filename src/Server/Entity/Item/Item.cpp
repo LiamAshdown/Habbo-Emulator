@@ -35,7 +35,6 @@ namespace SteerStone
         m_DrinkId = 0;
         m_Tradable = false;
         m_Recycleable = false;
-
     }
 
     /// Deconstructor
@@ -48,14 +47,13 @@ namespace SteerStone
     /// @p_Extra : If true do extra checks
     bool Item::CanBeWalkedOn(bool p_Extra /*= false*/)
     {
-        if (GetBehaviour() == "solid")
+        if (GetTrigger() == "solid")
             return false;
 
         if (p_Extra)
-            if (GetBehaviour() == "can_sit_on_top")
+            if (GetTrigger() == "can_sit_on_top")
                 return false;
 
         return true;
     }
-    
-}
+} /// NAMESPACE STEERSTONE

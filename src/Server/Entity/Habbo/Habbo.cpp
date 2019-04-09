@@ -84,7 +84,7 @@ namespace SteerStone
     /// Get room
     std::shared_ptr<Room> Habbo::GetRoom() const
     {
-        return m_Room.lock();
+        return m_Room.expired() ? nullptr : m_Room.lock();
     }
 
     /// DestroyRoom

@@ -20,6 +20,7 @@
 #define _PATHFINDER_TILE_INSTANCE_h
 #include "Common/SharedDefines.h"
 #include "ItemManager.h"
+#include "BaseTriggerEvent.h"
 #endif /* _PATHFINDER_TILE_INSTANCE_h */
 
 namespace SteerStone
@@ -85,15 +86,29 @@ namespace SteerStone
         /// Get Tile Position Y
         int16 GetTilePositionY() const { return m_TileY; }
 
+        /// AddTrigger
+        /// Add Trigger to tile
+        /// @p_BaseTriggerEvent : Trigger Event which is being added to tile
+        void AddTrigger(BaseTriggerEvent* p_BaseTriggerEvent);
+
+        /// ExecuteTrigger
+        /// Execute Trigger if exists
+        /// @p_Habbo : Habbo user which activated the event
+        /// @p_Room : Habbo user which is inside the room
+        /// @p_Item : Item which may be apart of the trigger
+        void ExecuteTrigger(Habbo* p_Habbo, std::shared_ptr<Room> p_Room = nullptr, Item* p_Item = nullptr);
+
     private:
         WalkWay* m_WalkWay;              ///< WalkWay which is used to enter another room or on a trigger event
         Item* m_Item;                    ///< Item which is on the tile
         int16 m_TileState;               ///< Whether the tile is closed or open to use
         int16 m_TileHeight;              ///< Max height of the tile
-        boost::optional<Habbo*> m_Habbo;///< Active user on tile
+        boost::optional<Habbo*> m_Habbo; ///< Active user on tile
 
         int16 m_TileX;                   ///< Tile instance X Position
-        int16 m_TileY;                   ///< ///< Tile instance X Position
+        int16 m_TileY;                   ///< Tile instance X Position
+
+        std::vector<BaseTriggerEvent*> m_Trigger;     ///< Trigger event which executes when user steps on a tile
     };
 
 } ///< NAMESPACE STEERSTONE

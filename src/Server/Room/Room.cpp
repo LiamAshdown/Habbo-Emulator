@@ -18,6 +18,7 @@
 
 #include "Habbo.h"
 #include "RoomManager.h"
+#include "TriggerEventManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Common/Maths.h"
 #include <functional>
@@ -72,6 +73,7 @@ namespace SteerStone
                 if (GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
                 {
                     GetRoomModel().TileGrid[l_X][l_Y]->AddItem(sItemMgr->GetPublicItemByPosition(GetModel(), l_X, l_Y));
+                    GetRoomModel().TileGrid[l_X][l_Y]->AddTrigger(sTriggerMgr->GetTrigger(GetRoomModel().TileGrid[l_X][l_Y]->GetItem() ? GetRoomModel().TileGrid[l_X][l_Y]->GetItem()->GetTrigger() : "default"));
                     GetRoomModel().TileGrid[l_X][l_Y]->AddWalkWay(sRoomMgr->GetWalkWay(GetId(), l_X, l_Y));
                 }
             }

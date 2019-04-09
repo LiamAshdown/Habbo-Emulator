@@ -16,13 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _HABBO_HABBO_h
-#define _HABBO_HABBO_h
+#pragma once
 #include "Common/SharedDefines.h"
 #include "Messenger.h"
 #include "FavouriteRoom.h"
 #include <mutex>
-#endif /* _HABBO_HABBO_h */
 
 namespace SteerStone
 {
