@@ -36,17 +36,15 @@ namespace SteerStone
         m_PingInterval    = sConfig->GetIntDefault("PongInterval", 30000);
         m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
 
-        m_Walking = false;
-        m_Sitting = false;
-        m_Dancing = false;
-        m_Waving  = false;
-
         SendPing();
     }
 
     /// Deconstructor
     Habbo::~Habbo()
     {
+        /// Save our player data
+        Logout();
+
         m_Messenger.reset();
         m_FavouriteRooms.reset();
 
@@ -268,6 +266,18 @@ namespace SteerStone
         m_HeadRotation = p_Rotation;
     }
 
+    /// TeleportTo
+    /// Teleport player to given location
+    /// @p_X - X axis on new position
+    /// @p_Y - Y axis on new position
+    /// @p_Z - Z axis on new position
+    /// @p_Rotation - New Rotation
+    void Habbo::TeleportTo(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation)
+    {
+        UpdatePosition(p_X, p_Y, p_Z, p_Rotation);
+        GetRoom()->AddStatus(GetRoomGUID(), Status::STATUS_TELEPORT);
+    }
+
     /// LookTo
     /// @p_X : X axis to face targeted user
     /// @p_Y : Y axis to face targeted user
@@ -364,7 +374,6 @@ namespace SteerStone
                 }
                 else
                 {
-                    Logout(LOGOUT_TIMEOUT);
                     LOG_INFO << "Disconnecting Habbo: " << GetId() << " have not recieved a pong back";
                     return false;
                 }
@@ -391,13 +400,6 @@ namespace SteerStone
         l_Packet.Reason = p_Reason;
         ToSocket()->SendPacket(l_Packet.Write());
 
-        if (m_Socket)
-        {
-            if (!m_Socket->IsClosed())
-                m_Socket->CloseSocket();
-
-            m_Socket->DestroyHabbo();
-        }
     }
 
     /// SaveToDB

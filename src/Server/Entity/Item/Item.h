@@ -43,25 +43,28 @@ namespace SteerStone
         bool CanBeWalkedOn(bool m_Extra = false);
 
         /// Item Info
-        uint32 GetId()                  const { return m_Id;                }
-        uint32 GetSpriteId()            const { return m_SpriteId;          }
-        std::string GetName()           const { return m_Name;              }
-        std::string GetDescription()    const { return m_Description;       }
-        std::string GetColour()         const { return m_Colour;            }
-        std::string GetRoomModel()      const { return m_RoomModel;         }
-        std::string GetSprite()         const { return m_Sprite;            }
-        int16 GetPositionX()            const { return m_X;                 }
-        int16 GetPositionY()            const { return m_Y;                 }
-        double GetPositionZ()           const { return m_Z;                 }
-        int16 GetRotation()             const { return m_Rotation;          }
-        float GetTopHeight()            const { return m_TopHeight;         }
-        int16 GetLength()               const { return m_Length;            }
-        int16 GetWidth()                const { return m_Width;             }
-        std::string GetTrigger()        const { return m_Trigger;           }
-        std::string GetInteractor()     const { return m_Interactor;        }
-        bool IsTradable()               const { return m_Tradable;          }
-        bool IsRecycleable()            const { return m_Recycleable;       }
-        uint32 GetDrinkId()             const { return m_DrinkId;           }
+        uint32 GetId()                                const { return m_Id;                }
+        uint32 GetSpriteId()                          const { return m_SpriteId;          }
+        std::string GetName()                         const { return m_Name;              }
+        std::string GetDescription()                  const { return m_Description;       }
+        std::string GetColour()                       const { return m_Colour;            }
+        std::string GetRoomModel()                    const { return m_RoomModel;         }
+        std::string GetSprite()                       const { return m_Sprite;            }
+        int16 GetPositionX()                          const { return m_X;                 }
+        int16 GetPositionY()                          const { return m_Y;                 }
+        double GetPositionZ()                         const { return m_Z;                 }
+        int16 GetRotation()                           const { return m_Rotation;          }
+        float GetTopHeight()                          const { return m_TopHeight;         }
+        int16 GetLength()                             const { return m_Length;            }
+        int16 GetWidth()                              const { return m_Width;             }
+        std::vector<std::string> GetTrigger()         const { return m_Trigger;           }
+        std::string GetProgram()                      const { return m_Program;           }
+        std::string GetState()                        const { return m_State;             }
+        bool IsTradable()                             const { return m_Tradable;          }
+        bool IsRecycleable()                          const { return m_Recycleable;       }
+        uint32 GetDrinkId()                           const { return m_DrinkId;           }
+
+        void SetState(std::string const p_State)            { m_State = p_State;          }
 
     private:
         /// Variables
@@ -79,8 +82,9 @@ namespace SteerStone
         float m_TopHeight;
         int16 m_Length;
         int16 m_Width;
-        std::string m_Trigger;
-        std::string m_Interactor;
+        std::vector<std::string> m_Trigger;
+        std::string m_Program;
+        std::string m_State;                ///< Program State
         bool m_Tradable;
         bool m_Recycleable;
         uint32 m_DrinkId;

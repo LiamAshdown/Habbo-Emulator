@@ -66,7 +66,15 @@ namespace SteerStone
 
                 m_Buffer.AppendString("b:", false);
                 m_Buffer.AppendString("\r", false);
+
+                if (PoolFigure.is_initialized())
+                {
+                    m_Buffer.AppendString("p:", false);
+                    m_Buffer.AppendString(PoolFigure.get(), false);
+                    m_Buffer.AppendString("\r", false);
+                }
                 m_Buffer.AppendSOH();
+
 
                 return &m_Buffer;
             }
@@ -213,8 +221,11 @@ namespace SteerStone
                     m_Buffer.AppendString("/Wave", false);
                 if (Sitting)
                     m_Buffer.AppendString("/sit 1", false);
+                if (Swimming)
+                    m_Buffer.AppendString("/swim", false);
 
                 m_Buffer.AppendString("\r", false);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -225,7 +236,7 @@ namespace SteerStone
 
             StringBuffer const * LeaveRoom::Write()
             {
-                m_Buffer.AppendWired(GUID);
+                m_Buffer.AppendString(GUID, false);
 
                 m_Buffer.AppendSOH();
 
@@ -267,6 +278,16 @@ namespace SteerStone
                 m_Buffer.AppendWired(GUID);
                 m_Buffer.AppendString(Message);
 
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * OpenUIMakeOPPI::Write()
+            {
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;

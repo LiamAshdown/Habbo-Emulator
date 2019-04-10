@@ -31,16 +31,24 @@ namespace SteerStone
         TriggerEventSit() {}
 
     public:
-        /// OnTriggerEvent
+        /// OnTriggerEventJoin
         /// Execute the sit animation
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        void OnTriggerEvent(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item)
+        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item)
         {
             p_Habbo->GetRoom()->RemoveStatus(p_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
             p_Habbo->GetRoom()->AddStatus(p_Habbo->GetRoomGUID(), Status::STATUS_SITTING);
             p_Habbo->UpdatePosition(p_Item->GetPositionX(), p_Item->GetPositionY(), p_Item->GetPositionZ(), p_Item->GetRotation());
+        }
+
+        /// OnTriggerEventJoin
+        /// @p_Habbo : Habbo user which is leaving the event
+        /// @p_Room : Habbo user which is inside the room
+        /// @p_Item : Item which may be apart of the trigger
+        void OnTriggerEventLeave(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) 
+        {
         }
     };
 }

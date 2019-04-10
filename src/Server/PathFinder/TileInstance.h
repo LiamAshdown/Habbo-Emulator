@@ -91,12 +91,19 @@ namespace SteerStone
         /// @p_BaseTriggerEvent : Trigger Event which is being added to tile
         void AddTrigger(BaseTriggerEvent* p_BaseTriggerEvent);
 
-        /// ExecuteTrigger
+        /// ExecuteTriggerJoin
         /// Execute Trigger if exists
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        void ExecuteTrigger(Habbo* p_Habbo, std::shared_ptr<Room> p_Room = nullptr, Item* p_Item = nullptr);
+        void ExecuteTriggerJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room = nullptr, Item* p_Item = nullptr);
+   
+        /// ExecuteTriggerJoin
+        /// Execute Trigger if exists
+        /// @p_Habbo : Habbo user which left the event
+        /// @p_Room : Habbo user which is inside the room
+        /// @p_Item : Item which may be apart of the trigger
+        void ExecuteTriggerLeave(Habbo* p_Habbo, std::shared_ptr<Room> p_Room = nullptr, Item* p_Item = nullptr);
 
     private:
         WalkWay* m_WalkWay;              ///< WalkWay which is used to enter another room or on a trigger event

@@ -52,7 +52,7 @@ namespace SteerStone
         if (TileInstance* l_TileInstance = m_RoomModel->GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
         {
             /// Execute trigger event if there's any
-            l_TileInstance->ExecuteTrigger(m_Habbo, m_Habbo->GetRoom(), l_TileInstance->GetItem());
+            l_TileInstance->ExecuteTriggerJoin(m_Habbo, m_Habbo->GetRoom(), l_TileInstance->GetItem());
 
             /// If we are on WalkWay tile - move to new room
             if (WalkWay* l_WalkWay = l_TileInstance->GetWalkWay())

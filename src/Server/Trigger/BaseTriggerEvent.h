@@ -37,11 +37,18 @@ namespace SteerStone
 
     public:
 
-        /// OnTriggerEvent
+        /// OnTriggerEventJoin
         /// This executes the virtual trigger
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        virtual void OnTriggerEvent(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) = 0;
+        virtual void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) = 0;
+
+        /// OnTriggerEventJoin
+        /// This executes the virtual trigger
+        /// @p_Habbo : Habbo user which is leaving the event
+        /// @p_Room : Habbo user which is inside the room
+        /// @p_Item : Item which may be apart of the trigger
+        virtual void OnTriggerEventLeave(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) = 0;
     };
 } ///< NAMESPACE STEERSTONE

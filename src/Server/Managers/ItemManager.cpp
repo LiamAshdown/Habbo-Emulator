@@ -44,7 +44,7 @@ namespace SteerStone
     void ItemManager::LoadPublicRoomItems()
     {
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, trigger_state FROM public_items");
+        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, trigger_state, current_program FROM public_items");
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -70,7 +70,19 @@ namespace SteerStone
             l_PublicItem.m_TopHeight    = l_Result->GetDouble(8);
             l_PublicItem.m_Length       = l_Result->GetInt32(9);
             l_PublicItem.m_Width        = l_Result->GetInt32(10);
-            l_PublicItem.m_Trigger      = l_Result->GetString(11);
+
+            if (!l_Result->GetString(11).empty())
+            {
+                std::vector<std::string> l_Split;
+                boost::split(l_Split, l_Result->GetString(11), boost::is_any_of(","));
+
+                for (auto& l_Itr : l_Split)
+                {
+                    l_PublicItem.m_Trigger.push_back(l_Itr);
+                }
+            }
+
+            l_PublicItem.m_Program      = l_Result->GetString(12);
 
             l_PublicItemVec.push_back(l_PublicItem);
 
@@ -157,6 +169,8 @@ namespace SteerStone
                 sunset_cafe.push_back(*l_Itr);
             else if (l_Itr->GetRoomModel() == "pool_a")
                 pool_a.push_back(*l_Itr);
+            else if (l_Itr->GetRoomModel() == "pool_b")
+                pool_b.push_back(*l_Itr);
             else if (l_Itr->GetRoomModel() == "pub_a")
                 pub_a.push_back(*l_Itr);
             else if (l_Itr->GetRoomModel() == "md_a")

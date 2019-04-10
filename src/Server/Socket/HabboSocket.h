@@ -99,6 +99,7 @@ namespace SteerStone
         void HandleRoomWhisper(std::unique_ptr<ClientPacket> p_Packet);
         void HandleInfoBus(std::unique_ptr<ClientPacket> p_Packet);
         void HandleChangeWorld(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSwimSuit(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

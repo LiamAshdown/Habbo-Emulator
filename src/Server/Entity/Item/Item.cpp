@@ -47,12 +47,15 @@ namespace SteerStone
     /// @p_Extra : If true do extra checks
     bool Item::CanBeWalkedOn(bool p_Extra /*= false*/)
     {
-        if (GetTrigger() == "solid")
-            return false;
-
-        if (p_Extra)
-            if (GetTrigger() == "can_sit_on_top")
+        for (auto const& l_Itr : m_Trigger)
+        {
+            if (l_Itr == "solid")
                 return false;
+
+            if (p_Extra)
+                if (l_Itr == "can_sit_on_top")
+                    return false;
+        }
 
         return true;
     }

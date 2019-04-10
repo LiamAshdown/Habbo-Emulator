@@ -73,7 +73,19 @@ namespace SteerStone
                 if (GetRoomCategory()->GetRoomType() == RoomType::ROOM_TYPE_PUBLIC)
                 {
                     GetRoomModel().TileGrid[l_X][l_Y]->AddItem(sItemMgr->GetPublicItemByPosition(GetModel(), l_X, l_Y));
-                    GetRoomModel().TileGrid[l_X][l_Y]->AddTrigger(sTriggerMgr->GetTrigger(GetRoomModel().TileGrid[l_X][l_Y]->GetItem() ? GetRoomModel().TileGrid[l_X][l_Y]->GetItem()->GetTrigger() : "default"));
+
+                    if (Item* l_Item = GetRoomModel().TileGrid[l_X][l_Y]->GetItem())
+                    {
+                        /// Load our item triggers
+                        for (auto const& l_Itr : l_Item->GetTrigger())
+                        {
+                            GetRoomModel().TileGrid[l_X][l_Y]->AddTrigger(sTriggerMgr->GetTrigger(l_Itr));
+                        }
+                    }
+                    else ///< If Item doesn't exist, then just add a default trigger (which does nothing)
+                        GetRoomModel().TileGrid[l_X][l_Y]->AddTrigger(sTriggerMgr->GetTrigger("default"));
+
+                    /// Add WalkWay tiles
                     GetRoomModel().TileGrid[l_X][l_Y]->AddWalkWay(sRoomMgr->GetWalkWay(GetId(), l_X, l_Y));
                 }
             }
@@ -111,6 +123,9 @@ namespace SteerStone
 
         p_Habbo->SetRoomGUID(GenerateGUID());
 
+        /// Send update that we joined the room
+        p_Habbo->SendMessengerUpdate();
+
         m_FunctionCallBack.AddCallBack(std::bind(&Room::EnterRoomCallBack, this, p_Habbo));
 
         return true;
@@ -139,6 +154,13 @@ namespace SteerStone
         auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
         if (l_Itr != m_Habbos.end())
         {
+            /// Set current tile occupied to false since we are leaving room
+            if (TileInstance* l_TileInstance = GetRoomModel().GetTileInstance(l_Itr->second->m_Habbo->GetPositionX(), l_Itr->second->m_Habbo->GetPositionY()))
+                l_TileInstance->SetTileOccupied(false, l_Itr->second->ToHabbo());
+
+            /// Send update that we left the room
+            l_Itr->second->m_Habbo->SendMessengerUpdate();
+
             /// Notify other users that we left the room
             SendUserLeftRoom(l_Itr->second->ToHabbo()->GetRoomGUID());
 
@@ -184,6 +206,7 @@ namespace SteerStone
                 l_Packet.Id         = boost::lexical_cast<std::string>(p_Habbo->GetId());
                 l_Packet.Name       = p_Habbo->GetName();
                 l_Packet.Figure     = p_Habbo->GetFigure();
+                l_Packet.PoolFigure = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
                 l_Packet.Gender     = p_Habbo->GetGender() == "Male" ? "M" : "F";
                 l_Packet.X          = boost::lexical_cast<std::string>(p_Habbo->GetPositionX());
                 l_Packet.Y          = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
@@ -197,6 +220,7 @@ namespace SteerStone
             l_Packet.Id             = boost::lexical_cast<std::string>(l_Habbo->GetId());
             l_Packet.Name           = l_Habbo->GetName();
             l_Packet.Figure         = l_Habbo->GetFigure();
+            l_Packet.PoolFigure     = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
             l_Packet.Gender         = l_Habbo->GetGender() == "Male" ? "M" : "F";
             l_Packet.X              = boost::lexical_cast<std::string>(l_Habbo->GetPositionX());
             l_Packet.Y              = boost::lexical_cast<std::string>(l_Habbo->GetPositionY());
@@ -209,7 +233,7 @@ namespace SteerStone
     /// SendRoomStatuses
     /// Send Habbo Statuses to user joining room
     /// @p_Habbo : Habbo which is joining room
-    void Room::SendRoomStatuses(Habbo * p_Habbo)
+    void Room::SendRoomStatuses(Habbo* p_Habbo)
     {
         for (auto const& l_Itr : m_Habbos)
         {
@@ -226,6 +250,7 @@ namespace SteerStone
             l_Packet.Walking        = l_Itr.second->HasStatus(Status::STATUS_WALKING);
             l_Packet.Dancing        = l_Itr.second->HasStatus(Status::STATUS_DANCING);
             l_Packet.Waving         = l_Itr.second->HasStatus(Status::STATUS_WAVING);
+            l_Packet.Swimming       = l_Itr.second->HasStatus(Status::STATUS_SWIMMING);
 
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
@@ -239,7 +264,7 @@ namespace SteerStone
             Habbo* l_Habbo = l_Itr.second->ToHabbo();
 
             HabboPacket::Room::LeaveRoom l_Packet;
-            l_Packet.GUID = p_GUID;
+            l_Packet.GUID = std::to_string(p_GUID);
             l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
     }
@@ -358,6 +383,23 @@ namespace SteerStone
         {
             l_Itr.second->ProcessActions(p_Diff);
         }
+    }
+
+    /// GetCcts
+    /// Get Ccts
+    /// @p_Specified : Return specified Ccts
+    std::string Room::GetCcts(std::string const p_Specified /*= std::string()*/)
+    {
+        for (auto& l_Itr : m_Ccts)
+        {
+            if (p_Specified.empty())
+                return l_Itr;
+            else
+                if (l_Itr == p_Specified)
+                    return l_Itr;
+        }
+
+        return std::string();
     }
 
     /// Update 

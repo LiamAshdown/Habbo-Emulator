@@ -33,14 +33,16 @@ namespace SteerStone
     };
 
     /// Used to send Status update to client(s)
-    enum Status
+    enum Status : uint32
     {
         STATUS_NONE              = 0,             
-        STATUS_WALKING           = 1,
-        STATUS_SITTING           = 2,
-        STATUS_WAVING            = 4,
-        STATUS_DANCING           = 8,
-        STATUS_ROTATION          = 16,
+        STATUS_WALKING           = 1,  ///< Update user is walking
+        STATUS_SITTING           = 2,  ///< Update user is sitting
+        STATUS_WAVING            = 4,  ///< Update user is waving
+        STATUS_DANCING           = 8,  ///< Update user is dancing
+        STATUS_SWIMMING          = 16, ///< Update user is swimming
+        STATUS_ROTATION          = 32, ///< Update user rotation
+        STATUS_TELEPORT          = 64, ///< Teleport user to given location in room
     };
 
     /// Holds Habbo Badges
@@ -219,6 +221,14 @@ namespace SteerStone
         /// @p_Z - Z axis on new position
         /// @p_Rotation - New Rotation
         void UpdatePosition(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation);
+
+        /// TeleportTo
+        /// Teleport player to given location
+        /// @p_X - X axis on new position
+        /// @p_Y - Y axis on new position
+        /// @p_Z - Z axis on new position
+        /// @p_Rotation - New Rotation
+        void TeleportTo(int16 const p_X, int16 const p_Y, int16 const p_Z, int16 const p_Rotation);
 
         /// LookTo
         /// @p_X : X axis to face targeted user

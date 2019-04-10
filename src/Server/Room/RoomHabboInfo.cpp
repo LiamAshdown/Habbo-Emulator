@@ -120,11 +120,16 @@ namespace SteerStone
         {
             Position& l_Position = m_Path->GetPath().back();
 
-            TileInstance* l_TileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
-            if (!l_TileInstance)
+            TileInstance* l_CurrTileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
+            TileInstance* l_PrevTileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY());
+
+            if (!l_CurrTileInstance)
                 return;
 
-            /*if (!l_TileInstance->CanWalkOnTile())
+            if (l_PrevTileInstance)
+                l_PrevTileInstance->SetTileOccupied(false);
+
+            if (!l_CurrTileInstance->CanWalkOnTile())
             {
                 /// If there's a next waypoint calculate new nearest waypoint to next waypoint
                 if (m_Path->GetPath().size() > 2)
@@ -147,7 +152,7 @@ namespace SteerStone
                     }
             }
             else
-                l_TileInstance->SetTileOccupied(true, m_Habbo);*/
+                l_CurrTileInstance->SetTileOccupied(true, m_Habbo);
 
             int16 l_Rotation = Maths::CalculateWalkDirection(m_Habbo->GetPositionX(), m_Habbo->GetPositionY(), l_Position.X, l_Position.Y);
 
@@ -165,6 +170,7 @@ namespace SteerStone
             l_Packet.Walking        = HasStatus(Status::STATUS_WALKING);
             l_Packet.Dancing        = HasStatus(Status::STATUS_DANCING);
             l_Packet.Waving         = HasStatus(Status::STATUS_WAVING);
+            l_Packet.Swimming       = HasStatus(Status::STATUS_SWIMMING);
             m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
             m_Habbo->UpdatePosition(l_Position.X, l_Position.Y, l_Position.Z, l_Rotation);
@@ -191,6 +197,7 @@ namespace SteerStone
         l_Packet.Walking            = HasStatus(Status::STATUS_WALKING);
         l_Packet.Dancing            = HasStatus(Status::STATUS_DANCING);
         l_Packet.Waving             = HasStatus(Status::STATUS_WAVING);
+        l_Packet.Swimming           = HasStatus(Status::STATUS_SWIMMING);
         m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
         m_UpdateClient = false;

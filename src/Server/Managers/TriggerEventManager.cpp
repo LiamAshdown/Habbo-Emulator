@@ -19,7 +19,10 @@
 #include "TriggerEventManager.h"
 
 #include "Events/TriggerEventSit.h"
+#include "Events/TriggerEventPoolBooth.h"
 #include "Events/TriggerEventDefault.h"
+#include "Events/TriggerEventEnterPool.h"
+#include "Events/TriggerEventExitPool.h"
 
 namespace SteerStone
 {
@@ -49,8 +52,11 @@ namespace SteerStone
     /// Load the triggers into the map storage
     void TriggerEventManager::LoadTriggerEvents()
     {
-        m_Triggers["default"]       = new TriggerEventDefault;
+        m_Triggers["default"]        = new TriggerEventDefault;
         m_Triggers["can_sit_on_top"] = new TriggerEventSit;
+        m_Triggers["pool_booth"]     = new TriggerEventPoolBooth;
+        m_Triggers["pool_enter"]     = new TriggerEventEnterPool;
+        m_Triggers["pool_exit"]      = new TriggerEventExitPool;
 
         LOG_INFO << "Loaded " << m_Triggers.size() << " Trigger Events";
     }

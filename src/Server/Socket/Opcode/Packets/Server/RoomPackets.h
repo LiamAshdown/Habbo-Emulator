@@ -90,6 +90,7 @@ namespace SteerStone
                 std::string Id;
                 std::string Name;
                 std::string Figure;
+                boost::optional<std::string> PoolFigure;
                 std::string Gender;
                 std::string X;
                 std::string Y;
@@ -237,6 +238,7 @@ namespace SteerStone
                 bool Sitting;
                 bool Walking;
                 bool Waving;
+                bool Swimming;
                 std::string Status = "";
                 std::string NewX;
                 std::string NewY;
@@ -254,7 +256,7 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
 
-                uint32 GUID;
+                std::string GUID;
             };
 
             /// SERVER_ROOM_CHAT packet builder
@@ -300,6 +302,19 @@ namespace SteerStone
 
                 uint32 GUID;
                 std::string Message;
+            };
+
+
+            /// SERVER_ROOM_WHISPER packet builder
+            class OpenUIMakeOPPI final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                OpenUIMakeOPPI() : ServerPacket(SERVER_OPEN_UI_MAKE_OPPI) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
             };
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET

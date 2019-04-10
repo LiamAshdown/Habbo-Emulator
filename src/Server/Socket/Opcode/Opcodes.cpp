@@ -86,6 +86,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",                     &HabboSocket::HandleRoomWhisper                );
         StoreClientPacket(PacketClientHeader::CLIENT_TRY_INFO_BUS,                  "CLIENT_TRY_INFO_BUS",                     &HabboSocket::HandleInfoBus                    );
         StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_WORLD,                  "CLIENT_CHANGE_WORLD",                     &HabboSocket::HandleChangeWorld                );
+        StoreClientPacket(PacketClientHeader::CLIENT_SWIM_SUIT,                     "CLIENT_SWIM_SUIT",                        &HabboSocket::HandleSwimSuit                   );
 
         ///< SMSG
         StoreServerPacket(PacketServerHeader::SERVER_CRYPTO_PARAMETERS,             "SERVER_CRYPTO_PARAMETERS",                &HabboSocket::HandleServerMessage              );
@@ -130,6 +131,12 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_MESSENGER_SEND_MESSAGE,        "SERVER_MESSENGER_SEND_MESSAGE",           &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_USER_UPDATE_STATUS,            "SERVER_USER_UPDATE_STATUS",               &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_LEAVE_ROOM,                    "SERVER_LEAVE_ROOM",                       &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ROOM_CHAT,                     "SERVER_ROOM_CHAT",                        &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ROOM_SHOUT,                    "SERVER_ROOM_CHAT",                        &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_ROOM_WHISPER,                  "SERVER_ROOM_WHISPER",                     &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_SHOW_PROGRAM,                  "SERVER_SHOW_PROGRAM",                     &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_OPEN_UI_MAKE_OPPI,             "SERVER_OPEN_UI_MAKE_OPPI",                &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_STUFF_DATA_UPDATE,             "SERVER_STUFF_DATA_UPDATE",                &HabboSocket::HandleServerMessage              );
 
         LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
         LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";

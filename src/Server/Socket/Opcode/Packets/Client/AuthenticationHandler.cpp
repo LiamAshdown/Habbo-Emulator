@@ -255,8 +255,6 @@ namespace SteerStone
             m_Habbo->m_SoundEnabled         = l_Result->GetBool(15);
             m_Habbo->m_AcceptFriendRequests = l_Result->GetBool(16);
             m_Habbo->m_Rank                 = l_Result->GetUint8(17);
-            m_Habbo->InitializeHabboData();
-            m_Habbo->m_Initialized = true;
 
             while (l_Result->GetNextResult())
             {
@@ -277,6 +275,9 @@ namespace SteerStone
                     m_Habbo->m_FuseRights.push_back(l_HabboFuseRight);
                 }
             }
+
+            m_Habbo->InitializeHabboData();
+            m_Habbo->m_Initialized = true;
 
             HabboPacket::Authentication::Login l_LoginPacket;
             SendPacket(l_LoginPacket.Write());

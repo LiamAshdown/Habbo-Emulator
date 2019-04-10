@@ -75,7 +75,13 @@ namespace SteerStone
         if (p_Occupied)
             m_Habbo = p_Habbo;
         else
+        {
+            if (p_Habbo != nullptr)
+                if (p_Habbo->GetRoom() != nullptr)
+                    ExecuteTriggerLeave(p_Habbo, p_Habbo->GetRoom(), GetItem());
+
             m_Habbo.reset();
+        }
     }
 
     /// AddWalkWay
@@ -105,10 +111,12 @@ namespace SteerStone
             if (Habbo* l_Habbo = m_Habbo.get())
             {
                 if (GetTilePositionX() != l_Habbo->GetPositionX() || GetTilePositionY() != l_Habbo->GetPositionY()) ///< User is no longer on the tile
-                    SetTileOccupied(false);
+                    SetTileOccupied(false, l_Habbo);
                 else
                     return false;
             }
+            else
+                SetTileOccupied(false);
         }
         else
         {
@@ -128,16 +136,29 @@ namespace SteerStone
         m_Trigger.push_back(p_BaseTriggerEvent);
     }
 
-    /// ExecuteTrigger
+    /// ExecuteTriggerJoin
     /// Execute Trigger if exists
     /// @p_Habbo : Habbo user which activated the event
     /// @p_Room : Habbo user which is inside the room
     /// @p_Item : Item which may be apart of the trigger
-    void TileInstance::ExecuteTrigger(Habbo* p_Habbo, std::shared_ptr<Room> p_Room /*= nullptr*/, Item* p_Item /*= nullptr*/)
+    void TileInstance::ExecuteTriggerJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room /*= nullptr*/, Item* p_Item /*= nullptr*/)
     {
         for (auto const& l_Itr : m_Trigger)
         {
-            l_Itr->OnTriggerEvent(p_Habbo, p_Room, p_Item);
+            l_Itr->OnTriggerEventJoin(p_Habbo, p_Room, p_Item);
+        }
+    }
+
+    /// ExecuteTriggerJoin
+    /// Execute Trigger if exists
+    /// @p_Habbo : Habbo user which left the event
+    /// @p_Room : Habbo user which is inside the room
+    /// @p_Item : Item which may be apart of the trigger
+    void TileInstance::ExecuteTriggerLeave(Habbo* p_Habbo, std::shared_ptr<Room> p_Room /*= nullptr*/, Item* p_Item /*= nullptr*/)
+    {
+        for (auto const& l_Itr : m_Trigger)
+        {
+            l_Itr->OnTriggerEventLeave(p_Habbo, p_Room, p_Item);
         }
     }
 } ///< NAMESPACE STEERSTONE

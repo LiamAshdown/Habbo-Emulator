@@ -18,7 +18,9 @@
 
 #include "Habbo.h"
 #include "RoomManager.h"
+
 #include "Opcode/Packets/Server/RoomPackets.h"
+#include "Opcode/Packets/Server/ItemPackets.h"
 
 namespace SteerStone
 {
@@ -53,9 +55,6 @@ namespace SteerStone
 
     void HabboSocket::HandleGetRoomHeight(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         HabboPacket::Room::RoomHeight l_Packet;
         l_Packet.HeightMap = m_Habbo->GetRoom()->GetRoomModel().GetHeightMap();
         SendPacket(l_Packet.Write());
@@ -63,18 +62,12 @@ namespace SteerStone
 
     void HabboSocket::HandleRoomUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         /// Sending Habbo object so client and other clients can see a new habbo has joined the room
         m_Habbo->GetRoom()->AddFigure(m_Habbo);
     }
 
     void HabboSocket::HandleGameObjects(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         /// Send Furniture and any active furniture to client
         m_Habbo->GetRoom()->SendWorldObjects(m_Habbo);
         m_Habbo->GetRoom()->SendActiveObjects(m_Habbo);
@@ -82,24 +75,16 @@ namespace SteerStone
 
     void HabboSocket::HandleFurnitureRevisions(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
     }
 
     void HabboSocket::HandleLeaveRoom(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         if (m_Habbo->GetRoom())
             m_Habbo->GetRoom()->LeaveRoom(m_Habbo);
     }
 
     void HabboSocket::HandleHabboMove(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         int16 l_X = p_Packet->ReadBase64Int();
         int16 l_Y = p_Packet->ReadBase64Int();
 
@@ -111,43 +96,28 @@ namespace SteerStone
 
     void HabboSocket::HandleUserDance(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
         m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
     void HabboSocket::HandleHabboStopDance(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
     void HabboSocket::HandleRoomHabboStatuses(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         m_Habbo->GetRoom()->SendRoomStatuses(m_Habbo);
     }
 
     void HabboSocket::HandleHabboWave(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
         m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
     }
 
     void HabboSocket::HandleLookTo(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         std::vector<std::string> l_Split;
         boost::split(l_Split, p_Packet->GetContent(), boost::is_any_of(" "));
 
@@ -156,9 +126,6 @@ namespace SteerStone
 
     void HabboSocket::HandleRoomChat(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         HabboPacket::Room::Chat l_Packet;
         l_Packet.Message = p_Packet->ReadString();
         l_Packet.GUID = m_Habbo->GetRoomGUID();
@@ -167,9 +134,6 @@ namespace SteerStone
 
     void HabboSocket::HandleRoomShout(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-
-            return;
         HabboPacket::Room::Shout l_Packet;
         l_Packet.Message = p_Packet->ReadString();
         l_Packet.GUID = m_Habbo->GetRoomGUID();
@@ -178,9 +142,6 @@ namespace SteerStone
 
     void HabboSocket::HandleRoomWhisper(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
         std::string l_Contents = p_Packet->ReadString();
 
         HabboPacket::Room::Whisper l_Packet;
@@ -203,5 +164,18 @@ namespace SteerStone
                 m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
             }
         }
+    }
+
+    void HabboSocket::HandleSwimSuit(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (TileInstance* l_TileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
+        {
+            /// Set our Pool Figure
+            m_Habbo->m_PoolFigure = p_Packet->GetContent();
+            
+            /// Set the file occupied to false which will call TriggerEventLeave
+            l_TileInstance->SetTileOccupied(false, m_Habbo);
+        }
+
     }
 }

@@ -16,30 +16,32 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef MANAGERS_PATH_FINDER_MANAGER_h
-#define MANAGERS_PATH_FINDER_MANAGER_h
-#include "Common/SharedDefines.h"
-#include "PathFinder.h"
-#endif /* MANAGERS_PATH_FINDER_MANAGER_h */
+#include "PoolManager.h"
 
 namespace SteerStone
 {
-    /// Class which holds information about current pathfinder objects
-    /// Class gets updated by Hotel tick
     /// Singleton
-    class PathFinderManager
+    PoolManager * PoolManager::instance()
     {
-    public:
-        static PathFinderManager* instance();
+        static PoolManager instance;
+        return &instance;
+    }
 
-    public:
-        /// Constructor
-        PathFinderManager();
+    /// Constructor
+    PoolManager::PoolManager()
+    {}
 
-        /// Deconstructor
-        ~PathFinderManager();
-       
-    };
+    /// Deconstructor
+    PoolManager::~PoolManager()
+    {}
+
+    /// AddHabbo
+    /// Add Habbo to queue
+    /// @p_Name : Name of queue we are adding habbo too
+    /// @p_Habbo : Habbo we are adding to queue
+    void PoolManager::AddHabbo(std::string p_Name, Habbo * p_Habbo)
+    {
+        /// Check if Habbo already exists in the queue
+        auto const& l_Itr = m_PoolQueue.find(p_Name);
+    }
 } ///< NAMESPACE STEERSTONE
-
-#define sPathFinderMgr SteerStone::PathFinderManager::instance()

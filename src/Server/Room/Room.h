@@ -134,6 +134,11 @@ namespace SteerStone
         /// Process Habbo Actions; Status, pathfinding, etc..
         void ProcessUserActions(const uint32 p_Diff);
 
+        /// GetCcts
+        /// Get Ccts
+        /// @p_Specified : Return specified Ccts
+        std::string GetCcts(std::string const p_Specified = std::string());
+
         /// Update 
         /// Update all objects in room
         /// @p_Diff : Hotel last tick time
@@ -148,7 +153,6 @@ namespace SteerStone
         std::string GetName()        const { return m_Name;         }
         std::string GetDescription() const { return m_Description;  }
         std::string GetModel()       const { return m_Model;        }
-        std::string GetCcts()        const { return m_Ccts;         }
         uint32 GetWallPaper()        const { return m_WallPaper;    }
         uint32 GetFloor()            const { return m_Floor;        }
         bool ShowName()              const { return m_ShowName;     }
@@ -174,7 +178,7 @@ namespace SteerStone
         std::string m_Name;
         std::string m_Description;
         std::string m_Model;
-        std::string m_Ccts;
+        std::vector<std::string> m_Ccts;
         uint32 m_WallPaper;
         uint32 m_Floor;
         bool m_ShowName;

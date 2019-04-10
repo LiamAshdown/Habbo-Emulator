@@ -186,7 +186,14 @@ namespace SteerStone
             l_Room->m_Name                    = l_Result->GetString(5);
             l_Room->m_Description             = l_Result->GetString(6);
             l_Room->m_Model                   = l_Result->GetString(7);
-            l_Room->m_Ccts                    = l_Result->GetString(8);
+
+            std::vector<std::string> l_Split;
+            boost::split(l_Split, l_Result->GetString(8), boost::is_any_of(","));
+            for (auto &l_Itr : l_Split) 
+            {
+                l_Room->m_Ccts.push_back(l_Itr);
+            }
+
             l_Room->m_WallPaper               = l_Result->GetUint32(9);
             l_Room->m_Floor                   = l_Result->GetUint32(10);
             l_Room->m_ShowName                = l_Result->GetBool(11);

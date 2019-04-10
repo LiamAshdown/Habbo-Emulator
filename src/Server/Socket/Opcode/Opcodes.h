@@ -74,6 +74,7 @@ enum PacketClientHeader : uint16
     CLIENT_ROOM_WHISPER                   = 56,
     CLIENT_TRY_INFO_BUS                   = 113,
     CLIENT_CHANGE_WORLD                   = 111,
+    CLIENT_SWIM_SUIT                      = 116,
 };
 
 enum PacketServerHeader : uint16
@@ -126,6 +127,9 @@ enum PacketServerHeader : uint16
     SERVER_ROOM_CHAT                      = 24,
     SERVER_ROOM_SHOUT                     = 26,
     SERVER_ROOM_WHISPER                   = 25,
+    SERVER_SHOW_PROGRAM                   = 71,
+    SERVER_OPEN_UI_MAKE_OPPI              = 96,
+    SERVER_STUFF_DATA_UPDATE              = 88,
 };
 
 namespace SteerStone

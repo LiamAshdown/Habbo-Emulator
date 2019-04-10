@@ -24,19 +24,43 @@
 namespace SteerStone
 {
     /// Dummy template if no trigger is set
-    class TriggerEventDefault : public BaseTriggerEvent
+    class TriggerEventExitPool : public BaseTriggerEvent
     {
     public:
         /// Constructor
-        TriggerEventDefault() {}
+        TriggerEventExitPool() {}
 
     public:
         /// OnTriggerEventJoin
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) {}
+        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) 
+        {
+            /// If we are walking then don't execute the trigger
+            if (p_Habbo->GetRoom()->HasStatus(p_Habbo->GetRoomGUID(), Status::STATUS_WALKING))
+                return;
 
+            if (!p_Habbo->GetRoom()->HasStatus(p_Habbo->GetRoomGUID(), Status::STATUS_SWIMMING))
+                return;
+
+            p_Habbo->GetRoom()->RemoveStatus(p_Habbo->GetRoomGUID(), Status::STATUS_SWIMMING);
+
+            if (p_Habbo->GetPositionX() == 21 && p_Habbo->GetPositionY() == 28)
+                p_Habbo->TeleportTo(19, 28, 7, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 17 && p_Habbo->GetPositionY() == 22)
+                p_Habbo->TeleportTo(17, 20, 7, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 31 && p_Habbo->GetPositionY() == 11)
+                p_Habbo->TeleportTo(31, 9, 7, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 20 && p_Habbo->GetPositionY() == 19)
+                p_Habbo->TeleportTo(18, 19, 7, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 12 && p_Habbo->GetPositionY() == 11)
+                p_Habbo->TeleportTo(10, 11, 7, p_Habbo->GetBodyRotation());
+        }
 
         /// OnTriggerEventJoin
         /// @p_Habbo : Habbo user which is leaving the event

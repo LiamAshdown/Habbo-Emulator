@@ -24,18 +24,41 @@
 namespace SteerStone
 {
     /// Dummy template if no trigger is set
-    class TriggerEventDefault : public BaseTriggerEvent
+    class TriggerEventEnterPool : public BaseTriggerEvent
     {
     public:
         /// Constructor
-        TriggerEventDefault() {}
+        TriggerEventEnterPool() {}
 
     public:
         /// OnTriggerEventJoin
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) {}
+        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) 
+        {
+            /// We shoulnd't be able to enter the pool if we are swimming
+            if (p_Habbo->GetRoom()->HasStatus(p_Habbo->GetRoomGUID(), Status::STATUS_WALKING))
+                return;
+
+            /// We can't enter the pool if we don't have a swiming suit on
+            if (p_Habbo->GetPoolFigure().empty())
+                return;
+
+            p_Habbo->GetRoom()->AddStatus(p_Habbo->GetRoomGUID(), Status::STATUS_SWIMMING);
+
+            if (p_Habbo->GetPositionX() == 20 && p_Habbo->GetPositionY() == 28)
+                p_Habbo->TeleportTo(22, 28, 3, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 17 && p_Habbo->GetPositionY() == 21)
+                p_Habbo->TeleportTo(16, 23, 3, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 31 && p_Habbo->GetPositionY() == 10)
+                p_Habbo->TeleportTo(30, 12, 3, p_Habbo->GetBodyRotation());
+
+            else if (p_Habbo->GetPositionX() == 11 && p_Habbo->GetPositionY() == 11)
+                p_Habbo->TeleportTo(13, 12, 3, p_Habbo->GetBodyRotation());
+        }
 
 
         /// OnTriggerEventJoin
