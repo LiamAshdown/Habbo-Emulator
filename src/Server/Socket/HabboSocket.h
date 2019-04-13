@@ -103,6 +103,8 @@ namespace SteerStone
         void HandleCreateFlat(std::unique_ptr<ClientPacket> p_Packet);
         void HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet);
         void HandleBuyHabboClub(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

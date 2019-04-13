@@ -83,7 +83,7 @@ namespace SteerStone
         bool CreateDatabase(char const* p_InfoString, std::size_t const& p_PoolSize);
 
         /// PrintException
-        /// @p_ErrorCode : MYSQL ErrorMessenger code
+        /// @p_ErrorCode : MYSQL Error code
         /// @p_File : Which file the error occured
         /// @p_Function : Which function the error occured
         /// @p_Line : Which line the error occured

@@ -189,8 +189,8 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_AC,                             "CLIENT_AC",                              &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_CHECK_TIME,           "CLIENT_COPPA_REG_CHECK_TIME",            &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_GET_REAL_TIME,        "CLIENT_COPPA_REG_GET_REAL_TIME",         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_PARENT_EMAIL_REQUIRED,          "CLIENT_PARENT_EMAIL_REQUIRED",           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_VALIDATE_PARENT_EMAIL,          "CLIENT_VALIDATE_PARENT_EMAIL",           &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PARENT_EMAIL_REQUIRED,          "CLIENT_PARENT_EMAIL_REQUIRED",           &HabboSocket::HandleParentEmailRequired        );
+        StoreClientPacket(PacketClientHeader::CLIENT_VALIDATE_PARENT_EMAIL,          "CLIENT_VALIDATE_PARENT_EMAIL",           &HabboSocket::HandleValidateParentEmail        );
         StoreClientPacket(PacketClientHeader::CLIENT_SEND_PARENT_EMAIL,              "CLIENT_SEND_PARENT_EMAIL",               &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_ACCOUNT,                 "CLIENT_UPDATE_ACCOUNT",                  &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_PASSWORD,               "CLIENT_APPROVE_PASSWORD",                &HabboSocket::HandleApprovePassword            );
@@ -402,7 +402,7 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_OK,                              "SERVER_OK",                             &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_LOGIN_OK,                        "SERVER_LOGIN_OK",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_AVAILABLE_SETS,                  "SERVER_AVAILABLE_SETS",                 &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_APPROVE_NAME,              "SERVER_APPROVE_NAME",             &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_APPROVE_NAME,                    "SERVER_APPROVE_NAME",                   &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_NAME_UNACCEPTABLE,               "SERVER_NAME_UNACCEPTABLE",              &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_REG_OK,                          "SERVER_REG_OK",                         &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ACR,                             "SERVER_REG_OK",                         &HabboSocket::HandleServerMessage              );

@@ -180,6 +180,12 @@ ParameterTutorial = 1
 #
 RegisterationHabboClothing = 0
 #
+#    RegisterationRequireParentEmail
+#        Description: User requires to enter a parent email
+#        Default:     0 - Disabled | Enabled - 1
+#
+RegisterationHabboClothing = 0
+#
 #    RegisterationCredits
 #        Description: Set credit amount on player registeration
 #        Default:     0

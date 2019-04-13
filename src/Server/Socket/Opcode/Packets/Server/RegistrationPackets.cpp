@@ -51,7 +51,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * ApproveEmailReply::Write()
+            StringBuffer const * ApproveEmail::Write()
             {
                 m_Buffer.AppendSOH();
 
@@ -60,6 +60,37 @@ namespace SteerStone
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * RejectedEmail::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * ParentEmailRequired::Write()
+            {
+                m_Buffer.AppendWiredBool(RequireParentEmail);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * ValidateParentEmail::Write()
+            {
+                m_Buffer.AppendWiredBool(Validate);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
 
         } ///< NAMESPACE REGISTRATION
     } ///< NAMESPACE HABBOPACKET

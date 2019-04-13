@@ -85,6 +85,7 @@ namespace SteerStone
     {
         m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_HABBO_CLOTHING]      = sConfig->GetBoolDefault("RegisterationHabboClothing", 0);
         m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_SOUND]               = sConfig->GetBoolDefault("RegisterationSound", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_REQUIRE_PARENT_EMAIL]= sConfig->GetBoolDefault("RegisterationRequireParentEmail", 1);
         m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_COPPA]                   = sConfig->GetBoolDefault("ParameterCoppa", 0);
         m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_VOUCHER]                 = sConfig->GetBoolDefault("ParameterVoucher", 1);
         m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_REQUIRE_PARENT_EMAIL]    = sConfig->GetBoolDefault("ParamterRequireParentEmail", 0);

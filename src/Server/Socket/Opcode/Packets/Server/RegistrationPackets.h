@@ -76,18 +76,57 @@ namespace SteerStone
                 ApprovePasswordError ErrorCode;
             };
 
-            /// SERVER_APPROVE_EMAIL_REPLY packet builder
-            class ApproveEmailReply final : public ServerPacket
+            /// SERVER_EMAIL_APPROVED packet builder
+            class ApproveEmail final : public ServerPacket
             {
             public:
                 /// Constructor 
-                ApproveEmailReply() : ServerPacket(SERVER_EMAIL_APPROVED) {}
+                ApproveEmail() : ServerPacket(SERVER_EMAIL_APPROVED) {}
 
             public:
                 /// Write the packet
                 StringBuffer const* Write();
             };
 
+            /// SERVER_EMAIL_REJECTED packet builder
+            class RejectedEmail final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                RejectedEmail() : ServerPacket(SERVER_EMAIL_REJECTED) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_PARENT_EMAIL_REQUIRED packet builder
+            class ParentEmailRequired final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                ParentEmailRequired() : ServerPacket(SERVER_PARENT_EMAIL_REQUIRED) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                bool RequireParentEmail;
+            };
+
+            /// SERVER_PARENT_EMAIL_VALIDATED packet builder
+            class ValidateParentEmail final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                ValidateParentEmail() : ServerPacket(SERVER_PARENT_EMAIL_VALIDATED) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                bool Validate;
+            };
 
         } ///< NAMESPACE REGISTRATION
     } ///< NAMESPACE HABBOPACKET

@@ -109,8 +109,32 @@ namespace SteerStone
     
     void HabboSocket::HandleApproveEmail(std::unique_ptr<ClientPacket> p_Packet)
     {
-        /// TODO; Check if email is valid
-        HabboPacket::Registration::ApproveEmailReply l_Packet;
+        std::string l_Email = p_Packet->ReadString();
+
+        /// List of emails we accept
+        char* l_AcceptedEmails[6] =
+        {
+            {"@hotmail.com"},
+            {"@hotmail.co.uk"},
+            {"@gmail.com"},
+            {"@icloud.com"},
+            {"@outlook.co.uk"},
+            {"@outlook.com"}
+
+        };
+
+        /// Check if the email recieved matches our requirements
+        for (int16 l_I = 0; l_I < 6; l_I++)
+            if (l_Email.find(l_AcceptedEmails[l_I]) != std::string::npos)
+            {
+                /// Email is valid... continue
+                HabboPacket::Registration::ApproveEmail l_Packet;
+                SendPacket(l_Packet.Write());
+                return;
+            }
+
+        /// Email is not valid
+        HabboPacket::Registration::RejectedEmail l_Packet;
         SendPacket(l_Packet.Write());
     }
     
@@ -177,5 +201,47 @@ namespace SteerStone
         l_Database.GetStatement()->setUInt(12,    sHotel->GetIntConfig(CONFIG_REGISTERATION_FILMS));
         l_Database.GetStatement()->setBoolean(13, sHotel->GetBoolConfig(BoolConfigs::CONFIG_REGISTERATION_SOUND));
         l_Database.ExecuteQuery();
+    }
+
+    void HabboSocket::HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        /// Email is not valid
+        HabboPacket::Registration::ParentEmailRequired l_Packet;
+        l_Packet.RequireParentEmail = sHotel->GetBoolConfig(CONFIG_REGISTERATION_REQUIRE_PARENT_EMAIL);
+        SendPacket(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Email = p_Packet->ReadString();
+
+        /// List of emails we accept
+        char* l_AcceptedEmails[6] =
+        {
+            {"@hotmail.com"},
+            {"@hotmail.co.uk"},
+            {"@gmail.com"},
+            {"@icloud.com"},
+            {"@outlook.co.uk"},
+            {"@outlook.com"}
+
+        };
+
+        /// Check if the email recieved matches our requirements
+        for (int16 l_I = 0; l_I < 6; l_I++)
+            if (l_Email.find(l_AcceptedEmails[l_I]) != std::string::npos)
+            {
+                /// Email is valid... continue
+                HabboPacket::Registration::ValidateParentEmail l_Packet;
+                l_Packet.Validate = true;
+                SendPacket(l_Packet.Write());
+                return;
+            }
+
+        /// Email is not valid
+        /// TODO; Add another database column to users, but will anyone ever use this parent email thingy?
+        HabboPacket::Registration::ValidateParentEmail l_Packet;
+        l_Packet.Validate = false;
+        SendPacket(l_Packet.Write());
     }
 }

@@ -108,7 +108,7 @@ namespace SteerStone
     }
     
     /// OnRead - Handle the incoming packet
-    /// @p_Error : ErrorMessenger code
+    /// @p_Error : Error code
     /// @p_Length : Length of failed buffer
     void Socket::OnRead(const boost::system::error_code& p_ErrorCode, const std::size_t& p_Length)
     {
@@ -167,7 +167,7 @@ namespace SteerStone
     }
     
     /// OnError - Catch an error if packet is corrupted
-    /// @p_Error : ErrorMessenger code
+    /// @p_Error : Error code
     void Socket::OnError(const boost::system::error_code& p_Error)
     {
         if (!IsClosed())
@@ -304,7 +304,7 @@ namespace SteerStone
     }
     
     /// OnWriteComplete - Finished sending out our buffer
-    /// @p_Error : ErrorMessenger code
+    /// @p_Error : Error code
     /// @p_Length : Length of failed buffer
     void Socket::OnWriteComplete(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length)
     {
