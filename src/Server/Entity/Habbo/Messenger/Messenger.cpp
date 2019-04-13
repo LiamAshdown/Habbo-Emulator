@@ -104,7 +104,7 @@ namespace SteerStone
 
         do
         {
-            HabboPacket::Messenger::MessengerSendMessage l_Packet;
+            HabboPacket::Messenger::SendMessage l_Packet;
             l_Packet.Id         = l_Result->GetUint32(1);
             l_Packet.ToId       = m_Habbo->GetId();
             l_Packet.Date       = l_Result->GetString(3);
@@ -131,8 +131,13 @@ namespace SteerStone
     /// IsFriendListFull
     bool Messenger::IsFriendListFull() const
     {
-        /// TODO; Habbo Club
-        return m_MessengerFriends.size() >= sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50) ? true : false;
+        uint32 l_FriendsLimit = 0;
+        if (m_Habbo->IsSubscribed())
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_CLUB_FRIENDS);
+        else
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_FRIENDS);
+
+        return m_MessengerFriends.size() >= l_FriendsLimit;
     }
 
     /// GetMessengerSize
@@ -144,13 +149,13 @@ namespace SteerStone
 
     /// GetFriend
     /// @p_Id : Friend Id which returns information about friend
-    MessengerFriendData& Messenger::GetFriend(uint32 const p_Id)
+    MessengerFriendData* Messenger::GetFriend(uint32 const p_Id)
     {
         auto const& l_Itr = m_MessengerFriends.find(p_Id);
         if (l_Itr != m_MessengerFriends.end())
-            return l_Itr->second;
+            return &l_Itr->second;
         else
-            return MessengerFriendData{};
+            return nullptr;
     }
 
     /// SaveToDB
@@ -192,10 +197,10 @@ namespace SteerStone
 
             p_Buffer.AppendWired(l_Friend.GetId());
             p_Buffer.AppendString(l_Friend.GetName());
-            p_Buffer.AppendWiredBool(l_Friend.GetGender() == "Male" ? true : false);
+            p_Buffer.AppendWired(l_Friend.GetGender() == "Male" ? true : false);
             p_Buffer.AppendString(l_Friend.GetConsoleMotto());
 
-            p_Buffer.AppendWiredBool(l_Habbo ? true : false);  ///< Is user online?
+            p_Buffer.AppendWired(l_Habbo ? true : false);  ///< Is user online?
 
             /// User is online!
             if (l_Habbo)
@@ -228,7 +233,7 @@ namespace SteerStone
         {
             MessengerFriendData const& l_Friend = l_Itr.second;
 
-            HabboPacket::Messenger::MessengerSendFriendRequest l_Packet;
+            HabboPacket::Messenger::MessengerBuddyRequest l_Packet;
             l_Packet.Id = l_Friend.GetId();
             l_Packet.Name = l_Friend.GetName();
             m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
@@ -252,7 +257,7 @@ namespace SteerStone
 
             p_Buffer.AppendWired(l_Friend.GetId());
             p_Buffer.AppendString(l_Friend.GetConsoleMotto());
-            p_Buffer.AppendWiredBool(l_Habbo ? true : false); ///< Is user online?
+            p_Buffer.AppendWired(l_Habbo ? true : false); ///< Is user online?
 
             /// User is online!
             if (l_Habbo)
@@ -279,11 +284,11 @@ namespace SteerStone
     void Messenger::ParseMessengerAcceptFriendRequest(uint32 const p_SenderId)
     {
         QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.id = ?)");
+        l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, subscribed, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.id = ?)");
         l_Database.GetStatement()->setUInt(1, p_SenderId);
         l_Database.ExecuteQuery();
 
-        HabboPacket::Messenger::MessengerRequestBuddyError l_Packet;
+        HabboPacket::Messenger::BuddyRequestResult l_Packet;
         l_Packet.Error = MessengerErrorCode::ACCEPT_SUCCESS;
 
         /// Habbo doesn't exist? Internal error
@@ -298,12 +303,17 @@ namespace SteerStone
         Result* l_Result = l_Database.Fetch();
 
         /// Check if target user friends is full
-       /// TODO; Habbo Club
-        if (l_Result->GetRowCount() >= sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50))
+        uint32 l_FriendsLimit = 0;
+        if (m_Habbo->IsSubscribed())
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_CLUB_FRIENDS);
+        else
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_FRIENDS);
+
+        if (l_Result->GetRowCount() >=  l_FriendsLimit)
             l_Packet.Error = MessengerErrorCode::TARGET_FRIEND_LIST_FULL;
 
         /// Does target user already exist on friend list?
-        if (l_Result->GetUint32(9) == m_Habbo->GetId())
+        if (l_Result->GetUint32(10) == m_Habbo->GetId())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         /// Does target user accept friend requests?
@@ -344,7 +354,7 @@ namespace SteerStone
         /// Is User online?
         Habbo* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
 
-        HabboPacket::Messenger::MessengerAddFriend l_PacketAddFriend;
+        HabboPacket::Messenger::AddBuddy l_PacketAddFriend;
         l_PacketAddFriend.Id            = l_Result->GetUint32(1);
         l_PacketAddFriend.Name          = l_Result->GetString(2);
         l_PacketAddFriend.Gender        = l_Result->GetString(5) == "Male" ? true : false;
@@ -376,7 +386,7 @@ namespace SteerStone
         /// Do the same for other user
         if (l_PacketAddFriend.IsOnline)
         {
-            HabboPacket::Messenger::MessengerAddFriend l_PacketAddFriendOther;
+            HabboPacket::Messenger::AddBuddy l_PacketAddFriendOther;
             l_PacketAddFriendOther.Id            = m_Habbo->GetId();
             l_PacketAddFriendOther.Name          = m_Habbo->GetName();
             l_PacketAddFriendOther.Gender        = m_Habbo->GetGender() == "Male" ? true : false;
@@ -426,12 +436,12 @@ namespace SteerStone
 
         p_Buffer.AppendWired(l_Result->GetUint32(1));
         p_Buffer.AppendString(l_Result->GetString(2));
-        p_Buffer.AppendWiredBool(l_Result->GetString(5) == "Male" ? true : false);
+        p_Buffer.AppendWired(l_Result->GetString(5) == "Male" ? true : false);
         p_Buffer.AppendString(l_Result->GetString(4));
 
         Habbo* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1));
 
-        p_Buffer.AppendWiredBool(l_Habbo ? true : false); ///< Is user online?
+        p_Buffer.AppendWired(l_Habbo ? true : false); ///< Is user online?
 
            /// User is online!
         if (l_Habbo)
@@ -460,11 +470,11 @@ namespace SteerStone
     void Messenger::ParseMessengerSendFriendRequest(std::string const p_Name)
     {
         QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");
+        l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, subscribed, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");
         l_Database.GetStatement()->setString(1, p_Name);
         l_Database.ExecuteQuery();
 
-        HabboPacket::Messenger::MessengerError l_Packet;
+        HabboPacket::Messenger::ErrorMessenger l_Packet;
         l_Packet.Error = MessengerErrorCode::ACCEPT_SUCCESS;
 
         /// Target user does not exist
@@ -478,16 +488,21 @@ namespace SteerStone
         Result* l_Result = l_Database.Fetch();
 
         /// Check if target user friends is full
-        /// TODO; Habbo Club
-        if (l_Result->GetRowCount() >= sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50))
+        uint32 l_FriendsLimit = 0;
+        if (m_Habbo->IsSubscribed())
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_CLUB_FRIENDS);
+        else
+            l_FriendsLimit = sHotel->GetIntConfig(CONFIG_MESSENGER_MAX_FRIENDS);
+
+        if (l_Result->GetRowCount() >= l_FriendsLimit)
             l_Packet.Error = MessengerErrorCode::TARGET_FRIEND_LIST_FULL;
 
         /// Does target user already exist on friend request list?
-        if (l_Result->GetUint32(8) == m_Habbo->GetId())
+        if (l_Result->GetUint32(7) == m_Habbo->GetId())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         /// Does target user already exist on friend list?
-        if (l_Result->GetUint32(9) == m_Habbo->GetId())
+        if (l_Result->GetUint32(10) == m_Habbo->GetId())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         /// Does target user accept friend requests?
@@ -503,7 +518,7 @@ namespace SteerStone
         ///< All Good send friend request notification to player if online
         if (Habbo* l_Habbo = sHotel->FindHabbo(l_Result->GetUint32(1)))
         {
-            HabboPacket::Messenger::MessengerSendFriendRequest l_Packet;
+            HabboPacket::Messenger::MessengerBuddyRequest l_Packet;
             l_Packet.Id = m_Habbo->GetId();
             l_Packet.Name = m_Habbo->GetName();
             l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
@@ -522,11 +537,11 @@ namespace SteerStone
         }
     }
 
-    /// ParseMessengerRemoveFriend
+    /// ParseMessengerRemoveBuddy
     /// @p_Packet : Incoming client packet which we will decode
-    void Messenger::ParseMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
+    void Messenger::ParseMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
-        HabboPacket::Messenger::MessengerRemoveFriend l_Packet;
+        HabboPacket::Messenger::MessengerRemoveBuddy l_Packet;
 
         uint32 l_Size = p_Packet->ReadWiredUint();
 
@@ -540,7 +555,7 @@ namespace SteerStone
             if (l_Itr == m_MessengerFriends.end())
             {
                 LOG_ERROR << "Tried to remove friend Id: " << l_Id << " from " << m_Habbo->GetName() << " but friend doesn't exist!";
-                HabboPacket::Messenger::MessengerError l_PacketError;
+                HabboPacket::Messenger::ErrorMessenger l_PacketError;
                 l_PacketError.Error = MessengerErrorCode::CONCURRENCY_ERROR;
                 m_Habbo->ToSocket()->SendPacket(l_PacketError.Write());
                 continue;
@@ -573,9 +588,9 @@ namespace SteerStone
         m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
 
-    /// ParseMessengerRejectRequest
+    /// ParseMessengerRejectBuddy
     /// @p_Packet : Incoming client packet which we will decode
-    void Messenger::ParseMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    void Messenger::ParseMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
         bool l_DeclineAll = p_Packet->ReadWiredBool();
 
@@ -623,14 +638,17 @@ namespace SteerStone
 
         for (auto const& l_Itr : l_Friends)
         {
-            MessengerFriendData const& l_Friend = GetFriend(l_Itr);
+            MessengerFriendData const* l_Friend = GetFriend(l_Itr);
+
+            if (!l_Friend)
+                continue;
 
             /// Is Habbo user online? If so send packet to let user know he recieved a new message
-            if (Habbo* l_Habbo = sHotel->FindHabbo(l_Friend.GetId()))
+            if (Habbo* l_Habbo = sHotel->FindHabbo(l_Friend->GetId()))
             {
-                HabboPacket::Messenger::MessengerSendMessage l_Packet;
+                HabboPacket::Messenger::SendMessage l_Packet;
                 l_Packet.Id      = m_Habbo->GetId();
-                l_Packet.ToId    = l_Friend.GetId();
+                l_Packet.ToId    = l_Friend->GetId();
                 l_Packet.Date    = GetDate();
                 l_Packet.Message = l_Message;
                 
@@ -640,11 +658,10 @@ namespace SteerStone
             /// Save message to the database
             QueryDatabase l_Database("users");
             l_Database.PrepareQuery("INSERT INTO messenger_messages (receiver_id, sender_id, body) VALUES (?, ?, ?)");
-            l_Database.GetStatement()->setUInt(1, l_Friend.GetId());
+            l_Database.GetStatement()->setUInt(1, l_Friend->GetId());
             l_Database.GetStatement()->setUInt(2, m_Habbo->GetId());
             l_Database.GetStatement()->setString(3, l_Message);
             l_Database.ExecuteQuery();
         }
     }
-    
 } ///< NAMESPACE MESSENGER

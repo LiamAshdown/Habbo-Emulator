@@ -95,13 +95,15 @@ namespace SteerStone
     }
     
     /// PrintException
-    /// @p_ErrorCode : MYSQL Error code
+    /// @p_ErrorCode : MYSQL ErrorMessenger code
     /// @p_File : Which file the error occured
     /// @p_Function : Which function the error occured
     /// @p_Line : Which line the error occured
     void Database::PrintException(sql::SQLException const& p_ErrorCode, char const* p_File, char const* p_Function, uint32 const p_Line)
     {
         std::string const& l_Message = p_ErrorCode.what();
+
+        LOG_FATAL << l_Message;
 
         /// Shut down server if database can no longer be reached
         if (l_Message.find("has gone away") != std::string::npos)

@@ -84,11 +84,11 @@ namespace SteerStone
     /// InitializeClientServer - Initialize client/server response
     void Socket::InitializeClientServer()
     {
-        StringBuffer buffer;
-        buffer.AppendBase64(0);
-        buffer.AppendSOH();
+        StringBuffer l_Buffer;
+        l_Buffer.AppendBase64(0);
+        l_Buffer.AppendSOH();
 
-        Write((const char*)buffer.GetContents(), buffer.GetSize());
+        Write((const char*)l_Buffer.GetContents(), l_Buffer.GetSize());
     }
     
     /// StartAsyncRead - Read incoming packets
@@ -108,7 +108,7 @@ namespace SteerStone
     }
     
     /// OnRead - Handle the incoming packet
-    /// @p_Error : Error code
+    /// @p_Error : ErrorMessenger code
     /// @p_Length : Length of failed buffer
     void Socket::OnRead(const boost::system::error_code& p_ErrorCode, const std::size_t& p_Length)
     {
@@ -167,7 +167,7 @@ namespace SteerStone
     }
     
     /// OnError - Catch an error if packet is corrupted
-    /// @p_Error : Error code
+    /// @p_Error : ErrorMessenger code
     void Socket::OnError(const boost::system::error_code& p_Error)
     {
         if (!IsClosed())
@@ -304,7 +304,7 @@ namespace SteerStone
     }
     
     /// OnWriteComplete - Finished sending out our buffer
-    /// @p_Error : Error code
+    /// @p_Error : ErrorMessenger code
     /// @p_Length : Length of failed buffer
     void Socket::OnWriteComplete(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length)
     {

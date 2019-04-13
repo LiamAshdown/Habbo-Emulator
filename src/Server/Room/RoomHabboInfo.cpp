@@ -19,7 +19,7 @@
 #include "Common/SharedDefines.h"
 #include "Habbo.h"
 #include "Room.h"
-#include "Config/Config.h"
+#include "Hotel.h"
 #include "Common/Maths.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 
@@ -169,6 +169,7 @@ namespace SteerStone
             l_Packet.Sitting        = HasStatus(Status::STATUS_SITTING);
             l_Packet.Walking        = HasStatus(Status::STATUS_WALKING);
             l_Packet.Dancing        = HasStatus(Status::STATUS_DANCING);
+            l_Packet.DanceId        = std::to_string(m_Habbo->GetDanceId());
             l_Packet.Waving         = HasStatus(Status::STATUS_WAVING);
             l_Packet.Swimming       = HasStatus(Status::STATUS_SWIMMING);
             m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -196,6 +197,7 @@ namespace SteerStone
         l_Packet.Sitting            = HasStatus(Status::STATUS_SITTING);
         l_Packet.Walking            = HasStatus(Status::STATUS_WALKING);
         l_Packet.Dancing            = HasStatus(Status::STATUS_DANCING);
+        l_Packet.DanceId            = std::to_string(m_Habbo->GetDanceId());
         l_Packet.Waving             = HasStatus(Status::STATUS_WAVING);
         l_Packet.Swimming           = HasStatus(Status::STATUS_SWIMMING);
         m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
@@ -212,14 +214,14 @@ namespace SteerStone
             if (m_WaveTimer <= p_Diff)
             {
                 RemoveStatus(Status::STATUS_WAVING);
-                m_WaveTimer = sConfig->GetIntDefault("WaveTimer", 4000);
+                m_WaveTimer = sHotel->GetIntConfig(CONFIG_WAVE_TIMER);
             }
             else
                 m_WaveTimer -= p_Diff;
         }
 
         if (CanSendStatusUpdate())
-            m_AFKTimer = sConfig->GetIntDefault("AwayFromKeyboardTimer", 900000);
+            m_AFKTimer = sHotel->GetIntConfig(CONFIG_AFK_TIMER);
         else
         {
             if (m_AFKTimer <= p_Diff)

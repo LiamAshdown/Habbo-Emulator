@@ -61,9 +61,9 @@ namespace SteerStone
             l_RoomCategories.m_ParentId        = l_Result->GetUint32(2);
             l_RoomCategories.m_Name            = l_Result->GetString(3);
             l_RoomCategories.m_RoomType        = l_Result->GetBool(4);
-            l_RoomCategories.m_AllowTrading    = l_Result->GetUint16(5);
-            l_RoomCategories.m_MinRoleAccess   = l_Result->GetBool(6);
-            l_RoomCategories.m_MinRoleSetFlat  = l_Result->GetBool(7);
+            l_RoomCategories.m_AllowTrading    = l_Result->GetBool(5);
+            l_RoomCategories.m_MinRoleAccess   = l_Result->GetUint16(6);
+            l_RoomCategories.m_MinRoleSetFlat  = l_Result->GetUint16(7);
 
         } while (l_Result->GetNextResult());
 
@@ -104,6 +104,34 @@ namespace SteerStone
 
 
         LOG_INFO << "Loaded " << m_RoomModels.size() << " Room Models";
+    }
+
+    /// LoadRoomUrls
+    /// Load room urls from database
+    void RoomManager::LoadRoomUrls()
+    {
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, image_url, link_url FROM room_url WHERE is_active = 1");
+        l_Database.ExecuteQuery();
+
+        if (!l_Database.GetResult())
+        {
+            LOG_ERROR << "room_url is empty!";
+            return;
+        }
+
+        Result* l_Result = l_Database.Fetch();
+
+        do
+        {
+            RoomUrlData& l_RoomUrl = m_RoomUrl[l_Result->GetUint32(1)];
+            l_RoomUrl.Id = l_Result->GetUint32(1);
+            l_RoomUrl.ImageUrl = l_Result->GetString(2);
+            l_RoomUrl.LinkUrl = l_Result->GetString(3);
+
+        } while (l_Result->GetNextResult());
+
+        LOG_INFO << "Loaded " << m_RoomUrl.size() << " Room Urls";
     }
 
     /// LoadRoomWalkWays
@@ -165,7 +193,7 @@ namespace SteerStone
     void RoomManager::LoadRooms()
     {
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, rating FROM rooms");
+        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, room_visible FROM rooms");
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -202,6 +230,7 @@ namespace SteerStone
             l_Room->m_Password                = l_Result->GetString(14);
             l_Room->m_VisitorsNow             = l_Result->GetUint32(15);
             l_Room->m_VisitorsMax             = l_Result->GetUint32(16);
+            l_Room->m_RoomVisible             = l_Result->GetBool(17);
             l_Room->m_RoomModel               = *GetRoomModel(l_Room->GetModel());
             l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
@@ -245,6 +274,17 @@ namespace SteerStone
     {
         auto const& l_Itr = m_RoomModels.find(p_Model);
         if (l_Itr != m_RoomModels.end())
+            return &l_Itr->second;
+        else
+            return nullptr;
+    }
+
+    /// GetRoomUrl
+    /// @p_Id : Room Id
+    RoomUrlData * RoomManager::GetRoomUrl(uint32 const p_Id)
+    {
+        auto const& l_Itr = m_RoomUrl.find(p_Id);
+        if (l_Itr != m_RoomUrl.end())
             return &l_Itr->second;
         else
             return nullptr;

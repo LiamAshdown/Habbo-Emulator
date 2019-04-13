@@ -27,7 +27,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerInitialize::Write()
+            StringBuffer const * Initialize::Write()
             {
                 m_Buffer.AppendString(ConsoleMotto);
                 m_Buffer.AppendWired(FriendsLimit);
@@ -46,7 +46,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerUpdate::Write()
+            StringBuffer const * Update::Write()
             {
                 /// Handled in Messenger::ParseMessengerUpdate
                 m_Buffer.Append(m_SecondaryBuffer);
@@ -60,7 +60,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerSendFriendRequest::Write()
+            StringBuffer const * MessengerBuddyRequest::Write()
             {
                 m_Buffer.AppendWired(Id);
                 m_Buffer.AppendString(Name);
@@ -73,7 +73,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerFindUserResult::Write()
+            StringBuffer const * FindUser::Write()
             {
                 m_Buffer.AppendString(Messenger);
 
@@ -89,7 +89,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerError::Write()
+            StringBuffer const * ErrorMessenger::Write()
             {
                 m_Buffer.AppendWired(Error);
 
@@ -101,7 +101,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerRequestBuddyError::Write()
+            StringBuffer const * BuddyRequestResult::Write()
             {
                 m_Buffer.AppendWired(Error);
 
@@ -114,7 +114,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerAddFriend::Write()
+            StringBuffer const * AddBuddy::Write()
             {
                 m_Buffer.AppendWired(Id);
                 m_Buffer.AppendString(Name);
@@ -140,7 +140,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerRemoveFriend::Write()
+            StringBuffer const * MessengerRemoveBuddy::Write()
             {
                 m_Buffer.AppendWired(FriendsId.size());
 
@@ -155,7 +155,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * MessengerSendMessage::Write()
+            StringBuffer const * SendMessage::Write()
             {
                 m_Buffer.AppendWired(1); ///< Client requires this, not sure why
                 m_Buffer.AppendWired(ToId);

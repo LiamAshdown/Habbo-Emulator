@@ -58,6 +58,7 @@ namespace SteerStone
         l_BufferVec.resize(ReadLengthRemaining());
         if (Read((char*)&l_BufferVec[0], ReadLengthRemaining()))
         {
+            /// Remove junk characters from end of string
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 

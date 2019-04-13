@@ -26,12 +26,12 @@ namespace SteerStone
     {
         namespace Misc
         {
-            /// SERVER_ALERT packet builder
+            /// SERVER_SYSTEM_BROADCAST packet builder
             class ServerAlert final : public ServerPacket
             {
             public:
                 /// Constructor 
-                ServerAlert() : ServerPacket(SERVER_ALERT) {}
+                ServerAlert() : ServerPacket(SERVER_SYSTEM_BROADCAST) {}
 
             public:
                 /// Write the packet
@@ -64,6 +64,20 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+            };
+
+            /// SERVER_ERROR packet builder
+            class LocalisedError final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                LocalisedError() : ServerPacket(SERVER_ERROR) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string Error;
             };
 
         } ///< NAMESPACE MISC

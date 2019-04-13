@@ -20,6 +20,7 @@
 #include "RoomManager.h"
 #include "TriggerEventManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
+#include "Opcode/Packets/Server/NavigatorPackets.h"
 #include "Common/Maths.h"
 #include <functional>
 
@@ -108,8 +109,8 @@ namespace SteerStone
         /// Room is full
         if (m_VisitorsNow >= m_VisitorsMax)
         {
-            HabboPacket::Room::RoomCantConnect l_Packet;
-            l_Packet.ErrorCode = RoomConnectionError::ROOM_IS_FULL;
+            HabboPacket::Navigator::CantConnect l_Packet;
+            l_Packet.ErrorCode = ConnectionError::ROOM_IS_FULL;
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
             return false;
         }
@@ -212,6 +213,7 @@ namespace SteerStone
                 l_Packet.Y          = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
                 l_Packet.Z          = boost::lexical_cast<std::string>(p_Habbo->GetPositionZ());
                 l_Packet.Motto      = p_Habbo->GetMotto();
+                l_Packet.Badge      = p_Habbo->GetCurrentBadge();
                 l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
             }
 
@@ -249,6 +251,7 @@ namespace SteerStone
             l_Packet.Sitting        = l_Itr.second->HasStatus(Status::STATUS_SITTING);
             l_Packet.Walking        = l_Itr.second->HasStatus(Status::STATUS_WALKING);
             l_Packet.Dancing        = l_Itr.second->HasStatus(Status::STATUS_DANCING);
+            l_Packet.DanceId        = std::to_string(l_Habbo->GetDanceId());
             l_Packet.Waving         = l_Itr.second->HasStatus(Status::STATUS_WAVING);
             l_Packet.Swimming       = l_Itr.second->HasStatus(Status::STATUS_SWIMMING);
 

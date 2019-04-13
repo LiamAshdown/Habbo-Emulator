@@ -16,20 +16,24 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FavouriteRoomPackets.h"
+#include "ClubPackets.h"
 
 namespace SteerStone
 {
     namespace HabboPacket
     {
-        namespace FavouriteRoom
+        namespace Club
         {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * FavouriteRoomResult::Write()
+            StringBuffer const * ClubInfo::Write()
             {
-                /// Handled in FavouriteRoom::ParseSendFavouriteRooms
+                m_Buffer.AppendString(ProductName);
+                m_Buffer.AppendWired(DaysLeft);
+                m_Buffer.AppendWired(ElaspedMonths);
+                m_Buffer.AppendWired(PrepaidMonths);
+                m_Buffer.AppendWired(ResponseFlag);
 
                 m_Buffer.AppendSOH();
 
@@ -38,7 +42,6 @@ namespace SteerStone
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
-
-        } ///< NAMESPACE FAVOURITEROOM
+        } ///< NAMESPACE CLUB
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

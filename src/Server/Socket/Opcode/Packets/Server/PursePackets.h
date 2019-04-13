@@ -22,43 +22,24 @@
 
 namespace SteerStone
 {
-    enum ConnectionError
-    {
-        ROOM_IS_FULL                = 1,
-        ROOM_IS_CLOSED              = 2,
-        ROOM_IS_IN_QUEUE            = 3
-    };
-
     namespace HabboPacket
     {
-        namespace Navigator
+        namespace Purse
         {
-            /// SERVER_CANT_CONNECT packet builder
-            class CantConnect final : public ServerPacket
+            /// SERVER_CREDITS packet builder
+            class CreditBalance final : public ServerPacket
             {
             public:
                 /// Constructor 
-                CantConnect() : ServerPacket(SERVER_CANT_CONNECT) {}
+                CreditBalance() : ServerPacket(SERVER_CREDITS) {}
 
             public:
                 /// Write the packet
                 StringBuffer const* Write();
 
-                ConnectionError ErrorCode;
+                std::string Credits;
+
             };
-
-            /// SERVER_FAVOURITE_ROOMS_RESULT packet builder
-            class FavouriteRoomResult final : public ServerPacket
-            {
-            public:
-                /// Constructor 
-                FavouriteRoomResult() : ServerPacket(SERVER_FAVOURITE_ROOMS_RESULT) {}
-
-            public:
-                /// Write the packet
-                StringBuffer const* Write();
-            };
-
-        } ///< NAMESPACE NAVIGATOR
+        } ///< NAMESPACE PURSE
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

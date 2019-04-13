@@ -22,13 +22,6 @@
 
 namespace SteerStone
 {
-    enum RoomConnectionError
-    {
-        ROOM_IS_FULL                = 1,
-        ROOM_IS_CLOSED              = 2,
-        ROOM_IS_IN_QUEUE            = 3
-    };
-
     enum ActiveObjectType
     {
         OBJECT_TYPE_PUBLIC          = 0,
@@ -75,12 +68,12 @@ namespace SteerStone
     {
         namespace Room
         {
-            /// SERVER_ROOM_USER_OBJECTS packet builder
+            /// SERVER_USERS packet builder
             class HabboRoomObject final : public ServerPacket
             {
             public:
                 /// Constructor                 
-                HabboRoomObject() : ServerPacket(SERVER_ROOM_USER_OBJECTS) {}
+                HabboRoomObject() : ServerPacket(SERVER_USERS) {}
 
             public:
                 /// Write the packet
@@ -95,6 +88,7 @@ namespace SteerStone
                 std::string X;
                 std::string Y;
                 std::string Z;
+                boost::optional<std::string> Badge;
                 boost::optional<std::string> Motto;
             };
 
@@ -110,12 +104,12 @@ namespace SteerStone
                 StringBuffer const* Write();
             };
 
-            /// SERVER_OPEN_CONNECTION packet builder
+            /// SERVER_CLC_OK packet builder
             class OpenConnection final : public ServerPacket
             {
             public:
                 /// Constructor 
-                OpenConnection() : ServerPacket(SERVER_OPEN_CONNECTION) {}
+                OpenConnection() : ServerPacket(SERVER_CLC_OK) {}
 
             public:
                 /// Write the packet
@@ -132,20 +126,6 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
-            };
-
-            /// SERVER_ROOM_CANT_CONNECT packet builder
-            class RoomCantConnect final : public ServerPacket
-            {
-            public:
-                /// Constructor 
-                RoomCantConnect() : ServerPacket(SERVER_ROOM_CANT_CONNECT) {}
-
-            public:
-                /// Write the packet
-                StringBuffer const* Write();
-
-                RoomConnectionError ErrorCode;              ///< Room Error code, failed to go inside room
             };
 
             /// SERVER_ROOM_READY packet builder
@@ -173,6 +153,9 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+
+                boost::optional<std::string> ImageUrl;
+                boost::optional<std::string> LinkUrl;
             };
 
             /// SERVER_ROOM_HEIGHT_MAP packet builder
@@ -189,12 +172,12 @@ namespace SteerStone
                 std::string HeightMap;
             };
 
-            /// SERVER_OBJECTS_WORLD packet builder
+            /// SERVER_OBJECTS packet builder
             class ObjectsWorld final : public ServerPacket
             {
             public:
                 /// Constructor 
-                ObjectsWorld() : ServerPacket(SERVER_OBJECTS_WORLD) {}
+                ObjectsWorld() : ServerPacket(SERVER_OBJECTS) {}
 
             public:
                 /// Write the packet
@@ -222,7 +205,7 @@ namespace SteerStone
             {
             public:
                 /// Constructor 
-                UserUpdateStatus() : ServerPacket(SERVER_USER_UPDATE_STATUS) {}
+                UserUpdateStatus() : ServerPacket(SERVER_STATUS) {}
 
             public:
                 /// Write the packet
@@ -234,6 +217,7 @@ namespace SteerStone
                 std::string CurrentZ;
                 std::string HeadRotation;
                 std::string BodyRotation;
+                std::string DanceId;
                 bool Dancing;
                 bool Sitting;
                 bool Walking;
@@ -245,12 +229,12 @@ namespace SteerStone
                 std::string NewZ;
             };
 
-            /// SERVER_LEAVE_ROOM packet builder
+            /// SERVER_LOGOUT packet builder
             class LeaveRoom final : public ServerPacket
             {
             public:
                 /// Constructor 
-                LeaveRoom() : ServerPacket(SERVER_LEAVE_ROOM) {}
+                LeaveRoom() : ServerPacket(SERVER_LOGOUT) {}
 
             public:
                 /// Write the packet
@@ -264,7 +248,7 @@ namespace SteerStone
             {
             public:
                 /// Constructor 
-                Chat() : ServerPacket(SERVER_ROOM_CHAT) {}
+                Chat() : ServerPacket(SERVER_CHAT) {}
 
             public:
                 /// Write the packet
@@ -279,7 +263,7 @@ namespace SteerStone
             {
             public:
                 /// Constructor 
-                Shout() : ServerPacket(SERVER_ROOM_SHOUT) {}
+                Shout() : ServerPacket(SERVER_SHOUT) {}
 
             public:
                 /// Write the packet
@@ -294,7 +278,7 @@ namespace SteerStone
             {
             public:
                 /// Constructor 
-                Whisper() : ServerPacket(SERVER_ROOM_WHISPER) {}
+                Whisper() : ServerPacket(SERVER_WHISPER) {}
 
             public:
                 /// Write the packet
@@ -303,8 +287,7 @@ namespace SteerStone
                 uint32 GUID;
                 std::string Message;
             };
-
-
+            
             /// SERVER_ROOM_WHISPER packet builder
             class OpenUIMakeOPPI final : public ServerPacket
             {
@@ -315,6 +298,21 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+            };
+
+            /// SERVER_GO_TO_FLAT packet builder
+            class GoToFlat final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                GoToFlat() : ServerPacket(SERVER_GO_TO_FLAT) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string Id;
+                std::string Name;
             };
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET

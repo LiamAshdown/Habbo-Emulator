@@ -37,12 +37,12 @@ namespace SteerStone
     {
         namespace Messenger
         {
-            /// SERVER_MESSENGER_INIT packet builder
-            class MessengerInitialize final : public ServerPacket
+            /// SERVER_MESSENGER_INITIALIZE packet builder
+            class Initialize final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerInitialize() : ServerPacket(SERVER_MESSENGER_INIT) {}
+                Initialize() : ServerPacket(SERVER_MESSENGER_INITIALIZE) {}
 
             public:
                 /// Write the packet
@@ -55,24 +55,24 @@ namespace SteerStone
                 uint32 MessengerSize;                                   ///< Size of the Messenger
             };
 
-            /// SERVER_MESSENGER_UPDATE packet builder
-            class MessengerUpdate final : public ServerPacket
+            /// SERVER_MESSENGER_CONSOLE_UPDATE packet builder
+            class Update final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerUpdate() : ServerPacket(SERVER_MESSENGER_UPDATE) {}
+                Update() : ServerPacket(SERVER_MESSENGER_CONSOLE_UPDATE) {}
 
             public:
                 /// Write the packet
                 StringBuffer const* Write();
             };
 
-            /// SERVER_MESSENGER_SEND_FRIEND_REQUEST packet builder
-            class MessengerSendFriendRequest final : public ServerPacket
+            /// SERVER_MESSENGER_BUDDY_REQUEST packet builder
+            class MessengerBuddyRequest final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerSendFriendRequest() : ServerPacket(SERVER_MESSENGER_SEND_FRIEND_REQUEST) {}
+                MessengerBuddyRequest() : ServerPacket(SERVER_MESSENGER_BUDDY_REQUEST) {}
 
             public:
                 /// Write the packet
@@ -82,12 +82,12 @@ namespace SteerStone
                 std::string Name;
             };
 
-            /// SERVER_MESSENGER_FIND_USER_RESULT packet builder
-            class MessengerFindUserResult final : public ServerPacket
+            /// SERVER_MESSENGER_FIND_USER packet builder
+            class FindUser final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerFindUserResult() : ServerPacket(SERVER_MESSENGER_FIND_USER_RESULT) {}
+                FindUser() : ServerPacket(SERVER_MESSENGER_FIND_USER) {}
 
             public:
                 /// Write the packet
@@ -97,11 +97,11 @@ namespace SteerStone
             };
 
             /// SERVER_MESSENGER_ERROR packet builder
-            class MessengerError final : public ServerPacket
+            class ErrorMessenger final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerError() : ServerPacket(SERVER_MESSENGER_ERROR) {}
+                ErrorMessenger() : ServerPacket(SERVER_MESSENGER_ERROR) {}
 
             public:
                 /// Write the packet
@@ -111,12 +111,12 @@ namespace SteerStone
                 MessengerErrorCode Error;           ///< Shows error message if we cannot send friend request
             };
 
-            /// SERVER_REQUEST_BUDDY_ERROR packet builder
-            class MessengerRequestBuddyError final : public ServerPacket
+            /// SERVER_MESSENGER_BUDDY_REQUEST_RESULT packet builder
+            class BuddyRequestResult final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerRequestBuddyError() : ServerPacket(SERVER_REQUEST_BUDDY_ERROR) {}
+                BuddyRequestResult() : ServerPacket(SERVER_MESSENGER_BUDDY_REQUEST_RESULT) {}
 
             public:
                 /// Write the packet
@@ -126,12 +126,12 @@ namespace SteerStone
                 MessengerErrorCode Error;
             };
 
-            /// SERVER_MESSENGER_ADD_FRIEND packet builder
-            class MessengerAddFriend final : public ServerPacket
+            /// SERVER_MESSENGER_ADD_BUDDY packet builder
+            class AddBuddy final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerAddFriend() : ServerPacket(SERVER_MESSENGER_ADD_FRIEND) {}
+                AddBuddy() : ServerPacket(SERVER_MESSENGER_ADD_BUDDY) {}
 
             public:
                 /// Write the packet
@@ -149,12 +149,12 @@ namespace SteerStone
 
             };
 
-            /// SERVER_MESSENGER_REMOVE_FRIEND packet builder
-            class MessengerRemoveFriend final : public ServerPacket
+            /// SERVER_MESSENGER_REMOVE_BUDDY packet builder
+            class MessengerRemoveBuddy final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerRemoveFriend() : ServerPacket(SERVER_MESSENGER_REMOVE_FRIEND) {}
+                MessengerRemoveBuddy() : ServerPacket(SERVER_MESSENGER_REMOVE_BUDDY) {}
 
             public:
                 /// Write the packet
@@ -163,12 +163,12 @@ namespace SteerStone
                 std::vector<uint32> FriendsId;
             };
 
-            /// SERVER_MESSENGER_SEND_MESSAGE packet builder
-            class MessengerSendMessage final : public ServerPacket
+            /// SERVER_MESSENGER_MESSAGE packet builder
+            class SendMessage final : public ServerPacket
             {
             public:
                 /// Constructor 
-                MessengerSendMessage() : ServerPacket(SERVER_MESSENGER_SEND_MESSAGE) {}
+                SendMessage() : ServerPacket(SERVER_MESSENGER_MESSAGE) {}
 
             public:
                 /// Write the packet

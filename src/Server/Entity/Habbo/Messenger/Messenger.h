@@ -96,7 +96,7 @@ namespace SteerStone
 
         /// GetFriend
         /// @p_Id : Friend Id which returns information about friend
-        MessengerFriendData& GetFriend(uint32 const p_Id);
+        MessengerFriendData* GetFriend(uint32 const p_Id);
 
         /// SaveToDB
         /// This function is used to query the database on removing friends etc..
@@ -139,13 +139,13 @@ namespace SteerStone
         /// @p_Name : Name of Habbo we are sending friend request too
         void ParseMessengerSendFriendRequest(std::string const p_Name);
 
-        /// ParseMessengerRemoveFriend
+        /// ParseMessengerRemoveBuddy
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet);
 
-        /// ParseMessengerRejectRequest
+        /// ParseMessengerRejectBuddy
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet);
 
         /// ParseMessengerSendMessage
         /// @p_Packet : Incoming client packet which we will decode

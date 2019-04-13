@@ -36,6 +36,14 @@ namespace SteerStone
         ROOM_TYPE_PUBLIC                    = 1
     };
 
+    enum RoomAccessType
+    {
+        ROOM_ACCESS_TYPE_OPEN               = 0,
+        ROOM_ACCESS_TYPE_CLOSED             = 1,
+        ROOM_ACCESS_TYPE_PASSWORD           = 2
+    };
+
+
     class Habbo;
     class StringBuffer;
 
@@ -161,6 +169,7 @@ namespace SteerStone
         std::string GetPassword()    const { return m_Password;     }
         uint32 GetVisitorsNow()      const { return m_VisitorsNow;  }
         uint32 GetVisitorsMax()      const { return m_VisitorsMax;  }
+        bool IsRoomVisible()         const { return m_RoomVisible;  }
         RoomModel& GetRoomModel()          { return m_RoomModel;    }
         RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
 
@@ -187,6 +196,7 @@ namespace SteerStone
         std::string m_Password;
         uint32 m_VisitorsNow;
         uint32 m_VisitorsMax;
+        bool m_RoomVisible;
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
 

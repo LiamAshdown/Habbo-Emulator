@@ -23,9 +23,21 @@
 
 namespace SteerStone
 {
+    /// Holds room Urls info
+    /// Each room can only hold 1 url, keep note
+    typedef struct RoomUrlStruct
+    {
+    public:
+        uint32 Id;              ///< Room Id
+        std::string ImageUrl;   ///< Image to display on billboard
+        std::string LinkUrl;    ///< Link to direct user to when clicking on billboard
+
+    }RoomUrlData;
+
     typedef std::unordered_map<uint32, RoomCategory> RoomCategoriesMap;
     typedef std::unordered_map<uint32, std::shared_ptr<Room>> RoomsMap;
     typedef std::unordered_map<std::string, RoomModel> RoomModelsMap;
+    typedef std::map<uint32, RoomUrlData> RoomUrlMap;
 
     /// This class stores information about all rooms, models and heightmap
     /// Singleton class
@@ -49,6 +61,10 @@ namespace SteerStone
         /// LoadRoomModels
         /// Load room models from database
         void LoadRoomModels();
+        
+        /// LoadRoomUrls
+        /// Load room urls from database
+        void LoadRoomUrls();
 
         /// LoadRoomWalkWays
         /// Load Walk way positions (used to walk into another room)
@@ -70,6 +86,10 @@ namespace SteerStone
         /// GetRoomCategory
         /// @p_Id : Model Id
         RoomModel* GetRoomModel(std::string const p_Model);
+
+        /// GetRoomUrl
+        /// @p_Id : Room Id
+        RoomUrlData* GetRoomUrl(uint32 const p_Id);
 
         /// GetWalkWay
         /// @p_Id : Model Id
@@ -93,6 +113,7 @@ namespace SteerStone
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for Room                               
         RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for Model
+        RoomUrlMap m_RoomUrl;                                        ///< Map storage which holds key Room Id and structure for RoomUrl
         std::vector<WalkWay> m_RoomWalkWays;                         ///< Stores Walk Way tiles
         std::mutex m_Mutex;
     };

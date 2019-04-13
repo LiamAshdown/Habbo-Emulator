@@ -16,33 +16,20 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ItemPackets.h"
+#include "RegistrationPackets.h"
 
 namespace SteerStone
 {
     namespace HabboPacket
     {
-        namespace Item
+        namespace Registration
         {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * ShowProgram::Write()
+            StringBuffer const * ApproveNameReply::Write()
             {
-                m_Buffer.AppendString(Program, false);
-                m_Buffer.AppendString(" ", false);
-                m_Buffer.AppendString(State, false);
-
-                m_Buffer.AppendSOH();
-
-                return &m_Buffer;
-            }
-
-            StringBuffer const * StuffDataUpdate::Write()
-            {
-                m_Buffer.AppendString(Program, false);
-                m_Buffer.AppendString(" ", false);
-                m_Buffer.AppendString(State, false);
+                m_Buffer.AppendWired(ErrorCode);
 
                 m_Buffer.AppendSOH();
 
@@ -51,6 +38,29 @@ namespace SteerStone
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
-        } ///< NAMESPACE ITEM
+
+            StringBuffer const * ApprovePasswordReply::Write()
+            {
+                m_Buffer.AppendWired(ErrorCode);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * ApproveEmailReply::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+        } ///< NAMESPACE REGISTRATION
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

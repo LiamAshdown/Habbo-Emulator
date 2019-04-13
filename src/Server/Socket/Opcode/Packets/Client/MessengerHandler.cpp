@@ -31,7 +31,7 @@ namespace SteerStone
         m_Habbo->SendMessengerUpdate();
     }
 
-    void HabboSocket::HandleMessengerAcceptRequest(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerAcceptBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
         uint32 l_SenderId = p_Packet->ReadWiredUint();
 
@@ -49,15 +49,15 @@ namespace SteerStone
     {
         std::string l_Name = p_Packet->ReadString();
 
-        m_Habbo->MessengerSendFriendRequest(l_Name);
+        m_Habbo->MessengerBuddyRequest(l_Name);
     }
 
-    void HabboSocket::HandleMessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Habbo->MessengerRemoveFriend(std::move(p_Packet));
+        m_Habbo->MessengerRemoveBuddy(std::move(p_Packet));
     }
 
-    void HabboSocket::HandleMessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Habbo->MessengerRejectRequest(std::move(p_Packet));
     }
@@ -67,7 +67,7 @@ namespace SteerStone
         m_Habbo->MessengerSendMessage(std::move(p_Packet));
     }
 
-    void HabboSocket::HandleMessengerReply(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerMarkRead(std::unique_ptr<ClientPacket> p_Packet)
     {
         uint32 l_MessageId = p_Packet->ReadWiredUint();
 

@@ -55,16 +55,15 @@
 #endif
 
 #if COMPILER == COMPILER_MICROSOFT
-#  pragma warning( disable : 4267 )                         // conversion from 'size_t' to 'int', possible loss of data
-#  pragma warning( disable : 4786 )                         // identifier was truncated to '255' characters in the debug information
-#  pragma warning(disable:4996)                             // 'function': was declared deprecated
-#ifndef __SHOW_STUPID_WARNINGS__
-#  pragma warning(disable:4244)                             // 'argument' : conversion from 'type1' to 'type2', possible loss of data
-#  pragma warning(disable:4355)                             // 'this' : used in base member initializer list
-#  pragma warning(disable:4251)                             // 'function': was declared deprecated
-#  pragma warning (disable : 4430)                          //  'function' should return a value; 'void' return type assumed
-#endif                                                      // __SHOW_STUPID_WARNINGS__
-#endif                                                      // __GNUC__
+#  pragma warning (disable : 4267)                          ///< conversion from 'size_t' to 'int', possible loss of data
+#  pragma warning (disable : 4786)                          ///< identifier was truncated to '255' characters in the debug information
+#  pragma warning (disable : 4996)                          ///< 'function': was declared deprecated
+#  pragma warning (disable : 4244)                          ///< 'argument' : conversion from 'type1' to 'type2', possible loss of data
+#  pragma warning (disable : 4355)                          ///< 'this' : used in base member initializer list
+#  pragma warning (disable : 4251)                          ///< 'function': was declared deprecated
+#  pragma warning (disable : 4430)                          ///< 'function' should return a value; 'void' return type assumed
+#  pragma warning (disable : 4200)                          ///< nonstandard extension used: zero-sized array in struct/union
+#endif                                                      ///< __GNUC__
 
 #endif /* !QuadCompilerDefs_h_ */
 

@@ -20,95 +20,57 @@
 #include "Common/SharedDefines.h"
 #include "Messenger.h"
 #include "FavouriteRoom.h"
+#include "FuseRights.h"
+#include "HabboClub.h"
+#include "Badge.h"
 #include <mutex>
 
 namespace SteerStone
 {
+    enum SessionParameters
+    {
+        PARAMETER_COPPA                     = 0, ///< TODO; Find out what this does
+        PARAMETER_VOUCHER                   = 1, ///< TODO; Determines if voucher is enabled in client
+        PARAMETER_REQUIRE_PARENT_EMAIL      = 2, ///< TODO; Find out what this does
+        PARAMETER_SEND_PARENT_EMAIL         = 3, ///< TODO; Find out what this does
+        PARAMETER_DIRECT_MAIL               = 4, ///< Allowed to send email directly to user
+        PARAMETER_DATE_FORMAT               = 5, ///< Date format
+        PARAMETER_INTEGRATION_ENALBED       = 6, ///< TODO; Find out what this does
+        PARAMETER_PROFILE_EDITING           = 7, ///< Allow user to edit profile ingame
+        PARAMETER_TRACKING_HEADER           = 8, ///< Find out what this does
+        PARAMETER_TUTORIAL                  = 9, ///< Show tutorial on first time login
+    };
+
+    enum AccountRank
+    {
+        HABBO_NORMAL                        = 0, ///< Default habbo rank
+        HABBO_CLUB                          = 1, ///< Habbo Club Subscription
+        HABBO_HOBBA                         = 2, ///< Hobba
+        HABBO_SUPER_HOBBA                   = 3, ///< Super Hobba
+        HABBO_MODERATOR                     = 4, ///< Moderator
+        HABBO_ADMIN                         = 5, ///< Adminstrator
+    };
+
     enum LogoutReason
     {
-        LOGOUT_DISCONNECTED         = -1,
-        LOGGED_OUT                  = 1,
-        LOGOUT_CONCURRENT           = 2,
-        LOGOUT_TIMEOUT              = 3,
+        LOGOUT_DISCONNECTED                 = -1,
+        LOGGED_OUT                          = 1,
+        LOGOUT_CONCURRENT                   = 2,
+        LOGOUT_TIMEOUT                      = 3,
     };
 
     /// Used to send Status update to client(s)
     enum Status : uint32
     {
-        STATUS_NONE              = 0,             
-        STATUS_WALKING           = 1,  ///< Update user is walking
-        STATUS_SITTING           = 2,  ///< Update user is sitting
-        STATUS_WAVING            = 4,  ///< Update user is waving
-        STATUS_DANCING           = 8,  ///< Update user is dancing
-        STATUS_SWIMMING          = 16, ///< Update user is swimming
-        STATUS_ROTATION          = 32, ///< Update user rotation
-        STATUS_TELEPORT          = 64, ///< Teleport user to given location in room
+        STATUS_NONE                         = 0,             
+        STATUS_WALKING                      = 1,  ///< Update user is walking
+        STATUS_SITTING                      = 2,  ///< Update user is sitting
+        STATUS_WAVING                       = 4,  ///< Update user is waving
+        STATUS_DANCING                      = 8,  ///< Update user is dancing
+        STATUS_SWIMMING                     = 16, ///< Update user is swimming
+        STATUS_ROTATION                     = 32, ///< Update user rotation
+        STATUS_TELEPORT                     = 64, ///< Teleport user to given location in room
     };
-
-    /// Holds Habbo Badges
-    typedef struct HabboBadgesStruct
-    {
-    public:
-        friend class HabboSocket;
-
-    public:
-        /// Constructor
-        HabboBadgesStruct() : m_Badge(""), m_IsActive(false) {}
-
-        /// Deconstructor
-        ~HabboBadgesStruct() {}
-
-    public:
-        std::string GetBadge() const { return m_Badge;    }
-        bool IsActive()        const { return m_IsActive; }
-
-    private:
-        std::string m_Badge;                ///< Badge Name
-        bool m_IsActive;                    ///< Is badge active?
-    }HabboBadgesData;
-
-    /// Holds Habbo Club Subscription
-    typedef struct HabboClubSubscriptionStruct
-    {
-    public:
-        friend class HabboSocket;
-
-    public:
-        /// Constructor
-        HabboClubSubscriptionStruct() : m_DaysRemaining(0), m_RemainingPeriods(0), m_DaysPassed(0),
-        m_LastChecked(0) {}
-
-        /// Deconstructor
-        ~HabboClubSubscriptionStruct() {}
-
-    private:
-        std::string m_LastChecked;              ///< Last time server checked if user should have habbo club
-        uint32 m_DaysRemaining;                 ///< Days remaining till habbo club expires
-        uint32 m_RemainingPeriods;              ///< How many periods (months) till habbo club exprires
-        uint32 m_DaysPassed;                    ///< Days passed since user has habbo club
-    }HabboClubSubscriptionData;
-
-    /// Holds Habbo Fuse Rights
-    typedef struct HabboFuseRightsStruct
-    {
-    public:
-        friend class HabboSocket;
-
-    public:
-        /// Constructor
-        HabboFuseRightsStruct() : m_Rank(0), m_FuseRight("") {}
-
-        /// Deconstructor
-        ~HabboFuseRightsStruct() {}
-
-    public:
-        uint8 GetRank()            const { return m_Rank;      }
-        std::string GetFuseRight() const { return m_FuseRight; }
-
-    private:
-        uint8 m_Rank;                       ///< Rank of fuse right
-        std::string m_FuseRight;            ///< Fuse right string (accounts.rank_fuserights)
-    }HabboFuseRightsData;
 
     class Room;
     class ClientPacket;
@@ -187,13 +149,13 @@ namespace SteerStone
         /// @p_Name - Room name user is searching for
         void SendSearchUserResults(std::string const p_Name);
 
-        /// MessengerSendFriendRequest
+        /// MessengerBuddyRequest
         /// @p_Name - Name of friend user is sending request for
-        void MessengerSendFriendRequest(std::string const p_Name);
+        void MessengerBuddyRequest(std::string const p_Name);
 
-        /// MessengerRemoveFriend
+        /// MessengerRemoveBuddy
         /// @p_Packet - Client packet which is being decoded
-        void MessengerRemoveFriend(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet);
 
         /// MessengerRejectRequest
         /// @p_Packet - Client packet which is being decoded
@@ -255,6 +217,11 @@ namespace SteerStone
         /// Send user account club status (set from users.club_subscriptions database)
         void SendClubStatus();
 
+        /// SetRank
+        /// Update users rank
+        /// @p_Rank : Rank user will recieve
+        void SetRank(uint8 const p_Rank);
+
         ///////////////////////////////////////////
         //             HABBO INFO
         ///////////////////////////////////////////
@@ -312,15 +279,20 @@ namespace SteerStone
         std::string GetGender()         const { return m_Gender;               }
         std::string GetCountry()        const { return m_Country;              }
         std::string GetPoolFigure()     const { return m_PoolFigure;           }
+        std::string GetCurrentBadge()   const { return m_Badge->GetCurrentBadgeName(); }
 
         uint32 GetFilms()               const { return m_Films;                }
         uint32 GetCredits()             const { return m_Credits;              }
         uint32 GetId()                  const { return m_Id;                   }
         uint32 GetTickets()             const { return m_Credits;              }
 
+        uint16 GetDanceId()             const { return m_DanceId;              }
+        void SetDanceId(uint16 const p_Id)    { m_DanceId = p_Id;              }
+
         bool IsInitialized()            const { return m_Initialized;          }
         bool GetReadAgreement()         const { return m_ReadAgreement;        }
         bool GetSpecialRights()         const { return m_SpecialRights;        }
+        bool IsSubscribed()             const { return m_HabboClub->IsSubscribed(); }
 
         ///////////////////////////////////////////
         //             USER OBJECTS
@@ -364,10 +336,6 @@ namespace SteerStone
         bool m_SoundEnabled;
         bool m_AcceptFriendRequests;
         bool m_Ponged;
-        bool m_Walking;
-        bool m_Sitting;
-        bool m_Dancing;
-        bool m_Waving;
 
         uint32 m_Id;
         uint32 m_Credits;
@@ -376,21 +344,24 @@ namespace SteerStone
         uint32 m_MaxFriendsLimit;
         uint32 m_PingInterval;
         uint32 m_RoomGUID;
+        uint32 m_LastCreatedRoomId;     ///< Save Room Id Habbo just created
 
         int16 m_PositionX;
         int16 m_PositionY;
         int16 m_PositionZ;
         int16 m_BodyRotation;
         int16 m_HeadRotation;
+        uint16 m_DanceId;               ///< Save Habbo dance Id to be used for status update
 
         uint8 m_Rank;
 
         /// Storages
         std::weak_ptr<Room> m_Room;
-        std::vector<HabboFuseRightsData> m_FuseRights;
-        std::vector<HabboBadgesData> m_Badges;
         std::unique_ptr<Messenger> m_Messenger;
+        std::unique_ptr<FuseRights> m_FuseRight;
+        std::unique_ptr<HabboClub> m_HabboClub;
         std::unique_ptr<FavouriteRoom> m_FavouriteRooms;
+        std::unique_ptr<Badge> m_Badge;
         std::shared_ptr<HabboSocket> m_Socket;
         std::mutex m_Mutex;
     };

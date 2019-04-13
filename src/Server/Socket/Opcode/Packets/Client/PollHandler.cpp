@@ -17,27 +17,8 @@
 */
 
 #include "Habbo.h"
-#include "HabboSocket.h"
-#include "Room.h"
 
 namespace SteerStone
 {
-    void HabboSocket::HandleInfoBus(std::unique_ptr<ClientPacket> p_Packet)
-    {
-        if (!m_Habbo->GetRoom())
-            return;
-
-        /// Walk on walkway tile to access info bus
-        m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), 28, 4);
-    } 
-
-    void HabboSocket::HandleChangeWorld(std::unique_ptr<ClientPacket> p_Packet)
-    {
-        if (!m_Habbo->GetRoom())
-            return;
-
-        /// Walk on walkway tile to access info bus
-        m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), 11, 2);
-    }
-
+    
 } ///< NAMESPACE STEERSTONE

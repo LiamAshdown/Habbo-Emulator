@@ -59,6 +59,15 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            StringBuffer const * LocalisedError::Write()
+            {
+                m_Buffer.AppendString(Error);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
         } ///< NAMESPACE MISC
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

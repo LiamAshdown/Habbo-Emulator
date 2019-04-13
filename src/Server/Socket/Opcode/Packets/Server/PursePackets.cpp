@@ -16,33 +16,20 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ItemPackets.h"
+#include "PursePackets.h"
 
 namespace SteerStone
 {
     namespace HabboPacket
     {
-        namespace Item
+        namespace Purse
         {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * ShowProgram::Write()
+            StringBuffer const * CreditBalance::Write()
             {
-                m_Buffer.AppendString(Program, false);
-                m_Buffer.AppendString(" ", false);
-                m_Buffer.AppendString(State, false);
-
-                m_Buffer.AppendSOH();
-
-                return &m_Buffer;
-            }
-
-            StringBuffer const * StuffDataUpdate::Write()
-            {
-                m_Buffer.AppendString(Program, false);
-                m_Buffer.AppendString(" ", false);
-                m_Buffer.AppendString(State, false);
+                m_Buffer.AppendString(Credits + ".0");
 
                 m_Buffer.AppendSOH();
 
@@ -51,6 +38,6 @@ namespace SteerStone
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
-        } ///< NAMESPACE ITEM
+        } ///< NAMESPACE PURSE
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

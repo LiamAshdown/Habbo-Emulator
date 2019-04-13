@@ -64,8 +64,12 @@ namespace SteerStone
                     m_Buffer.AppendString("\r", false);
                 }
 
-                m_Buffer.AppendString("b:", false);
-                m_Buffer.AppendString("\r", false);
+                if (Badge.is_initialized())
+                {
+                    m_Buffer.AppendString("b:", false);
+                    m_Buffer.AppendString(Badge.get(), false);
+                    m_Buffer.AppendString("\r", false);
+                }
 
                 if (PoolFigure.is_initialized())
                 {
@@ -108,17 +112,7 @@ namespace SteerStone
             StringBuffer const* RoomUrl::Write()
             {
                 m_Buffer.AppendString("/client/");
-                m_Buffer.AppendSOH();
 
-                return &m_Buffer;
-            }
-
-            //////////////////////////////////////////////////////////////////////////
-            //////////////////////////////////////////////////////////////////////////
-
-            StringBuffer const* RoomCantConnect::Write()
-            {
-                m_Buffer.AppendWired(ErrorCode);
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -132,6 +126,7 @@ namespace SteerStone
                 m_Buffer.AppendString(Model);
                 m_Buffer.AppendString(" ");
                 m_Buffer.AppendWired(Id);
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -142,7 +137,12 @@ namespace SteerStone
 
             StringBuffer const* RoomAdd::Write()
             {
-                m_Buffer.AppendWired(0);
+                if (ImageUrl.is_initialized() && LinkUrl.is_initialized())
+                {
+                    m_Buffer.AppendStringDelimiter(ImageUrl.get(), "\t");
+                    m_Buffer.AppendString(LinkUrl.get(), false);
+                }
+
                 m_Buffer.AppendSOH();
 
                 return &m_Buffer;
@@ -208,7 +208,7 @@ namespace SteerStone
                 m_Buffer.AppendString(BodyRotation, false);
 
                 if (Dancing)
-                    m_Buffer.AppendString("/Dance", false);
+                    m_Buffer.AppendString("/Dance " + DanceId , false);
                 if (Walking)
                 {
                     m_Buffer.AppendString("/mv", false);
@@ -296,6 +296,19 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-        } ///< NAMESPACE ROOM
+            StringBuffer const * GoToFlat::Write()
+            {
+                m_Buffer.AppendStringDelimiter(Id, "\r");
+                m_Buffer.AppendString(Name, false);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+} ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

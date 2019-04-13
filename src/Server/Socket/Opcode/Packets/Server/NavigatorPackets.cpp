@@ -28,6 +28,27 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            StringBuffer const* CantConnect::Write()
+            {
+                m_Buffer.AppendWired(ErrorCode);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FavouriteRoomResult::Write()
+            {
+                /// Handled in FavouriteRoom::ParseSendFavouriteRooms
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
         } ///< NAMESPACE NAVIGATOR
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

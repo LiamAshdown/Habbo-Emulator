@@ -121,12 +121,12 @@ namespace SteerStone
         void StartAsyncRead();
 
         /// OnRead - Handle the incoming packet
-        /// @p_Error : Error code
+        /// @p_Error : ErrorMessenger code
         /// @p_Length : Length of failed buffer
         void OnRead(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length);
 
         /// OnWriteComplete - Finished sending out our buffer
-        /// @p_Error : Error code
+        /// @p_Error : ErrorMessenger code
         /// @p_Length : Length of failed buffer
         void OnWriteComplete(boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length);
 
@@ -137,7 +137,7 @@ namespace SteerStone
         void StartWriteFlushTimer();
 
         /// OnError - Catch an error if packet is corrupted
-        /// @p_Error : Error code
+        /// @p_Error : ErrorMessenger code
         void OnError(boost::system::error_code const& p_ErrorCode);
 
     private:

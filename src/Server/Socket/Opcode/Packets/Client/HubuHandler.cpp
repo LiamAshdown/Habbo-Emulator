@@ -16,29 +16,28 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include "Common/SharedDefines.h"
 #include "HabboSocket.h"
+#include "Habbo.h"
+#include "RoomManager.h"
 
 namespace SteerStone
 {
-    namespace HabboPacket
+    void HabboSocket::HandleInfoBus(std::unique_ptr<ClientPacket> p_Packet)
     {
-        namespace FavouriteRoom
-        {
-            /// SERVER_FAVOURITE_ROOMS_RESULT packet builder
-            class FavouriteRoomResult final : public ServerPacket
-            {
-            public:
-                /// Constructor 
-                FavouriteRoomResult() : ServerPacket(SERVER_FAVOURITE_ROOMS_RESULT) {}
+        if (!m_Habbo->GetRoom())
+            return;
 
-            public:
-                /// Write the packet
-                StringBuffer const* Write();
-            };
+        /// Walk on walkway tile to access info bus
+        m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), 28, 4);
+    }
 
+    void HabboSocket::HandleChangeWorld(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
 
-        } ///< NAMESPACE FAVOURITEROOM
-    } ///< NAMESPACE HABBOPACKET
+        /// Walk on walkway tile to access info bus
+        m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), 11, 2);
+    }
+   
 } ///< NAMESPACE STEERSTONE

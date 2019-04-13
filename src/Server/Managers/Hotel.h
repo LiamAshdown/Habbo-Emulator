@@ -28,6 +28,45 @@
 
 namespace SteerStone
 {
+    /// Holds bool configs values
+    enum BoolConfigs
+    {
+        CONFIG_REGISTERATION_HABBO_CLOTHING,
+        CONFIG_REGISTERATION_SOUND,
+        CONFIG_PARAMETER_COPPA,
+        CONFIG_PARAMETER_VOUCHER,
+        CONFIG_PARAMETER_REQUIRE_PARENT_EMAIL,
+        CONFIG_PARAMETER_SEND_PARENT_EMAIL,
+        CONFIG_PARAMETER_DIRECT_MAIL,
+        CONFIG_PARAMETER_INTEGRATION,
+        CONFIG_PARAMETER_PROFILE_EDITING,
+        CONFIG_PARAMETER_TRACKING_HEAD,
+        CONFIG_PARAMETER_TUTORIAL,
+        BOOL_CONFIG_MAX
+    };
+
+    /// Holds int configs values
+    enum IntConfigs
+    {
+        CONFIG_SERVER_PORT,
+        CONFIG_NETWORK_PROCESSORS,
+        CONFIG_PONG_INTERVAL,
+        CONFIG_REGISTERATION_CREDITS,
+        CONFIG_REGISTERATION_TICKETS,
+        CONFIG_REGISTERATION_FILMS,
+        CONFIG_MESSENGER_MAX_FRIENDS,
+        CONFIG_MESSENGER_MAX_CLUB_FRIENDS,
+        CONFIG_AFK_TIMER,
+        CONFIG_WAVE_TIMER,
+        INT_CONFIG_MAX
+    };
+
+    /// Holds float configs values
+    enum FloatConfigs
+    {
+        FLOAT_CONFIG_MAX
+    };
+
     class Habbo;
 
     typedef std::unordered_map<uint32, Habbo*> HabboMap;
@@ -62,6 +101,21 @@ namespace SteerStone
         /// @p_Player : Habbo Class
         void RemoveHabbo(Habbo* p_Habbo);
 
+        /// Load Configs from .conf file
+        void LoadConfigs();
+
+        /// GetBoolConfig
+        /// Returns bool value
+        bool GetBoolConfig(BoolConfigs p_Index);
+
+        /// GetBoolConfig
+        /// Returns integer value
+        uint32 GetIntConfig(IntConfigs p_Index);
+
+        /// GetBoolConfig
+        /// Returns float value
+        float GetFloatConfig(FloatConfigs p_Index);
+
         /// StopWorld - Stop the world updating -> Closing down server
         static bool StopWorld();
 
@@ -74,8 +128,11 @@ namespace SteerStone
 
     private:
         /// Variables
-        HabboMap m_Habbos;                              ///< Container which holds Habbo Users in the hotel
+        HabboMap m_Habbos;                               ///< Container which holds Habbo Users in the hotel
         std::mutex m_Mutex;                              ///< Mutex
+        uint32 m_IntConfigs[INT_CONFIG_MAX];             ///< Holds config settings for int
+        bool m_BoolConfigs[BOOL_CONFIG_MAX];             ///< Holds config settings for bool
+        float m_FloatConfigs[FLOAT_CONFIG_MAX];           ///< Holds config settings for float
         static volatile bool s_StopWorld;
     };
 }

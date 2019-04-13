@@ -8,6 +8,7 @@
 #    EXAMPLE CONFIG
 #    SERVER SETTINGS
 #	 MYSQL SETTINGS
+# 	 SESSION PARAMETERS
 #    REGISTERATION SETTINGS
 #    MESSENGER SETTINGS
 #	 ROOM SETTINGS
@@ -62,13 +63,6 @@ NetworkThreadProcessors = 1
 PongInterval = 10000
 #
 #
-#    PlayerAccountUpdate
-#        Description: Update player to database in milliseconds
-#        Default:     600000 (10 minutes)
-#
-PlayerAccountUpdate = 600000
-#
-#
 ###################################################################################################
 
 ###################################################################################################
@@ -112,12 +106,77 @@ RoomDatabaseInfo.WorkerThreads  = 10
 ###################################################################################################
 
 ###################################################################################################
+# SESSION PARAMETERS
+#
+#    ParameterCoppa
+#        Description: TODO; Find out what this means
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParameterCoppa = 0
+#
+#    ParameterVoucher
+#        Description: Enable/Disable voucher use in client
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParameterVoucher = 1
+#
+#    ParamterRequireParentEmail
+#        Description: TODO; Find out what this means
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParamterRequireParentEmail = 0
+#
+#    ParamterSendParentEmail
+#        Description: TODO; Find out what this means
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParamterSendParentEmail = 0
+#
+#    ParamterDirectMail
+#        Description: Allow use of direct mail
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParamterDirectMail = 1
+#
+#    ParameterDateFormat
+#        Description: Date format client will use
+#        Default:     dd-MM-yyyy
+#
+ParameterDateFormat = dd-MM-yyyy
+#
+#    ParamterIntegration
+#        Description: TODO; Find out what this means
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParamterIntegration = 0
+#
+#    ParameterProfileEditing
+#        Description: Allow use of editing user profile in game
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParameterProfileEditing = 1
+#
+#    ParameterTrackingHeader
+#        Description: TODO; Find out what this means
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParameterTrackingHeader = 0
+#
+#    ParameterTutorial
+#        Description: Send tutorial on user first login
+#        Default:     0 - Disabled | Enabled - 1
+#
+ParameterTutorial = 1
+#
+#
+####################################################################################################
+
+###################################################################################################
 # REGISTERATION SETTINGS
 #
 #    RegisterationHabboClothing
 #        Description: Allow to use Habbo Club Clothing during registeration
 #        Default:     0 - Disabled | Enabled - 1
-#
 #
 RegisterationHabboClothing = 0
 #
@@ -125,13 +184,11 @@ RegisterationHabboClothing = 0
 #        Description: Set credit amount on player registeration
 #        Default:     0
 #
-#
 RegisterationCredits = 0
 #
 #    RegisterationTickets
 #        Description: Set ticket amount on player registeration
 #        Default:     0
-#
 #
 RegisterationTickets = 0
 #
@@ -139,13 +196,11 @@ RegisterationTickets = 0
 #        Description: Set film amount on player registeration
 #        Default:     0
 #
-#
 RegisterationFilms = 0
 #
 #    RegisterationBobbaWords
 #        Description: Set words which are not allowed when registering.
 #        Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
-#
 #
 RegisterationBobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
 #
@@ -153,29 +208,25 @@ RegisterationBobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
 #        Description: Set whether sound is enabled or not
 #        Default:     0 - Disabled | Enabled - 1
 #
-#
-RegisterationSound= 0
+RegisterationSound = 0
 #
 #    RegisterationMotto
 #        Description: Set whether sound is enabled or not
 #        Default:     "I'm a new user!"
 #
-#
-RegisterationMotto= I'm a new user!
+RegisterationMotto = I'm a new user!
 #
 #    RegisterationConsoleMotto
 #        Description: Set whether sound is enabled or not
 #        Default:     "I'm looking for friends!"
 #
-#
-RegisterationConsoleMotto= I'm looking for friends!
+RegisterationConsoleMotto = I'm looking for friends!
 #
 #    RegisterationWelcomeMessage
 #        Description: Set welcome message when user logging into Habbo
-#        Default:     "Welcome to QuadEmulator!"
+#        Default:     "Welcome to SteerStone Emulator!"
 #
-#
-RegisterationWelcomeMessage = Welcome to QuadEmulator!
+RegisterationWelcomeMessage = Welcome to SteerStone Emulator!
 #
 #
 ###################################################################################################
@@ -183,17 +234,17 @@ RegisterationWelcomeMessage = Welcome to QuadEmulator!
 ###################################################################################################
 # MESSENGER SETTINGS
 #
-#    MessgengerMaxFriendsLimit
+#    MessengerMaxFriendsLimit
 #        Description: Max amount of friends non club member can have
 #        Default:     50
 #
-MessgengerMaxFriendsLimit = 50
+MessengerMaxFriendsLimit = 50
 #
-#    MessgengerMaxFriendsClubLimit
+#    MessengerMaxFriendsClubLimit
 #        Description: Max amount of friends club member can have
 #        Default:     100
 #
-MessgengerMaxFriendsClubLimit = 100
+MessengerMaxFriendsClubLimit = 100
 #
 #
 ###################################################################################################

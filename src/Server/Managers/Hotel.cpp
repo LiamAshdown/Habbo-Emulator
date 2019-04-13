@@ -80,6 +80,54 @@ namespace SteerStone
             itr->second->Logout();
     }
 
+    /// Load Configs from .conf file
+    void Hotel::LoadConfigs()
+    {
+        m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_HABBO_CLOTHING]      = sConfig->GetBoolDefault("RegisterationHabboClothing", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_SOUND]               = sConfig->GetBoolDefault("RegisterationSound", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_COPPA]                   = sConfig->GetBoolDefault("ParameterCoppa", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_VOUCHER]                 = sConfig->GetBoolDefault("ParameterVoucher", 1);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_REQUIRE_PARENT_EMAIL]    = sConfig->GetBoolDefault("ParamterRequireParentEmail", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_SEND_PARENT_EMAIL]       = sConfig->GetBoolDefault("ParamterSendParentEmail", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_DIRECT_MAIL]             = sConfig->GetBoolDefault("ParamterDirectMail", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_INTEGRATION]             = sConfig->GetBoolDefault("ParamterIntegration", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_PROFILE_EDITING]         = sConfig->GetBoolDefault("ParameterProfileEditing", 1);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_TRACKING_HEAD]           = sConfig->GetBoolDefault("ParameterTrackingHeader", 0);
+        m_BoolConfigs[BoolConfigs::CONFIG_PARAMETER_TUTORIAL]                = sConfig->GetBoolDefault("ParameterTutorial", 1);
+
+        m_IntConfigs[IntConfigs::CONFIG_SERVER_PORT]                         = sConfig->GetIntDefault("ServerPort", DEFAULT_SERVER_PORT);
+        m_IntConfigs[IntConfigs::CONFIG_NETWORK_PROCESSORS]                  = sConfig->GetIntDefault("NetworkThreadProcessors", 1);
+        m_IntConfigs[IntConfigs::CONFIG_PONG_INTERVAL]                       = sConfig->GetIntDefault("PongInterval", 30000);
+        m_IntConfigs[IntConfigs::CONFIG_REGISTERATION_CREDITS]               = sConfig->GetIntDefault("RegisterationCredits", 0);
+        m_IntConfigs[IntConfigs::CONFIG_REGISTERATION_TICKETS]               = sConfig->GetIntDefault("RegisterationTickets", 0);
+        m_IntConfigs[IntConfigs::CONFIG_REGISTERATION_FILMS]                 = sConfig->GetIntDefault("RegisterationFilms", 0);
+        m_IntConfigs[IntConfigs::CONFIG_MESSENGER_MAX_FRIENDS]               = sConfig->GetIntDefault("MessengerMaxFriendsLimit", 50);
+        m_IntConfigs[IntConfigs::CONFIG_MESSENGER_MAX_CLUB_FRIENDS]          = sConfig->GetIntDefault("MessgengerMaxFriendsClubLimit", 100);
+        m_IntConfigs[IntConfigs::CONFIG_AFK_TIMER]                           = sConfig->GetIntDefault("WaveTimer", 4000);
+        m_IntConfigs[IntConfigs::CONFIG_WAVE_TIMER]                          = sConfig->GetIntDefault("AwayFromKeyboardTimer", 900000);
+    }
+
+    /// GetBoolConfig
+    /// Returns bool value
+    bool Hotel::GetBoolConfig(BoolConfigs p_Index)
+    {
+        return p_Index < BOOL_CONFIG_MAX ? m_BoolConfigs[p_Index] : 0;
+    }
+
+    /// GetBoolConfig
+   /// Returns integer value
+    uint32 Hotel::GetIntConfig(IntConfigs p_Index)
+    {
+        return p_Index < INT_CONFIG_MAX ? m_IntConfigs[p_Index] : 0;
+    }
+
+    /// GetBoolConfig
+    /// Returns float value
+    float Hotel::GetFloatConfig(FloatConfigs p_Index)
+    {
+        return p_Index < FLOAT_CONFIG_MAX ? m_FloatConfigs[p_Index] : 0;
+    }
+
     /// StopWorld - Stop the world updating -> Closing down server
     bool Hotel::StopWorld()
     {

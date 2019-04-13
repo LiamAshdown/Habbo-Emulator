@@ -47,6 +47,9 @@ namespace SteerStone
                 if (l_Room->GetVisitorsNow() == l_Room->GetVisitorsMax())
                     continue;
 
+            if (!l_Room->IsRoomVisible() && m_Habbo->GetRank() < AccountRank::HABBO_MODERATOR)
+                continue;
+
             if (l_Room->GetCategoryId() == l_CategoryId)
             {
                 /// Total Now/Max Visitors in specific category
@@ -86,7 +89,7 @@ namespace SteerStone
             l_SecondBuffer.AppendWired(l_GuestRooms);
 
         l_Buffer.AppendBase64(PacketServerHeader::SERVER_NAVIGATE_NODE_INFO);
-        l_Buffer.AppendWiredBool(l_HideFullRooms);
+        l_Buffer.AppendWired(l_HideFullRooms);
         l_Buffer.AppendWired(l_CategoryId);
         l_Buffer.AppendWired(l_RoomCategory->GetRoomType() ? 0 : 2);
         l_Buffer.AppendString(l_RoomCategory->GetName());
@@ -100,6 +103,9 @@ namespace SteerStone
         for (auto& l_Itr : *sRoomMgr->GetRoomCategories())
         {
             RoomCategory* l_RoomCategory = &l_Itr.second;
+
+            if (m_Habbo->GetRank() < l_RoomCategory->GetMinRoleAccess())
+                continue;
 
             l_Buffer.AppendWired(l_RoomCategory->GetCategoryId());
             l_Buffer.AppendWired(0);
@@ -142,7 +148,7 @@ namespace SteerStone
         std::string l_Search = p_Packet->ReadString();
 
         StringBuffer l_Buffer;
-        l_Buffer.AppendBase64(PacketServerHeader::SERVER_SEARCH_RESULTS);
+        l_Buffer.AppendBase64(PacketServerHeader::SERVER_FLAT_RESULTS_1);
         for (auto const& l_Itr : *sRoomMgr->GetRooms())
         {
             std::shared_ptr<Room> l_Room = l_Itr.second;
@@ -165,6 +171,38 @@ namespace SteerStone
 
         l_Buffer.AppendSOH();
         SendPacket(&l_Buffer);
+    }
+
+    void HabboSocket::HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        m_Habbo->SendFavouriteRooms();
+    }
+
+    void HabboSocket::HandleAddFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        bool l_RoomType = p_Packet->ReadWiredBool();
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+
+        m_Habbo->AddFavouriteRoom(l_RoomType, l_RoomId);
+    }
+
+    void HabboSocket::HandleRemoveFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        bool l_RoomType = p_Packet->ReadWiredBool();
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+
+        m_Habbo->RemoveFavouriteRoom(l_RoomId);
+    }
+
+    void HabboSocket::HandleNodeSpaceUsers(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
+
+        /* StringBuffer buffer;
+         buffer.AppendBase64(PacketClientHeader::CLIENT_NO_DESPACE_USERS);
+         buffer.AppendString(mPlayer->GetName());
+         buffer.AppendSOH();
+         SendPacket(buffer);*/
     }
     
 } ///< NAMESPACE STEERSTONE

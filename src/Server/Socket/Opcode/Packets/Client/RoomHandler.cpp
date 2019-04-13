@@ -50,23 +50,30 @@ namespace SteerStone
     void HabboSocket::HandleGetRoomAdd(std::unique_ptr<ClientPacket> p_Packet)
     {
         HabboPacket::Room::RoomAdd l_Packet;
+        
+        if (RoomUrlData* l_RoomUrlData = sRoomMgr->GetRoomUrl(m_Habbo->GetRoom()->GetId()))
+        {
+            l_Packet.ImageUrl = l_RoomUrlData->ImageUrl;
+            l_Packet.LinkUrl  = l_RoomUrlData->LinkUrl;
+        }
+
         SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGetRoomHeight(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGHeightMap(std::unique_ptr<ClientPacket> p_Packet)
     {
         HabboPacket::Room::RoomHeight l_Packet;
         l_Packet.HeightMap = m_Habbo->GetRoom()->GetRoomModel().GetHeightMap();
         SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleRoomUsers(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
         /// Sending Habbo object so client and other clients can see a new habbo has joined the room
         m_Habbo->GetRoom()->AddFigure(m_Habbo);
     }
 
-    void HabboSocket::HandleGameObjects(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGObjects(std::unique_ptr<ClientPacket> p_Packet)
     {
         /// Send Furniture and any active furniture to client
         m_Habbo->GetRoom()->SendWorldObjects(m_Habbo);
@@ -83,7 +90,7 @@ namespace SteerStone
             m_Habbo->GetRoom()->LeaveRoom(m_Habbo);
     }
 
-    void HabboSocket::HandleHabboMove(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMove(std::unique_ptr<ClientPacket> p_Packet)
     {
         int16 l_X = p_Packet->ReadBase64Int();
         int16 l_Y = p_Packet->ReadBase64Int();
@@ -94,23 +101,36 @@ namespace SteerStone
             m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), l_X, l_Y);
     }
 
-    void HabboSocket::HandleUserDance(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleDance(std::unique_ptr<ClientPacket> p_Packet)
     {
+        if (!p_Packet->GetContent().empty() && m_Habbo->IsSubscribed())
+        {
+            int16 l_Id = p_Packet->ReadWiredInt();
+
+            /// Is Id valid?
+            if (l_Id < 0 || l_Id > 4)
+                return;
+
+            m_Habbo->SetDanceId(l_Id);
+        }
+        else
+            m_Habbo->SetDanceId(0);
+
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
         m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
-    void HabboSocket::HandleHabboStopDance(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleStop(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
     }
 
-    void HabboSocket::HandleRoomHabboStatuses(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGStat(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Habbo->GetRoom()->SendRoomStatuses(m_Habbo);
     }
 
-    void HabboSocket::HandleHabboWave(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleWave(std::unique_ptr<ClientPacket> p_Packet)
     {
         m_Habbo->GetRoom()->RemoveStatus(m_Habbo->GetRoomGUID(), Status::STATUS_DANCING);
         m_Habbo->GetRoom()->AddStatus(m_Habbo->GetRoomGUID(), Status::STATUS_WAVING);
@@ -164,18 +184,5 @@ namespace SteerStone
                 m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
             }
         }
-    }
-
-    void HabboSocket::HandleSwimSuit(std::unique_ptr<ClientPacket> p_Packet)
-    {
-        if (TileInstance* l_TileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
-        {
-            /// Set our Pool Figure
-            m_Habbo->m_PoolFigure = p_Packet->GetContent();
-            
-            /// Set the file occupied to false which will call TriggerEventLeave
-            l_TileInstance->SetTileOccupied(false, m_Habbo);
-        }
-
     }
 }
