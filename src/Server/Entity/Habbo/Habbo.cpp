@@ -378,8 +378,6 @@ namespace SteerStone
     /// @p_Diff - Tick Timer
     bool Habbo::Update(uint32 const& p_Diff)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
         if (m_Socket && !m_Socket->IsClosed())
         {
             if (m_PingInterval < p_Diff)

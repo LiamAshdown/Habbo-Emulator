@@ -73,6 +73,11 @@ namespace SteerStone
         /// LoadRooms
         /// Load rooms from database
         void LoadRooms();
+        
+        /// AddRoom
+        /// Add room to storage from database
+        /// @p_RoomId : Id of room we are querying database to get room info
+        void AddRoom(uint32 const p_RoomId);
 
         /// UpdateRooms
         /// Update all active rooms

@@ -161,7 +161,23 @@ namespace SteerStone
                     l_SecondBuffer.AppendWired(l_Room->GetId());
                     l_SecondBuffer.AppendString(l_Room->GetName());
                     l_SecondBuffer.AppendString(l_Room->GetOwnerName());
-                    l_SecondBuffer.AppendString(l_Room->GetAccessType());
+
+                    switch (l_Room->GetAccessType())
+                    {
+                    case RoomAccessType::ROOM_ACCESS_TYPE_OPEN:
+                        l_SecondBuffer.AppendString("open");
+                        break;
+                    case RoomAccessType::ROOM_ACCESS_TYPE_CLOSED:
+                        l_SecondBuffer.AppendString("closed");
+                        break;
+                    case RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD:
+                        l_SecondBuffer.AppendString("password");
+                        break;
+                    default:
+                        l_SecondBuffer.AppendString("open");
+                        break;
+                    }
+
                     l_SecondBuffer.AppendWired(l_Room->GetVisitorsNow());
                     l_SecondBuffer.AppendWired(l_Room->GetVisitorsMax());
                     l_SecondBuffer.AppendString(l_Room->GetDescription());

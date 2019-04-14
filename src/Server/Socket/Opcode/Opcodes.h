@@ -117,6 +117,7 @@ enum PacketClientHeader : uint16
     CLIENT_DELETE_FLAT                    = 23,
     CLIENT_UPDATE_FLAT                    = 24,
     CLIENT_SET_FLAT_INFO                  = 25,
+    CLIENT_CREATE_FLAT                    = 29,
     CLIENT_NAVIGATE                       = 150,
     CLIENT_GET_USER_FLAT_CATEGORIES       = 151,
     CLIENT_GET_FLAT_CATEGORY              = 152,
@@ -391,7 +392,7 @@ enum PacketServerHeader : uint16
     ///////////////////////////////////////////
     SERVER_OK                             = 1,  ///< #handle_ok
     SERVER_AVAILABLE_SETS                 = 8,  ///< #handle_availablesets
-    SERVER_APPROVE_NAME             = 36, ///< #handle_approvenamereply
+    SERVER_APPROVE_NAME                   = 36, ///< #handle_approvenamereply
     SERVER_NAME_UNACCEPTABLE              = 37, ///< #handle_nameunacceptable
     SERVER_REG_OK                         = 51, ///< #handle_regok
     SERVER_ACR                            = 164,///< #handle_acr

@@ -165,7 +165,7 @@ namespace SteerStone
         uint32 GetFloor()            const { return m_Floor;        }
         bool ShowName()              const { return m_ShowName;     }
         bool GetSuperUsers()         const { return m_SuperUsers;   }
-        std::string GetAccessType()  const { return m_AccessType;   }
+        uint16 GetAccessType()       const { return m_AccessType;   }
         std::string GetPassword()    const { return m_Password;     }
         uint32 GetVisitorsNow()      const { return m_VisitorsNow;  }
         uint32 GetVisitorsMax()      const { return m_VisitorsMax;  }
@@ -192,7 +192,7 @@ namespace SteerStone
         uint32 m_Floor;
         bool m_ShowName;
         bool m_SuperUsers;
-        std::string m_AccessType;
+        uint16 m_AccessType;
         std::string m_Password;
         uint32 m_VisitorsNow;
         uint32 m_VisitorsMax;

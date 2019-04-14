@@ -220,12 +220,13 @@ namespace SteerStone
                 m_WaveTimer -= p_Diff;
         }
 
+        /// Check last time user sent a status update
         if (CanSendStatusUpdate())
             m_AFKTimer = sHotel->GetIntConfig(CONFIG_AFK_TIMER);
         else
         {
             if (m_AFKTimer <= p_Diff)
-                ;//    m_Habbo->Logout();
+                m_Habbo->Logout();
             else
                 m_AFKTimer -= p_Diff;
         }

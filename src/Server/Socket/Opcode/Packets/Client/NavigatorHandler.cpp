@@ -16,10 +16,14 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "HabboSocket.h"
 #include "Habbo.h"
-#include "Database/QueryDatabase.h"
+#include "HabboSocket.h"
 #include "RoomManager.h"
+#include "Database/QueryDatabase.h"
+
+#include "Opcode/Packets/Server/LoginPackets.h"
+#include "Opcode/Packets/Server/RoomPackets.h"
+#include "Opcode/Packets/Server/NavigatorPackets.h"
 
 namespace SteerStone
 {
@@ -76,7 +80,22 @@ namespace SteerStone
                     l_ThirdBuffer.AppendWired(l_Room->GetId());
                     l_ThirdBuffer.AppendString(l_Room->GetName());
                     l_ThirdBuffer.AppendString(l_Room->GetOwnerName());
-                    l_ThirdBuffer.AppendString(l_Room->GetAccessType());
+                    switch (l_Room->GetAccessType())
+                    {
+                    case RoomAccessType::ROOM_ACCESS_TYPE_OPEN:
+                        l_ThirdBuffer.AppendString("open");
+                        break;
+                    case RoomAccessType::ROOM_ACCESS_TYPE_CLOSED:
+                        l_ThirdBuffer.AppendString("closed");
+                        break;
+                    case RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD:
+                        l_ThirdBuffer.AppendString("password");
+                        break;
+                    default:
+                        l_ThirdBuffer.AppendString("open");
+                        break;
+                    }
+
                     l_ThirdBuffer.AppendWired(l_Room->GetVisitorsNow());
                     l_ThirdBuffer.AppendWired(l_Room->GetVisitorsMax());
                     l_ThirdBuffer.AppendString(l_Room->GetDescription());
@@ -143,34 +162,65 @@ namespace SteerStone
         SendPacket(&l_Buffer);
     }
     
-    void HabboSocket::HandleSearchRooms(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSearchFlats(std::unique_ptr<ClientPacket> p_Packet)
     {
-        std::string l_Search = p_Packet->ReadString();
+        std::string l_Search = p_Packet->GetContent();
 
-        StringBuffer l_Buffer;
-        l_Buffer.AppendBase64(PacketServerHeader::SERVER_FLAT_RESULTS_1);
-        for (auto const& l_Itr : *sRoomMgr->GetRooms())
+        /// We will just query this instead of accessing our storage - I believe it's faster and cleaner if we do it this way
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, owner_name, name, description, access_type, visitors_now, visitors_max, room_visible FROM rooms WHERE category = 2 AND (name LIKE ? OR owner_name LIKE ?)");
+        l_Database.GetStatement()->setString(1, l_Search);
+        l_Database.GetStatement()->setString(2, l_Search);
+        l_Database.ExecuteQuery();
+
+        /// Does any rooms match criteria?
+        if (!l_Database.GetResult())
         {
-            std::shared_ptr<Room> l_Room = l_Itr.second;
-
-            // TODO fix this structure
-            if (l_Room->GetName().find(l_Search) != std::string::npos)
-            {
-                l_Buffer.AppendWired(l_Room->GetId());
-                l_Buffer.AppendString(l_Room->GetName());
-                l_Buffer.AppendString(l_Room->GetOwnerName());
-                l_Buffer.AppendString(l_Room->GetAccessType());
-                l_Buffer.AppendString("x");
-                l_Buffer.AppendWired(l_Room->GetVisitorsNow());
-                l_Buffer.AppendWired(l_Room->GetVisitorsMax());
-                l_Buffer.AppendString("null");
-                l_Buffer.AppendString(l_Room->GetDescription());
-                l_Buffer.AppendString(l_Room->GetDescription());
-            }
+            HabboPacket::Navigator::NoFlats l_Packet;
+            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
         }
 
-        l_Buffer.AppendSOH();
-        SendPacket(&l_Buffer);
+        Result* l_Result = l_Database.Fetch();
+
+        HabboPacket::Navigator::FlatResultsSearch l_Packet;
+
+        do
+        {
+            FlatResultData l_FlatResult;
+            l_FlatResult.RoomId = std::to_string(l_Result->GetUint32(1));
+            l_FlatResult.RoomName = l_Result->GetString(3);
+
+            if (!l_Result->GetBool(8) && (m_Habbo->GetId() != l_Result->GetUint32(1) || m_Habbo->GetRank() <= AccountRank::HABBO_MODERATOR))
+                l_FlatResult.OwnerName = "-";
+            else
+                l_FlatResult.OwnerName = l_Result->GetString(2);
+
+            switch (l_Result->GetUint16(5))
+            {
+            case RoomAccessType::ROOM_ACCESS_TYPE_OPEN:
+                l_FlatResult.AccessType = "open";
+                break;
+            case RoomAccessType::ROOM_ACCESS_TYPE_CLOSED:
+                l_FlatResult.AccessType = "closed";
+                break;
+            case RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD:
+                l_FlatResult.AccessType = "password";
+                break;
+            default:
+                l_FlatResult.AccessType = "open";
+                break;
+            }
+
+            l_FlatResult.VisitorsNow = std::to_string(l_Result->GetUint32(6));
+            l_FlatResult.VisitorsMax = std::to_string(l_Result->GetUint32(7));
+            l_FlatResult.Description = l_Result->GetString(4);
+
+            l_Packet.Flats.push_back(l_FlatResult);
+
+        } while (l_Result->GetNextResult());
+
+        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
 
     void HabboSocket::HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet)
@@ -203,6 +253,174 @@ namespace SteerStone
          buffer.AppendString(mPlayer->GetName());
          buffer.AppendSOH();
          SendPacket(buffer);*/
+    }
+
+    void HabboSocket::HandleCreateFlat(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::vector<std::string> l_Split;
+        boost::split(l_Split, p_Packet->GetContent(), boost::is_any_of("/"));
+
+        std::string l_FloorType = l_Split[1];
+        std::string l_RoomName = l_Split[2];
+        std::string l_RoomModel = l_Split[3];
+        std::string l_RoomAccess = l_Split[4];
+        bool l_ShowOwnerName = l_Split[5] == "1" ? true : false;
+
+        bool l_CreateFlat = true;
+
+        if (l_FloorType != "first floor")
+            l_CreateFlat = false;
+
+        if (l_RoomName.empty())
+            l_CreateFlat = false;
+
+        if (l_RoomModel.empty())
+            l_CreateFlat = false;
+
+        /// Credits Quackster for this part
+        std::string l_RoomModelContains = l_RoomModel.substr(6);
+        if (l_RoomModelContains != "a" &&
+            l_RoomModelContains != "c" &&
+            l_RoomModelContains != "d" &&
+            l_RoomModelContains != "e" &&
+            l_RoomModelContains != "f" &&
+            l_RoomModelContains != "i" &&
+            l_RoomModelContains != "h" &&
+            l_RoomModelContains != "j" &&
+            l_RoomModelContains != "k" &&
+            l_RoomModelContains != "l" &&
+            l_RoomModelContains != "m" &&
+            l_RoomModelContains != "n")
+            l_CreateFlat = false;
+
+        /// ErrorMessenger creating flat? let player know
+        if (!l_CreateFlat)
+        {
+            HabboPacket::Login::LocalisedError l_Packet;
+            l_Packet.Error = "Error creating a private room";
+            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        uint16 l_AccessType = RoomAccessType::ROOM_ACCESS_TYPE_OPEN;
+
+        if (l_RoomAccess == "closed")
+            l_AccessType = RoomAccessType::ROOM_ACCESS_TYPE_CLOSED;
+
+        if (l_RoomAccess == "password")
+            l_AccessType = RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD;
+
+        /// Okay all good! Lets insert our new room into database
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("INSERT INTO rooms (owner_id, owner_name, name, model, show_name, description, access_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
+        l_Database.GetStatement()->setString(2, m_Habbo->GetName());
+        l_Database.GetStatement()->setString(3, l_RoomName);
+        l_Database.GetStatement()->setString(4, l_RoomModel);
+        l_Database.GetStatement()->setBoolean(5, l_ShowOwnerName);
+        l_Database.GetStatement()->setString(6, "");
+        l_Database.GetStatement()->setUInt(7, l_AccessType);
+        l_Database.ExecuteQuery();
+
+        /// Get the Room Id of room we just created
+        l_Database.ClearParameters();
+
+        l_Database.PrepareQuery("SELECT LAST_INSERT_ID() as id");
+        l_Database.ExecuteQuery();
+
+        if (l_Database.GetResult())
+            m_Habbo->m_LastCreatedRoomId = l_Database.Fetch()->GetInt32(1);
+
+        /// Let client know created room successfully!
+        HabboPacket::Room::GoToFlat l_Packet;
+        l_Packet.Id = std::to_string(m_Habbo->m_LastCreatedRoomId);
+        l_Packet.Name = l_RoomName;
+        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Body = p_Packet->GetContent();
+
+        /// Get rid of useless character at start
+        if (l_Body[0] == '/')
+            l_Body.substr(0, 1);
+
+        std::vector<std::string> l_Split;
+        boost::split(l_Split, l_Body, boost::is_any_of("/"));
+
+        uint32 l_RoomId = std::stoi(l_Split[1]);
+
+        std::string l_Description = SplitString(l_Split[2], "description");
+        std::string l_Password = SplitString(l_Split[2], "password");
+        bool l_AllSuperUser = SplitString(l_Split[2], "allsuperuser")[0] == '1' ? true : false;
+
+        /// Update our room
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("UPDATE rooms SET description = ?, password = ?, super_users = ? WHERE id = ?");
+        l_Database.GetStatement()->setString(1, l_Description);
+        l_Database.GetStatement()->setString(2, l_Password);
+        l_Database.GetStatement()->setBoolean(3, l_AllSuperUser);
+        l_Database.GetStatement()->setUInt(4, l_RoomId);
+        l_Database.ExecuteQuery();
+        
+        /// Add room into our storage
+        sRoomMgr->AddRoom(l_RoomId);
+    }
+
+    void HabboSocket::HandleSearchUserFlats(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        /// We will just query this instead of accessing our storage - I believe it's faster and cleaner if we do it this way
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT id, owner_name, name, description, access_type, visitors_now, visitors_max FROM rooms WHERE owner_id = ?");
+        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
+        l_Database.ExecuteQuery();
+
+        /// Does user have any flats? if not send packet to inform he/she has no flats
+        if (!l_Database.GetResult())
+        {
+            HabboPacket::Navigator::NoFlatsForUser l_Packet;
+            l_Packet.Name = m_Habbo->GetName();
+            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        Result* l_Result = l_Database.Fetch();
+
+        HabboPacket::Navigator::FlatResults l_Packet;
+
+        do
+        {
+            FlatResultData l_FlatResult;
+            l_FlatResult.RoomId    = std::to_string(l_Result->GetUint32(1));
+            l_FlatResult.RoomName  = l_Result->GetString(3);
+            l_FlatResult.OwnerName = l_Result->GetString(2);
+
+            switch (l_Result->GetUint16(5))
+            {
+            case RoomAccessType::ROOM_ACCESS_TYPE_OPEN:
+                l_FlatResult.AccessType = "open";
+                break;
+            case RoomAccessType::ROOM_ACCESS_TYPE_CLOSED:
+                l_FlatResult.AccessType = "closed";
+                break;
+            case RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD:
+                l_FlatResult.AccessType = "password";
+                break;
+            default:
+                l_FlatResult.AccessType = "open";
+                break;
+            }
+
+            l_FlatResult.VisitorsNow = std::to_string(l_Result->GetUint32(6));
+            l_FlatResult.VisitorsMax = std::to_string(l_Result->GetUint32(7));
+            l_FlatResult.Description = l_Result->GetString(4);
+
+            l_Packet.Flats.push_back(l_FlatResult);
+
+        } while (l_Result->GetNextResult());
+
+        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
     
 } ///< NAMESPACE STEERSTONE

@@ -49,6 +49,76 @@ namespace SteerStone
                 return &m_Buffer;
             }
 
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * NoFlatsForUser::Write()
+            {
+                m_Buffer.AppendString(Name, false);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatResults::Write()
+            {
+                for (auto const& l_Itr : Flats)
+                {
+                    m_Buffer.AppendStringDelimiter(l_Itr.RoomId, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.RoomName, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.OwnerName, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.AccessType, "\t");
+                    m_Buffer.AppendStringDelimiter("x", "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.VisitorsNow, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.VisitorsMax, "\t");
+                    m_Buffer.AppendStringDelimiter("null", "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Description, "\t");
+                    m_Buffer.AppendString("\r", false);
+                }
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * NoFlats::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatResultsSearch::Write()
+            {
+                for (auto const& l_Itr : Flats)
+                {
+                    m_Buffer.AppendStringDelimiter(l_Itr.RoomId, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.RoomName, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.OwnerName, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.AccessType, "\t");
+                    m_Buffer.AppendStringDelimiter("x", "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.VisitorsNow, "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.VisitorsMax, "\t");
+                    m_Buffer.AppendStringDelimiter("null", "\t");
+                    m_Buffer.AppendStringDelimiter(l_Itr.Description, "\t");
+                    m_Buffer.AppendString("\r", false);
+                }
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
         } ///< NAMESPACE NAVIGATOR
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

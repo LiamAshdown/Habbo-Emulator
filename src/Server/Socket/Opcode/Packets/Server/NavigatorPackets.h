@@ -29,6 +29,18 @@ namespace SteerStone
         ROOM_IS_IN_QUEUE            = 3
     };
 
+    struct FlatResultData
+    {
+        std::string RoomId;
+        std::string RoomName;
+        std::string OwnerName;
+        std::string AccessType;
+        std::string VisitorsNow;
+        std::string VisitorsMax;
+        std::string Description;
+        
+    };
+
     namespace HabboPacket
     {
         namespace Navigator
@@ -57,6 +69,60 @@ namespace SteerStone
             public:
                 /// Write the packet
                 StringBuffer const* Write();
+            };
+            
+            /// SERVER_NO_FLATS_FOR_USER packet builder
+            class NoFlatsForUser final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                NoFlatsForUser() : ServerPacket(SERVER_NO_FLATS_FOR_USER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string Name;
+            };
+            
+            /// SERVER_FLAT_RESULTS packet builder
+            class FlatResults final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatResults() : ServerPacket(SERVER_FLAT_RESULTS) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::vector<FlatResultData> Flats;
+            };
+
+            /// SERVER_NO_FLATS packet builder
+            class NoFlats final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                NoFlats() : ServerPacket(SERVER_NO_FLATS) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_FLAT_RESULTS_1 packet builder
+            class FlatResultsSearch final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatResultsSearch() : ServerPacket(SERVER_FLAT_RESULTS_1) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::vector<FlatResultData> Flats;
             };
 
         } ///< NAMESPACE NAVIGATOR

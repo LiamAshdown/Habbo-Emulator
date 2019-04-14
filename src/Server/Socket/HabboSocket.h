@@ -67,7 +67,7 @@ namespace SteerStone
         void HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet);
         void HandleAddFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet);
         void HandleRemoveFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet);
-        void HandleSearchRooms(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSearchFlats(std::unique_ptr<ClientPacket> p_Packet);
         void HandleGetInterest(std::unique_ptr<ClientPacket> p_Packet);
         void HandleMessengerInitialize(std::unique_ptr<ClientPacket> p_Packet);
         void HandleRoomDirectory(std::unique_ptr<ClientPacket> p_Packet);
@@ -107,6 +107,7 @@ namespace SteerStone
         void HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet);
         void HandleSetBadge(std::unique_ptr<ClientPacket> p_Packet);
         void HandleConsoleMotto(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSearchUserFlats(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

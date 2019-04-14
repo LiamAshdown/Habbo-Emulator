@@ -37,7 +37,7 @@ std::string SplitString(std::string const& p_StringData, std::string const& p_To
         return l_KeyString;
     }
 
-    return "0";
+    return std::string();
 }
 
 Tokens StrSplit(std::string const& p_Src, std::string const& p_Seperator)

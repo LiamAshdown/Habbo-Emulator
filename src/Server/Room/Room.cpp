@@ -49,6 +49,7 @@ namespace SteerStone
 
             for (int32 l_X = 0; l_X < GetRoomModel().m_MapSizeX; l_X++)
             {     
+                /// I don't like this, is there a better way of doing this?
                 GetRoomModel().TileGrid[l_X][l_Y] = new TileInstance(l_X, l_Y);
 
                 uint8 l_Tile = l_Line[l_X];

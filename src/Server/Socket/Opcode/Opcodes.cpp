@@ -121,19 +121,20 @@ namespace SteerStone
         //             NAVIGATOR HANDLER
         ///////////////////////////////////////////
         StoreClientPacket(PacketClientHeader::CLIENT_S_BUSY_F,                      "CLIENT_S_BUSY_F",                         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SUSERF,                        "CLIENT_SUSERF",                           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SEARCH_FLATS,                  "CLIENT_SEARCH_FLATS",                     &HabboSocket::HandleSearchRooms                );
+        StoreClientPacket(PacketClientHeader::CLIENT_SUSERF,                        "CLIENT_SUSERF",                           &HabboSocket::HandleSearchUserFlats            );
+        StoreClientPacket(PacketClientHeader::CLIENT_SEARCH_FLATS,                  "CLIENT_SEARCH_FLATS",                     &HabboSocket::HandleSearchFlats                );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FAVOURITE_ROOMS,           "CLIENT_GET_FAVOURITE_ROOMS",              &HabboSocket::HandleGetFavouriteRooms          );
         StoreClientPacket(PacketClientHeader::CLIENT_ADD_FAVOURITE_ROOM,            "CLIENT_ADD_FAVOURITE_ROOM",               &HabboSocket::HandleAddFavouriteRoom           );
         StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",            &HabboSocket::HandleRemoveFavouriteRoom        );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_INFO,                 "CLIENT_GET_FLAT_INFO",                    &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FLAT,                   "CLIENT_DELETE_FLAT",                      &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_FLAT,                   "CLIENT_UPDATE_FLAT",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_INFO,                 "CLIENT_SET_FLAT_INFO",                    &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_INFO,                 "CLIENT_SET_FLAT_INFO",                    &HabboSocket::HandleSetFlatCategory            );
+        StoreClientPacket(PacketClientHeader::CLIENT_CREATE_FLAT,                   "CLIENT_CREATE_FLAT",                      &HabboSocket::HandleCreateFlat                 );
         StoreClientPacket(PacketClientHeader::CLIENT_NAVIGATE,                      "CLIENT_NAVIGATE",                         &HabboSocket::HandleNavigate                   );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_FLAT_CATEGORIES,      "CLIENT_GET_USER_FLAT_CATEGORIES",         &HabboSocket::HandleGetUserFlatsCategories     );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_CATEGORY,             "CLIENT_GET_FLAT_CATEGORY",                &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_CATEGORY,             "CLIENT_SET_FLAT_CATEGORY",                &HabboSocket::HandleSetFlatCategory            );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_CATEGORY,             "CLIENT_SET_FLAT_CATEGORY",                &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_SPACE_NODE_USERS,          "CLIENT_GET_SPACE_NODE_USERS",             &HabboSocket::HandleNodeSpaceUsers             );
         StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ALL_RIGHTS,             "CLIENT_REMOVE_ALL_RIGHTS",                &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_PARENT_CHAIN,              "CLIENT_GET_PARENT_CHAIN",                 &HabboSocket::HandleNULL                       );

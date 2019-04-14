@@ -48,6 +48,7 @@ namespace SteerStone
     /// @p_Name : Habbo Name
     Habbo* Hotel::FindHabboByName(std::string const& p_Name) const
     {
+        /// TODO; Is there a faster way of doing this?
         auto itr = std::find_if(m_Habbos.begin(), m_Habbos.end(),
             [&p_Name](std::pair<uint32, Habbo*> const& player)
             {
@@ -64,6 +65,7 @@ namespace SteerStone
     /// @p_Player : Habbo Class
     void Hotel::AddHabbo(Habbo* p_Habbo)
     {
+        /// If the habbo already exists in our storage, then disconnect session, and insert our new session
         auto const& itr = m_Habbos.find(p_Habbo->GetId());
         if (itr != m_Habbos.end())
             itr->second->Logout(LOGOUT_CONCURRENT);
@@ -83,6 +85,7 @@ namespace SteerStone
     /// Load Configs from .conf file
     void Hotel::LoadConfigs()
     {
+        /// It's faster if we store the results in a array, so we don't have to keep accessing the map storage to find our key
         m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_HABBO_CLOTHING]      = sConfig->GetBoolDefault("RegisterationHabboClothing", 0);
         m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_SOUND]               = sConfig->GetBoolDefault("RegisterationSound", 0);
         m_BoolConfigs[BoolConfigs::CONFIG_REGISTERATION_REQUIRE_PARENT_EMAIL]= sConfig->GetBoolDefault("RegisterationRequireParentEmail", 1);
@@ -139,30 +142,33 @@ namespace SteerStone
     /// @p_Diff : Diff time of updating Hotel
     void Hotel::UpdateWorld(uint32 const& p_Diff)
     {
-        for (auto& itr = m_Habbos.begin(); itr != m_Habbos.end();)
+        for (auto& l_Itr = m_Habbos.begin(); l_Itr != m_Habbos.end();)
         {
-            Habbo* player = itr->second;
+            Habbo* l_Habbo = l_Itr->second;
 
-            if (!player->Update(p_Diff))
+            /// Habbo has its own update, incase we need to independantly update for example Ping
+            if (!l_Habbo->Update(p_Diff))
             {
-                itr = m_Habbos.erase(itr);
-                delete player;
+                l_Itr = m_Habbos.erase(l_Itr);
+                delete l_Habbo;
             }
             else
-                ++itr;
+                ++l_Itr;
         }
 
         /// Update all of our rooms
+        /// TODO; We should probably only update rooms which has players in?
         sRoomMgr->UpdateRooms(p_Diff);
     }
    
     /// Clean Up - Clean up the objects in the hotel before closing down server
     void Hotel::CleanUp()
     {
-        for (auto& itr = m_Habbos.begin(); itr != m_Habbos.end();)
+        for (auto& l_Itr = m_Habbos.begin(); l_Itr != m_Habbos.end();)
         {
-            delete itr->second;
-            itr = m_Habbos.erase(itr);
+            l_Itr->second->Logout();
+            delete l_Itr->second;
+            l_Itr = m_Habbos.erase(l_Itr);
         }
 
         m_Habbos.clear();

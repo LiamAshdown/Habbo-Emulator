@@ -269,7 +269,7 @@ namespace SteerStone
 
         bool IsSoundEnabled()           const { return m_SoundEnabled;         }
         bool IsPonged()                 const { return m_Ponged;               }
-        uint8 GetRank()                 const { return m_Rank;                 }
+        uint16 GetRank()                const { return m_Rank;                 }
 
         ///////////////////////////////////////////
         //             HABBO INFO
@@ -359,16 +359,15 @@ namespace SteerStone
         int16 m_HeadRotation;
         uint16 m_DanceId;               ///< Save Habbo dance Id to be used for status update
 
-        uint8 m_Rank;
+        uint16 m_Rank;
 
         /// Storages
-        std::weak_ptr<Room> m_Room;
-        std::unique_ptr<Messenger> m_Messenger;
-        std::unique_ptr<FuseRights> m_FuseRight;
-        std::unique_ptr<HabboClub> m_HabboClub;
+        std::weak_ptr<Room>            m_Room;
+        std::unique_ptr<Messenger>     m_Messenger;
+        std::unique_ptr<FuseRights>    m_FuseRight;
+        std::unique_ptr<HabboClub>     m_HabboClub;
         std::unique_ptr<FavouriteRoom> m_FavouriteRooms;
-        std::unique_ptr<Badge> m_Badge;
-        std::shared_ptr<HabboSocket> m_Socket;
-        std::mutex m_Mutex;
+        std::unique_ptr<Badge>         m_Badge;
+        std::shared_ptr<HabboSocket>   m_Socket;
     };
 } ///< NAMESPACE STEERSTONE
