@@ -72,7 +72,8 @@ namespace SteerStone
             l_Database.ExecuteQuery();
 
             /// Set user rank to habbo club
-            m_Habbo->SetRank(AccountRank::HABBO_CLUB);
+            if (m_Habbo->GetRank() < AccountRank::HABBO_CLUB)
+                m_Habbo->SetRank(AccountRank::HABBO_CLUB);
         }
 
         LoadSubscription();
