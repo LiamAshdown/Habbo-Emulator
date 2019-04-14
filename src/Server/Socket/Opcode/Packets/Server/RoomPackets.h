@@ -299,7 +299,7 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
             };
-
+            
             /// SERVER_GO_TO_FLAT packet builder
             class GoToFlat final : public ServerPacket
             {
@@ -313,6 +313,22 @@ namespace SteerStone
 
                 std::string Id;
                 std::string Name;
+            };
+
+            /// SERVER_USE_BADGE packet builder
+            class UseBadge final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                UseBadge() : ServerPacket(SERVER_USE_BADGE) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 GUID;
+                std::string Badge;
+                bool BadgeVisible;
             };
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET

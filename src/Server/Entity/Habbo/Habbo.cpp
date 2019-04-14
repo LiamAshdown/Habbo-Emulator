@@ -204,7 +204,7 @@ namespace SteerStone
             return;
         }
 
-        m_Messenger->ParseMessengerSendFriendRequest(p_Name);
+        m_Messenger->ParseMessengerSendBuddyRequest(p_Name);
     }
 
     /// MessengerRemoveBuddy
@@ -313,6 +313,15 @@ namespace SteerStone
     void Habbo::SendAccountBadges()
     {
         m_Badge->SendBadges();
+    }
+
+    /// SendSetBadge
+    /// Update current badge
+    /// @p_Badge : New badge we are setting to
+    /// @p_Visible : Is new badge visible
+    void Habbo::SendSetBadge(std::string const p_Badge, bool const p_Visible)
+    {
+        m_Badge->SendSetBadge(p_Badge, p_Visible);
     }
 
     /// SendFuseRights

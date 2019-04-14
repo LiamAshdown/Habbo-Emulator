@@ -45,6 +45,12 @@ namespace SteerStone
         /// Send user badges to client
         void SendBadges();
 
+        /// SendSetBadge
+        /// Set user new current badge
+        /// @p_Badge : New badge we are setting to
+        /// @p_Visible : Is new badge visible
+        void SendSetBadge(std::string const p_Badge, bool const p_Visible);
+
         /// IsBadgeVisible
         /// Is badge visible to other users
         bool IsCurrentBadgeVisible() const;

@@ -79,6 +79,7 @@ namespace SteerStone
                 }
                 m_Buffer.AppendSOH();
 
+                uint8* test = &m_Buffer.m_Storage[0];
 
                 return &m_Buffer;
             }
@@ -309,6 +310,18 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-} ///< NAMESPACE ROOM
+            StringBuffer const * UseBadge::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+
+                if (BadgeVisible)
+                    m_Buffer.AppendString(Badge);
+
+                m_Buffer.AppendSOH();
+           
+                return &m_Buffer;
+            }
+
+        } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

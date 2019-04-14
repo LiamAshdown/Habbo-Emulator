@@ -17,9 +17,11 @@
 */
 
 #include "Habbo.h"
+#include "RoomManager.h"
 #include "Database/QueryDatabase.h"
 
 #include "Opcode/Packets/Server/LoginPackets.h"
+#include "Opcode/Packets/Server/RoomPackets.h"
 
 namespace SteerStone
 {
@@ -72,6 +74,27 @@ namespace SteerStone
         }
 
         m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+    }
+
+    /// SendSetBadge
+    /// Update new current badge
+    /// @p_Badge : New badge we are setting to
+    /// @p_Visible : Is new badge visible
+    void Badge::SendSetBadge(std::string const p_Badge, bool const p_Visible)
+    {
+        /// Does user badge exist?
+        auto const& l_Itr = m_Badges.find(p_Badge);
+        if (l_Itr != m_Badges.end())
+        {
+            m_CurrentBadge = std::make_tuple(l_Itr->first, l_Itr->second = p_Visible);
+
+            /// Inform players inside room we have changed badge
+            HabboPacket::Room::UseBadge l_Packet;
+            l_Packet.GUID = m_Habbo->GetRoomGUID();
+            l_Packet.Badge = GetCurrentBadgeName();
+            l_Packet.BadgeVisible = IsCurrentBadgeVisible();
+            m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
+        }
     }
 
     /// IsBadgeVisible

@@ -225,7 +225,7 @@ namespace SteerStone
         else
         {
             if (m_AFKTimer <= p_Diff)
-                m_Habbo->Logout();
+                ;//    m_Habbo->Logout();
             else
                 m_AFKTimer -= p_Diff;
         }

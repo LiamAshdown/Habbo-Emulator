@@ -13,7 +13,7 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.f
 */
 //-----------------------------------------------//
 #include "../HabboSocket.h"
@@ -108,7 +108,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_GO_AWAY,                       "CLIENT_GO_AWAY",                          &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",                     &HabboSocket::HandleGetRoomAdd                 );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_PET_STAT,                  "CLIENT_GET_PET_STAT",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_BADGE,                     "CLIENT_SET_BADGE",                        &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_BADGE,                     "CLIENT_SET_BADGE",                        &HabboSocket::HandleSetBadge                   );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_INTEREST,                  "CLIENT_GET_INTEREST",                     &HabboSocket::HandleGetInterest                );
         StoreClientPacket(PacketClientHeader::CLIENT_CONVERT_FURNI_TO_CREDITS,      "CLIENT_CONVERT_FURNI_TO_CREDITS",         &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_QUEUE,                    "CLIENT_ROOM_QUEUE",                       &HabboSocket::HandleNULL                       );
@@ -229,10 +229,11 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_C_READ,               "CLIENT_MESSENGER_C_READ",                &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_MARK_READ,            "CLIENT_MESSENGER_MARK_READ",             &HabboSocket::HandleMessengerMarkRead          );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_MESSAGE,         "CLIENT_MESSENGER_SEND_MESSAGE",          &HabboSocket::HandleMessengerSendMessage       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_ASSIGN_PER_MSG,       "CLIENT_MESSENGER_ASSIGN_PER_MSG",        &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_CONSOLE_MOTTO,        "CLIENT_MESSENGER_CONSOLE_MOTTO",         &HabboSocket::HandleConsoleMotto               );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_ACCEPT_BUDDY,         "CLIENT_MESSENGER_ACCEPT_BUDDY",          &HabboSocket::HandleMessengerAcceptBuddy       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_DECLINE_BUDDY,        "CLIENT_MESSENGER_DECLINE_BUDDY",         &HabboSocket::HandleMessengerRejectBuddy       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REQUEST_BUDDY,        "CLIENT_MESSENGER_REQUEST_BUDDY",         &HabboSocket::HandleMessengerRemoveBuddy       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REQUEST_BUDDY,        "CLIENT_MESSENGER_REQUEST_BUDDY",         &HabboSocket::HandleMessengerSendRequest       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REMOVE_BUDDY,         "CLIENT_MESSENGER_REMOVE_BUDDY",          &HabboSocket::HandleMessengerRemoveBuddy       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_GET_MESSAGE,          "CLIENT_MESSENGER_GET_MESSAGE",           &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REPORT_MESSAGE,       "CLIENT_MESSENGER_REPORT_MESSAGE",        &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_BUDDY_REQUESTS,       "CLIENT_MESSENGER_BUDDY_REQUESTS",        &HabboSocket::HandleNULL                       );

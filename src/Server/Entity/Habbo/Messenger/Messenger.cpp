@@ -52,7 +52,7 @@ namespace SteerStone
 
         do
         {
-            MessengerFriendData& l_Friend = m_MessengerFriends[l_Result->GetUint32(1)];
+            MessengerFriendData& l_Friend  = m_MessengerFriends[l_Result->GetUint32(1)];
             l_Friend.m_Id                  = l_Result->GetUint32(1);
             l_Friend.m_Name                = l_Result->GetString(2);
             l_Friend.m_Figure              = l_Result->GetString(3);
@@ -408,6 +408,7 @@ namespace SteerStone
             l_PacketAddFriendOther.Figure        = m_Habbo->GetFigure(); ///< User Figure
 
             l_Habbo->ToSocket()->SendPacket(l_PacketAddFriendOther.Write());
+            l_Habbo->SendMessengerUpdate();
         }
     }
     
@@ -465,9 +466,9 @@ namespace SteerStone
         p_Buffer.AppendString(l_Result->GetString(3)); ///< User Figure
     }
 
-    /// ParseMessengerSendFriendRequest
+    /// ParseMessengerSendBuddyRequest
     /// @p_Name : Name of Habbo we are sending friend request too
-    void Messenger::ParseMessengerSendFriendRequest(std::string const p_Name)
+    void Messenger::ParseMessengerSendBuddyRequest(std::string const p_Name)
     {
         QueryDatabase l_Database("users");
         l_Database.PrepareQuery("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, subscribed, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");
@@ -581,10 +582,18 @@ namespace SteerStone
 
             m_MessengerFriends.erase(l_Itr);
             l_Packet.FriendsId.push_back(l_Id);
-        }
 
-        /// We could also do this if the friend is online aswell, but we will let UpdateConsole()
-        /// do that since messenger console gets updated every couple minutes
+            /// If our ex-friend is online send remove packet to user aswell
+            if (Habbo* l_Habbo = sHotel->FindHabbo(l_Id))
+            {
+                HabboPacket::Messenger::MessengerRemoveBuddy l_ExFriendPacket;
+                l_ExFriendPacket.FriendsId.push_back(m_Habbo->GetId());
+                l_Habbo->ToSocket()->SendPacket(l_ExFriendPacket.Write());
+
+                /// And also update users console
+                l_Habbo->SendMessengerUpdate();
+            }
+        }
         m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
     }
 

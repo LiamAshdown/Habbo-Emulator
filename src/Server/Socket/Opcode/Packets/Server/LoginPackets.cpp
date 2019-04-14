@@ -176,6 +176,8 @@ namespace SteerStone
 
                 m_Buffer.AppendSOH();
 
+                uint8* test = &m_Buffer.m_Storage[0];
+
                 return &m_Buffer;
             }
 

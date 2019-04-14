@@ -209,6 +209,7 @@ namespace SteerStone
                 l_Packet.Figure     = p_Habbo->GetFigure();
                 l_Packet.PoolFigure = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
                 l_Packet.Gender     = p_Habbo->GetGender() == "Male" ? "M" : "F";
+                l_Packet.Badge      = l_Habbo->GetCurrentBadge();
                 l_Packet.X          = boost::lexical_cast<std::string>(p_Habbo->GetPositionX());
                 l_Packet.Y          = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
                 l_Packet.Z          = boost::lexical_cast<std::string>(p_Habbo->GetPositionZ());
@@ -224,10 +225,12 @@ namespace SteerStone
             l_Packet.Figure         = l_Habbo->GetFigure();
             l_Packet.PoolFigure     = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
             l_Packet.Gender         = l_Habbo->GetGender() == "Male" ? "M" : "F";
+            l_Packet.Badge          = l_Habbo->GetCurrentBadge();
             l_Packet.X              = boost::lexical_cast<std::string>(l_Habbo->GetPositionX());
             l_Packet.Y              = boost::lexical_cast<std::string>(l_Habbo->GetPositionY());
             l_Packet.Z              = boost::lexical_cast<std::string>(l_Habbo->GetPositionZ());
             l_Packet.Motto          = l_Habbo->GetMotto();
+            StringBuffer l_Buffer;
             p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
         }
     }
@@ -382,7 +385,7 @@ namespace SteerStone
     /// Process Habbo Actions; Status, pathfinding, etc..
     void Room::ProcessUserActions(const uint32 p_Diff)
     {
-        for (auto& l_Itr : m_Habbos)
+        for (auto const& l_Itr : m_Habbos)
         {
             l_Itr.second->ProcessActions(p_Diff);
         }

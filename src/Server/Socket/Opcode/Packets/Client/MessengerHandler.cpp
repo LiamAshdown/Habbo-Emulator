@@ -19,6 +19,8 @@
 #include "HabboSocket.h"
 #include "Habbo.h"
 
+#include "Opcode/Packets/Server/MessengerPackets.h"
+
 namespace SteerStone
 {
     void HabboSocket::HandleMessengerInitialize(std::unique_ptr<ClientPacket> p_Packet)
@@ -72,5 +74,23 @@ namespace SteerStone
         uint32 l_MessageId = p_Packet->ReadWiredUint();
 
         m_Habbo->MessengerReply(l_MessageId);
+    }
+
+    void HabboSocket::HandleConsoleMotto(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        /// TODO; Filter motto
+        std::string l_Motto = p_Packet->ReadString();
+
+        /// Set our new motto
+        m_Habbo->m_ConsoleMotto = l_Motto;
+
+        /// Update client with our new motto
+        HabboPacket::Messenger::PersistentMessage l_Packet;
+        l_Packet.Motto = l_Motto;
+        SendPacket(l_Packet.Write());
+
+        /// Time to update the database
+        /// I will just call the default SaveToDb which will save all player details
+        m_Habbo->SaveToDB();
     }
 } /// NAMESPACE STEERSTONE

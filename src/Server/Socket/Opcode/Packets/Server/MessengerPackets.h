@@ -180,6 +180,20 @@ namespace SteerStone
                 std::string Message;
             };
 
+            /// SERVER_MY_PERSISTENT_MESSAGE packet builder
+            class PersistentMessage final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                PersistentMessage() : ServerPacket(SERVER_MY_PERSISTENT_MESSAGE) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+                
+                std::string Motto;
+            };
+
         } ///< NAMESPACE Messenger
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

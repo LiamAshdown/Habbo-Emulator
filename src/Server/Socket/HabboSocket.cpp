@@ -20,7 +20,7 @@
 #include "Database/QueryDatabase.h"
 #include "Common/SHA1.h"
 #include "Habbo.h"
-#include "Opcodes.h"
+#include "Opcode/Opcodes.h"
 
 namespace SteerStone
 {

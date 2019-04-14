@@ -120,7 +120,6 @@ namespace SteerStone
             {"@icloud.com"},
             {"@outlook.co.uk"},
             {"@outlook.com"}
-
         };
 
         /// Check if the email recieved matches our requirements
@@ -205,7 +204,6 @@ namespace SteerStone
 
     void HabboSocket::HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet)
     {
-        /// Email is not valid
         HabboPacket::Registration::ParentEmailRequired l_Packet;
         l_Packet.RequireParentEmail = sHotel->GetBoolConfig(CONFIG_REGISTERATION_REQUIRE_PARENT_EMAIL);
         SendPacket(l_Packet.Write());
@@ -224,7 +222,6 @@ namespace SteerStone
             {"@icloud.com"},
             {"@outlook.co.uk"},
             {"@outlook.com"}
-
         };
 
         /// Check if the email recieved matches our requirements

@@ -50,11 +50,11 @@ namespace SteerStone
     void HabboSocket::HandleGetRoomAdd(std::unique_ptr<ClientPacket> p_Packet)
     {
         HabboPacket::Room::RoomAdd l_Packet;
-        
+
         if (RoomUrlData* l_RoomUrlData = sRoomMgr->GetRoomUrl(m_Habbo->GetRoom()->GetId()))
         {
             l_Packet.ImageUrl = l_RoomUrlData->ImageUrl;
-            l_Packet.LinkUrl  = l_RoomUrlData->LinkUrl;
+            l_Packet.LinkUrl = l_RoomUrlData->LinkUrl;
         }
 
         SendPacket(l_Packet.Write());
@@ -171,7 +171,7 @@ namespace SteerStone
         if (l_Position != std::string::npos)
         {
             std::string l_Name = l_Contents.substr(0, l_Position);
-            
+
             if (Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Name))
             {
                 l_Packet.Message = l_Contents.substr(l_Position + 1);
@@ -184,5 +184,12 @@ namespace SteerStone
                 m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
             }
         }
+    }
+
+    void HabboSocket::HandleSetBadge(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Badge = p_Packet->ReadString();
+        bool l_Visible = p_Packet->ReadWiredBool();
+        m_Habbo->SendSetBadge(l_Badge, l_Visible);
     }
 }

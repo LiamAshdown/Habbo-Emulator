@@ -102,6 +102,7 @@ namespace SteerStone
             if (m_RemainingDays < 0)
             {
                 m_Habbo->SetRank(AccountRank::HABBO_NORMAL);
+                m_Habbo->SendAccountBadges(); ///< Update our badges for user to recieve HC badge
                 
                 l_Database.ClearParameters();
 

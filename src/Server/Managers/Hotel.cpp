@@ -104,8 +104,8 @@ namespace SteerStone
         m_IntConfigs[IntConfigs::CONFIG_REGISTERATION_FILMS]                 = sConfig->GetIntDefault("RegisterationFilms", 0);
         m_IntConfigs[IntConfigs::CONFIG_MESSENGER_MAX_FRIENDS]               = sConfig->GetIntDefault("MessengerMaxFriendsLimit", 50);
         m_IntConfigs[IntConfigs::CONFIG_MESSENGER_MAX_CLUB_FRIENDS]          = sConfig->GetIntDefault("MessgengerMaxFriendsClubLimit", 100);
-        m_IntConfigs[IntConfigs::CONFIG_AFK_TIMER]                           = sConfig->GetIntDefault("WaveTimer", 4000);
-        m_IntConfigs[IntConfigs::CONFIG_WAVE_TIMER]                          = sConfig->GetIntDefault("AwayFromKeyboardTimer", 900000);
+        m_IntConfigs[IntConfigs::CONFIG_AFK_TIMER]                           = sConfig->GetIntDefault("AwayFromKeyboardTimer", 900000);
+        m_IntConfigs[IntConfigs::CONFIG_WAVE_TIMER]                          = sConfig->GetIntDefault("WaveTimer", 4000);
     }
 
     /// GetBoolConfig

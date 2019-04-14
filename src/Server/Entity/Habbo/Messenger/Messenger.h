@@ -135,9 +135,9 @@ namespace SteerStone
         /// @p_Name : Name of Habbo we are searching for
         void ParseMessengerSearchUser(StringBuffer& p_Buffer, std::string const p_Name);
 
-        /// ParseMessengerSendFriendRequest
+        /// ParseMessengerSendBuddyRequest
         /// @p_Name : Name of Habbo we are sending friend request too
-        void ParseMessengerSendFriendRequest(std::string const p_Name);
+        void ParseMessengerSendBuddyRequest(std::string const p_Name);
 
         /// ParseMessengerRemoveBuddy
         /// @p_Packet : Incoming client packet which we will decode

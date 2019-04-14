@@ -105,6 +105,8 @@ namespace SteerStone
         void HandleBuyHabboClub(std::unique_ptr<ClientPacket> p_Packet);
         void HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet);
         void HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSetBadge(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleConsoleMotto(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

@@ -107,7 +107,6 @@ namespace SteerStone
 
                 m_Buffer.AppendSOH();
 
-
                 return &m_Buffer;
             }
 
@@ -170,6 +169,17 @@ namespace SteerStone
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * PersistentMessage::Write()
+            {
+                m_Buffer.AppendString(Motto, false);
+
+                m_Buffer.AppendSOH();
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
 
 } ///< NAMESPACE MESSENGER
     } ///< NAMESPACE HABBOPACKET

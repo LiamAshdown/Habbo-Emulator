@@ -18,11 +18,11 @@
 
 #pragma once
 #include "Common/SharedDefines.h"
-#include "Messenger.h"
-#include "FavouriteRoom.h"
-#include "FuseRights.h"
-#include "HabboClub.h"
-#include "Badge.h"
+#include "Messenger/Messenger.h"
+#include "FavouriteRooms/FavouriteRoom.h"
+#include "Fuse/FuseRights.h"
+#include "Club/Club.h"
+#include "Badge/Badge.h"
 #include <mutex>
 
 namespace SteerStone
@@ -208,6 +208,12 @@ namespace SteerStone
         /// SendAccountBadges
         /// Send user account badges (set from users.account_badges database)
         void SendAccountBadges();
+
+        /// SendSetBadge
+        /// Update new current badge
+        /// @p_Badge : New badge we are setting to
+        /// @p_Visible : Is new badge visible
+        void SendSetBadge(std::string const p_Badge, bool const p_Visible);
 
         /// SendFuseRights
         /// Send user account rights (set from users.rank_fuserights database)
