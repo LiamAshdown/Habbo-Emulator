@@ -129,7 +129,7 @@ namespace SteerStone
         l_Packet.ElaspedMonths = m_MonthsPassed;
         l_Packet.PrepaidMonths = m_PrePaidMonths;
         l_Packet.ResponseFlag  = 1;
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
     
     /// IsSubscribed

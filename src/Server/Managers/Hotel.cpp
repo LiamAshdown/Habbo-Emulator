@@ -65,10 +65,16 @@ namespace SteerStone
     /// @p_Player : Habbo Class
     void Hotel::AddHabbo(Habbo* p_Habbo)
     {
+        if (FindHabbo(p_Habbo->GetId()))
+        {
+            LOG_ERROR << "Trying to add an already existing habbo session";
+            return;
+        }
+
         /// If the habbo already exists in our storage, then disconnect session, and insert our new session
-        auto const& itr = m_Habbos.find(p_Habbo->GetId());
-        if (itr != m_Habbos.end())
-            itr->second->Logout(LOGOUT_CONCURRENT);
+        auto const& l_Itr = m_Habbos.find(p_Habbo->GetId());
+        if (l_Itr != m_Habbos.end())
+            delete l_Itr->second;
 
         m_Habbos[p_Habbo->GetId()] = p_Habbo;
     }
@@ -142,15 +148,17 @@ namespace SteerStone
     /// @p_Diff : Diff time of updating Hotel
     void Hotel::UpdateWorld(uint32 const& p_Diff)
     {
-        for (auto& l_Itr = m_Habbos.begin(); l_Itr != m_Habbos.end();)
+        uint32 l_StartTime = sHotelTimer->GetServerTime();
+
+        for (auto l_Itr = m_Habbos.begin(); l_Itr != m_Habbos.end();)
         {
             Habbo* l_Habbo = l_Itr->second;
 
             /// Habbo has its own update, incase we need to independantly update for example Ping
             if (!l_Habbo->Update(p_Diff))
             {
-                l_Itr = m_Habbos.erase(l_Itr);
                 delete l_Habbo;
+                l_Itr = m_Habbos.erase(l_Itr);
             }
             else
                 ++l_Itr;
@@ -159,6 +167,9 @@ namespace SteerStone
         /// Update all of our rooms
         /// TODO; We should probably only update rooms which has players in?
         sRoomMgr->UpdateRooms(p_Diff);
+
+        uint32 l_EndTime = sHotelTimer->GetTimeDifference(l_StartTime, sHotelTimer->GetServerTime());
+        LOG_INFO << "Updated world in " << l_EndTime  << " milliseconds with " << m_Habbos.size() << " players online";
     }
    
     /// Clean Up - Clean up the objects in the hotel before closing down server
@@ -166,7 +177,6 @@ namespace SteerStone
     {
         for (auto& l_Itr = m_Habbos.begin(); l_Itr != m_Habbos.end();)
         {
-            l_Itr->second->Logout();
             delete l_Itr->second;
             l_Itr = m_Habbos.erase(l_Itr);
         }

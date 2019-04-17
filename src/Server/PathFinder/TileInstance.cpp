@@ -76,8 +76,8 @@ namespace SteerStone
             m_Habbo = p_Habbo;
         else
         {
-            if (p_Habbo != nullptr)
-                if (p_Habbo->GetRoom() != nullptr)
+            if (p_Habbo)
+                if (p_Habbo->GetRoom())
                     ExecuteTriggerLeave(p_Habbo, p_Habbo->GetRoom(), GetItem());
 
             m_Habbo.reset();

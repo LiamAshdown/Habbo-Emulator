@@ -47,7 +47,11 @@ namespace SteerStone
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
+        {
+            /// No Badge? just set to default
+            m_CurrentBadge = std::make_tuple(std::string(), false);
             return;
+        }
 
         Result* l_Result = l_Database.Fetch();
 
@@ -73,7 +77,7 @@ namespace SteerStone
             l_Packet.Badges[l_Itr.first] = l_Itr.second;
         }
 
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
 
     /// SendSetBadge

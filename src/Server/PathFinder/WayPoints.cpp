@@ -59,11 +59,11 @@ namespace SteerStone
             {
                 /// Initialize room connection with client
                 HabboPacket::Room::OpenConnection l_Packet;
-                m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+                m_Habbo->SendPacket(l_Packet.Write());
 
                 /// Send Room Advertisement url
                 HabboPacket::Room::RoomUrl l_PacketUrl;
-                m_Habbo->ToSocket()->SendPacket(l_PacketUrl.Write());
+                m_Habbo->SendPacket(l_PacketUrl.Write());
 
                 /// Enter the room
                 m_Habbo->SetRoom(sRoomMgr->GetRoom(l_WalkWay->GetToId()), l_WalkWay);

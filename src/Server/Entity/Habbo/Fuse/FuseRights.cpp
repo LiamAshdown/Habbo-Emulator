@@ -65,7 +65,7 @@ namespace SteerStone
         for (auto& l_Itr : m_FuseRights)
             l_Packet.HabboFuseRights.push_back(l_Itr);
 
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
 
 } ///< NAMESPACE STEERSTONE

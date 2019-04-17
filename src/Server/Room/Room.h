@@ -47,8 +47,6 @@ namespace SteerStone
     class Habbo;
     class StringBuffer;
 
-    typedef std::unordered_map<uint32, std::unique_ptr<WayPoints>> PathFinderMap;
-    typedef std::unordered_map<uint32, std::unique_ptr<RoomHabboInfo>> GUIDUserMap;
 
     class Room
     {
@@ -172,11 +170,6 @@ namespace SteerStone
         bool IsRoomVisible()         const { return m_RoomVisible;  }
         RoomModel& GetRoomModel()          { return m_RoomModel;    }
         RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
-
-    private:
-        /// GenerateGUID
-        /// Generate a unique ID for new object in room
-        uint32 GenerateGUID();
       
     private:
         /// Room Info
@@ -199,7 +192,6 @@ namespace SteerStone
         bool m_RoomVisible;
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
-
         GUIDUserMap m_Habbos;                    ///< Hold Habbo users
         FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
     };

@@ -66,7 +66,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_SHOUT,                    "CLIENT_ROOM_SHOUT",                       &HabboSocket::HandleRoomShout                  );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",                     &HabboSocket::HandleRoomWhisper                );
         StoreClientPacket(PacketClientHeader::CLIENT_BTCKS,                         "CLIENT_QUIT",                             &HabboSocket::HandleLeaveRoom                  );
-        StoreClientPacket(PacketClientHeader::CLIENT_GO_VIA_DOOR,                   "CLIENT_GO_VIA_DOOR",                      &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GO_VIA_DOOR,                   "CLIENT_GO_VIA_DOOR",                      &HabboSocket::HandleNULL);
         StoreClientPacket(PacketClientHeader::CLIENT_TRY_FLAT,                      "CLIENT_TRY_FLAT",                         &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GO_TO_FLAT,                    "CLIENT_GO_TO_FLAT",                       &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_G_HEIGHT_MAP,                  "CLIENT_G_HEIGHT_MAP",                     &HabboSocket::HandleGHeightMap                 );

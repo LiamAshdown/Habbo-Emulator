@@ -48,6 +48,9 @@ namespace SteerStone
     /// @p_Buffer : Buffer which holds our data to be send to the client
     void HabboSocket::SendPacket(StringBuffer const* p_Buffer)
     {
+        if (IsClosed())
+            return;
+
         Write((const char*)p_Buffer->GetContents(), p_Buffer->GetSize());
     }
     

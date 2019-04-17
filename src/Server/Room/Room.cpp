@@ -123,7 +123,7 @@ namespace SteerStone
             p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
                 GetRoomModel().GetDoorOrientation());
 
-        p_Habbo->SetRoomGUID(GenerateGUID());
+        p_Habbo->SetRoomGUID(Maths::GetRandomUint32(1, 9999));
 
         /// Send update that we joined the room
         p_Habbo->SendMessengerUpdate();
@@ -146,7 +146,7 @@ namespace SteerStone
         HabboPacket::Room::RoomReady l_PacketRoomReady;
         l_PacketRoomReady.Model = GetRoomModel().GetModel();
         l_PacketRoomReady.Id = GetId();
-        p_Habbo->ToSocket()->SendPacket(l_PacketRoomReady.Write());
+        p_Habbo->SendPacket(l_PacketRoomReady.Write());
     }
     
     /// EnterRoom 
@@ -163,11 +163,11 @@ namespace SteerStone
             /// Send update that we left the room
             l_Itr->second->m_Habbo->SendMessengerUpdate();
 
-            /// Notify other users that we left the room
-            SendUserLeftRoom(l_Itr->second->ToHabbo()->GetRoomGUID());
+            /// Set our room to null
+            l_Itr->second->m_Habbo->DestroyRoom();
 
-            /// Set Habbo room to nullptr
-            l_Itr->second->ToHabbo()->DestroyRoom();
+            /// Notify other users that we left the room
+            SendUserLeftRoom(l_Itr->first);
 
             m_FunctionCallBack.AddCallBack(std::bind(&Room::LeaveRoomCallBack, this, l_Itr));
         }
@@ -181,16 +181,9 @@ namespace SteerStone
     void Room::LeaveRoomCallBack(GUIDUserMap::iterator& p_Itr)
     {
         m_Habbos.erase(p_Itr);
+
         m_VisitorsNow--;
         GetRoomCategory()->GetVisitorsNow()--;
-    }
-
-    /// GenerateGUID 
-    /// Generate a unique ID for new object in room
-    uint32 Room::GenerateGUID()
-    {
-        /// TODO; Check whether guid already exists
-        return Maths::GetRandomUint32(1, 9999);
     }
     
     /// Send Habbo Figure to clients in room
@@ -208,15 +201,15 @@ namespace SteerStone
                 l_Packet.Id         = boost::lexical_cast<std::string>(p_Habbo->GetId());
                 l_Packet.Name       = p_Habbo->GetName();
                 l_Packet.Figure     = p_Habbo->GetFigure();
-                l_Packet.PoolFigure = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
+                l_Packet.PoolFigure = GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
                 l_Packet.Gender     = p_Habbo->GetGender() == "Male" ? "M" : "F";
-                l_Packet.Badge      = l_Habbo->GetCurrentBadge();
+                l_Packet.Badge      = p_Habbo->GetCurrentBadge();
                 l_Packet.X          = boost::lexical_cast<std::string>(p_Habbo->GetPositionX());
                 l_Packet.Y          = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
                 l_Packet.Z          = boost::lexical_cast<std::string>(p_Habbo->GetPositionZ());
                 l_Packet.Motto      = p_Habbo->GetMotto();
                 l_Packet.Badge      = p_Habbo->GetCurrentBadge();
-                l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+                l_Habbo->SendPacket(l_Packet.Write());
             }
 
             HabboPacket::Room::HabboRoomObject l_Packet;
@@ -224,15 +217,14 @@ namespace SteerStone
             l_Packet.Id             = boost::lexical_cast<std::string>(l_Habbo->GetId());
             l_Packet.Name           = l_Habbo->GetName();
             l_Packet.Figure         = l_Habbo->GetFigure();
-            l_Packet.PoolFigure     = p_Habbo->GetRoom()->GetCcts("hh_people_pool").empty() ? std::string() : p_Habbo->GetPoolFigure();
+            l_Packet.PoolFigure     = GetCcts("hh_people_pool").empty() ? std::string() : l_Habbo->GetPoolFigure();
             l_Packet.Gender         = l_Habbo->GetGender() == "Male" ? "M" : "F";
             l_Packet.Badge          = l_Habbo->GetCurrentBadge();
             l_Packet.X              = boost::lexical_cast<std::string>(l_Habbo->GetPositionX());
             l_Packet.Y              = boost::lexical_cast<std::string>(l_Habbo->GetPositionY());
             l_Packet.Z              = boost::lexical_cast<std::string>(l_Habbo->GetPositionZ());
             l_Packet.Motto          = l_Habbo->GetMotto();
-            StringBuffer l_Buffer;
-            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            p_Habbo->SendPacket(l_Packet.Write());
         }
     }
 
@@ -258,8 +250,7 @@ namespace SteerStone
             l_Packet.DanceId        = std::to_string(l_Habbo->GetDanceId());
             l_Packet.Waving         = l_Itr.second->HasStatus(Status::STATUS_WAVING);
             l_Packet.Swimming       = l_Itr.second->HasStatus(Status::STATUS_SWIMMING);
-
-            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            p_Habbo->SendPacket(l_Packet.Write());
         }
     }
 
@@ -268,11 +259,12 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            Habbo* l_Habbo = l_Itr.second->ToHabbo();
+            if (!l_Itr.second->ToHabbo())
+                return;
 
             HabboPacket::Room::LeaveRoom l_Packet;
             l_Packet.GUID = std::to_string(p_GUID);
-            l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            l_Itr.second->ToHabbo()->SendPacket(l_Packet.Write());
         }
     }
     
@@ -298,7 +290,7 @@ namespace SteerStone
                 l_Packet.WorldObjects.push_back(l_WorldObject);
             }
 
-            p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            p_Habbo->SendPacket(l_Packet.Write());
         }
         else
         {
@@ -313,7 +305,9 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            l_Itr.second->ToHabbo()->ToSocket()->SendPacket(p_Buffer);
+            Habbo* l_Habbo = l_Itr.second->ToHabbo();
+
+            l_Habbo->SendPacket(p_Buffer);
         }
     }
 
@@ -322,7 +316,7 @@ namespace SteerStone
     void Room::SendActiveObjects(Habbo* p_Habbo)
     {
         HabboPacket::Room::ActiveObjects l_Packet;
-        p_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        p_Habbo->SendPacket(l_Packet.Write());
     }
 
     /// Walk 
@@ -362,7 +356,7 @@ namespace SteerStone
     /// @p_Status : Status to check
     bool Room::HasStatus(uint32 const p_RoomGUID, uint32 const p_Status) const
     {
-        auto& l_Itr = m_Habbos.find(p_RoomGUID);
+        auto const& l_Itr = m_Habbos.find(p_RoomGUID);
         if (l_Itr != m_Habbos.end())
             return l_Itr->second->HasStatus(p_Status);
         else
@@ -375,6 +369,9 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
+            if (!l_Itr.second->ToHabbo()->GetRoom())
+                continue;
+
             if (l_Itr.second->ToHabbo()->GetName() == p_Name)
                 return l_Itr.second->ToHabbo();
         }
@@ -388,6 +385,10 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
+            /// Does user still exist?
+            if (!l_Itr.second->ToHabbo())
+                continue;
+
             l_Itr.second->ProcessActions(p_Diff);
         }
     }

@@ -38,8 +38,8 @@ namespace SteerStone
 
         /// GetTimeDifference
         /// @p_OldMSTime : Old Time
-        /// @p_NewMSTime : New Time
-        inline uint32 WorldTimer::GetTimeDifference(uint32 const& p_OldMSTime, uint32 const& p_NewMSTime)
+        /// @p_NewMSTime : New Time    
+        uint32 WorldTimer::GetTimeDifference(uint32 const& p_OldMSTime, uint32 const& p_NewMSTime)
         {
             if (p_OldMSTime > p_NewMSTime)
             {

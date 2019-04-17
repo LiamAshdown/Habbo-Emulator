@@ -110,7 +110,7 @@ namespace SteerStone
             l_Packet.Date       = l_Result->GetString(3);
             l_Packet.Message    = l_Result->GetString(2);
 
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
 
         } while (l_Result->GetNextResult());
     }
@@ -236,7 +236,7 @@ namespace SteerStone
             HabboPacket::Messenger::MessengerBuddyRequest l_Packet;
             l_Packet.Id = l_Friend.GetId();
             l_Packet.Name = l_Friend.GetName();
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
         }
     }
 
@@ -296,7 +296,7 @@ namespace SteerStone
         {
             LOG_FATAL << "Habbo " << m_Habbo->GetName() << " tried to accept friend request from Habbo Id " << p_SenderId << " but Habbo does not exist!";
             l_Packet.Error = MessengerErrorCode::CONCURRENCY_ERROR;
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -322,7 +322,7 @@ namespace SteerStone
 
         if (l_Packet.Error != MessengerErrorCode::ACCEPT_SUCCESS)
         {
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -381,7 +381,7 @@ namespace SteerStone
         l_PacketAddFriend.LastOnline = l_Result->GetString(6); ///< Last time user was online
         l_PacketAddFriend.Figure = l_Result->GetString(3); ///< User Figure
         
-        m_Habbo->ToSocket()->SendPacket(l_PacketAddFriend.Write());
+        m_Habbo->SendPacket(l_PacketAddFriend.Write());
 
         /// Do the same for other user
         if (l_PacketAddFriend.IsOnline)
@@ -407,7 +407,7 @@ namespace SteerStone
             l_PacketAddFriendOther.LastOnline    = GetDate(); ///< Last time user was online
             l_PacketAddFriendOther.Figure        = m_Habbo->GetFigure(); ///< User Figure
 
-            l_Habbo->ToSocket()->SendPacket(l_PacketAddFriendOther.Write());
+            l_Habbo->SendPacket(l_PacketAddFriendOther.Write());
             l_Habbo->SendMessengerUpdate();
         }
     }
@@ -482,7 +482,7 @@ namespace SteerStone
         if (!l_Database.GetResult())
         {
             l_Packet.Error = MessengerErrorCode::FRIEND_REQUEST_NOT_FOUND;
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -512,7 +512,7 @@ namespace SteerStone
 
         if (l_Packet.Error != MessengerErrorCode::ACCEPT_SUCCESS)
         {
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -522,7 +522,7 @@ namespace SteerStone
             HabboPacket::Messenger::MessengerBuddyRequest l_Packet;
             l_Packet.Id = m_Habbo->GetId();
             l_Packet.Name = m_Habbo->GetName();
-            l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            l_Habbo->SendPacket(l_Packet.Write());
         }
         else
         {
@@ -558,7 +558,7 @@ namespace SteerStone
                 LOG_ERROR << "Tried to remove friend Id: " << l_Id << " from " << m_Habbo->GetName() << " but friend doesn't exist!";
                 HabboPacket::Messenger::ErrorMessenger l_PacketError;
                 l_PacketError.Error = MessengerErrorCode::CONCURRENCY_ERROR;
-                m_Habbo->ToSocket()->SendPacket(l_PacketError.Write());
+                m_Habbo->SendPacket(l_PacketError.Write());
                 continue;
             }
 
@@ -588,13 +588,13 @@ namespace SteerStone
             {
                 HabboPacket::Messenger::MessengerRemoveBuddy l_ExFriendPacket;
                 l_ExFriendPacket.FriendsId.push_back(m_Habbo->GetId());
-                l_Habbo->ToSocket()->SendPacket(l_ExFriendPacket.Write());
+                l_Habbo->SendPacket(l_ExFriendPacket.Write());
 
                 /// And also update users console
                 l_Habbo->SendMessengerUpdate();
             }
         }
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
 
     /// ParseMessengerRejectBuddy
@@ -661,7 +661,7 @@ namespace SteerStone
                 l_Packet.Date    = GetDate();
                 l_Packet.Message = l_Message;
                 
-                l_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+                l_Habbo->SendPacket(l_Packet.Write());
             }
 
             /// Save message to the database

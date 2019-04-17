@@ -249,6 +249,10 @@ namespace SteerStone
         /// Save Habbo data to database on logout
         void SaveToDB();
 
+        /// SendPacket 
+        /// @p_Buffer : Buffer which holds our data to be send to the client
+        void SendPacket(StringBuffer const* p_Buffer);
+
     public:
         ///////////////////////////////////////////
         //                 ROOMS

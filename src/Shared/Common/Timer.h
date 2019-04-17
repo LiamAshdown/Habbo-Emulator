@@ -48,7 +48,7 @@ namespace SteerStone
             /// GetTimeDifference
             /// @p_OldMSTime : Old Time
             /// @p_NewMSTime : New Time
-            inline uint32 GetTimeDifference(uint32 const& p_OldMSTime, uint32 const& p_NewMSTime);
+            uint32 GetTimeDifference(uint32 const& p_OldMSTime, uint32 const& p_NewMSTime);
 
             /// TickTime - Get our Tick Time
             uint32 TickTime();

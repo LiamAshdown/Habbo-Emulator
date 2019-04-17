@@ -42,7 +42,7 @@ namespace SteerStone
         {
             /// Send our UI Makeup for swim wear
             HabboPacket::Room::OpenUIMakeOPPI l_PacketMakeUp;
-            p_Habbo->ToSocket()->SendPacket(l_PacketMakeUp.Write());
+            p_Habbo->SendPacket(l_PacketMakeUp.Write());
 
             p_Item->SetState("close");
             HabboPacket::Item::ShowProgram l_Packet;
@@ -77,7 +77,7 @@ namespace SteerStone
             l_PacketFigure.Y            = boost::lexical_cast<std::string>(p_Habbo->GetPositionY());
             l_PacketFigure.Z            = boost::lexical_cast<std::string>(p_Habbo->GetPositionZ());
             l_PacketFigure.Motto        = p_Habbo->GetMotto();
-            p_Habbo->ToSocket()->SendPacket(l_PacketFigure.Write());
+            p_Habbo->SendPacket(l_PacketFigure.Write());
 
             p_Habbo->GetRoom()->Walk(p_Habbo->GetRoomGUID(), p_Habbo->GetPositionX() + 2, p_Habbo->GetPositionY());
         }

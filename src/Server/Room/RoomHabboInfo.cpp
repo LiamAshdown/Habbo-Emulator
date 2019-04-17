@@ -79,9 +79,12 @@ namespace SteerStone
             /// Remove iteration which is the current user position
             m_Path->GetPath().pop_back();
 
+            /// Is our path empty when popping back? this means there's no suitable path created
+            if (m_Path->GetPath().empty())
+                return false;
+
             return true;
         }
-
         return false;
     }
 

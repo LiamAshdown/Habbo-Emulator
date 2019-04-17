@@ -177,7 +177,7 @@ namespace SteerStone
         if (!l_Database.GetResult())
         {
             HabboPacket::Navigator::NoFlats l_Packet;
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -220,7 +220,7 @@ namespace SteerStone
 
         } while (l_Result->GetNextResult());
 
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
 
     void HabboSocket::HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet)
@@ -298,7 +298,7 @@ namespace SteerStone
         {
             HabboPacket::Login::LocalisedError l_Packet;
             l_Packet.Error = "Error creating a private room";
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -335,7 +335,7 @@ namespace SteerStone
         HabboPacket::Room::GoToFlat l_Packet;
         l_Packet.Id = std::to_string(m_Habbo->m_LastCreatedRoomId);
         l_Packet.Name = l_RoomName;
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
 
     void HabboSocket::HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet)
@@ -381,7 +381,7 @@ namespace SteerStone
         {
             HabboPacket::Navigator::NoFlatsForUser l_Packet;
             l_Packet.Name = m_Habbo->GetName();
-            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
@@ -420,7 +420,7 @@ namespace SteerStone
 
         } while (l_Result->GetNextResult());
 
-        m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        m_Habbo->SendPacket(l_Packet.Write());
     }
     
 } ///< NAMESPACE STEERSTONE

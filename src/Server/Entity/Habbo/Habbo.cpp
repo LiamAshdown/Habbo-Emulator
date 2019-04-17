@@ -45,19 +45,7 @@ namespace SteerStone
     /// Deconstructor
     Habbo::~Habbo()
     {
-        /// Save our player data
         Logout();
-
-        m_Messenger.reset();
-        m_FavouriteRooms.reset();
-
-        if (m_Socket)
-        {
-            if (!m_Socket->IsClosed())
-                m_Socket->CloseSocket();
-
-            m_Socket->DestroyHabbo();
-        }
     }
 
     ///////////////////////////////////////////
@@ -85,18 +73,17 @@ namespace SteerStone
     /// Get room
     std::shared_ptr<Room> Habbo::GetRoom() const
     {
-        return m_Room.expired() ? nullptr : m_Room.lock();
+        if (m_Room.expired() || !GetRoomGUID())
+            return nullptr;
+
+        return m_Room.lock();
     }
 
     /// DestroyRoom
     /// Set Room to nullptr - player is no longer inside room
     void Habbo::DestroyRoom()
     {
-        if (auto l_Room = m_Room.lock())
-        {
-            l_Room.reset();
-            m_RoomGUID = 0;
-        }
+        m_RoomGUID = 0;
     }
 
     //////////////////////////////////////////////
@@ -109,7 +96,7 @@ namespace SteerStone
     {
         HabboPacket::Navigator::FavouriteRoomResult l_Packet;
         m_FavouriteRooms->ParseSendFavouriteRooms(l_Packet.GetBuffer());
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
     /// AddFavouriteRoom
@@ -148,7 +135,7 @@ namespace SteerStone
         l_Packet.ClubFriendsLimit = sConfig->GetIntDefault("MessgengerMaxFriendsClubLimit", 100);
         l_Packet.MessengerSize = m_Messenger->GetMessengerSize();
         m_Messenger->ParseMessengerInitialize(l_Packet.GetSecondaryBuffer());
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
 
         if (m_Messenger->HasFriendRequestPending())
             m_Messenger->ParseMessengerFriendRequest();
@@ -165,7 +152,7 @@ namespace SteerStone
         {
             HabboPacket::Messenger::BuddyRequestResult l_Packet;
             l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
-            ToSocket()->SendPacket(l_Packet.Write());
+            SendPacket(l_Packet.Write());
             return;
         }
 
@@ -178,7 +165,7 @@ namespace SteerStone
     {
         HabboPacket::Messenger::Update l_Packet;
         m_Messenger->ParseMessengerUpdate(l_Packet.GetSecondaryBuffer());
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
     /// SendSearchUserResults
@@ -188,7 +175,7 @@ namespace SteerStone
         HabboPacket::Messenger::FindUser l_Packet;
         l_Packet.Messenger = "MESSENGER";
         m_Messenger->ParseMessengerSearchUser(l_Packet.GetSecondaryBuffer(), p_Name);
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
     /// MessengerBuddyRequest
@@ -200,7 +187,7 @@ namespace SteerStone
         {
             HabboPacket::Messenger::ErrorMessenger l_Packet;
             l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
-            ToSocket()->SendPacket(l_Packet.Write());   
+            SendPacket(l_Packet.Write());   
             return;
         }
 
@@ -252,7 +239,7 @@ namespace SteerStone
         l_Packet.Tickets        = m_Tickets;
         l_Packet.PoolFigure     = m_PoolFigure;
         l_Packet.Films          = m_Films;
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
     /// SendUpdateStatusWalk
@@ -305,7 +292,7 @@ namespace SteerStone
         HabboPacket::Login::AccountPreferences l_Packet;
         l_Packet.SoundEnabled = IsSoundEnabled();
         l_Packet.TutorialFinished = true; ///< TODO
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
     /// SendAccountBadges
@@ -406,14 +393,28 @@ namespace SteerStone
     /// @p_Reason - Logout reason (enum LogoutReason)
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
-        SaveToDB();
+        //SaveToDB();
 
         if (GetRoom())
             GetRoom()->LeaveRoom(this);
 
-        HabboPacket::Misc::HotelLogout l_Packet;
-        l_Packet.Reason = p_Reason;
-        ToSocket()->SendPacket(l_Packet.Write());
+        m_Messenger.reset();
+        m_FavouriteRooms.reset();
+
+        if (m_Socket)
+        {
+            if (!m_Socket->IsClosed())
+            {
+                /// Inform client player logged out
+                HabboPacket::Misc::HotelLogout l_Packet;
+                l_Packet.Reason = p_Reason;
+                SendPacket(l_Packet.Write());
+
+                m_Socket->CloseSocket();
+            }
+
+            m_Socket->DestroyHabbo();
+        }
     }
 
     /// SaveToDB
@@ -441,13 +442,23 @@ namespace SteerStone
         SaveFavouriteRoomToDB();
     }
 
+    /// SendPacket 
+    /// @p_Buffer : Buffer which holds our data to be send to the client
+    void Habbo::SendPacket(StringBuffer const* p_Buffer)
+    {
+        if (!m_Socket)
+            return;
+
+        m_Socket->SendPacket(p_Buffer);
+    }
+
     /// SendPing
     /// Send Ping response to client
     void Habbo::SendPing()
     {
         m_Ponged = false;
         HabboPacket::Misc::Ping l_Packet;
-        ToSocket()->SendPacket(l_Packet.Write());
+        SendPacket(l_Packet.Write());
     }
 
 } ///< NAMESPACE STEERSTONE
