@@ -153,8 +153,5 @@ namespace SteerStone
         std::deque<Position> m_Path;               ///< Holds our path points
         std::vector<Node*> m_OpenList;             ///< Holds nodes which needs to evaluted
         std::vector<Node*> m_ClosedList;           ///< Holds nodes which are already evaluted
-
-        int32 m_MaxGridX;                          ///< Holds Max Grid of X axis
-        int32 m_MaxGridY;                          ///< Holds Max Grid of Y axis
     };
 } ///< NAMESPACE STEERSTONE

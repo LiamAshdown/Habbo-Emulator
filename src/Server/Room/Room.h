@@ -47,6 +47,7 @@ namespace SteerStone
     class Habbo;
     class StringBuffer;
 
+    typedef std::unordered_map<int32, std::unique_ptr<RoomHabboInfo>> GUIDUserMap;
 
     class Room
     {
@@ -132,10 +133,6 @@ namespace SteerStone
         /// @p_Status : Status to check
         bool HasStatus(uint32 const p_RoomGUID, uint32 const p_Status) const;
 
-        /// FindHabboByName
-        /// @p_Name : Name of user to find
-        Habbo* FindHabboByName(std::string const p_Name);
-
         /// ProcessUserActions
         /// Process Habbo Actions; Status, pathfinding, etc..
         void ProcessUserActions(const uint32 p_Diff);
@@ -144,6 +141,26 @@ namespace SteerStone
         /// Get Ccts
         /// @p_Specified : Return specified Ccts
         std::string GetCcts(std::string const p_Specified = std::string());
+
+        /// SendNodeSpaceUsers
+        /// @p_Habbo : Packet to send to
+        void SendNodeSpaceUsers(Habbo* p_Habbo);
+
+        /// FindHabboByName
+        /// @p_Name : Name of user to find
+        Habbo* FindHabboByName(std::string const p_Name);
+
+        /// FindHabboByGuid
+        /// @p_Id : Room GUID we are searching for
+        Habbo* FindHabboByGuid(uint32 const p_GUID);
+
+        /// FindHabboById
+        /// @p_Id : Id of user we are searching for
+        Habbo* FindHabboById(uint32 const p_Id);
+
+        /// GetRoomUsers
+        /// Returns storage of users with room rights
+        std::set<uint32>* GetRoomRightsUsers();
 
         /// Update 
         /// Update all objects in room
@@ -193,6 +210,7 @@ namespace SteerStone
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
         GUIDUserMap m_Habbos;                    ///< Hold Habbo users
+        std::set<uint32> m_SuperRights;          ///< Holds users who have room rights
         FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
     };
 } ///< NAMESPACE STEERSTONE

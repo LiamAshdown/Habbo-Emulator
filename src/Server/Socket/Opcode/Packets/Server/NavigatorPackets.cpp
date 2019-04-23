@@ -119,6 +119,57 @@ namespace SteerStone
                 return &m_Buffer;
             }
 
-        } ///< NAMESPACE NAVIGATOR
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatInfo::Write()
+            {
+                m_Buffer.AppendWiredBool(AllowSuperUsers);
+                m_Buffer.AppendWired(AccessType);
+                m_Buffer.AppendWired(RoomId);
+
+                m_Buffer.AppendString(OwnerName);
+
+                m_Buffer.AppendString(Model);
+                m_Buffer.AppendString(Name);
+                m_Buffer.AppendString(Description);
+                m_Buffer.AppendWiredBool(ShowOwnerName);
+                m_Buffer.AppendWiredBool(AllowTrading);
+                m_Buffer.AppendWiredBool(HasCategory);
+                m_Buffer.AppendWired(NowVisitors);
+                m_Buffer.AppendWired(MaxVisitors);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatCategory::Write()
+            {
+                m_Buffer.AppendWired(RoomId);
+                m_Buffer.AppendWired(CategoryId);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * NodeSpaceUsers::Write()
+            {
+                for (auto const& l_Itr : Names)
+                    m_Buffer.AppendString(l_Itr);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+} ///< NAMESPACE NAVIGATOR
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

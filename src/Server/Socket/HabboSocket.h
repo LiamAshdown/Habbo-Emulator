@@ -33,6 +33,7 @@ namespace SteerStone
         /// @p_Service : Boost Service
         /// @p_CloseHandler : Close Handler Custom function
         HabboSocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler);
+
         /// Deconstructor
         ~HabboSocket() {}
 
@@ -101,13 +102,20 @@ namespace SteerStone
         void HandleChangeWorld(std::unique_ptr<ClientPacket> p_Packet);
         void HandleSwimSuit(std::unique_ptr<ClientPacket> p_Packet);
         void HandleCreateFlat(std::unique_ptr<ClientPacket> p_Packet);
-        void HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSetFlatInfo(std::unique_ptr<ClientPacket> p_Packet);
         void HandleBuyHabboClub(std::unique_ptr<ClientPacket> p_Packet);
         void HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet);
         void HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet);
         void HandleSetBadge(std::unique_ptr<ClientPacket> p_Packet);
         void HandleConsoleMotto(std::unique_ptr<ClientPacket> p_Packet);
         void HandleSearchUserFlats(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleGetFlatInfo(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleGetFlatCategory(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleUpdateFlat(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleGItems(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleTryFlat(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleGoToFlat(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

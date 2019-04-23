@@ -245,6 +245,8 @@ namespace SteerStone
         /// @p_Reason - Logout reason (enum LogoutReason)
         void Logout(LogoutReason const p_Reason = LOGGED_OUT);
 
+        void CleanUpBeforeDelete();
+
         /// SaveToDB
         /// Save Habbo data to database on logout
         void SaveToDB();
@@ -303,6 +305,9 @@ namespace SteerStone
         bool GetReadAgreement()         const { return m_ReadAgreement;        }
         bool GetSpecialRights()         const { return m_SpecialRights;        }
         bool IsSubscribed()             const { return m_HabboClub->IsSubscribed(); }
+        bool HasFuseRight(std::string const p_Fuse) const { return m_FuseRight->HasFuseRight(p_Fuse); }
+        bool IsScheduledForDelete()     const { return m_ScheduledForDelete;   }
+        void SetIsScheduledForDelete(bool const p_Schedule) { m_ScheduledForDelete = p_Schedule; }
 
         ///////////////////////////////////////////
         //             USER OBJECTS
@@ -346,6 +351,7 @@ namespace SteerStone
         bool m_SoundEnabled;
         bool m_AcceptFriendRequests;
         bool m_Ponged;
+        bool m_ScheduledForDelete;
 
         uint32 m_Id;
         uint32 m_Credits;

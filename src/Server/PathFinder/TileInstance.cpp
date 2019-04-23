@@ -26,7 +26,7 @@ namespace SteerStone
     /// @p_X : Tile position X
     /// @p_Y : Tile position Y
     TileInstance::TileInstance(int16 const p_X, int16 const p_Y) : m_TileX(p_X), m_TileY(p_Y), m_TileHeight(0), m_TileState(TileState::TILE_STATE_CLOSED),
-        m_WalkWay(nullptr)
+        m_WalkWay(nullptr), m_Item(nullptr)
     {
         m_Habbo.reset();
     }

@@ -171,7 +171,7 @@ namespace SteerStone
     void Messenger::ReadMessage(uint32 const p_MessageId)
     {
         QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("UPDATE messenger_messages SET has_read = 1 WHERE receiver_id = ? ORDER BY id DESC LIMIT 1");
+        l_Database.PrepareQuery("UPDATE messenger_messages SET has_read = 1 WHERE receiver_id = ? AND has_read = 0 ORDER BY id DESC LIMIT 1");
         l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
         l_Database.ExecuteQuery();
     }

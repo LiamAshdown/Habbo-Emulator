@@ -21,6 +21,8 @@
 
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Opcode/Packets/Server/ItemPackets.h"
+#include "Opcode/Packets/Server/MiscPackets.h"
+#include "Opcode/Packets/Server/NavigatorPackets.h"
 
 namespace SteerStone
 {
@@ -39,12 +41,26 @@ namespace SteerStone
         HabboPacket::Room::OpenConnection l_Packet;
         SendPacket(l_Packet.Write());
 
-        /// Send Room Advertisement url
-        HabboPacket::Room::RoomUrl l_PacketUrl;
-        SendPacket(l_PacketUrl.Write());
-
         /// Enter the room
-        m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId));
+        if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
+        {
+            if (l_IsPublic)
+            {
+                HabboPacket::Room::RoomUrl l_PacketUrl;
+                SendPacket(l_PacketUrl.Write());
+
+                HabboPacket::Room::RoomReady l_PacketRoomReady;
+                l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
+                l_PacketRoomReady.Id = m_Habbo->GetRoom()->GetId();
+                m_Habbo->SendPacket(l_PacketRoomReady.Write());
+            }
+        }
+        else
+        {
+            HabboPacket::Navigator::CantConnect l_Packet;
+            l_Packet.ErrorCode = ConnectionError::ROOM_IS_CLOSED;
+            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
     }
 
     void HabboSocket::HandleGetRoomAdd(std::unique_ptr<ClientPacket> p_Packet)
@@ -232,5 +248,139 @@ namespace SteerStone
         std::string l_Badge = p_Packet->ReadString();
         bool l_Visible = p_Packet->ReadWiredBool();
         m_Habbo->SendSetBadge(l_Badge, l_Visible);
+    }
+
+    void HabboSocket::HandleGItems(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        HabboPacket::Room::Items l_Packet;
+        m_Habbo->SendPacket(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleTryFlat(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        std::string l_Body = p_Packet->GetContent();
+
+        std::vector<std::string> l_Split;
+        boost::split(l_Split, l_Body, boost::is_any_of("/"));
+
+        uint32 l_RoomId = std::stoi(l_Split[0]);
+
+        std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_RoomId);
+
+        if (!l_Room)
+        {
+            LOG_ERROR << "Player " << m_Habbo->GetId() << " tryed to enter a non existent room!";
+            HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
+            m_Habbo->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        if (m_Habbo->HasFuseRight(Fuse::EnterLockedRooms) || m_Habbo->GetId() == l_Room->GetOwnerId())
+        {
+            HabboPacket::Room::FlatLetIn l_Packet;
+            m_Habbo->SendPacket(l_Packet.Write());
+            return;
+        }
+
+        switch (l_Room->GetAccessType())
+        {
+        case RoomAccessType::ROOM_ACCESS_TYPE_CLOSED:
+        {
+            if (l_Room->GetVisitorsNow() > 0)
+            {
+                /// Send door bell ringing to user joining room
+                HabboPacket::Room::DoorBellRinging l_Packet;
+                m_Habbo->SendPacket(l_Packet.Write());
+
+                /// Is owner inside room?
+                if (Habbo* l_Habbo = l_Room->FindHabboById(l_Room->GetOwnerId()))
+                {
+                    HabboPacket::Room::DoorBellRinging l_PacketOwner;
+                    l_PacketOwner.Name = m_Habbo->GetName();
+                    l_Habbo->SendPacket(l_PacketOwner.Write());
+                }
+                else
+                {
+                    /// Is there anyone else inside room with rights?
+                    for (auto const& l_Itr : *l_Room->GetRoomRightsUsers())
+                    {
+                        if (Habbo* l_RightsHabbo = l_Room->FindHabboById(l_Itr))
+                        {
+                            HabboPacket::Room::DoorBellRinging l_PacketRights;
+                            l_PacketRights.Name = m_Habbo->GetName();
+                            l_RightsHabbo->SendPacket(l_PacketRights.Write());
+                        }
+                    }
+                }
+
+                return;
+            }
+            else
+            {
+                /// No one inside room
+                HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
+                m_Habbo->SendPacket(l_Packet.Write());
+                return;
+            }
+        }
+        break;
+        case RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD:
+        {
+            /// Room has password lock
+            std::string l_Password = l_Split[1];
+
+            /// Does password match?
+            if (l_Password != l_Room->GetPassword() && !m_Habbo->HasFuseRight(Fuse::AnyRoomController))
+            {
+                HabboPacket::Misc::LocalisedError l_Packet;
+                l_Packet.Error = "Incorrect flat password";
+                m_Habbo->SendPacket(l_Packet.Write());
+                return;
+            }
+        }
+        break;
+        case RoomAccessType::ROOM_ACCESS_TYPE_OPEN:
+        {
+            HabboPacket::Room::FlatLetIn l_Packet;
+            m_Habbo->SendPacket(l_Packet.Write());
+            return;
+        }
+        break;
+        default:
+        {
+            /// This should never happen but good to check
+            HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
+            m_Habbo->SendPacket(l_Packet.Write());
+            return;
+        }
+        break;
+        }
+
+        /// Okay we can go in!
+        HabboPacket::Room::FlatLetIn l_Packet;
+        m_Habbo->SendPacket(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleGoToFlat(std::unique_ptr<ClientPacket> l_Packet)
+    {
+        uint32 l_RoomId = std::stoi(l_Packet->GetContent());
+
+        /// Enter the room
+        if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
+        {
+            HabboPacket::Room::RoomReady l_PacketRoomReady;
+            l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
+            l_PacketRoomReady.Id = m_Habbo->GetRoom()->GetId();
+            m_Habbo->SendPacket(l_PacketRoomReady.Write());
+        }
+        else
+        {
+            HabboPacket::Navigator::CantConnect l_Packet;
+            l_Packet.ErrorCode = ConnectionError::ROOM_IS_CLOSED;
+            m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
     }
 }

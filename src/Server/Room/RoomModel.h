@@ -65,11 +65,7 @@ namespace SteerStone
 
         TileInstance* GetTileInstance(int16 const p_X, int16 const p_Y)
         {
-            if (p_X >= GetMaxGridX() || p_Y >= GetMaxGridY()
-                || p_X < 0 || p_Y < 0)
-                return nullptr;
-            else
-                return TileGrid[p_X][p_Y];
+            return TileGrid[p_X][p_Y];
         }
 
     protected:

@@ -297,6 +297,21 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            StringBuffer const * UseBadge::Write()
+            {
+                m_Buffer.AppendWired(GUID);
+
+                if (BadgeVisible)
+                    m_Buffer.AppendString(Badge);
+
+                m_Buffer.AppendSOH();
+           
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
             StringBuffer const * GoToFlat::Write()
             {
                 m_Buffer.AppendStringDelimiter(Id, "\r");
@@ -310,18 +325,48 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * UseBadge::Write()
+            StringBuffer const * Items::Write()
             {
-                m_Buffer.AppendWired(GUID);
-
-                if (BadgeVisible)
-                    m_Buffer.AppendString(Badge);
+                m_Buffer.AppendString("", false);
 
                 m_Buffer.AppendSOH();
-           
+
                 return &m_Buffer;
             }
 
-        } ///< NAMESPACE ROOM
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatNotAllowedToEnter::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * DoorBellRinging::Write()
+            {
+                if (Name.is_initialized())
+                    m_Buffer.AppendString(Name.get());
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * FlatLetIn::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+} ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

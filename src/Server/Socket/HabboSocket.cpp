@@ -63,7 +63,7 @@ namespace SteerStone
         {
             /// Remove junk characters from end of string
             l_BufferVec.resize(l_BufferVec.size() + 1);
-            l_BufferVec[l_BufferVec.size() - 1] = 0;
+            l_BufferVec[l_BufferVec. size() - 1] = 0;
 
             std::string l_TempBuffer = (char*)&l_BufferVec[0];
 

@@ -48,6 +48,7 @@ namespace SteerStone
             else
                 AppendWired(0);
         }
+
         /// AppendString
         /// @p_Value : Append a string to our storage
         /// @p_Delimeter : Append "/x2" to our storage if true
@@ -185,7 +186,7 @@ namespace SteerStone
             m_Storage.clear();
         }
 
-
+    private:
         std::size_t m_WritePosition;                                                    ///< Write position in our stroage
         std::size_t m_ReadPosition;                                                     ///< Read position in our storage
         std::vector<uint8> m_Storage;                                                   ///< Vector Storage

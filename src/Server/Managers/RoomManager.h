@@ -73,6 +73,10 @@ namespace SteerStone
         /// LoadRooms
         /// Load rooms from database
         void LoadRooms();
+
+        /// LoadRoomRights
+        /// Load room rights from database
+        void LoadRoomRights();
         
         /// AddRoom
         /// Add room to storage from database
@@ -105,6 +109,11 @@ namespace SteerStone
         /// GetRoomCategory
         /// @p_Id : Room Id
         std::shared_ptr<Room> GetRoom(uint32 const p_Id);
+
+        /// ReloadRoom
+        /// Reload room from database
+        /// @p_Id : Room Id
+        void ReloadRoom(uint32 const p_Id);
 
         /// GetRoomCategories
         /// Get Room Category Map

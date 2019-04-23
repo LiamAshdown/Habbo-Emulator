@@ -243,6 +243,29 @@ namespace SteerStone
         LOG_INFO << "Loaded " << m_Rooms.size() << " Hotel Rooms";
     }
 
+    /// LoadRoomRights
+    /// Load room rights from database
+    void RoomManager::LoadRoomRights()
+    {
+        for (auto const& l_Itr : m_Rooms)
+        {
+            QueryDatabase l_Database("rooms");
+            l_Database.PrepareQuery("SELECT id FROM room_rights WHERE room_id = ?");
+            l_Database.GetStatement()->setUInt(1, l_Itr.second->GetId());
+            l_Database.ExecuteQuery();
+
+            if (!l_Database.GetResult())
+                continue;
+
+            Result* l_Result = l_Database.Fetch();
+
+            do
+            {
+                l_Itr.second->m_SuperRights.insert(l_Result->GetUint32(1));
+            } while (l_Result->GetNextResult());
+        }
+    }
+
     /// AddRoom
     /// Add room to storage from database
     /// @p_RoomId : Id of room we are querying database to get room info
@@ -289,6 +312,8 @@ namespace SteerStone
         l_Room->m_RoomCategory              = GetRoomCategory(l_Room->GetCategoryId());
         l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
         l_Room->LoadGridData();
+
+        m_Rooms[l_Room->GetId()] = std::move(l_Room);
     }
 
     /// UpdateRooms
@@ -364,6 +389,36 @@ namespace SteerStone
             }
         }
         return nullptr;
+    }
+
+    /// ReloadRoom
+    /// Reload room from database
+    /// @p_Id : Room Id
+    void RoomManager::ReloadRoom(uint32 const p_Id)
+    {
+        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("SELECT category, name, description, wall_paper, show_name, super_users, access_type, password, visitors_max, room_visible FROM rooms WHERE id = ?");
+        l_Database.GetStatement()->setUInt(1, p_Id);
+        l_Database.ExecuteQuery();
+
+        if (!l_Database.GetResult())
+            return;
+
+        Result* l_Result = l_Database.Fetch();
+
+        std::shared_ptr<Room> l_Room        = GetRoom(p_Id);
+        l_Room->m_CategoryId                = l_Result->GetUint32(1);
+        l_Room->m_Name                      = l_Result->GetString(2);
+        l_Room->m_Description               = l_Result->GetString(3);
+        l_Room->m_WallPaper                 = l_Result->GetUint32(4);
+        l_Room->m_ShowName                  = l_Result->GetBool(5);
+        l_Room->m_SuperUsers                = l_Result->GetBool(6);
+        l_Room->m_AccessType                = l_Result->GetUint16(7);
+        l_Room->m_Password                  = l_Result->GetString(8);
+        l_Room->m_VisitorsMax               = l_Result->GetUint32(9);
+        l_Room->m_RoomVisible               = l_Result->GetBool(10);
     }
 
     /// GetRoomCategories

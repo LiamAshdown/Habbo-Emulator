@@ -299,22 +299,7 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
             };
-            
-            /// SERVER_GO_TO_FLAT packet builder
-            class GoToFlat final : public ServerPacket
-            {
-            public:
-                /// Constructor 
-                GoToFlat() : ServerPacket(SERVER_GO_TO_FLAT) {}
-
-            public:
-                /// Write the packet
-                StringBuffer const* Write();
-
-                std::string Id;
-                std::string Name;
-            };
-
+           
             /// SERVER_USE_BADGE packet builder
             class UseBadge final : public ServerPacket
             {
@@ -330,6 +315,72 @@ namespace SteerStone
                 std::string Badge;
                 bool BadgeVisible;
             };
+
+            /// SERVER_GO_TO_FLAT packet builder
+            class GoToFlat final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                GoToFlat() : ServerPacket(SERVER_GO_TO_FLAT) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string Id;
+                std::string Name;
+            };
+
+            /// SERVER_ITEMS packet builder
+            class Items final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                Items() : ServerPacket(SERVER_ITEMS) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_FLAT_NOT_ALLOWED_TO_ENTER packet builder
+            class FlatNotAllowedToEnter final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatNotAllowedToEnter() : ServerPacket(SERVER_FLAT_NOT_ALLOWED_TO_ENTER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_DOOR_BELL_RINGING packet builder
+            class DoorBellRinging final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                DoorBellRinging() : ServerPacket(SERVER_DOOR_BELL_RINGING) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                boost::optional<std::string> Name;
+            };
+
+            /// SERVER_FLAT_LET_IN packet builder
+            class FlatLetIn final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatLetIn() : ServerPacket(SERVER_FLAT_LET_IN) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

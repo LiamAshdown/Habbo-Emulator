@@ -68,4 +68,16 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
+    /// HasFuseRight
+    /// @p_Fuse : Fuse right we are checking for
+    bool FuseRights::HasFuseRight(std::string const p_Fuse)
+    {
+        for (auto const& l_Itr : m_FuseRights)
+        {
+            if (l_Itr == p_Fuse)
+                return true;
+        }
+        return false;
+    }
+
 } ///< NAMESPACE STEERSTONE

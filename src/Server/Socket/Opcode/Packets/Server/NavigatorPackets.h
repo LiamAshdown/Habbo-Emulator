@@ -125,6 +125,60 @@ namespace SteerStone
                 std::vector<FlatResultData> Flats;
             };
 
+            /// SERVER_FLAT_INFO packet builder
+            class FlatInfo final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatInfo() : ServerPacket(SERVER_FLAT_INFO) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                bool AllowSuperUsers;
+                uint16 AccessType;
+                uint32 RoomId;
+                std::string OwnerName;
+                bool ShowOwnerName;
+                std::string Model;
+                std::string Name;
+                std::string Description;
+                bool AllowTrading;
+                bool HasCategory;
+                uint32 NowVisitors;
+                uint32 MaxVisitors;
+            };
+
+            /// SERVER_USER_FLAT_CATEGORY packet builder
+            class FlatCategory final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                FlatCategory() : ServerPacket(SERVER_USER_FLAT_CATEGORY) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                uint32 RoomId;
+                uint32 CategoryId;
+            };
+
+            /// SERVER_SPACE_NODE_USERS packet builder
+            class NodeSpaceUsers final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                NodeSpaceUsers() : ServerPacket(SERVER_SPACE_NODE_USERS) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::vector<std::string> Names;
+            };
+
         } ///< NAMESPACE NAVIGATOR
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

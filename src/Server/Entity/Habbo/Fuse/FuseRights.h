@@ -23,6 +23,13 @@
 
 namespace SteerStone
 {
+    namespace Fuse
+    {
+        static const std::string UseSpecialRoomLayOuts = "fuse_use_special_room_layouts";
+        static const std::string EnterLockedRooms = "fuse_enter_locked_rooms";
+        static const std::string AnyRoomController = "fuse_any_room_controller";
+    }
+
     class Habbo;
 
     /// Holds Habbo Fuse rights
@@ -44,6 +51,10 @@ namespace SteerStone
         /// SendFuseRights
         /// Send User fuse rights to client
         void SendFuseRights();
+    
+        /// HasFuseRight
+        /// @p_Fuse : Fuse right we are checking for
+        bool HasFuseRight(std::string const p_Fuse);
 
     private:
         std::vector<std::string> m_FuseRights;

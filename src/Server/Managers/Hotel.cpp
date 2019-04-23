@@ -83,9 +83,13 @@ namespace SteerStone
     /// @p_Player : Habbo Class
     void Hotel::RemoveHabbo(Habbo* p_Habbo)
     {
-        auto const& itr = m_Habbos.find(p_Habbo->GetId());
-        if (itr != m_Habbos.end() && itr->second)
-            itr->second->Logout();
+        auto const& l_Itr = m_Habbos.find(p_Habbo->GetId());
+        if (l_Itr != m_Habbos.end() && l_Itr->second)
+        {
+            l_Itr->second->Logout();
+            if (l_Itr->second->GetRoom())
+                l_Itr->second->GetRoom()->LeaveRoom(l_Itr->second);
+        }
     }
 
     /// Load Configs from .conf file
@@ -157,11 +161,17 @@ namespace SteerStone
             /// Habbo has its own update, incase we need to independantly update for example Ping
             if (!l_Habbo->Update(p_Diff))
             {
-                delete l_Habbo;
-                l_Itr = m_Habbos.erase(l_Itr);
+                if (!l_Habbo->GetRoom() && !l_Habbo->IsScheduledForDelete())
+                {
+                    delete l_Habbo;
+                    l_Itr = m_Habbos.erase(l_Itr);
+                    continue;
+
+                }
+                else if (!l_Habbo->IsScheduledForDelete())
+                    l_Habbo->CleanUpBeforeDelete();
             }
-            else
-                ++l_Itr;
+            ++l_Itr;
         }
 
         /// Update all of our rooms
@@ -169,7 +179,7 @@ namespace SteerStone
         sRoomMgr->UpdateRooms(p_Diff);
 
         uint32 l_EndTime = sHotelTimer->GetTimeDifference(l_StartTime, sHotelTimer->GetServerTime());
-        LOG_INFO << "Updated world in " << l_EndTime  << " milliseconds with " << m_Habbos.size() << " players online";
+        //LOG_INFO << "Updated world in " << l_EndTime  << " milliseconds with " << m_Habbos.size() << " players online";
     }
    
     /// Clean Up - Clean up the objects in the hotel before closing down server

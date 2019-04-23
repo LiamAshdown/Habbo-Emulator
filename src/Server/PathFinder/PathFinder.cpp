@@ -194,6 +194,10 @@ namespace SteerStone
     /// @p_Position : Struct which holds x, y coordinates
     bool PathFinder::CheckValidTile(Position const& p_FuturePosition, Position const& p_CurrentPosition)
     {
+        if (p_FuturePosition.X >= m_RoomModel->GetMaxGridX() || p_FuturePosition.Y >= m_RoomModel->GetMaxGridY()
+            || p_FuturePosition.X < 0 || p_FuturePosition.Y < 0)
+            return false;
+
         TileInstance* l_NextTileInstance = m_RoomModel->GetTileInstance(p_FuturePosition.X, p_FuturePosition.Y);
         TileInstance* l_CurrentTileInstance = m_RoomModel->GetTileInstance(p_CurrentPosition.X, p_CurrentPosition.Y);
       
@@ -225,6 +229,10 @@ namespace SteerStone
     /// @p_Position : Struct which holds x, y coordinates
     bool PathFinder::CheckDestination(Position const& p_Position)
     {
+        if (p_Position.X >= m_RoomModel->GetMaxGridX() || p_Position.Y >= m_RoomModel->GetMaxGridY()
+            || p_Position.X < 0 || p_Position.Y < 0)
+            return false;
+
         TileInstance* l_TileInstance = m_RoomModel->GetTileInstance(p_Position.X, p_Position.Y);
 
         if (!l_TileInstance)

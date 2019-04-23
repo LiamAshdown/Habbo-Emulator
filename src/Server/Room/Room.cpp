@@ -104,7 +104,7 @@ namespace SteerStone
         if (l_Itr != m_Habbos.end())
         {
             LOG_ERROR << "Habbo " << p_Habbo->GetName() << " tried to enter Room Id " << GetId() << " but is already inside room!";
-            return true;
+            return false;
         }
 
         /// Room is full
@@ -141,12 +141,6 @@ namespace SteerStone
         m_Habbos[p_Habbo->GetRoomGUID()] = std::make_unique<RoomHabboInfo>(p_Habbo);
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++;
-
-        /// Send Packet to user that room is ready to be entered!
-        HabboPacket::Room::RoomReady l_PacketRoomReady;
-        l_PacketRoomReady.Model = GetRoomModel().GetModel();
-        l_PacketRoomReady.Id = GetId();
-        p_Habbo->SendPacket(l_PacketRoomReady.Write());
     }
     
     /// EnterRoom 
@@ -180,6 +174,9 @@ namespace SteerStone
     /// @p_Itr : Iteration of habbo which going to be removed
     void Room::LeaveRoomCallBack(GUIDUserMap::iterator& p_Itr)
     {
+        if (p_Itr->second->ToHabbo()->IsScheduledForDelete())
+            p_Itr->second->ToHabbo()->SetIsScheduledForDelete(false);
+
         m_Habbos.erase(p_Itr);
 
         m_VisitorsNow--;
@@ -259,9 +256,6 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            if (!l_Itr.second->ToHabbo())
-                return;
-
             HabboPacket::Room::LeaveRoom l_Packet;
             l_Packet.GUID = std::to_string(p_GUID);
             l_Itr.second->ToHabbo()->SendPacket(l_Packet.Write());
@@ -289,13 +283,12 @@ namespace SteerStone
                 l_WorldObject.Rotation = boost::lexical_cast<std::string>(l_Item->GetRotation());
                 l_Packet.WorldObjects.push_back(l_WorldObject);
             }
-
-            p_Habbo->SendPacket(l_Packet.Write());
         }
         else
         {
             /// TODO; Flat Furniture
         }
+        p_Habbo->SendPacket(l_Packet.Write());
     }
 
     /// SendPacketToAll
@@ -363,30 +356,13 @@ namespace SteerStone
             return false;
     }
 
-    /// FindHabboByName
-    /// @p_Name : Name of user to find
-    Habbo * Room::FindHabboByName(std::string const p_Name)
-    {
-        for (auto const& l_Itr : m_Habbos)
-        {
-            if (!l_Itr.second->ToHabbo()->GetRoom())
-                continue;
-
-            if (l_Itr.second->ToHabbo()->GetName() == p_Name)
-                return l_Itr.second->ToHabbo();
-        }
-
-        return nullptr;
-    }
-
     /// ProcessUserActions
     /// Process Habbo Actions; Status, pathfinding, etc..
     void Room::ProcessUserActions(const uint32 p_Diff)
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            /// Does user still exist?
-            if (!l_Itr.second->ToHabbo())
+            if (l_Itr.second->ToHabbo()->IsScheduledForDelete())
                 continue;
 
             l_Itr.second->ProcessActions(p_Diff);
@@ -408,6 +384,60 @@ namespace SteerStone
         }
 
         return std::string();
+    }
+
+    /// SendNodeSpaceUsers
+    /// @p_Habbo : Packet to send to
+    void Room::SendNodeSpaceUsers(Habbo* p_Habbo)
+    {
+        HabboPacket::Navigator::NodeSpaceUsers l_Packet;
+        for (auto const& l_Itr : m_Habbos)
+            l_Packet.Names.push_back(l_Itr.second->ToHabbo()->GetName());
+        
+        p_Habbo->SendPacket(l_Packet.Write());
+    }
+
+    /// FindHabboByGuid
+    /// @p_Id : Room GUID we are searching for
+    Habbo* Room::FindHabboByGuid(uint32 const p_GUID)
+    {
+        auto const& l_Itr = m_Habbos.find(p_GUID);
+        if (l_Itr != m_Habbos.end())
+            return l_Itr->second->ToHabbo();
+        else
+            return nullptr;
+    }
+
+    /// FindHabboById
+    /// @p_Id : Id of user we are searching for
+    Habbo* Room::FindHabboById(uint32 const p_Id)
+    {
+        for (auto const& l_Itr : m_Habbos)
+        {
+            if (l_Itr.second->ToHabbo()->GetId() == p_Id)
+                return l_Itr.second->ToHabbo();
+        }
+        return nullptr;
+    }
+
+    /// FindHabboByName
+    /// @p_Name : Name of user to find
+    Habbo* Room::FindHabboByName(std::string const p_Name)
+    {
+        for (auto const& l_Itr : m_Habbos)
+        {
+            if (l_Itr.second->ToHabbo()->GetName() == p_Name)
+                return l_Itr.second->ToHabbo();
+        }
+
+        return nullptr;
+    }
+
+    /// GetRoomUsers
+    /// Returns storage of users with room rights
+    std::set<uint32>* Room::GetRoomRightsUsers()
+    {
+        return &m_SuperRights;
     }
 
     /// Update 

@@ -38,6 +38,7 @@ namespace SteerStone
         m_LastCreatedRoomId = 0;
         m_RoomGUID = 0;
         m_DanceId = 0;
+        m_ScheduledForDelete = false;
 
         SendPing();
     }
@@ -394,10 +395,6 @@ namespace SteerStone
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
         //SaveToDB();
-
-        if (GetRoom())
-            GetRoom()->LeaveRoom(this);
-
         m_Messenger.reset();
         m_FavouriteRooms.reset();
 
@@ -414,6 +411,15 @@ namespace SteerStone
             }
 
             m_Socket->DestroyHabbo();
+        }
+    }
+
+    void Habbo::CleanUpBeforeDelete()
+    { 
+        if (GetRoom())
+        {
+            GetRoom()->LeaveRoom(this);
+            m_ScheduledForDelete = true;
         }
     }
 

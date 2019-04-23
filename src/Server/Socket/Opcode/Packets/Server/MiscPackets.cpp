@@ -61,7 +61,7 @@ namespace SteerStone
 
             StringBuffer const * LocalisedError::Write()
             {
-                m_Buffer.AppendString(Error);
+                m_Buffer.AppendString(Error, false);
 
                 m_Buffer.AppendSOH();
 

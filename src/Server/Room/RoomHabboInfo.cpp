@@ -32,8 +32,8 @@ namespace SteerStone
         m_Path = std::make_unique<WayPoints>(m_Habbo, &m_Habbo->GetRoom()->GetRoomModel());
         m_Statuses = Status::STATUS_NONE;
         
-        m_WaveTimer = sConfig->GetIntDefault("WaveTimer", 4000);
-        m_AFKTimer = sConfig->GetIntDefault("AwayFromKeyboardTimer", 900000);
+        m_WaveTimer = sHotel->GetIntConfig(IntConfigs::CONFIG_WAVE_TIMER);
+        m_AFKTimer  = sHotel->GetIntConfig(IntConfigs::CONFIG_AFK_TIMER);
     }
 
     /// Deconstructor
@@ -110,7 +110,7 @@ namespace SteerStone
     /// Process next waypoint
     void RoomHabboInfo::ProcessNextWayPoint()
     {
-        if (!m_Path->HasActivePath())
+        if (!m_Path->HasActivePath() || !m_Habbo->GetRoom())
             return;
 
         if (m_Path->GetPath().empty())
@@ -187,7 +187,7 @@ namespace SteerStone
     /// Process Habbo Status
     void RoomHabboInfo::ProcessStatusUpdates()
     {
-        if (!CanSendStatusUpdate() || HasStatus(Status::STATUS_WALKING))
+        if (!CanSendStatusUpdate() || HasStatus(Status::STATUS_WALKING) || !m_Habbo->GetRoom())
             return;
 
         HabboPacket::Room::UserUpdateStatus l_Packet;
@@ -212,6 +212,9 @@ namespace SteerStone
     /// Check durations of user; Waving, AFK etc..
     void RoomHabboInfo::CheckTimers(uint32 const p_Diff)
     {
+        if (!m_Habbo->GetRoom())
+            return;
+
         if (HasStatus(Status::STATUS_WAVING))
         {
             if (m_WaveTimer <= p_Diff)
@@ -229,7 +232,10 @@ namespace SteerStone
         else
         {
             if (m_AFKTimer <= p_Diff)
-                m_Habbo->Logout();
+            {
+                m_Habbo->Logout(LogoutReason::LOGOUT_TIMEOUT);
+                m_Habbo->GetRoom()->LeaveRoom(m_Habbo);
+            }
             else
                 m_AFKTimer -= p_Diff;
         }
