@@ -61,6 +61,6 @@ namespace SteerStone
                 break;
         }
 
-        m_Habbo->m_HabboClub->AddSubscription(l_Days, l_Price);
+        m_Habbo->m_Club.AddSubscription(l_Days, l_Price);
     }
 } ///< NAMESPACE STEERSTONE

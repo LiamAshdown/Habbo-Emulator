@@ -225,7 +225,7 @@ namespace SteerStone
             l_Room->m_WallPaper               = l_Result->GetUint32(9);
             l_Room->m_Floor                   = l_Result->GetUint32(10);
             l_Room->m_ShowName                = l_Result->GetBool(11);
-            l_Room->m_SuperUsers              = l_Result->GetBool(12);
+            l_Room->m_AllowSuperRights        = l_Result->GetBool(12);
             l_Room->m_AccessType              = l_Result->GetUint16(13);
             l_Room->m_Password                = l_Result->GetString(14);
             l_Room->m_VisitorsNow             = l_Result->GetUint32(15);
@@ -302,7 +302,7 @@ namespace SteerStone
         l_Room->m_WallPaper                 = l_Result->GetUint32(9);
         l_Room->m_Floor                     = l_Result->GetUint32(10);
         l_Room->m_ShowName                  = l_Result->GetBool(11);
-        l_Room->m_SuperUsers                = l_Result->GetBool(12);
+        l_Room->m_AllowSuperRights                = l_Result->GetBool(12);
         l_Room->m_AccessType                = l_Result->GetUint16(13);
         l_Room->m_Password                  = l_Result->GetString(14);
         l_Room->m_VisitorsNow               = l_Result->GetUint32(15);
@@ -414,7 +414,7 @@ namespace SteerStone
         l_Room->m_Description               = l_Result->GetString(3);
         l_Room->m_WallPaper                 = l_Result->GetUint32(4);
         l_Room->m_ShowName                  = l_Result->GetBool(5);
-        l_Room->m_SuperUsers                = l_Result->GetBool(6);
+        l_Room->m_AllowSuperRights          = l_Result->GetBool(6);
         l_Room->m_AccessType                = l_Result->GetUint16(7);
         l_Room->m_Password                  = l_Result->GetString(8);
         l_Room->m_VisitorsMax               = l_Result->GetUint32(9);

@@ -70,6 +70,8 @@ namespace SteerStone
         STATUS_SWIMMING                     = 16, ///< Update user is swimming
         STATUS_ROTATION                     = 32, ///< Update user rotation
         STATUS_TELEPORT                     = 64, ///< Teleport user to given location in room
+        STATUS_CONTROLLER                   = 128,///< User has super rights inside room
+        STATUS_OWNER                        = 256,///< User is owner of room
     };
 
     class Room;
@@ -304,10 +306,12 @@ namespace SteerStone
         bool IsInitialized()            const { return m_Initialized;          }
         bool GetReadAgreement()         const { return m_ReadAgreement;        }
         bool GetSpecialRights()         const { return m_SpecialRights;        }
-        bool IsSubscribed()             const { return m_HabboClub->IsSubscribed(); }
-        bool HasFuseRight(std::string const p_Fuse) const { return m_FuseRight->HasFuseRight(p_Fuse); }
+        bool IsSubscribed()             const { return m_Club.IsSubscribed(); }
+        bool HasFuseRight(std::string const p_Fuse) const { return m_FuseRight.HasFuseRight(p_Fuse); }
         bool IsScheduledForDelete()     const { return m_ScheduledForDelete;   }
         void SetIsScheduledForDelete(bool const p_Schedule) { m_ScheduledForDelete = p_Schedule; }
+        bool CanWalk()                  const { return m_CanWalk;              }
+        void SetCanWalk(bool const p_Walk)    { m_CanWalk = p_Walk;         }
 
         ///////////////////////////////////////////
         //             USER OBJECTS
@@ -352,6 +356,7 @@ namespace SteerStone
         bool m_AcceptFriendRequests;
         bool m_Ponged;
         bool m_ScheduledForDelete;
+        bool m_CanWalk;
 
         uint32 m_Id;
         uint32 m_Credits;
@@ -372,12 +377,12 @@ namespace SteerStone
         uint16 m_Rank;
 
         /// Storages
-        std::weak_ptr<Room>            m_Room;
-        std::unique_ptr<Messenger>     m_Messenger;
-        std::unique_ptr<FuseRights>    m_FuseRight;
-        std::unique_ptr<HabboClub>     m_HabboClub;
-        std::unique_ptr<FavouriteRoom> m_FavouriteRooms;
-        std::unique_ptr<Badge>         m_Badge;
-        std::shared_ptr<HabboSocket>   m_Socket;
+        std::weak_ptr<Room> m_Room;
+        std::shared_ptr<HabboSocket> m_Socket;
+        Messenger m_Messenger;
+        FuseRights m_FuseRight;
+        HabboClub m_Club;
+        FavouriteRoom m_FavouriteRooms;
+        Badge m_Badge;
     };
 } ///< NAMESPACE STEERSTONE

@@ -21,6 +21,8 @@
 #include "Habbo.h"
 #include "RoomManager.h"
 
+#include "Opcode/Packets/Server/RoomPackets.h"
+
 namespace SteerStone
 {
     /// Dummy template if no trigger is set
@@ -35,7 +37,14 @@ namespace SteerStone
         /// @p_Habbo : Habbo user which activated the event
         /// @p_Room : Habbo user which is inside the room
         /// @p_Item : Item which may be apart of the trigger
-        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) {}
+        void OnTriggerEventJoin(Habbo* p_Habbo, std::shared_ptr<Room> p_Room, Item* p_Item) 
+        {
+            /// If we are at the door, then leave the room
+            if (p_Habbo->GetRoom())
+                if (p_Habbo->GetPositionX() == p_Habbo->GetRoom()->GetRoomModel().GetDoorX() &&
+                    p_Habbo->GetPositionY() == p_Habbo->GetRoom()->GetRoomModel().GetDoorY())
+                    p_Habbo->GetRoom()->LeaveRoom(p_Habbo, true);
+        }
 
 
         /// OnTriggerEventJoin

@@ -30,8 +30,13 @@ namespace SteerStone
 {
     /// Constructor
     /// @p_HabboSocket -Socket is inheriting from
-    Habbo::Habbo(HabboSocket* p_HabboSocket)
-        : m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr)
+    Habbo::Habbo(HabboSocket* p_HabboSocket) :
+        m_Socket(p_HabboSocket ? p_HabboSocket->Shared<HabboSocket>() : nullptr),
+        m_Badge(this),
+        m_Club(this),
+        m_Messenger(this),
+        m_FavouriteRooms(this),
+        m_FuseRight(this)
     {
         m_PingInterval = sHotel->GetIntConfig(IntConfigs::CONFIG_PONG_INTERVAL);
         m_MaxFriendsLimit = sConfig->GetIntDefault("MaxFriendsLimit", 50);
@@ -96,7 +101,7 @@ namespace SteerStone
     void Habbo::SendFavouriteRooms()
     {
         HabboPacket::Navigator::FavouriteRoomResult l_Packet;
-        m_FavouriteRooms->ParseSendFavouriteRooms(l_Packet.GetBuffer());
+        m_FavouriteRooms.ParseSendFavouriteRooms(l_Packet.GetBuffer());
         SendPacket(l_Packet.Write());
     }
 
@@ -105,21 +110,21 @@ namespace SteerStone
     /// @p_RoomId - Id of room
     void Habbo::AddFavouriteRoom(bool const& p_IsPublic, uint32 const& p_RoomId)
     {
-        m_FavouriteRooms->AddFavouriteRoom(p_IsPublic, p_RoomId);
+        m_FavouriteRooms.AddFavouriteRoom(p_IsPublic, p_RoomId);
     }
 
     /// RemoveFavouriteRoom
     /// @p_RoomId - Id of room
     void Habbo::RemoveFavouriteRoom(uint32 const& p_RoomId)
     {
-        m_FavouriteRooms->RemoveFavouriteRoom(p_RoomId);
+        m_FavouriteRooms.RemoveFavouriteRoom(p_RoomId);
     }
 
     /// SaveFavouriteRoomToDB
     /// Update Favourite Rooms to database
     void Habbo::SaveFavouriteRoomToDB()
     {
-        m_FavouriteRooms->SaveToDB();
+        m_FavouriteRooms.SaveToDB();
     }
 
     ///////////////////////////////////////////
@@ -134,14 +139,14 @@ namespace SteerStone
         l_Packet.ConsoleMotto = GetConsoleMotto();
         l_Packet.FriendsLimit = sConfig->GetIntDefault("MessgengerMaxFriendsLimit", 50);
         l_Packet.ClubFriendsLimit = sConfig->GetIntDefault("MessgengerMaxFriendsClubLimit", 100);
-        l_Packet.MessengerSize = m_Messenger->GetMessengerSize();
-        m_Messenger->ParseMessengerInitialize(l_Packet.GetSecondaryBuffer());
+        l_Packet.MessengerSize = m_Messenger.GetMessengerSize();
+        m_Messenger.ParseMessengerInitialize(l_Packet.GetSecondaryBuffer());
         SendPacket(l_Packet.Write());
 
-        if (m_Messenger->HasFriendRequestPending())
-            m_Messenger->ParseMessengerFriendRequest();
+        if (m_Messenger.HasFriendRequestPending())
+            m_Messenger.ParseMessengerFriendRequest();
 
-        m_Messenger->LoadMessengerMessages();
+        m_Messenger.LoadMessengerMessages();
     }
 
     /// MessengerAcceptRequest
@@ -149,7 +154,7 @@ namespace SteerStone
     void Habbo::MessengerAcceptRequest(uint32 const p_SenderId)
     {
         /// Is friend list full?
-        if (m_Messenger->IsFriendListFull())
+        if (m_Messenger.IsFriendListFull())
         {
             HabboPacket::Messenger::BuddyRequestResult l_Packet;
             l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
@@ -157,7 +162,7 @@ namespace SteerStone
             return;
         }
 
-        m_Messenger->ParseMessengerAcceptFriendRequest(p_SenderId);
+        m_Messenger.ParseMessengerAcceptFriendRequest(p_SenderId);
     }
 
     /// SendMessengerUpdate
@@ -165,7 +170,7 @@ namespace SteerStone
     void Habbo::SendMessengerUpdate()
     {
         HabboPacket::Messenger::Update l_Packet;
-        m_Messenger->ParseMessengerUpdate(l_Packet.GetSecondaryBuffer());
+        m_Messenger.ParseMessengerUpdate(l_Packet.GetSecondaryBuffer());
         SendPacket(l_Packet.Write());
     }
 
@@ -175,7 +180,7 @@ namespace SteerStone
     {
         HabboPacket::Messenger::FindUser l_Packet;
         l_Packet.Messenger = "MESSENGER";
-        m_Messenger->ParseMessengerSearchUser(l_Packet.GetSecondaryBuffer(), p_Name);
+        m_Messenger.ParseMessengerSearchUser(l_Packet.GetSecondaryBuffer(), p_Name);
         SendPacket(l_Packet.Write());
     }
 
@@ -184,7 +189,7 @@ namespace SteerStone
     void Habbo::MessengerBuddyRequest(std::string const p_Name)
     {
         /// Is friend list full?
-        if (m_Messenger->IsFriendListFull())
+        if (m_Messenger.IsFriendListFull())
         {
             HabboPacket::Messenger::ErrorMessenger l_Packet;
             l_Packet.Error = MessengerErrorCode::FRIEND_LIST_FULL;
@@ -192,35 +197,35 @@ namespace SteerStone
             return;
         }
 
-        m_Messenger->ParseMessengerSendBuddyRequest(p_Name);
+        m_Messenger.ParseMessengerSendBuddyRequest(p_Name);
     }
 
     /// MessengerRemoveBuddy
    /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Messenger->ParseMessengerRemoveBuddy(std::move(p_Packet));
+        m_Messenger.ParseMessengerRemoveBuddy(std::move(p_Packet));
     }
 
     /// MessengerRejectRequest
     /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Messenger->ParseMessengerRejectBuddy(std::move(p_Packet));
+        m_Messenger.ParseMessengerRejectBuddy(std::move(p_Packet));
     }
 
     /// MessengerSendMessage
     /// @p_Packet - Client packet which is being decoded
     void Habbo::MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
     {
-        m_Messenger->ParseMessengerSendMessage(std::move(p_Packet));
+        m_Messenger.ParseMessengerSendMessage(std::move(p_Packet));
     }
 
     /// MessengerReply
     /// @p_MessageId - Id of message (account id)
     void Habbo::MessengerReply(uint32 const p_MessageId)
     {
-        m_Messenger->ReadMessage(p_MessageId);
+        m_Messenger.ReadMessage(p_MessageId);
     }
 
     ///////////////////////////////////////////
@@ -300,7 +305,7 @@ namespace SteerStone
     /// Send user account badges (set from users.account_badges database)
     void Habbo::SendAccountBadges()
     {
-        m_Badge->SendBadges();
+        m_Badge.SendBadges();
     }
 
     /// SendSetBadge
@@ -309,21 +314,21 @@ namespace SteerStone
     /// @p_Visible : Is new badge visible
     void Habbo::SendSetBadge(std::string const p_Badge, bool const p_Visible)
     {
-        m_Badge->SendSetBadge(p_Badge, p_Visible);
+        m_Badge.SendSetBadge(p_Badge, p_Visible);
     }
 
     /// SendFuseRights
     /// Send user account rights (set from users.rank_fuserights database)
     void Habbo::SendFuseRights()
     {
-        m_FuseRight->SendFuseRights();
+        m_FuseRight.SendFuseRights();
     }
 
     /// SendClubStatus
     /// Send user account club status (set from users.club_subscriptions database)
     void Habbo::SendClubStatus()
     {
-        m_HabboClub->LoadSubscription();
+        m_Club.LoadSubscription();
     }
 
     /// SetRank
@@ -334,7 +339,7 @@ namespace SteerStone
         m_Rank = p_Rank;
 
         /// Load our fuse rights again for user to recieve
-        m_FuseRight->LoadFuseRights();
+        m_FuseRight.LoadFuseRights();
         SendFuseRights();
     }
 
@@ -346,19 +351,10 @@ namespace SteerStone
     /// Initialize Habbo Info data when user logs in
     void Habbo::InitializeHabboData()
     {
-        m_Messenger = std::make_unique<Messenger>(this);
-        m_Messenger->UpdateConsole();
-
-        m_FavouriteRooms = std::make_unique<FavouriteRoom>(m_Id);
-        m_FavouriteRooms->LoadFavouriteRooms();
-
-        m_FuseRight = std::make_unique<FuseRights>(this);
-        m_FuseRight->LoadFuseRights();
-
-        m_Badge = std::make_unique<Badge>(this);
-        m_Badge->LoadBadges();
-
-        m_HabboClub = std::make_unique<HabboClub>(this);
+        m_Messenger.UpdateConsole();
+        m_FavouriteRooms.LoadFavouriteRooms();
+        m_FuseRight.LoadFuseRights();
+        m_Badge.LoadBadges();
     }
 
     /// Update
@@ -394,9 +390,7 @@ namespace SteerStone
     /// @p_Reason - Logout reason (enum LogoutReason)
     void Habbo::Logout(LogoutReason const p_Reason /*= LOGGED_OUT*/)
     {
-        //SaveToDB();
-        m_Messenger.reset();
-        m_FavouriteRooms.reset();
+        SaveToDB();
 
         if (m_Socket)
         {

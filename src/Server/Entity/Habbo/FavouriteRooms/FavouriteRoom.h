@@ -24,6 +24,7 @@
 namespace SteerStone
 {
     class StringBuffer;
+    class Habbo;
 
     /// Structure which holds information about room
     typedef struct FavouriteRoomsStruct
@@ -59,8 +60,8 @@ namespace SteerStone
     {
     public:
         /// Constructor
-        /// @p_Id : Account Id, we don't use Habbo class here
-        explicit FavouriteRoom(uint32 const& p_Id);
+        /// @p_Habbo : Habbo class which owns the favourite rooms
+        explicit FavouriteRoom(Habbo* p_Habbo);
         
         /// Deconstructor
         ~FavouriteRoom();
@@ -89,6 +90,6 @@ namespace SteerStone
         /// Variables
         FavouriteRoomsVector m_FavouriteRooms;                              ///< Vector storage which holds our favourite rooms
         FavouriteRoomsVector m_DeletedFavouriteRooms;                       ///< Vector storage which holds our deleted favourite rooms
-        uint32 m_Id;                                                        ///< Account Id, we don't use Habbo class here, not needed
+        Habbo* m_Habbo;
     };
 } ///< NAMESPACE STEERSTONE

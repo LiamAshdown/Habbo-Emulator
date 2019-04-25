@@ -452,7 +452,7 @@ namespace SteerStone
             return;
 
         HabboPacket::Navigator::FlatInfo l_Packet;
-        l_Packet.AllowSuperUsers    = l_Room->GetSuperUsers();
+        l_Packet.AllowSuperUsers    = l_Room->AllowSuperRights();
         l_Packet.AccessType         = l_Room->GetAccessType();
         l_Packet.RoomId             = l_Room->GetId();
 
@@ -467,8 +467,8 @@ namespace SteerStone
         l_Packet.ShowOwnerName      = l_Room->ShowName();
         l_Packet.AllowTrading       = l_Room->GetRoomCategory()->CanTrade();
         l_Packet.HasCategory        = l_Room->GetCategoryId() == 2 ? true : false;
-        l_Packet.NowVisitors        = l_Room->GetVisitorsNow();
         l_Packet.MaxVisitors        = l_Room->GetVisitorsMax();
+        l_Packet.NowVisitors        = l_Room->GetVisitorsNow();
 
         m_Habbo->SendPacket(l_Packet.Write());
     }
@@ -487,7 +487,6 @@ namespace SteerStone
         l_Packet.CategoryId = l_Room->GetCategoryId();
 
         m_Habbo->SendPacket(l_Packet.Write());
-
     }
 
     void HabboSocket::HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet)
@@ -496,17 +495,17 @@ namespace SteerStone
         uint32 l_CategoryId = p_Packet->ReadWiredUint();
 
         std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_RoomId);
+        RoomCategory* l_RoomCategory = sRoomMgr->GetRoomCategory(l_CategoryId);
 
-        if (!l_Room)
+        if (!l_Room || !l_RoomCategory)
             return;
 
-        if (l_Room->GetRoomCategory()->GetMinRoleSetFlat() > m_Habbo->GetRank())
+        if (l_RoomCategory->GetMinRoleSetFlat() > m_Habbo->GetRank())
             return;
-        else if (l_Room->GetRoomCategory()->GetRoomType() != RoomType::ROOM_TYPE_FLAT)
+        else if (l_RoomCategory->GetRoomType() != RoomType::ROOM_TYPE_FLAT)
             return;
         else if (l_Room->GetOwnerId() != m_Habbo->GetId())
             return;
-
 
         QueryDatabase l_Database("rooms");
         l_Database.PrepareQuery("UPDATE rooms SET category = ? WHERE id = ?");
@@ -550,6 +549,20 @@ namespace SteerStone
         l_Database.GetStatement()->setBoolean(3, l_ShowOwner);
         l_Database.GetStatement()->setUInt(4, l_Room->GetId());
         l_Database.ExecuteQuery();
+    }
+
+    void HabboSocket::HandleRemoveAllRights(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        uint32 l_RoomId = p_Packet->ReadWiredUint();
+
+        std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_RoomId);
+        
+        /// Does room exist?
+        if (!l_Room)
+            return;
+
+        /// Remove rights from all users
+        l_Room->RemoveAllUserRights();
     }
 
 } ///< NAMESPACE STEERSTONE

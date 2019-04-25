@@ -101,10 +101,10 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_PLACE_STUFF,                   "CLIENT_PLACE_STUFF",                      &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_DANCE,                         "CLIENT_DANCE",                            &HabboSocket::HandleDance                      );
         StoreClientPacket(PacketClientHeader::CLIENT_WAVE,                          "CLIENT_WAVE",                             &HabboSocket::HandleWave                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_KICK_USER,                     "CLIENT_KICK_USER",                        &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_ASSIGN_RIGHTS,                 "CLIENT_ASSIGN_RIGHTS",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_RIGHTS,                 "CLIENT_REMOVE_RIGHTS",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                      &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_KICK_USER,                     "CLIENT_KICK_USER",                        &HabboSocket::HandleKickUser                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_ASSIGN_RIGHTS,                 "CLIENT_ASSIGN_RIGHTS",                    &HabboSocket::HandleAssignRights               );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_RIGHTS,                 "CLIENT_REMOVE_RIGHTS",                    &HabboSocket::HandleRemoveRights               );
+        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                      &HabboSocket::HandleLetInUser                   );
         StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_STUFF,                  "CLIENT_REMOVE_STUFF",                     &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GO_AWAY,                       "CLIENT_GO_AWAY",                          &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",                     &HabboSocket::HandleGetRoomAdd                 );
@@ -137,7 +137,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_CATEGORY,             "CLIENT_GET_FLAT_CATEGORY",                &HabboSocket::HandleGetFlatCategory            );
         StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_CATEGORY,             "CLIENT_SET_FLAT_CATEGORY",                &HabboSocket::HandleSetFlatCategory            );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_SPACE_NODE_USERS,          "CLIENT_GET_SPACE_NODE_USERS",             &HabboSocket::HandleNodeSpaceUsers             );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ALL_RIGHTS,             "CLIENT_REMOVE_ALL_RIGHTS",                &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ALL_RIGHTS,             "CLIENT_REMOVE_ALL_RIGHTS",                &HabboSocket::HandleRemoveAllRights            );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_PARENT_CHAIN,              "CLIENT_GET_PARENT_CHAIN",                 &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////

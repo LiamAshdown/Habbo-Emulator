@@ -129,6 +129,7 @@ namespace SteerStone
             if (!l_CurrTileInstance)
                 return;
 
+            /// Set our previous tile occupation to false as we are no longer on the tile
             if (l_PrevTileInstance)
                 l_PrevTileInstance->SetTileOccupied(false);
 
@@ -155,7 +156,7 @@ namespace SteerStone
                     }
             }
             else
-                l_CurrTileInstance->SetTileOccupied(true, m_Habbo);
+                l_CurrTileInstance->SetTileOccupied(true, m_Habbo); ///< We are no occupying this tile
 
             int16 l_Rotation = Maths::CalculateWalkDirection(m_Habbo->GetPositionX(), m_Habbo->GetPositionY(), l_Position.X, l_Position.Y);
 
@@ -175,6 +176,8 @@ namespace SteerStone
             l_Packet.DanceId        = std::to_string(m_Habbo->GetDanceId());
             l_Packet.Waving         = HasStatus(Status::STATUS_WAVING);
             l_Packet.Swimming       = HasStatus(Status::STATUS_SWIMMING);
+            l_Packet.HasController  = HasStatus(Status::STATUS_CONTROLLER);
+            l_Packet.IsOwner        = HasStatus(Status::STATUS_OWNER);
             m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
             m_Habbo->UpdatePosition(l_Position.X, l_Position.Y, l_Position.Z, l_Rotation);
@@ -203,6 +206,8 @@ namespace SteerStone
         l_Packet.DanceId            = std::to_string(m_Habbo->GetDanceId());
         l_Packet.Waving             = HasStatus(Status::STATUS_WAVING);
         l_Packet.Swimming           = HasStatus(Status::STATUS_SWIMMING);
+        l_Packet.HasController      = HasStatus(Status::STATUS_CONTROLLER);
+        l_Packet.IsOwner            = HasStatus(Status::STATUS_OWNER);
         m_Habbo->GetRoom()->SendPacketToAll(l_Packet.Write());
 
         m_UpdateClient = false;
@@ -233,8 +238,8 @@ namespace SteerStone
         {
             if (m_AFKTimer <= p_Diff)
             {
-                m_Habbo->Logout(LogoutReason::LOGOUT_TIMEOUT);
                 m_Habbo->GetRoom()->LeaveRoom(m_Habbo);
+                m_Habbo->Logout(LogoutReason::LOGOUT_TIMEOUT);
             }
             else
                 m_AFKTimer -= p_Diff;

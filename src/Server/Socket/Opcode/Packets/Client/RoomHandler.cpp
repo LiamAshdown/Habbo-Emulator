@@ -52,7 +52,7 @@ namespace SteerStone
                 HabboPacket::Room::RoomReady l_PacketRoomReady;
                 l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
                 l_PacketRoomReady.Id = m_Habbo->GetRoom()->GetId();
-                m_Habbo->SendPacket(l_PacketRoomReady.Write());
+                SendPacket(l_PacketRoomReady.Write());
             }
         }
         else
@@ -91,11 +91,7 @@ namespace SteerStone
 
     void HabboSocket::HandleGUsers(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
-        /// Sending Habbo object so client and other clients can see a new habbo has joined the room
-        m_Habbo->GetRoom()->AddFigure(m_Habbo);
+        /// Handled in Room::EnterRoomCallBack
     }
 
     void HabboSocket::HandleGObjects(std::unique_ptr<ClientPacket> p_Packet)
@@ -122,11 +118,11 @@ namespace SteerStone
 
     void HabboSocket::HandleMove(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
+        if (!m_Habbo->GetRoom() || !m_Habbo->CanWalk())
             return;
 
-        int16 l_X = p_Packet->ReadBase64Int();
-        int16 l_Y = p_Packet->ReadBase64Int();
+        int16 l_X = static_cast<int16>(p_Packet->ReadBase64Int());
+        int16 l_Y = static_cast<int16>(p_Packet->ReadBase64Int());
         
         m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), l_X, l_Y);
     }
@@ -163,10 +159,7 @@ namespace SteerStone
 
     void HabboSocket::HandleGStat(std::unique_ptr<ClientPacket> p_Packet)
     {
-        if (!m_Habbo->GetRoom())
-            return;
-
-        m_Habbo->GetRoom()->SendRoomStatuses(m_Habbo);
+        /// Handled in Room::EnterRoomCallBack
     }
 
     void HabboSocket::HandleWave(std::unique_ptr<ClientPacket> p_Packet)
@@ -261,6 +254,9 @@ namespace SteerStone
 
     void HabboSocket::HandleTryFlat(std::unique_ptr<ClientPacket> p_Packet)
     {
+        if (!m_Habbo->GetRoom())
+            return;
+
         std::string l_Body = p_Packet->GetContent();
 
         std::vector<std::string> l_Split;
@@ -270,15 +266,17 @@ namespace SteerStone
 
         std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_RoomId);
 
+        /// Does room exist?
         if (!l_Room)
         {
-            LOG_ERROR << "Player " << m_Habbo->GetId() << " tryed to enter a non existent room!";
+            LOG_ERROR << "Player " << m_Habbo->GetId() << " tried to enter a non existent room!";
             HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
             m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
-        if (m_Habbo->HasFuseRight(Fuse::EnterLockedRooms) || m_Habbo->GetId() == l_Room->GetOwnerId())
+        /// Check if we have one of the following: Owner, Fuse Right or Super Rights
+        if (m_Habbo->HasFuseRight(Fuse::EnterLockedRooms) || m_Habbo->GetId() == l_Room->GetOwnerId() || m_Habbo->GetRoom()->IsSuperUser(m_Habbo->GetId()))
         {
             HabboPacket::Room::FlatLetIn l_Packet;
             m_Habbo->SendPacket(l_Packet.Write());
@@ -295,7 +293,22 @@ namespace SteerStone
                 HabboPacket::Room::DoorBellRinging l_Packet;
                 m_Habbo->SendPacket(l_Packet.Write());
 
-                /// Is owner inside room?
+                /// IMPORTANT:
+                /*on showDoorBellDialog(me, tName)
+                    tOwnUser = me.getComponent().getOwnUser()
+                    if tOwnUser = 0 then
+                        return(error(me, "Own user not found!", #showDoorBell, #major))
+                        end if
+                        if tOwnUser.getInfo().ctrl = 0 then
+                            return(1)
+                            end if
+                            if objectExists(pDoorBellID) then
+                                return(getObject(pDoorBellID).addDoorbellRinger(tName))
+                                end if
+                                exit
+                                end*/
+                /// Doorbell wont ring for people inside room with super rights if user who is joining
+                /// has super rights
                 if (Habbo* l_Habbo = l_Room->FindHabboById(l_Room->GetOwnerId()))
                 {
                     HabboPacket::Room::DoorBellRinging l_PacketOwner;
@@ -352,7 +365,8 @@ namespace SteerStone
         default:
         {
             /// This should never happen but good to check
-            HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
+            HabboPacket::Misc::LocalisedError l_Packet;
+            l_Packet.Error = "weird error";
             m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
@@ -364,9 +378,9 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGoToFlat(std::unique_ptr<ClientPacket> l_Packet)
+    void HabboSocket::HandleGoToFlat(std::unique_ptr<ClientPacket> p_Packet)
     {
-        uint32 l_RoomId = std::stoi(l_Packet->GetContent());
+        uint32 l_RoomId = std::stoi(p_Packet->GetContent());
 
         /// Enter the room
         if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
@@ -381,6 +395,99 @@ namespace SteerStone
             HabboPacket::Navigator::CantConnect l_Packet;
             l_Packet.ErrorCode = ConnectionError::ROOM_IS_CLOSED;
             m_Habbo->ToSocket()->SendPacket(l_Packet.Write());
+        }
+    }
+
+    void HabboSocket::HandleAssignRights(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        std::string l_Username = p_Packet->GetContent();
+
+        /// Is the user allowed to give rights?
+        if (m_Habbo->GetId() != m_Habbo->GetRoom()->GetOwnerId() && !m_Habbo->HasFuseRight(Fuse::AnyRoomController))
+            return;
+
+        /// Does user exist?
+        if (Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Username))
+            m_Habbo->GetRoom()->AddUserRights(l_Habbo);
+    }
+
+    void HabboSocket::HandleRemoveRights(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        std::string l_Username = p_Packet->GetContent();
+
+        /// Is the user allowed to remove rights?
+        if (m_Habbo->GetId() != m_Habbo->GetRoom()->GetOwnerId() && !m_Habbo->HasFuseRight(Fuse::AnyRoomController))
+            return;
+
+        /// Does user exist?
+        if (Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Username))
+            m_Habbo->GetRoom()->RemoveUserRights(l_Habbo->GetId());
+    }
+
+    void HabboSocket::HandleKickUser(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        std::string l_Username = p_Packet->GetContent();
+
+        /// Cannot kick if you are not a super user, owner, or have fuse right
+        if (m_Habbo->GetId() != m_Habbo->GetRoom()->GetOwnerId() && !m_Habbo->GetRoom()->IsSuperUser(m_Habbo->GetId()) && !m_Habbo->HasFuseRight(Fuse::Kick))
+            return;
+
+        /// Cannot kick yourself
+        if (m_Habbo->GetName() == l_Username)
+            return;
+
+        /// Cannot kick room owner if you are not moderator
+        if (m_Habbo->GetRoom()->GetOwnerName() == l_Username && !m_Habbo->HasFuseRight(Fuse::Kick))
+            return;
+
+        /// Cannot kick user who has fuse right
+        if (Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Username))
+            if (l_Habbo->HasFuseRight(Fuse::Kick))
+                return;
+            else
+            {
+                /// Make user walk to door to leave room
+                if (l_Habbo->GetRoom()->Walk(l_Habbo->GetRoomGUID(), l_Habbo->GetRoom()->GetRoomModel().GetDoorX(), l_Habbo->GetRoom()->GetRoomModel().GetDoorY()))
+                    /// Prevent user from creating a new path
+                    l_Habbo->SetCanWalk(false);
+                else ///< If we cannot form a path, just kick the user
+                    l_Habbo->GetRoom()->LeaveRoom(l_Habbo, true);
+            }
+    }
+
+    void HabboSocket::HandleLetInUser(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        std::string l_Username = p_Packet->ReadString();
+        l_Username.pop_back(); /// Remove last character from string since it's garbage
+        bool l_Allowed = p_Packet->ReadWiredBool();
+
+        Habbo* l_Habbo = m_Habbo->GetRoom()->FindHabboByName(l_Username);
+
+        /// Should never happpen
+        if (!l_Habbo)
+            return;
+
+        if (l_Allowed)
+        {
+            HabboPacket::Room::FlatLetIn l_Packet;
+            l_Habbo->SendPacket(l_Packet.Write());
+        }
+        else
+        {
+            HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
+            l_Habbo->SendPacket(l_Packet.Write());
         }
     }
 }

@@ -78,7 +78,8 @@ namespace SteerStone
 
         /// LeaveRoom 
         /// @p_Habbo : Habbo user leaving room
-        void LeaveRoom(Habbo* p_Habbo);
+        /// @p_HotelView : Kick user to hotel view
+        void LeaveRoom(Habbo* p_Habbo, bool p_HotelView = false);
 
         /// LeaveRoomCallBack
         /// Gets processed on Room::Update
@@ -115,7 +116,7 @@ namespace SteerStone
         /// @p_Habbo : Habbo user who is walking
         /// @p_EndX : End Position habbo is going to
         /// @p_EndY : End Position habbo is going to
-        void Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY);
+        bool Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY);
 
         /// AddStatus
         /// @p_RoomGUID : Room GUID of user
@@ -158,9 +159,34 @@ namespace SteerStone
         /// @p_Id : Id of user we are searching for
         Habbo* FindHabboById(uint32 const p_Id);
 
+        ///////////////////////////////////////////
+        //             SUPER RIGHTS
+        ///////////////////////////////////////////
+
+        /// RefreshRights
+        /// Send Rights to user whether they are owner, super user or normal user
+        /// @p_Habbo : Rights we are sending to
+        void RefreshRights(Habbo* p_Habbo);
+
         /// GetRoomUsers
         /// Returns storage of users with room rights
         std::set<uint32>* GetRoomRightsUsers();
+
+        /// AddFuserRights
+        /// @p_Habbo : Habbo user we are adding user rights to
+        void AddUserRights(Habbo* p_Habbo);
+
+        /// RemoveUserRights
+        /// @p_Id : User we are removing user rights from
+        void RemoveUserRights(uint32 const p_Id);
+
+        /// IsSuperUser
+        /// @p_Id : Id we are checking if user has super rights
+        bool IsSuperUser(uint32 const p_Id);
+
+        /// RemoveAllUserRights
+        /// Remove all users who have super rights
+        void RemoveAllUserRights();
 
         /// Update 
         /// Update all objects in room
@@ -179,7 +205,7 @@ namespace SteerStone
         uint32 GetWallPaper()        const { return m_WallPaper;    }
         uint32 GetFloor()            const { return m_Floor;        }
         bool ShowName()              const { return m_ShowName;     }
-        bool GetSuperUsers()         const { return m_SuperUsers;   }
+        bool AllowSuperRights()      const { return m_AllowSuperRights;   }
         uint16 GetAccessType()       const { return m_AccessType;   }
         std::string GetPassword()    const { return m_Password;     }
         uint32 GetVisitorsNow()      const { return m_VisitorsNow;  }
@@ -201,7 +227,7 @@ namespace SteerStone
         uint32 m_WallPaper;
         uint32 m_Floor;
         bool m_ShowName;
-        bool m_SuperUsers;
+        bool m_AllowSuperRights;
         uint16 m_AccessType;
         std::string m_Password;
         uint32 m_VisitorsNow;
@@ -212,5 +238,7 @@ namespace SteerStone
         GUIDUserMap m_Habbos;                    ///< Hold Habbo users
         std::set<uint32> m_SuperRights;          ///< Holds users who have room rights
         FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
+
+        boost::shared_mutex m_SuperRightsMutex;  ///< Used for m_SuperRights
     };
 } ///< NAMESPACE STEERSTONE

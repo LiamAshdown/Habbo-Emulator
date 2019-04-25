@@ -28,6 +28,7 @@ namespace SteerStone
         static const std::string UseSpecialRoomLayOuts = "fuse_use_special_room_layouts";
         static const std::string EnterLockedRooms = "fuse_enter_locked_rooms";
         static const std::string AnyRoomController = "fuse_any_room_controller";
+        static const std::string Kick = "fuse_kick";
     }
 
     class Habbo;
@@ -54,7 +55,7 @@ namespace SteerStone
     
         /// HasFuseRight
         /// @p_Fuse : Fuse right we are checking for
-        bool HasFuseRight(std::string const p_Fuse);
+        bool HasFuseRight(std::string const p_Fuse) const;
 
     private:
         std::vector<std::string> m_FuseRights;

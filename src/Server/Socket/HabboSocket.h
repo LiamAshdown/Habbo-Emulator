@@ -116,6 +116,11 @@ namespace SteerStone
         void HandleGItems(std::unique_ptr<ClientPacket> p_Packet);
         void HandleTryFlat(std::unique_ptr<ClientPacket> p_Packet);
         void HandleGoToFlat(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleAssignRights(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleRemoveRights(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleKickUser(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleLetInUser(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleRemoveAllRights(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

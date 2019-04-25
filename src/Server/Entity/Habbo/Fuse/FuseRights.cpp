@@ -70,7 +70,7 @@ namespace SteerStone
 
     /// HasFuseRight
     /// @p_Fuse : Fuse right we are checking for
-    bool FuseRights::HasFuseRight(std::string const p_Fuse)
+    bool FuseRights::HasFuseRight(std::string const p_Fuse) const
     {
         for (auto const& l_Itr : m_FuseRights)
         {

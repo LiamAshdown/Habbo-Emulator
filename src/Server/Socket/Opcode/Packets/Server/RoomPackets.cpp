@@ -77,9 +77,8 @@ namespace SteerStone
                     m_Buffer.AppendString(PoolFigure.get(), false);
                     m_Buffer.AppendString("\r", false);
                 }
-                m_Buffer.AppendSOH();
 
-                uint8* test = &m_Buffer.m_Storage[0];
+                m_Buffer.AppendSOH();
 
                 return &m_Buffer;
             }
@@ -208,6 +207,10 @@ namespace SteerStone
                 m_Buffer.AppendStringDelimiter(HeadRotation, ",");
                 m_Buffer.AppendString(BodyRotation, false);
 
+                if (HasController)
+                    m_Buffer.AppendString("/flatctrl", false);
+                if (IsOwner)
+                    m_Buffer.AppendString("/flatctrl useradmin", false);
                 if (Dancing)
                     m_Buffer.AppendString("/Dance " + DanceId , false);
                 if (Walking)
@@ -235,7 +238,7 @@ namespace SteerStone
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            StringBuffer const * LeaveRoom::Write()
+            StringBuffer const * Logout::Write()
             {
                 m_Buffer.AppendString(GUID, false);
 
@@ -367,6 +370,49 @@ namespace SteerStone
                 return &m_Buffer;
             }
 
-} ///< NAMESPACE ROOM
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * YouAreController::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * YouAreNotController::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * YouAreOwner::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * CLC::Write()
+            {
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+        } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

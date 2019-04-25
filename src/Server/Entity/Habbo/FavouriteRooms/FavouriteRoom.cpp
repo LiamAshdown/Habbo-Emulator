@@ -16,17 +16,17 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "FavouriteRoom.h"
 #include "Database/QueryDatabase.h"
 #include "RoomManager.h"
 #include "Config/Config.h"
 #include "Network/StringBuffer.h"
+#include "Habbo.h"
 
 namespace SteerStone
 {
     /// Constructor
-    /// @p_Id : Account Id, we don't use Habbo class here
-    FavouriteRoom::FavouriteRoom(const uint32& id) : m_Id(id)
+    /// @p_Habbo : Habbo class which owns the favourite rooms
+    FavouriteRoom::FavouriteRoom(Habbo* p_Habbo) : m_Habbo(p_Habbo)
     {
     }
     
@@ -44,7 +44,7 @@ namespace SteerStone
 
         QueryDatabase l_Database("rooms");
         l_Database.PrepareQuery("SELECT id, room_id, public_space FROM favourite_rooms WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, m_Id);
+        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -55,9 +55,9 @@ namespace SteerStone
         do
         {
             FavouriteRoomsData l_FavouriteRoom;
-            l_FavouriteRoom.m_Id = l_Result->GetUint32(1);
-            l_FavouriteRoom.m_RoomId = l_Result->GetUint32(2);
-            l_FavouriteRoom.m_RoomType = l_Result->GetBool(3);
+            l_FavouriteRoom.m_Id        = l_Result->GetUint32(1);
+            l_FavouriteRoom.m_RoomId    = l_Result->GetUint32(2);
+            l_FavouriteRoom.m_RoomType  = l_Result->GetBool(3);
 
             m_FavouriteRooms.push_back(l_FavouriteRoom);
 
@@ -82,9 +82,9 @@ namespace SteerStone
             return;
 
         FavouriteRoomsData l_FavouriteRoom;
-        l_FavouriteRoom.m_Id = m_Id;
-        l_FavouriteRoom.m_RoomType = p_IsPublic;
-        l_FavouriteRoom.m_RoomId = p_RoomId;
+        l_FavouriteRoom.m_Id        = m_Habbo->GetId();
+        l_FavouriteRoom.m_RoomType  = p_IsPublic;
+        l_FavouriteRoom.m_RoomId    = p_RoomId;
 
         m_FavouriteRooms.push_back(l_FavouriteRoom);
     }

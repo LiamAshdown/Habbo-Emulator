@@ -223,6 +223,8 @@ namespace SteerStone
                 bool Walking;
                 bool Waving;
                 bool Swimming;
+                bool HasController;
+                bool IsOwner;
                 std::string Status = "";
                 std::string NewX;
                 std::string NewY;
@@ -230,11 +232,11 @@ namespace SteerStone
             };
 
             /// SERVER_LOGOUT packet builder
-            class LeaveRoom final : public ServerPacket
+            class Logout final : public ServerPacket
             {
             public:
                 /// Constructor 
-                LeaveRoom() : ServerPacket(SERVER_LOGOUT) {}
+                Logout() : ServerPacket(SERVER_LOGOUT) {}
 
             public:
                 /// Write the packet
@@ -380,6 +382,55 @@ namespace SteerStone
                 /// Write the packet
                 StringBuffer const* Write();
             };
+
+            /// SERVER_YOU_ARE_CONTROLLER packet builder
+            class YouAreController final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                YouAreController() : ServerPacket(SERVER_YOU_ARE_CONTROLLER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_YOU_ARE_NOT_CONTROLLER packet builder
+            class YouAreNotController final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                YouAreNotController() : ServerPacket(SERVER_YOU_ARE_NOT_CONTROLLER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_YOU_ARE_OWNER packet builder
+            class YouAreOwner final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                YouAreOwner() : ServerPacket(SERVER_YOU_ARE_OWNER) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
+            /// SERVER_CLC packet builder
+            class CLC final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                CLC() : ServerPacket(SERVER_CLC) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+            };
+
 
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET

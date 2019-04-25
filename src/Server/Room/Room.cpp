@@ -22,6 +22,7 @@
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Opcode/Packets/Server/NavigatorPackets.h"
 #include "Common/Maths.h"
+#include "Database/QueryDatabase.h"
 #include <functional>
 
 namespace SteerStone
@@ -90,6 +91,10 @@ namespace SteerStone
                     /// Add WalkWay tiles
                     GetRoomModel().TileGrid[l_X][l_Y]->AddWalkWay(sRoomMgr->GetWalkWay(GetId(), l_X, l_Y));
                 }
+                else
+                {
+                    GetRoomModel().TileGrid[l_X][l_Y]->AddTrigger(sTriggerMgr->GetTrigger("default")); ///< Temporary
+                }
             }
         }    
     }
@@ -123,6 +128,9 @@ namespace SteerStone
             p_Habbo->UpdatePosition(GetRoomModel().GetDoorX(), GetRoomModel().GetDoorY(), GetRoomModel().GetDoorZ(),
                 GetRoomModel().GetDoorOrientation());
 
+        /// User can walk
+        p_Habbo->SetCanWalk(true);
+
         p_Habbo->SetRoomGUID(Maths::GetRandomUint32(1, 9999));
 
         /// Send update that we joined the room
@@ -139,13 +147,18 @@ namespace SteerStone
     void Room::EnterRoomCallBack(Habbo* p_Habbo)
     {
         m_Habbos[p_Habbo->GetRoomGUID()] = std::make_unique<RoomHabboInfo>(p_Habbo);
+
+        AddFigure(p_Habbo);
+        RefreshRights(p_Habbo);
+        SendRoomStatuses(p_Habbo);
+
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++;
     }
     
-    /// EnterRoom 
     /// @p_Habbo : Habbo user leaving room
-    void Room::LeaveRoom(Habbo* p_Habbo)
+    /// @p_HotelView : Kick user to hotel view
+    void Room::LeaveRoom(Habbo* p_Habbo, bool p_HotelView /*= false*/)
     {
         auto const& l_Itr = m_Habbos.find(p_Habbo->GetRoomGUID());
         if (l_Itr != m_Habbos.end())
@@ -156,6 +169,16 @@ namespace SteerStone
 
             /// Send update that we left the room
             l_Itr->second->m_Habbo->SendMessengerUpdate();
+
+            /// User cannot walk
+            p_Habbo->SetCanWalk(false);
+
+            /// If true, kick user to hotel view
+            if (p_HotelView)
+            {
+                HabboPacket::Room::CLC l_Packet;
+                p_Habbo->SendPacket(l_Packet.Write());
+            }
 
             /// Set our room to null
             l_Itr->second->m_Habbo->DestroyRoom();
@@ -247,6 +270,8 @@ namespace SteerStone
             l_Packet.DanceId        = std::to_string(l_Habbo->GetDanceId());
             l_Packet.Waving         = l_Itr.second->HasStatus(Status::STATUS_WAVING);
             l_Packet.Swimming       = l_Itr.second->HasStatus(Status::STATUS_SWIMMING);
+            l_Packet.HasController  = l_Itr.second->HasStatus(Status::STATUS_CONTROLLER);
+            l_Packet.IsOwner        = l_Itr.second->HasStatus(Status::STATUS_OWNER);
             p_Habbo->SendPacket(l_Packet.Write());
         }
     }
@@ -256,7 +281,7 @@ namespace SteerStone
     {
         for (auto const& l_Itr : m_Habbos)
         {
-            HabboPacket::Room::LeaveRoom l_Packet;
+            HabboPacket::Room::Logout l_Packet;
             l_Packet.GUID = std::to_string(p_GUID);
             l_Itr.second->ToHabbo()->SendPacket(l_Packet.Write());
         }
@@ -316,11 +341,13 @@ namespace SteerStone
     /// @p_Habbo : Habbo user who is walking
     /// @p_EndX : End Position habbo is going to
     /// @p_EndY : End Position habbo is going to
-    void Room::Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY)
+    bool Room::Walk(uint32 const p_RoomGUID, uint16 const p_EndX, uint16 const p_EndY)
     {
         auto const& l_Itr = m_Habbos.find(p_RoomGUID);
         if (l_Itr != m_Habbos.end())
-            l_Itr->second->CreatePath(p_EndX, p_EndY);
+            return l_Itr->second->CreatePath(p_EndX, p_EndY);
+
+        return false;
     }
 
     /// AddStatus
@@ -433,11 +460,113 @@ namespace SteerStone
         return nullptr;
     }
 
+    ///////////////////////////////////////////
+    //             SUPER RIGHTS
+    ///////////////////////////////////////////
+
+    /// RefreshRights
+    /// Send Rights to user whether they are owner, super user or normal user
+    /// @p_Habbo : Rights we are sending to
+    void Room::RefreshRights(Habbo* p_Habbo)
+    {
+        auto const& l_Itr = m_SuperRights.find(p_Habbo->GetId());
+        if (l_Itr != m_SuperRights.end())
+        {
+            p_Habbo->GetRoom()->AddStatus(p_Habbo->GetRoomGUID(), Status::STATUS_CONTROLLER);
+            HabboPacket::Room::YouAreController l_Packet;
+            p_Habbo->SendPacket(l_Packet.Write());
+        }
+        else
+        {
+            p_Habbo->GetRoom()->RemoveStatus(p_Habbo->GetRoomGUID(), Status::STATUS_CONTROLLER);
+            HabboPacket::Room::YouAreNotController l_Packet;
+            p_Habbo->SendPacket(l_Packet.Write());
+        }
+
+        /// Seperate check for owner and fuse right
+        if (p_Habbo->GetId() == GetOwnerId() || p_Habbo->HasFuseRight(Fuse::AnyRoomController))
+        {
+            p_Habbo->GetRoom()->AddStatus(p_Habbo->GetRoomGUID(), Status::STATUS_OWNER);
+            HabboPacket::Room::YouAreOwner l_Packet;
+            p_Habbo->SendPacket(l_Packet.Write());
+        }
+    }
+
     /// GetRoomUsers
     /// Returns storage of users with room rights
     std::set<uint32>* Room::GetRoomRightsUsers()
     {
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+
         return &m_SuperRights;
+    }
+
+    /// AddFuserRights
+    /// @p_Habbo : Habbo user we are adding user rights to
+    void Room::AddUserRights(Habbo* p_Habbo)
+    {
+        boost::unique_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+
+        auto const& l_Itr = m_SuperRights.find(p_Habbo->GetId());
+        if (l_Itr == m_SuperRights.end())
+        {
+            m_SuperRights.insert(p_Habbo->GetId());
+
+            /// Refresh rights to update client
+            RefreshRights(p_Habbo);
+
+            /// And update the database
+            QueryDatabase l_Database("rooms");
+            l_Database.PrepareQuery("INSERT INTO room_rights (id, room_id) VALUES (?, ?)");
+            l_Database.GetStatement()->setUInt(1, p_Habbo->GetId());
+            l_Database.GetStatement()->setUInt(2, GetId());
+            l_Database.ExecuteQuery();
+        }
+    }
+
+    /// RemoveUserRights
+    /// @p_Id : User we are removing user rights from
+    void Room::RemoveUserRights(uint32 const p_Id)
+    {
+        boost::unique_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+
+        auto& l_Itr = m_SuperRights.find(p_Id);
+        if (l_Itr != m_SuperRights.end())
+        {
+            m_SuperRights.erase(l_Itr);
+
+            /// If user is online, refresh rights
+            if (Habbo* l_Habbo = FindHabboById(p_Id))
+                l_Habbo->GetRoom()->RefreshRights(l_Habbo);
+
+            /// And update the database
+            QueryDatabase l_Database("rooms");
+            l_Database.PrepareQuery("DELETE FROM room_rights WHERE id = ? AND room_id = ?");
+            l_Database.GetStatement()->setUInt(1, p_Id);
+            l_Database.GetStatement()->setUInt(2, GetId());
+            l_Database.ExecuteQuery();
+        }
+    }
+
+    /// IsSuperUser
+    /// @p_Id : Id we are checking if user has super rights
+    bool Room::IsSuperUser(uint32 const p_Id)
+    {
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+
+        auto const& l_Itr = m_SuperRights.find(p_Id);
+        if (l_Itr != m_SuperRights.end())
+            return true;
+        
+        return false;
+    }
+
+    /// RemoveAllUserRights
+    /// Remove all users who have super rights
+    void Room::RemoveAllUserRights()
+    {
+        for (auto const& l_Itr : m_SuperRights)
+            RemoveUserRights(l_Itr);
     }
 
     /// Update 
