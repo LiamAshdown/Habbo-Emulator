@@ -293,7 +293,7 @@ namespace SteerStone
         std::string GetGender()         const { return m_Gender;               }
         std::string GetCountry()        const { return m_Country;              }
         std::string GetPoolFigure()     const { return m_PoolFigure;           }
-        std::string GetCurrentBadge()   const { return m_Badge->GetCurrentBadgeName(); }
+        std::string GetCurrentBadge()   const { return m_Badge.GetCurrentBadgeName(); }
 
         uint32 GetFilms()               const { return m_Films;                }
         uint32 GetCredits()             const { return m_Credits;              }

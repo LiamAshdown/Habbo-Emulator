@@ -321,12 +321,39 @@ namespace SteerStone
     /// @p_Diff - Update tick
     void RoomManager::UpdateRooms(uint32 const& p_Diff)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+        /// Check any rooms are pending for deletion
+        IsScheduledToDeleteRoom();
 
         /// TODO; Don't update rooms which are not active
         for (auto const& l_Itr : m_Rooms)
         {
             l_Itr.second->Update(p_Diff);
+        }
+    }
+
+    /// IsScheduledToDeleteRoom
+    /// Check if we can delete the room
+    void RoomManager::IsScheduledToDeleteRoom()
+    {
+        for (auto l_Itr = m_RoomDeletion.begin(); l_Itr != m_RoomDeletion.end();)
+        {
+            /// If there is users inside the room, don't delete
+            if ((*l_Itr)->GetVisitorsNow() > 0)
+                ++l_Itr;
+            else
+            {
+                /// Okay we can delete room
+                auto const& l_RemoveItr = m_Rooms.find((*l_Itr)->GetId());
+                if (l_RemoveItr != m_Rooms.end())
+                    m_Rooms.erase(l_RemoveItr);
+
+                QueryDatabase l_Database("rooms");
+                l_Database.PrepareQuery("DELETE FROM rooms WHERE id = ?");
+                l_Database.GetStatement()->setUInt(1, (*l_Itr)->GetId());
+                l_Database.ExecuteQuery();
+
+                l_Itr = m_RoomDeletion.erase(l_Itr);
+            }
         }
     }
     
@@ -421,6 +448,17 @@ namespace SteerStone
         l_Room->m_RoomVisible               = l_Result->GetBool(10);
     }
 
+    /// ScheduleDeleteRoom
+    /// @p_RoomId : Room Id we are preparing to delete
+    void RoomManager::ScheduleDeleteRoom(const uint32 p_RoomId)
+    {
+        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+
+        auto const& l_Itr = m_Rooms.find(p_RoomId);
+        if (l_Itr != m_Rooms.end())
+            m_RoomDeletion.push_back(l_Itr->second);
+    }
+
     /// GetRoomCategories
     /// Get Room Category Map
     RoomCategoriesMap* RoomManager::GetRoomCategories()
@@ -433,4 +471,15 @@ namespace SteerStone
     {
         return &m_Rooms;
     }
+
+    /// CleanUp
+    /// Called when server is shutting down
+    void RoomManager::CleanUp()
+    {
+        for (auto const& l_Itr : m_RoomDeletion)
+        {
+
+        }
+    }
+
 } ///< NAMESPACE STEERSTONE

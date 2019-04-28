@@ -565,4 +565,10 @@ namespace SteerStone
         l_Room->RemoveAllUserRights();
     }
 
+    void HabboSocket::HandleDeleteFlat(std::unique_ptr<ClientPacket> p_Packet)
+    {
+        uint32 l_RoomId = std::stoi(p_Packet->GetContent());
+        sRoomMgr->ScheduleDeleteRoom(l_RoomId);
+    }
+
 } ///< NAMESPACE STEERSTONE

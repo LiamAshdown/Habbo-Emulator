@@ -128,7 +128,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_ADD_FAVOURITE_ROOM,            "CLIENT_ADD_FAVOURITE_ROOM",               &HabboSocket::HandleAddFavouriteRoom           );
         StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",            &HabboSocket::HandleRemoveFavouriteRoom        );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_INFO,                 "CLIENT_GET_FLAT_INFO",                    &HabboSocket::HandleGetFlatInfo                );
-        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FLAT,                   "CLIENT_DELETE_FLAT",                      &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FLAT,                   "CLIENT_DELETE_FLAT",                      &HabboSocket::HandleDeleteFlat                 );
         StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_FLAT,                   "CLIENT_UPDATE_FLAT",                      &HabboSocket::HandleUpdateFlat                 );
         StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_INFO,                 "CLIENT_SET_FLAT_INFO",                    &HabboSocket::HandleSetFlatInfo                );
         StoreClientPacket(PacketClientHeader::CLIENT_CREATE_FLAT,                   "CLIENT_CREATE_FLAT",                      &HabboSocket::HandleCreateFlat                 );

@@ -121,6 +121,7 @@ namespace SteerStone
         void HandleKickUser(std::unique_ptr<ClientPacket> p_Packet);
         void HandleLetInUser(std::unique_ptr<ClientPacket> p_Packet);
         void HandleRemoveAllRights(std::unique_ptr<ClientPacket> p_Packet);
+        void HandleDeleteFlat(std::unique_ptr<ClientPacket> p_Packet);
         void HandleNULL(std::unique_ptr<ClientPacket> p_Packet);
         void HandleServerMessage(std::unique_ptr<ClientPacket> p_Packet) {}
 

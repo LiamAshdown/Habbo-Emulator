@@ -73,9 +73,11 @@ namespace SteerStone
 
                 std::unique_ptr<ClientPacket> l_Packet = std::make_unique<ClientPacket>(l_TrimBuffer);
 
-                LOG_INFO << "[INCOMING]: " << "[" << l_Packet->GetHeader() << "] [" << sOpcode->GetClientPacket(l_Packet->GetHeader()).name << "]";
+                auto const& l_Handler = sOpcode->GetClientPacket(l_Packet->GetHeader());
 
-                ExecutePacket(sOpcode->GetClientPacket(l_Packet->GetHeader()), std::move(l_Packet));
+                LOG_INFO << "[INCOMING]: " << "[" << l_Packet->GetHeader() << "] [" << l_Handler.name << "]";
+
+                ExecutePacket(l_Handler, std::move(l_Packet));
 
                 l_TempBuffer = l_TempBuffer.substr(l_TrimBuffer.length() + 3);
             }

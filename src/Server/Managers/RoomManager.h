@@ -88,6 +88,10 @@ namespace SteerStone
         /// @p_Diff - Update tick
         void UpdateRooms(uint32 const& p_Diff);
 
+        /// IsScheduledToDeleteRoom
+        /// Check if we can delete the room
+        void IsScheduledToDeleteRoom();
+
         /// GetRoomCategory
         /// @p_Id : Category Id
         RoomCategory* GetRoomCategory(uint32 const p_Id);
@@ -115,6 +119,10 @@ namespace SteerStone
         /// @p_Id : Room Id
         void ReloadRoom(uint32 const p_Id);
 
+        /// ScheduleDeleteRoom
+        /// @p_RoomId : Room Id we are preparing to delete
+        void ScheduleDeleteRoom(uint32 const p_RoomId);
+
         /// GetRoomCategories
         /// Get Room Category Map
         RoomCategoriesMap* GetRoomCategories();
@@ -123,12 +131,17 @@ namespace SteerStone
         /// Get Room Map
         RoomsMap* GetRooms();
 
+        /// CleanUp
+        /// Called when server is shutting down
+        void CleanUp();
+
     private:
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for Room                               
         RoomModelsMap m_RoomModels;                                  ///< Map Storage which holds key Model Id and structure for Model
         RoomUrlMap m_RoomUrl;                                        ///< Map storage which holds key Room Id and structure for RoomUrl
         std::vector<WalkWay> m_RoomWalkWays;                         ///< Stores Walk Way tiles
+        std::vector<std::shared_ptr<Room>> m_RoomDeletion;           ///< Room which will get deleted when it's ready to do so
         std::mutex m_Mutex;
     };
 }
