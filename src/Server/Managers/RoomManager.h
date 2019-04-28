@@ -131,10 +131,6 @@ namespace SteerStone
         /// Get Room Map
         RoomsMap* GetRooms();
 
-        /// CleanUp
-        /// Called when server is shutting down
-        void CleanUp();
-
     private:
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category
         RoomsMap m_Rooms;                                            ///< Map Storage which holds key room Id and structure for Room                               
@@ -142,7 +138,7 @@ namespace SteerStone
         RoomUrlMap m_RoomUrl;                                        ///< Map storage which holds key Room Id and structure for RoomUrl
         std::vector<WalkWay> m_RoomWalkWays;                         ///< Stores Walk Way tiles
         std::vector<std::shared_ptr<Room>> m_RoomDeletion;           ///< Room which will get deleted when it's ready to do so
-        std::mutex m_Mutex;
+        boost::shared_mutex m_Mutex;
     };
 }
 

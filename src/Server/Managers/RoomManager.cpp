@@ -271,7 +271,7 @@ namespace SteerStone
     /// @p_RoomId : Id of room we are querying database to get room info
     void RoomManager::AddRoom(uint32 const p_RoomId)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
+        boost::unique_lock<boost::shared_mutex> l_Guard(m_Mutex);
 
         QueryDatabase l_Database("rooms");
         l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, room_visible FROM rooms WHERE id = ?");
@@ -335,6 +335,8 @@ namespace SteerStone
     /// Check if we can delete the room
     void RoomManager::IsScheduledToDeleteRoom()
     {
+        boost::unique_lock<boost::shared_mutex> l_Guard(m_Mutex);
+
         for (auto l_Itr = m_RoomDeletion.begin(); l_Itr != m_RoomDeletion.end();)
         {
             /// If there is users inside the room, don't delete
@@ -394,6 +396,8 @@ namespace SteerStone
     /// @p_Id : Room Id
     std::shared_ptr<Room> RoomManager::GetRoom(uint32 const p_Id)
     {
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_Mutex);
+
         auto const& l_Itr = m_Rooms.find(p_Id);
         if (l_Itr != m_Rooms.end())
             return l_Itr->second;
@@ -423,8 +427,6 @@ namespace SteerStone
     /// @p_Id : Room Id
     void RoomManager::ReloadRoom(uint32 const p_Id)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
         QueryDatabase l_Database("rooms");
         l_Database.PrepareQuery("SELECT category, name, description, wall_paper, show_name, super_users, access_type, password, visitors_max, room_visible FROM rooms WHERE id = ?");
         l_Database.GetStatement()->setUInt(1, p_Id);
@@ -452,8 +454,6 @@ namespace SteerStone
     /// @p_RoomId : Room Id we are preparing to delete
     void RoomManager::ScheduleDeleteRoom(const uint32 p_RoomId)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
         auto const& l_Itr = m_Rooms.find(p_RoomId);
         if (l_Itr != m_Rooms.end())
             m_RoomDeletion.push_back(l_Itr->second);
@@ -470,16 +470,6 @@ namespace SteerStone
     RoomsMap* RoomManager::GetRooms()
     {
         return &m_Rooms;
-    }
-
-    /// CleanUp
-    /// Called when server is shutting down
-    void RoomManager::CleanUp()
-    {
-        for (auto const& l_Itr : m_RoomDeletion)
-        {
-
-        }
     }
 
 } ///< NAMESPACE STEERSTONE
