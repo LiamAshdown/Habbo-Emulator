@@ -19,8 +19,9 @@
 #include "Database/QueryDatabase.h"
 #include "RoomManager.h"
 #include "Config/Config.h"
-#include "Network/StringBuffer.h"
 #include "Habbo.h"
+
+#include "Opcode/Packets/Server/MiscPackets.h"
 
 namespace SteerStone
 {
@@ -65,12 +66,17 @@ namespace SteerStone
     }
     
     /// AddFavouriteRoom
-    /// @p_IsPublic : Is Room public or flat
+    /// @p_IsPublic : Is room public or flat
     /// @p_RoomId : Room Id
     void FavouriteRoom::AddFavouriteRoom(bool const& p_IsPublic, uint32 const& p_RoomId)
     {
-        if (m_FavouriteRooms.size() >= sConfig->GetIntDefault("MaxFavouriteRooms", 50))
+        if (m_FavouriteRooms.size() >= MAX_FAVOURITE_ROOMS)
+        {
+            HabboPacket::Misc::LocalisedError l_Packet;
+            l_Packet.Error = "nav_error_toomanyfavrooms";
+            m_Habbo->SendPacket(l_Packet.Write());
             return;
+        }
 
         auto const& l_Itr = std::find_if(m_FavouriteRooms.begin(), m_FavouriteRooms.end(), 
             [p_RoomId](const FavouriteRoomsData& p_FavRoom) 
