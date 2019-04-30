@@ -27,7 +27,7 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleNavigate(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleNavigate(ClientPacket* p_Packet)
     {
         bool l_HideFullRooms = p_Packet->ReadWiredBool();
         int32 l_CategoryId = p_Packet->ReadWiredInt();
@@ -138,7 +138,7 @@ namespace SteerStone
         SendPacket(&l_Buffer);
     }
     
-    void HabboSocket::HandleGetUserFlatsCategories(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetUserFlatsCategories(ClientPacket* p_Packet)
     {
         StringBuffer l_Buffer;
         StringBuffer l_SecondBuffer;
@@ -162,7 +162,7 @@ namespace SteerStone
         SendPacket(&l_Buffer);
     }
     
-    void HabboSocket::HandleSearchFlats(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSearchFlats(ClientPacket* p_Packet)
     {
         std::string l_Search = p_Packet->GetContent();
 
@@ -224,12 +224,12 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGetFavouriteRooms(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetFavouriteRooms(ClientPacket* p_Packet)
     {
         m_Habbo->SendFavouriteRooms();
     }
 
-    void HabboSocket::HandleAddFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleAddFavouriteRoom(ClientPacket* p_Packet)
     {
         bool l_RoomType = p_Packet->ReadWiredBool();
         uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
@@ -237,7 +237,7 @@ namespace SteerStone
         m_Habbo->AddFavouriteRoom(l_RoomType, l_RoomId);
     }
 
-    void HabboSocket::HandleRemoveFavouriteRoom(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleRemoveFavouriteRoom(ClientPacket* p_Packet)
     {
         bool l_RoomType = p_Packet->ReadWiredBool();
         uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
@@ -245,7 +245,7 @@ namespace SteerStone
         m_Habbo->RemoveFavouriteRoom(l_RoomId);
     }
 
-    void HabboSocket::HandleNodeSpaceUsers(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleNodeSpaceUsers(ClientPacket* p_Packet)
     {
         uint32 l_RoomId = p_Packet->ReadWiredUint() - PUBLIC_ROOM_OFFSET;
 
@@ -257,7 +257,7 @@ namespace SteerStone
         l_Room->SendNodeSpaceUsers(m_Habbo);
     }
 
-    void HabboSocket::HandleCreateFlat(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleCreateFlat(ClientPacket* p_Packet)
     {
         std::vector<std::string> l_Split;
         boost::split(l_Split, p_Packet->GetContent(), boost::is_any_of("/"));
@@ -295,7 +295,7 @@ namespace SteerStone
             !m_Habbo->HasFuseRight(Fuse::UseSpecialRoomLayOuts))
             l_CreateFlat = false;
 
-        /// ErrorMessenger creating flat? let player know
+        /// Error creating flat? let player know
         if (!l_CreateFlat)
         {
             HabboPacket::Login::LocalisedError l_Packet;
@@ -342,7 +342,7 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleSetFlatInfo(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSetFlatInfo(ClientPacket* p_Packet)
     {
         std::string l_Body = p_Packet->GetContent();
 
@@ -382,7 +382,7 @@ namespace SteerStone
         sRoomMgr->ReloadRoom(l_Room->GetId());
     }
 
-    void HabboSocket::HandleSearchUserFlats(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSearchUserFlats(ClientPacket* p_Packet)
     {
         /// TODO; Clean this. We are querying the database and then finding the room in the storage = slow !!
         QueryDatabase l_Database("rooms");
@@ -442,7 +442,7 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGetFlatInfo(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetFlatInfo(ClientPacket* p_Packet)
     {
         int32 l_RoomId = std::stoi(p_Packet->GetContent());
 
@@ -473,7 +473,7 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGetFlatCategory(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetFlatCategory(ClientPacket* p_Packet)
     {
         uint32 l_RoomId = p_Packet->ReadWiredUint();
 
@@ -489,7 +489,7 @@ namespace SteerStone
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleSetFlatCategory(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSetFlatCategory(ClientPacket* p_Packet)
     {
         uint32 l_RoomId = p_Packet->ReadWiredUint();
         uint32 l_CategoryId = p_Packet->ReadWiredUint();
@@ -514,7 +514,7 @@ namespace SteerStone
         l_Database.ExecuteQuery();
     }
 
-    void HabboSocket::HandleUpdateFlat(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleUpdateFlat(ClientPacket* p_Packet)
     {
         std::string l_Body = p_Packet->GetContent();
 
@@ -551,7 +551,7 @@ namespace SteerStone
         l_Database.ExecuteQuery();
     }
 
-    void HabboSocket::HandleRemoveAllRights(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleRemoveAllRights(ClientPacket* p_Packet)
     {
         uint32 l_RoomId = p_Packet->ReadWiredUint();
 
@@ -565,7 +565,7 @@ namespace SteerStone
         l_Room->RemoveAllUserRights();
     }
 
-    void HabboSocket::HandleDeleteFlat(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleDeleteFlat(ClientPacket* p_Packet)
     {
         uint32 l_RoomId = std::stoi(p_Packet->GetContent());
         sRoomMgr->ScheduleDeleteRoom(l_RoomId);

@@ -20,7 +20,6 @@
 #include "Database/QueryDatabase.h"
 #include "Common/SHA1.h"
 #include "Habbo.h"
-#include "Opcode/Opcodes.h"
 
 namespace SteerStone
 {
@@ -71,13 +70,61 @@ namespace SteerStone
             {
                 std::string l_TrimBuffer = l_TempBuffer.substr(3, DecodeBase64(l_TempBuffer.substr(1, 2)));
 
-                std::unique_ptr<ClientPacket> l_Packet = std::make_unique<ClientPacket>(l_TrimBuffer);
+                ClientPacket* l_Packet = new ClientPacket(l_TrimBuffer);
 
                 auto const& l_Handler = sOpcode->GetClientPacket(l_Packet->GetHeader());
 
-                LOG_INFO << "[INCOMING]: " << "[" << l_Packet->GetHeader() << "] [" << l_Handler.name << "]";
+                if (l_Handler.Process != PacketProcess::PROCESS_NOW)
+                {
+                    m_Habbo->QueuePacket(l_Handler.Process, l_Packet);
 
-                ExecutePacket(l_Handler, std::move(l_Packet));
+                    l_TempBuffer = l_TempBuffer.substr(l_TrimBuffer.length() + 3);
+
+                    continue;
+                }
+
+                switch (l_Handler.Status)
+                {
+                case PacketStatus::STATUS_AUTH:
+                {
+                    if (!m_Habbo)
+                        ExecutePacket(l_Handler, l_Packet);
+                    else
+                        LOG_INFO << "[" << l_Handler.Name << "]" << "Cannot process packet because player is already initialized";
+                }
+                break;  
+
+                case PacketStatus::STATUS_HOTEL_VIEW:
+                {
+                    if (!m_Habbo->GetRoom())
+                        ExecutePacket(l_Handler, l_Packet);                    
+                    else
+                        LOG_INFO << "[" << l_Handler.Name << "]" << "Cannot process packet because player is not at hotel view";
+                }
+                break;
+
+                case PacketStatus::STATUS_IN_ROOM:
+                {
+                    if (m_Habbo->GetRoom())
+                        ExecutePacket(l_Handler, l_Packet);
+                    else
+                        LOG_INFO << "[" << l_Handler.Name << "]" << "Cannot process packet because player is not in room";
+                }
+                break;
+
+                case PacketStatus::STATUS_ALL:
+                {
+                    /// Process packet regardless
+                    ExecutePacket(l_Handler, l_Packet);
+                }
+                break;
+
+                /// Should we log here?
+                default:
+                    break;
+                }
+
+                delete l_Packet;
 
                 l_TempBuffer = l_TempBuffer.substr(l_TrimBuffer.length() + 3);
             }
@@ -89,13 +136,17 @@ namespace SteerStone
     }
     
     /// Client Handlers
-    void HabboSocket::ExecutePacket(OpcodeHandler const& p_Handler, std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::ExecutePacket(OpcodeHandler const& p_Handler, ClientPacket* p_Packet)
     {
-        (this->*p_Handler.handler)(std::move(p_Packet));
+        LOG_INFO << "[INCOMING]: " << "[" << p_Packet->GetHeader() << "] [" << p_Handler.Name << "]";
+
+        
+
+        (this->*p_Handler.Handler)(std::move(p_Packet));
     }
     
     /// ClientPacket is not handled yet
-    void HabboSocket::HandleNULL(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleNULL(ClientPacket* p_Packet)
     {
 
     }

@@ -23,7 +23,7 @@
 #include "Fuse/FuseRights.h"
 #include "Club/Club.h"
 #include "Badge/Badge.h"
-#include <mutex>
+#include "Platform/Thread/LockedDeque.h"
 
 namespace SteerStone
 {
@@ -157,15 +157,15 @@ namespace SteerStone
 
         /// MessengerRemoveBuddy
         /// @p_Packet - Client packet which is being decoded
-        void MessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerRemoveBuddy(ClientPacket* p_Packet);
 
         /// MessengerRejectRequest
         /// @p_Packet - Client packet which is being decoded
-        void MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerRejectRequest(ClientPacket* p_Packet);
 
         /// MessengerSendMessage
         /// @p_Packet - Client packet which is being decoded
-        void MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
+        void MessengerSendMessage(ClientPacket* p_Packet);
 
         /// MessengerReply
         /// @p_MessageId - Id of message (account id)
@@ -253,9 +253,24 @@ namespace SteerStone
         /// Save Habbo data to database on logout
         void SaveToDB();
 
+        ///////////////////////////////////////////
+        //             NETWORK
+        ///////////////////////////////////////////
+
         /// SendPacket 
         /// @p_Buffer : Buffer which holds our data to be send to the client
         void SendPacket(StringBuffer const* p_Buffer);
+
+        /// QueuePacket
+        /// @p_Process : Type of packet we are processing
+        /// @p_Packet : Packet we are adding to queue to be processed on main thread
+        void QueuePacket(uint8 p_Process, ClientPacket* p_Packet);
+
+        /// ProcessPackets
+        /// Process any pending packets
+        /// @p_Process : Type of packet we are processing
+        /// @p_Packet : Packet being processed
+        void ProcessPackets(uint8 p_Process, ClientPacket* p_Packet = nullptr);
 
     public:
         ///////////////////////////////////////////
@@ -326,6 +341,10 @@ namespace SteerStone
         void SetBodyRotation(int16 const l_Rotation) { m_BodyRotation = l_Rotation; }
         void SetHeadRotation(int16 const l_Rotation) { m_HeadRotation = l_Rotation; }
 
+        ///////////////////////////////////////////
+        //             NETWORK
+        ///////////////////////////////////////////
+
         std::shared_ptr<HabboSocket> ToSocket() { return m_Socket;             }
 
     private:
@@ -384,5 +403,7 @@ namespace SteerStone
         HabboClub m_Club;
         FavouriteRoom m_FavouriteRooms;
         Badge m_Badge;
+        LockedDeque<ClientPacket*> m_QueuePlrUpdPck;
+        LockedDeque<ClientPacket*> m_QueueRoomUpdPck;
     };
 } ///< NAMESPACE STEERSTONE

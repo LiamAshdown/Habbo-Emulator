@@ -58,7 +58,8 @@ typedef boost::multi_array<int16, 2> StaticGridArray; ///< Used for pathfinding
 
 #define DEFAULT_SERVER_PORT 37120
 #define UPDATE_WORLD_TIMER 500
-#define PUBLIC_ROOM_OFFSET 1000
+#define PUBLIC_ROOM_OFFSET 1000 ///< Credits Quackster
+#define MAX_FAVOURITE_ROOMS 10
 
 /// Split String
 std::string SplitString(std::string const& p_StringData, std::string const& p_Tokenizer);

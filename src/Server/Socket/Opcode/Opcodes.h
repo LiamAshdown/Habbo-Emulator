@@ -16,10 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _Quad_Opcodes_h_
-#define _Quad_Opcodes_h_
+#ifndef _OPCODES_OPCODES_h
+#define _OPCODES_OPCODES_h
 #include "Common/SharedDefines.h"
 #include "Network/ClientPacket.h"
+#endif /* _OPCODES_OPCODES_h */
 
 enum PacketClientHeader : uint16
 {
@@ -233,6 +234,13 @@ enum PacketClientHeader : uint16
     CLIENT_CLUB_GET_USER_INFO             = 26,
     CLIENT_CLUB_BUY                       = 190,
     CLIENT_GIFT_APPROVAL                  = 210,
+
+    ///////////////////////////////////////////
+    //           CATALOGUE HANDLER
+    ///////////////////////////////////////////
+    CLIENT_GPRC                           = 100,
+    CLIENT_GCIX                           = 101,
+    CLIENT_GCAP                           = 102,
      
 };
 
@@ -476,46 +484,89 @@ enum PacketServerHeader : uint16
  
 };
 
+/// Used to prevent any one attempting to tamper with the client packets,
+/// and send packets which are not yet registered by server yet
+enum PacketStatus
+{
+    STATUS_AUTH,                                ///< Player is at authentication stage (habbo is not initialized yet)
+    STATUS_HOTEL_VIEW,                          ///< Player is at hotel view (habbo is initialized)
+    STATUS_IN_ROOM,                             ///< Player is inside room
+    STATUS_ALL,                                 ///< Accept packet regardless what stage player is at
+    STATUS_UNHANDLED                            ///< Packet is not handled yet
+};
+
+/// Used to determine whether we can process the packet now, or process
+/// it on next hotel update to ensure thread safety
+enum PacketProcess
+{
+    PROCESS_NOW,                                ///< Process packet now
+    PROCESS_PLAYER_UPDATE,                      ///< Process packet on Player Update
+    PROCESS_ROOM_UPDATE                         ///< Process packet on Room Update (player must be in room)
+};
+
 namespace SteerStone
 {
     class HabboSocket;
 
+    /// Holds the handler and name of opcode
     struct OpcodeHandler
     {
-        char const* name;
-        void (HabboSocket::*handler)(std::unique_ptr<ClientPacket> p_Packet);
+        char const* Name;
+        PacketStatus Status;
+        PacketProcess Process;
+        void (HabboSocket::*Handler)(ClientPacket* p_Packet);
     };
 
     typedef std::map<uint64, OpcodeHandler> OpcodeMap;
 
+    /// Stores Opcodes handler for server and client
     class Opcodes
     {
     public:
         static Opcodes* instance();
 
     public:
+        /// Constructor
         Opcodes() {}
+
+        /// Deconstructor
         ~Opcodes() {}
 
     public:
+        /// InitializePackets
+        /// Load our packets into storages to be accessed later
         void InitializePackets();
+
+        /// GetClientPacket
+        /// @p_Id : Id of client packet we are searching for
         OpcodeHandler const& GetClientPacket(const uint64& Id);
+
+        /// GetServerPacket
+        /// @p_Id : Id of server packet we are searching for
         OpcodeHandler const& GetServerPacket(const uint64& Id);
 
-        const char* GetClientPacketName(const uint64& Id);
-        const char* GetServerPacketName(const uint64& Id);
+    private:
+        /// StoreClientPacket
+        /// Store Client packet into our storage
+        /// @p_Opcode : Opcode Id
+        /// @p_Name : Name of Opcode
+        /// @p_Status : Status of Opcode
+        /// @p_Process : When to process the packet
+        /// @p_Handler : Handler Function which we will be accessing too
+        void StoreClientPacket(uint64 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void (HabboSocket::*handler)(ClientPacket* p_Packet));
+
+        /// StoreServerPacket
+        /// Store Server packet into our storage
+        /// @p_Opcode : Opcode Id
+        /// @p_Name : Name of Opcode
+        /// @p_Handler : Handler Function which we will be accessing too
+        void StoreServerPacket(uint64 const p_OpCode, char const* p_Name, void (HabboSocket::*handler)(ClientPacket* p_Packet));
 
     private:
-        void StoreClientPacket(const uint64& opcode, char const* name, void (HabboSocket::*handler)(std::unique_ptr<ClientPacket> p_Packet));
-        void StoreServerPacket(const uint64& opcode, char const* name, void (HabboSocket::*handler)(std::unique_ptr<ClientPacket> p_Packet));
-
-    private:
-        static OpcodeHandler const emptyHandler;
-        OpcodeMap mClientOpcode;
-        OpcodeMap mServerOpcode;
+        static OpcodeHandler const m_EmptyHandler;      ///< Empty handler if our client packet has not been given a handler yet
+        OpcodeMap m_ClientOpcode;                       ///< Holds our client packets
+        OpcodeMap m_ServerOpcode;                       ///< Holds our server packets
     };
 }
 
 #define sOpcode SteerStone::Opcodes::instance()
-
-#endif /* _Quad_Opcodes_h_ */

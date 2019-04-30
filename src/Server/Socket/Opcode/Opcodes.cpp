@@ -15,238 +15,249 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.f
 */
-//-----------------------------------------------//
-#include "../HabboSocket.h"
-//-----------------------------------------------//
+
+#include "HabboSocket.h"
+
 namespace SteerStone
 {
-    //-----------------------------------------------//
+    /// Singleton
     Opcodes* Opcodes::instance()
     {
         static Opcodes instance;
         return &instance;
     }
-    //-----------------------------------------------//
-    OpcodeHandler const Opcodes::emptyHandler =
+    
+    OpcodeHandler const Opcodes::m_EmptyHandler =
     {
         "NULL",
+        PacketStatus::STATUS_UNHANDLED,
+        PacketProcess::PROCESS_NOW,
         &HabboSocket::HandleNULL
     };
-    //-----------------------------------------------//
+    
+    /// InitializePackets
+    /// Load our packets into storages to be accessed later
     void Opcodes::InitializePackets()
     {
 
         ///////////////////////////////////////////
         //             LOGIN HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_INFO_RETRIEVE,                 "CLIENT_INFO_RETRIEVE",                    &HabboSocket::HandleGetInfoRetrieve            );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRY_LOGIN,                     "CLIENT_TRY_LOGIN",                        &HabboSocket::HandleTryLogin                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_VERSION_CHECK,                 "CLIENT_VERSION_CHECK",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_UNIQUE_ID,                     "CLIENT_UNIQUE_ID",                        &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_PASSWORD,                  "CLIENT_GET_PASSWORD",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_LANG_CHECK,                    "CLIENT_LANG_CHECK",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_BTCKS,                         "CLIENT_BTCKS",                            &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_AVAILABLE_BADGES,          "CLIENT_GET_AVAILABLE_BADGES",             &HabboSocket::HandleGetAvailableBadges         );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_SESSION_PARAMETERS,        "CLIENT_GET_SESSION_PARAMETERS",           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_PONG,                          "CLIENT_PONG",                             &HabboSocket::HandlePong                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GENERATE_KEY,                  "CLIENT_GENERATE_KEY",                     &HabboSocket::HandleGenerateKey                );
-        StoreClientPacket(PacketClientHeader::CLIENT_SSO,                           "CLIENT_SSO",                              &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_INITIALIZE_CRYPTO,             "CLIENT_INITIALIZE_CRYPTO",                &HabboSocket::HandleInitializeCrypto           );
-        StoreClientPacket(PacketClientHeader::CLIENT_SECRET_KEY,                    "CLIENT_SECRET_KEY",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_SETTINGS,            "CLIENT_GET_SOUND_SETTINGS",               &HabboSocket::HandleGetAccountPreferences      );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_SOUND_SETTINGS,            "CLIENT_SET_SOUND_SETTINGS",               &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_AVAILABLE_SETS,            "CLIENT_GET_AVAILABLE_SETS",               &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_INFO_RETRIEVE,                 "CLIENT_INFO_RETRIEVE",              PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetInfoRetrieve            );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRY_LOGIN,                     "CLIENT_TRY_LOGIN",                  PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleTryLogin                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_VERSION_CHECK,                 "CLIENT_VERSION_CHECK",              PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_UNIQUE_ID,                     "CLIENT_UNIQUE_ID",                  PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_PASSWORD,                  "CLIENT_GET_PASSWORD",               PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_LANG_CHECK,                    "CLIENT_LANG_CHECK",                 PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_BTCKS,                         "CLIENT_BTCKS",                      PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_AVAILABLE_BADGES,          "CLIENT_GET_AVAILABLE_BADGES",       PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetAvailableBadges         );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_SESSION_PARAMETERS,        "CLIENT_GET_SESSION_PARAMETERS",     PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PONG,                          "CLIENT_PONG",                       PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandlePong                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GENERATE_KEY,                  "CLIENT_GENERATE_KEY",               PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGenerateKey                );
+        StoreClientPacket(PacketClientHeader::CLIENT_SSO,                           "CLIENT_SSO",                        PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_INITIALIZE_CRYPTO,             "CLIENT_INITIALIZE_CRYPTO",          PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleInitializeCrypto           );
+        StoreClientPacket(PacketClientHeader::CLIENT_SECRET_KEY,                    "CLIENT_SECRET_KEY",                 PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_SETTINGS,            "CLIENT_GET_SOUND_SETTINGS",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetAccountPreferences      );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_SOUND_SETTINGS,            "CLIENT_SET_SOUND_SETTINGS",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_AVAILABLE_SETS,            "CLIENT_GET_AVAILABLE_SETS",         PacketStatus::STATUS_AUTH,               PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //             ROOM HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_DIRECTORY,                "CLIENT_ROOM_DIRECTORY",                   &HabboSocket::HandleRoomDirectory              );
-        StoreClientPacket(PacketClientHeader::CLIENT_BTCKS,                         "CLIENT_GET_DOOR_FLAT",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_CHAT,                     "CLIENT_ROOM_CHAT",                        &HabboSocket::HandleRoomChat                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_SHOUT,                    "CLIENT_ROOM_SHOUT",                       &HabboSocket::HandleRoomShout                  );
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",                     &HabboSocket::HandleRoomWhisper                );
-        StoreClientPacket(PacketClientHeader::CLIENT_QUIT,                          "CLIENT_QUIT",                             &HabboSocket::HandleLeaveRoom                  );
-        StoreClientPacket(PacketClientHeader::CLIENT_GO_VIA_DOOR,                   "CLIENT_GO_VIA_DOOR",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRY_FLAT,                      "CLIENT_TRY_FLAT",                         &HabboSocket::HandleTryFlat                    );
-        StoreClientPacket(PacketClientHeader::CLIENT_GO_TO_FLAT,                    "CLIENT_GO_TO_FLAT",                       &HabboSocket::HandleGoToFlat                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_HEIGHT_MAP,                  "CLIENT_G_HEIGHT_MAP",                     &HabboSocket::HandleGHeightMap                 );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_USERS,                       "CLIENT_G_USERS",                          &HabboSocket::HandleGUsers                     );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_OBJECTS,                     "CLIENT_G_OBJECTS",                        &HabboSocket::HandleGObjects                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_STAT,                        "CLIENT_G_STAT",                           &HabboSocket::HandleGStat                      );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_ITEMS,                       "CLIENT_G_ITEMS",                          &HabboSocket::HandleGItems                     );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_STRIP,                     "CLIENT_GET_STRIP",                        &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_FLAT_PROP_BY_ITEM,             "CLIENT_FLAT_PROP_BY_ITEM",                &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_ADD_STRIP_ITEM,                "CLIENT_ADD_STRIP_ITEM",                   &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_UNACCEPT,                "CLIENT_TRADE_UNACCEPT",                   &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_ACCEPT,                  "CLIENT_TRADE_ACCEPT",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_CLOSE,                   "CLIENT_TRADE_CLOSE",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_OPEN,                    "CLIENT_TRADE_OPEN",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_ADD_ITEM,                "CLIENT_TRADE_ADD_ITEM",                   &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MOVE_STUFF,                    "CLIENT_MOVE_STUFF",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_STUFF_DATA,                "CLIENT_SET_STUFF_DATA",                   &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MOVE,                          "CLIENT_MOVE",                             &HabboSocket::HandleMove                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_STUFF_DATA,                "CLIENT_THROW_DICE",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_DICE_OFF,                      "CLIENT_DICE_OFF",                         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_PRESENT_OPEN,                  "CLIENT_PRESENT_OPEN",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_LOOK_TO,                       "CLIENT_LOOK_TO",                          &HabboSocket::HandleLookTo                     );
-        StoreClientPacket(PacketClientHeader::CLIENT_CARRY_DRINK,                   "CLIENT_CARRY_DRINK",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_IN_TO_DOOR,                    "CLIENT_IN_TO_DOOR",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_DOOR_GO_IN,                    "CLIENT_DOOR_GO_IN",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_G_IDATA,                       "CLIENT_G_IDATA",                          &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_ITEM_DATA,                 "CLIENT_SET_ITEM_DATA",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ITEM,                   "CLIENT_REMOVE_ITEM",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_CARRY_ITEM,                    "CLIENT_CARRY_ITEM",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_STOP,                          "CLIENT_STOP",                             &HabboSocket::HandleStop                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_USE_ITEM,                      "CLIENT_USE_ITEM",                         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_PLACE_STUFF,                   "CLIENT_PLACE_STUFF",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_DANCE,                         "CLIENT_DANCE",                            &HabboSocket::HandleDance                      );
-        StoreClientPacket(PacketClientHeader::CLIENT_WAVE,                          "CLIENT_WAVE",                             &HabboSocket::HandleWave                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_KICK_USER,                     "CLIENT_KICK_USER",                        &HabboSocket::HandleKickUser                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_ASSIGN_RIGHTS,                 "CLIENT_ASSIGN_RIGHTS",                    &HabboSocket::HandleAssignRights               );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_RIGHTS,                 "CLIENT_REMOVE_RIGHTS",                    &HabboSocket::HandleRemoveRights               );
-        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                      &HabboSocket::HandleLetInUser                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_STUFF,                  "CLIENT_REMOVE_STUFF",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GO_AWAY,                       "CLIENT_GO_AWAY",                          &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",                     &HabboSocket::HandleGetRoomAdd                 );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_PET_STAT,                  "CLIENT_GET_PET_STAT",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_BADGE,                     "CLIENT_SET_BADGE",                        &HabboSocket::HandleSetBadge                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_INTEREST,                  "CLIENT_GET_INTEREST",                     &HabboSocket::HandleGetInterest                );
-        StoreClientPacket(PacketClientHeader::CLIENT_CONVERT_FURNI_TO_CREDITS,      "CLIENT_CONVERT_FURNI_TO_CREDITS",         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_QUEUE,                    "CLIENT_ROOM_QUEUE",                       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_ITEM_STATE,                "CLIENT_SET_ITEM_STATE",                   &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_SPECTATOR_AMOUNT,          "CLIENT_SET_SPECTATOR_AMOUNT",             &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_GROUP_BADGES,              "CLIENT_GET_GROUP_BADGES",                 &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GROUP_DETAILS,                 "CLIENT_GROUP_DETAILS",                    &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_DIRECTORY,                "CLIENT_ROOM_DIRECTORY",             PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomDirectory              );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_CHAT,                     "CLIENT_ROOM_CHAT",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomChat                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_SHOUT,                    "CLIENT_ROOM_SHOUT",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomShout                  );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomWhisper                );
+        StoreClientPacket(PacketClientHeader::CLIENT_QUIT,                          "CLIENT_QUIT",                       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLeaveRoom                  );
+        StoreClientPacket(PacketClientHeader::CLIENT_GO_VIA_DOOR,                   "CLIENT_GO_VIA_DOOR",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRY_FLAT,                      "CLIENT_TRY_FLAT",                   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleTryFlat                    );
+        StoreClientPacket(PacketClientHeader::CLIENT_GO_TO_FLAT,                    "CLIENT_GO_TO_FLAT",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGoToFlat                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_HEIGHT_MAP,                  "CLIENT_G_HEIGHT_MAP",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGHeightMap                 );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_USERS,                       "CLIENT_G_USERS",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGUsers                     );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_OBJECTS,                     "CLIENT_G_OBJECTS",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGObjects                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_STAT,                        "CLIENT_G_STAT",                     PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGStat                      );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_ITEMS,                       "CLIENT_G_ITEMS",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGItems                     );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_STRIP,                     "CLIENT_GET_STRIP",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_FLAT_PROP_BY_ITEM,             "CLIENT_FLAT_PROP_BY_ITEM",          PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_ADD_STRIP_ITEM,                "CLIENT_ADD_STRIP_ITEM",             PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_UNACCEPT,                "CLIENT_TRADE_UNACCEPT",             PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_ACCEPT,                  "CLIENT_TRADE_ACCEPT",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_CLOSE,                   "CLIENT_TRADE_CLOSE",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_OPEN,                    "CLIENT_TRADE_OPEN",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRADE_ADD_ITEM,                "CLIENT_TRADE_ADD_ITEM",             PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MOVE_STUFF,                    "CLIENT_MOVE_STUFF",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_STUFF_DATA,                "CLIENT_SET_STUFF_DATA",             PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MOVE,                          "CLIENT_MOVE",                       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleMove                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_STUFF_DATA,                "CLIENT_THROW_DICE",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_DICE_OFF,                      "CLIENT_DICE_OFF",                   PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PRESENT_OPEN,                  "CLIENT_PRESENT_OPEN",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_LOOK_TO,                       "CLIENT_LOOK_TO",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLookTo                     );
+        StoreClientPacket(PacketClientHeader::CLIENT_CARRY_DRINK,                   "CLIENT_CARRY_DRINK",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_IN_TO_DOOR,                    "CLIENT_IN_TO_DOOR",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_DOOR_GO_IN,                    "CLIENT_DOOR_GO_IN",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_G_IDATA,                       "CLIENT_G_IDATA",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_ITEM_DATA,                 "CLIENT_SET_ITEM_DATA",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ITEM,                   "CLIENT_REMOVE_ITEM",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CARRY_ITEM,                    "CLIENT_CARRY_ITEM",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_STOP,                          "CLIENT_STOP",                       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleStop                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_USE_ITEM,                      "CLIENT_USE_ITEM",                   PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PLACE_STUFF,                   "CLIENT_PLACE_STUFF",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_DANCE,                         "CLIENT_DANCE",                      PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleDance                      );
+        StoreClientPacket(PacketClientHeader::CLIENT_WAVE,                          "CLIENT_WAVE",                       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleWave                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_KICK_USER,                     "CLIENT_KICK_USER",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleKickUser                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_ASSIGN_RIGHTS,                 "CLIENT_ASSIGN_RIGHTS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleAssignRights               );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_RIGHTS,                 "CLIENT_REMOVE_RIGHTS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleRemoveRights               );
+        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLetInUser                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_STUFF,                  "CLIENT_REMOVE_STUFF",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GO_AWAY,                       "CLIENT_GO_AWAY",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetRoomAdd                 );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_PET_STAT,                  "CLIENT_GET_PET_STAT",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_BADGE,                     "CLIENT_SET_BADGE",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleSetBadge                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_INTEREST,                  "CLIENT_GET_INTEREST",               PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetInterest                );
+        StoreClientPacket(PacketClientHeader::CLIENT_CONVERT_FURNI_TO_CREDITS,      "CLIENT_CONVERT_FURNI_TO_CREDITS",   PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_QUEUE,                    "CLIENT_ROOM_QUEUE",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_ITEM_STATE,                "CLIENT_SET_ITEM_STATE",             PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_SPECTATOR_AMOUNT,          "CLIENT_SET_SPECTATOR_AMOUNT",       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_GROUP_BADGES,              "CLIENT_GET_GROUP_BADGES",           PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GROUP_DETAILS,                 "CLIENT_GROUP_DETAILS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //             NAVIGATOR HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_S_BUSY_F,                      "CLIENT_S_BUSY_F",                         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SUSERF,                        "CLIENT_SUSERF",                           &HabboSocket::HandleSearchUserFlats            );
-        StoreClientPacket(PacketClientHeader::CLIENT_SEARCH_FLATS,                  "CLIENT_SEARCH_FLATS",                     &HabboSocket::HandleSearchFlats                );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_FAVOURITE_ROOMS,           "CLIENT_GET_FAVOURITE_ROOMS",              &HabboSocket::HandleGetFavouriteRooms          );
-        StoreClientPacket(PacketClientHeader::CLIENT_ADD_FAVOURITE_ROOM,            "CLIENT_ADD_FAVOURITE_ROOM",               &HabboSocket::HandleAddFavouriteRoom           );
-        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",            &HabboSocket::HandleRemoveFavouriteRoom        );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_INFO,                 "CLIENT_GET_FLAT_INFO",                    &HabboSocket::HandleGetFlatInfo                );
-        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FLAT,                   "CLIENT_DELETE_FLAT",                      &HabboSocket::HandleDeleteFlat                 );
-        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_FLAT,                   "CLIENT_UPDATE_FLAT",                      &HabboSocket::HandleUpdateFlat                 );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_INFO,                 "CLIENT_SET_FLAT_INFO",                    &HabboSocket::HandleSetFlatInfo                );
-        StoreClientPacket(PacketClientHeader::CLIENT_CREATE_FLAT,                   "CLIENT_CREATE_FLAT",                      &HabboSocket::HandleCreateFlat                 );
-        StoreClientPacket(PacketClientHeader::CLIENT_NAVIGATE,                      "CLIENT_NAVIGATE",                         &HabboSocket::HandleNavigate                   );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_FLAT_CATEGORIES,      "CLIENT_GET_USER_FLAT_CATEGORIES",         &HabboSocket::HandleGetUserFlatsCategories     );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_CATEGORY,             "CLIENT_GET_FLAT_CATEGORY",                &HabboSocket::HandleGetFlatCategory            );
-        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_CATEGORY,             "CLIENT_SET_FLAT_CATEGORY",                &HabboSocket::HandleSetFlatCategory            );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_SPACE_NODE_USERS,          "CLIENT_GET_SPACE_NODE_USERS",             &HabboSocket::HandleNodeSpaceUsers             );
-        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ALL_RIGHTS,             "CLIENT_REMOVE_ALL_RIGHTS",                &HabboSocket::HandleRemoveAllRights            );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_PARENT_CHAIN,              "CLIENT_GET_PARENT_CHAIN",                 &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_S_BUSY_F,                      "CLIENT_S_BUSY_F",                   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SUSERF,                        "CLIENT_SUSERF",                     PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleSearchUserFlats            );
+        StoreClientPacket(PacketClientHeader::CLIENT_SEARCH_FLATS,                  "CLIENT_SEARCH_FLATS",               PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleSearchFlats                );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_FAVOURITE_ROOMS,           "CLIENT_GET_FAVOURITE_ROOMS",        PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetFavouriteRooms          );
+        StoreClientPacket(PacketClientHeader::CLIENT_ADD_FAVOURITE_ROOM,            "CLIENT_ADD_FAVOURITE_ROOM",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleAddFavouriteRoom           );
+        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FAVOURITE_ROOM,         "CLIENT_DELETE_FAVOURITE_ROOM",      PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRemoveFavouriteRoom        );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_INFO,                 "CLIENT_GET_FLAT_INFO",              PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetFlatInfo                );
+        StoreClientPacket(PacketClientHeader::CLIENT_DELETE_FLAT,                   "CLIENT_DELETE_FLAT",                PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleDeleteFlat                 );
+        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_FLAT,                   "CLIENT_UPDATE_FLAT",                PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleUpdateFlat                 );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_INFO,                 "CLIENT_SET_FLAT_INFO",              PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleSetFlatInfo                );
+        StoreClientPacket(PacketClientHeader::CLIENT_CREATE_FLAT,                   "CLIENT_CREATE_FLAT",                PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleCreateFlat                 );
+        StoreClientPacket(PacketClientHeader::CLIENT_NAVIGATE,                      "CLIENT_NAVIGATE",                   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNavigate                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_FLAT_CATEGORIES,      "CLIENT_GET_USER_FLAT_CATEGORIES",   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetUserFlatsCategories     );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_FLAT_CATEGORY,             "CLIENT_GET_FLAT_CATEGORY",          PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetFlatCategory            );
+        StoreClientPacket(PacketClientHeader::CLIENT_SET_FLAT_CATEGORY,             "CLIENT_SET_FLAT_CATEGORY",          PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleSetFlatCategory            );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_SPACE_NODE_USERS,          "CLIENT_GET_SPACE_NODE_USERS",       PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNodeSpaceUsers             );
+        StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_ALL_RIGHTS,             "CLIENT_REMOVE_ALL_RIGHTS",          PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleRemoveAllRights            );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_PARENT_CHAIN,              "CLIENT_GET_PARENT_CHAIN",           PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //             HOBBA HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_PICK_CRY_FOR_HELP,              "CLIENT_PICK_CRY_FOR_HELP",               &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_CRY_FOR_HELP,                   "CLIENT_CRY_FOR_HELP",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_CALL_BACK_CATEGORY,      "CLIENT_CHANGE_CALL_BACK_CATEGORY",       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSAGE_TO_CALLER,              "CLIENT_MESSAGE_TO_CALLER",               &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MODERATION_ACTION,              "CLIENT_MODERATION_ACTION",               &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PICK_CRY_FOR_HELP,              "CLIENT_PICK_CRY_FOR_HELP",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CRY_FOR_HELP,                   "CLIENT_CRY_FOR_HELP",              PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_CALL_BACK_CATEGORY,      "CLIENT_CHANGE_CALL_BACK_CATEGORY", PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSAGE_TO_CALLER,              "CLIENT_MESSAGE_TO_CALLER",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MODERATION_ACTION,              "CLIENT_MODERATION_ACTION",         PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //         SOUND MACHINE HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_MACHINE_CONFIG,       "CLIENT_GET_SOUND_MACHINE_CONFIG",        &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SAVE_SOUND_MACHINE_CONFIG,      "CLIENT_SAVE_SOUND_MACHINE_CONFIG",       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_INSERT_SOUND_PACKAGE,           "CLIENT_INSERT_SOUND_PACKAGE",            &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_EJECT_SOUND_PACKAGE,            "CLIENT_EJECT_SOUND_PACKAGE",             &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_DATA,                 "CLIENT_GET_SOUND_DATA",                  &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_MACHINE_CONFIG,       "CLIENT_GET_SOUND_MACHINE_CONFIG", PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SAVE_SOUND_MACHINE_CONFIG,      "CLIENT_SAVE_SOUND_MACHINE_CONFIG",PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_INSERT_SOUND_PACKAGE,           "CLIENT_INSERT_SOUND_PACKAGE",    PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_EJECT_SOUND_PACKAGE,            "CLIENT_EJECT_SOUND_PACKAGE",     PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_SOUND_DATA,                 "CLIENT_GET_SOUND_DATA",          PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //         MOUNTAIN HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_CLOSE_UK_MAKE_OPPI,             "CLIENT_CLOSE_UK_MAKE_OPPI",              &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_SHIRT,                   "CLIENT_CHANGE_SHIRT",                    &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_REFRESH_FIGURE,                 "CLIENT_REFRESH_FIGURE",                  &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SWIM_SUIT,                      "CLIENT_SWIM_SUIT",                       &HabboSocket::HandleSwimSuit                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_CLOSE_UK_MAKE_OPPI,             "CLIENT_CLOSE_UK_MAKE_OPPI",      PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_SHIRT,                   "CLIENT_CHANGE_SHIRT",            PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_REFRESH_FIGURE,                 "CLIENT_REFRESH_FIGURE",          PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SWIM_SUIT,                      "CLIENT_SWIM_SUIT",               PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleSwimSuit                   );
 
         ///////////////////////////////////////////
         //         PELLEHYPPY HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_JUMP_START,                      "CLIENT_JUMP_START",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SIGN,                            "CLIENT_SIGN",                           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_JUMP_PERF,                       "CLIENT_JUMP_PERF",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_SPLASH_POSITION,                 "CLIENT_SPLASH_POSITION",                &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_JUMP_START,                      "CLIENT_JUMP_START",             PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SIGN,                            "CLIENT_SIGN",                   PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_JUMP_PERF,                       "CLIENT_JUMP_PERF",              PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_SPLASH_POSITION,                 "CLIENT_SPLASH_POSITION",        PacketStatus::STATUS_IN_ROOM,              PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //           HUBU HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_VOTE,                          "CLIENT_VOTE",                             &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRY_INFO_BUS,                  "CLIENT_TRY_INFO_BUS",                     &HabboSocket::HandleInfoBus                    );
-        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_WORLD,                  "CLIENT_CHANGE_WORLD",                     &HabboSocket::HandleChangeWorld                );
+        StoreClientPacket(PacketClientHeader::CLIENT_VOTE,                          "CLIENT_VOTE",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRY_INFO_BUS,                  "CLIENT_TRY_INFO_BUS",              PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleInfoBus                    );
+        StoreClientPacket(PacketClientHeader::CLIENT_CHANGE_WORLD,                  "CLIENT_CHANGE_WORLD",              PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleChangeWorld                );
 
         ///////////////////////////////////////////
         //        REGISTRATION HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_GDATE,                          "CLIENT_GDATE",                           &HabboSocket::HandleGDate                      );
-        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_NAME,                   "CLIENT_APPROVE_NAME",                    &HabboSocket::HandleApproveUsername            );
-        StoreClientPacket(PacketClientHeader::CLIENT_REGISTER,                       "CLIENT_REGISTER",                        &HabboSocket::HandleRegisteration              );
-        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE,                         "CLIENT_UPDATE",                          &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_AC,                             "CLIENT_AC",                              &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_CHECK_TIME,           "CLIENT_COPPA_REG_CHECK_TIME",            &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_GET_REAL_TIME,        "CLIENT_COPPA_REG_GET_REAL_TIME",         &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_PARENT_EMAIL_REQUIRED,          "CLIENT_PARENT_EMAIL_REQUIRED",           &HabboSocket::HandleParentEmailRequired        );
-        StoreClientPacket(PacketClientHeader::CLIENT_VALIDATE_PARENT_EMAIL,          "CLIENT_VALIDATE_PARENT_EMAIL",           &HabboSocket::HandleValidateParentEmail        );
-        StoreClientPacket(PacketClientHeader::CLIENT_SEND_PARENT_EMAIL,              "CLIENT_SEND_PARENT_EMAIL",               &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_ACCOUNT,                 "CLIENT_UPDATE_ACCOUNT",                  &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_PASSWORD,               "CLIENT_APPROVE_PASSWORD",                &HabboSocket::HandleApprovePassword            );
-        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_EMAIL,                  "CLIENT_APPROVE_EMAIL",                   &HabboSocket::HandleApproveEmail               );
+        StoreClientPacket(PacketClientHeader::CLIENT_GDATE,                          "CLIENT_GDATE",                    PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,             &HabboSocket::HandleGDate                      );
+        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_NAME,                   "CLIENT_APPROVE_NAME",             PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleApproveUsername            );
+        StoreClientPacket(PacketClientHeader::CLIENT_REGISTER,                       "CLIENT_REGISTER",                 PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleRegisteration              );
+        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE,                         "CLIENT_UPDATE",                   PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_AC,                             "CLIENT_AC",                       PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_CHECK_TIME,           "CLIENT_COPPA_REG_CHECK_TIME",     PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_COPPA_REG_GET_REAL_TIME,        "CLIENT_COPPA_REG_GET_REAL_TIME",  PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_PARENT_EMAIL_REQUIRED,          "CLIENT_PARENT_EMAIL_REQUIRED",    PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleParentEmailRequired        );
+        StoreClientPacket(PacketClientHeader::CLIENT_VALIDATE_PARENT_EMAIL,          "CLIENT_VALIDATE_PARENT_EMAIL",    PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleValidateParentEmail        );
+        StoreClientPacket(PacketClientHeader::CLIENT_SEND_PARENT_EMAIL,              "CLIENT_SEND_PARENT_EMAIL",        PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_UPDATE_ACCOUNT,                 "CLIENT_UPDATE_ACCOUNT",           PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_PASSWORD,               "CLIENT_APPROVE_PASSWORD",         PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleApprovePassword            );
+        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_EMAIL,                  "CLIENT_APPROVE_EMAIL",            PacketStatus::STATUS_AUTH,                PacketProcess::PROCESS_NOW,             &HabboSocket::HandleApproveEmail               );
 
         ///////////////////////////////////////////
         //           RECYCLER HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_FURNI_RECYCLER_CONFIG,      "CLIENT_GET_FURNI_RECYCLER_CONFIG",       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_FURNI_RECYCLER_CONFIG,      "CLIENT_GET_FURNI_RECYCLER_CONFIG",       &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_RECYCLED_FURNI,         "CLIENT_APPROVE_RECYCLED_FURNI",          &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_START_FURNI_RECYCLING,          "CLIENT_START_FURNI_RECYCLING",           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_CONFIRM_FURNI_RECYCLING,        "CLIENT_CONFIRM_FURNI_RECYCLING",         &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_FURNI_RECYCLER_CONFIG,      "CLIENT_GET_FURNI_RECYCLER_CONFIG",PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_FURNI_RECYCLER_CONFIG,      "CLIENT_GET_FURNI_RECYCLER_CONFIG",PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_APPROVE_RECYCLED_FURNI,         "CLIENT_APPROVE_RECYCLED_FURNI",   PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_START_FURNI_RECYCLING,          "CLIENT_START_FURNI_RECYCLING",    PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CONFIRM_FURNI_RECYCLING,        "CLIENT_CONFIRM_FURNI_RECYCLING",  PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
 
          ///////////////////////////////////////////
         //           PURSE HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_CREDITS,                    "CLIENT_GET_CREDITS",                     &HabboSocket::HandleCreditBalance              );
-        StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_CREDIT_LOG,            "CLIENT_GET_USER_CREDIT_LOG",             &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_REDEEM_VOUCHER,                 "CLIENT_REDEEM_VOUCHER",                  &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_CREDITS,                    "CLIENT_GET_CREDITS",              PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,              &HabboSocket::HandleCreditBalance              );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_USER_CREDIT_LOG,            "CLIENT_GET_USER_CREDIT_LOG",      PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_REDEEM_VOUCHER,                 "CLIENT_REDEEM_VOUCHER",           PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,             &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //           POLL HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_POLL_START,                     "CLIENT_POLL_START",                      &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_POLL_REJECT,                    "CLIENT_POLL_REJECT",                     &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_POLL_ANSWER,                    "CLIENT_POLL_ANSWER",                     &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_POLL_START,                     "CLIENT_POLL_START",               PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_POLL_REJECT,                    "CLIENT_POLL_REJECT",              PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_POLL_ANSWER,                    "CLIENT_POLL_ANSWER",              PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //          MESSENGER HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_FIND_USER,                      "CLIENT_FIND_USER",                       &HabboSocket::HandleMessengerFindUser          );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_INITIALIZE,           "CLIENT_MESSENGER_INITIALIZE",            &HabboSocket::HandleMessengerInitialize        ); 
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_UPDATE,               "CLIENT_MESSENGER_UPDATE",                &HabboSocket::HandleMessengerUpdate            );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_C_CLICK,              "CLIENT_MESSENGER_C_CLICK",               &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_C_READ,               "CLIENT_MESSENGER_C_READ",                &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_MARK_READ,            "CLIENT_MESSENGER_MARK_READ",             &HabboSocket::HandleMessengerMarkRead          );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_MESSAGE,         "CLIENT_MESSENGER_SEND_MESSAGE",          &HabboSocket::HandleMessengerSendMessage       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_CONSOLE_MOTTO,        "CLIENT_MESSENGER_CONSOLE_MOTTO",         &HabboSocket::HandleConsoleMotto               );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_ACCEPT_BUDDY,         "CLIENT_MESSENGER_ACCEPT_BUDDY",          &HabboSocket::HandleMessengerAcceptBuddy       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_DECLINE_BUDDY,        "CLIENT_MESSENGER_DECLINE_BUDDY",         &HabboSocket::HandleMessengerRejectBuddy       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REQUEST_BUDDY,        "CLIENT_MESSENGER_REQUEST_BUDDY",         &HabboSocket::HandleMessengerSendRequest       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REMOVE_BUDDY,         "CLIENT_MESSENGER_REMOVE_BUDDY",          &HabboSocket::HandleMessengerRemoveBuddy       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_GET_MESSAGE,          "CLIENT_MESSENGER_GET_MESSAGE",           &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REPORT_MESSAGE,       "CLIENT_MESSENGER_REPORT_MESSAGE",        &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_BUDDY_REQUESTS,       "CLIENT_MESSENGER_BUDDY_REQUESTS",        &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_FIND_USER,                      "CLIENT_FIND_USER",                PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerFindUser          );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_INITIALIZE,           "CLIENT_MESSENGER_INITIALIZE",     PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerInitialize        );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_UPDATE,               "CLIENT_MESSENGER_UPDATE",         PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerUpdate            );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_C_CLICK,              "CLIENT_MESSENGER_C_CLICK",        PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_C_READ,               "CLIENT_MESSENGER_C_READ",         PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_MARK_READ,            "CLIENT_MESSENGER_MARK_READ",      PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerMarkRead          );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_SEND_MESSAGE,         "CLIENT_MESSENGER_SEND_MESSAGE",   PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerSendMessage       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_CONSOLE_MOTTO,        "CLIENT_MESSENGER_CONSOLE_MOTTO",  PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleConsoleMotto               );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_ACCEPT_BUDDY,         "CLIENT_MESSENGER_ACCEPT_BUDDY",   PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerAcceptBuddy       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_DECLINE_BUDDY,        "CLIENT_MESSENGER_DECLINE_BUDDY",  PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerRejectBuddy       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REQUEST_BUDDY,        "CLIENT_MESSENGER_REQUEST_BUDDY",  PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerSendRequest       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REMOVE_BUDDY,         "CLIENT_MESSENGER_REMOVE_BUDDY",   PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleMessengerRemoveBuddy       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_GET_MESSAGE,          "CLIENT_MESSENGER_GET_MESSAGE",    PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_REPORT_MESSAGE,       "CLIENT_MESSENGER_REPORT_MESSAGE", PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_MESSENGER_BUDDY_REQUESTS,       "CLIENT_MESSENGER_BUDDY_REQUESTS", PacketStatus::STATUS_ALL,                 PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
 
         ///////////////////////////////////////////
         //           CLUB HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_CLUB_BUY,                      "CLIENT_BUY_HABBO_CLUB",                   &HabboSocket::HandleBuyHabboClub               );
-        StoreClientPacket(PacketClientHeader::CLIENT_CLUB_GET_USER_INFO,            "CLIENT_CLUB_GET_USER_INFO",               &HabboSocket::HandleGetClub                    );
-        StoreClientPacket(PacketClientHeader::CLIENT_GIFT_APPROVAL,                 "CLIENT_GIFT_APPROVAL",                    &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_CLUB_BUY,                      "CLIENT_BUY_HABBO_CLUB",            PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,              &HabboSocket::HandleBuyHabboClub               );
+        StoreClientPacket(PacketClientHeader::CLIENT_CLUB_GET_USER_INFO,            "CLIENT_CLUB_GET_USER_INFO",        PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,              &HabboSocket::HandleGetClub                    );
+        StoreClientPacket(PacketClientHeader::CLIENT_GIFT_APPROVAL,                 "CLIENT_GIFT_APPROVAL",             PacketStatus::STATUS_HOTEL_VIEW,          PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
         
+        ///////////////////////////////////////////
+        //           CATALOGUE HANDLER
+        ///////////////////////////////////////////
+        StoreClientPacket(PacketClientHeader::CLIENT_GPRC,                          "CLIENT_GPRC",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GCIX,                          "CLIENT_GCIX",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GCAP,                          "CLIENT_GCAP",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -283,7 +294,7 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_OBJECTS,                       "SERVER_OBJECTS",                          &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ROOM_HEIGHT_MAP,               "SERVER_ROOM_HEIGHT_MAP",                  &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ACTIVE_OBJECTS,                "SERVER_ACTIVE_OBJECTS",                   &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_STATUS,                        "SERVER_STATUS",                           &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_STATUS ,                       "SERVER_STATUS ",                          &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_FLAT_LET_IN,                   "SERVER_FLAT_LET_IN",                      &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_ITEMS,                         "SERVER_ITEMS",                            &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_YOU_ARE_CONTROLLER,            "SERVER_YOU_ARE_CONTROLLER",               &HabboSocket::HandleServerMessage              );
@@ -425,7 +436,7 @@ namespace SteerStone
         //           RECYCLER HANDLER
         ///////////////////////////////////////////
         StoreServerPacket(PacketServerHeader::SERVER_RECYCLER_CONFIG,                  "SERVER_RECYCLER_CONFIG",               &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_RECYCLER_STATUS,                  "SERVER_RECYCLER_STATUS",               &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_STATUS ,                          "SERVER_STATUS ",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_APPROVE_RECYCLING_RESULT,         "SERVER_APPROVE_RECYCLING_RESULT",      &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_START_RECYCLING_RESULT,           "SERVER_START_RECYCLING_RESULT",        &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_CONFIRM_RECYCLING_RESULT,         "SERVER_CONFIRM_RECYCLING_RESULT",      &HabboSocket::HandleServerMessage              );
@@ -473,60 +484,60 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_PT_PREPARE,                        "SERVER_PT_PREPARE",                   &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_END,                            "SERVER_PT_END",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_TIME_OUT,                       "SERVER_PT_TIME_OUT",                  &HabboSocket::HandleServerMessage              );
-        StoreServerPacket(PacketServerHeader::SERVER_PT_STATUS,                         "SERVER_PT_STATUS",                    &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_STATUS ,                           "SERVER_STATUS ",                      &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_WIN,                            "SERVER_PT_WIN",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_BOTH_LOSE,                      "SERVER_PT_BOTH_LOSE",                 &HabboSocket::HandleServerMessage              );
 
 
-        LOG_INFO << "Loaded " << mClientOpcode.size() << " CMSG OPCodes";
-        LOG_INFO << "Loaded " << mServerOpcode.size() << " SMSG OPCodes";
+        LOG_INFO << "Loaded " << m_ClientOpcode.size() << " CMSG OPCodes";
+        LOG_INFO << "Loaded " << m_ServerOpcode.size() << " SMSG OPCodes";
     } 
-    //-----------------------------------------------//
-    void Opcodes::StoreClientPacket(const uint64& opcode, char const * name, void(HabboSocket::* handler)(std::unique_ptr<ClientPacket> p_Packet))
+    
+    /// StoreClientPacket
+    /// Store Client packet into our storage
+    /// @p_Opcode : Opcode Id
+    /// @p_Name : Name of Opcode
+    /// @p_Status : Status of Opcode
+    /// @p_Process : When to process the packet
+    /// @p_Handler : Handler Function which we will be accessing too
+    void Opcodes::StoreClientPacket(uint64 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void(HabboSocket::* p_Handler)(ClientPacket* p_Packet))
     {
-        OpcodeHandler& ref = mClientOpcode[opcode];
-        ref.name = name;
-        ref.handler = handler;
+        OpcodeHandler& l_Ref = m_ClientOpcode[p_OpCode];
+        l_Ref.Name = p_Name;
+        l_Ref.Status = p_Status;
+        l_Ref.Handler = p_Handler;
     }
-    //-----------------------------------------------//
-    void Opcodes::StoreServerPacket(const uint64& opcode, char const * name, void(HabboSocket::* handler)(std::unique_ptr<ClientPacket> p_Packet))
+
+    
+    /// StoreServerPacket
+    /// Store Server packet into our storage
+    /// @p_Opcode : Opcode Id
+    /// @p_Name : Name of Opcode
+    /// @p_Handler : Handler Function which we will be accessing too
+    void Opcodes::StoreServerPacket(uint64 const p_OpCode, char const* p_Name, void(HabboSocket::* p_Handler)(ClientPacket* p_Packet))
     {
-        OpcodeHandler& ref = mServerOpcode[opcode];
-        ref.name = name;
-        ref.handler = handler;
+        OpcodeHandler& l_Ref = m_ServerOpcode[p_OpCode];
+        l_Ref.Name = p_Name;
+        l_Ref.Handler = p_Handler;
     }
-    //-----------------------------------------------//
+    
+    /// GetClientPacket
+    /// @p_Id : Id of client packet we are searching for
     OpcodeHandler const& Opcodes::GetClientPacket(const uint64& Id)
     {
-        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
-        if (itr != mClientOpcode.end())
-            return itr->second;
-        return emptyHandler;
+        OpcodeMap::const_iterator l_Itr = m_ClientOpcode.find(Id);
+        if (l_Itr != m_ClientOpcode.end())
+            return l_Itr->second;
+        return m_EmptyHandler;
     }
-    //-----------------------------------------------//
-    const char * Opcodes::GetClientPacketName(const uint64& Id)
-    {
-        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
-        if (itr != mClientOpcode.end())
-            return itr->second.name;
-        return "NULL";
-    }
-    //-----------------------------------------------//
+      
+    /// GetServerPacket
+    /// @p_Id : Id of server packet we are searching for
     OpcodeHandler const& Opcodes::GetServerPacket(const uint64& Id)
     {
-        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
-        if (itr != mServerOpcode.end())
-            return itr->second;
-        return emptyHandler;
+        OpcodeMap::const_iterator l_Itr = m_ServerOpcode.find(Id);
+        if (l_Itr != m_ServerOpcode.end())
+            return l_Itr->second;
+        return m_EmptyHandler;
     }
-    //-----------------------------------------------//
-    const char * Opcodes::GetServerPacketName(const uint64& Id)
-    {
-        OpcodeMap::const_iterator itr = mClientOpcode.find(Id);
-        if (itr != mServerOpcode.end())
-            return itr->second.name;
-        return "NULL";
-    }
-    //-----------------------------------------------//
 }
-//-----------------------------------------------//
