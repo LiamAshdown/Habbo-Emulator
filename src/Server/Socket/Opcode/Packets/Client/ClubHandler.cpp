@@ -21,12 +21,12 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleGetClub(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetClub(ClientPacket* p_Packet)
     {
         m_Habbo->SendClubStatus();
     }
 
-    void HabboSocket::HandleBuyHabboClub(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleBuyHabboClub(ClientPacket* p_Packet)
     {
         std::string l_Subscription = p_Packet->ReadString();
         uint16 l_SubscriptionType = p_Packet->ReadWiredUint();

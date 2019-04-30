@@ -202,21 +202,21 @@ namespace SteerStone
 
     /// MessengerRemoveBuddy
    /// @p_Packet - Client packet which is being decoded
-    void Habbo::MessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void Habbo::MessengerRemoveBuddy(ClientPacket* p_Packet)
     {
         m_Messenger.ParseMessengerRemoveBuddy(std::move(p_Packet));
     }
 
     /// MessengerRejectRequest
     /// @p_Packet - Client packet which is being decoded
-    void Habbo::MessengerRejectRequest(std::unique_ptr<ClientPacket> p_Packet)
+    void Habbo::MessengerRejectRequest(ClientPacket* p_Packet)
     {
         m_Messenger.ParseMessengerRejectBuddy(std::move(p_Packet));
     }
 
     /// MessengerSendMessage
     /// @p_Packet - Client packet which is being decoded
-    void Habbo::MessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
+    void Habbo::MessengerSendMessage(ClientPacket* p_Packet)
     {
         m_Messenger.ParseMessengerSendMessage(std::move(p_Packet));
     }
@@ -364,6 +364,8 @@ namespace SteerStone
     {
         if (m_Socket && !m_Socket->IsClosed())
         {
+            LOG_INFO << m_PacketQueue.Size();
+
             if (m_PingInterval < p_Diff)
             {
                 if (IsPonged())
@@ -442,6 +444,10 @@ namespace SteerStone
         SaveFavouriteRoomToDB();
     }
 
+    ///////////////////////////////////////////
+    //             NETWORK
+    ///////////////////////////////////////////
+
     /// SendPacket 
     /// @p_Buffer : Buffer which holds our data to be send to the client
     void Habbo::SendPacket(StringBuffer const* p_Buffer)
@@ -450,6 +456,26 @@ namespace SteerStone
             return;
 
         m_Socket->SendPacket(p_Buffer);
+    }
+
+    /// QueuePacket
+    /// @p_Packet : Packet we are adding to queue to be processed on hotel update
+    void Habbo::QueuePacket(ClientPacket* p_Packet)
+    {
+        m_PacketQueue.Add(p_Packet);
+    }
+
+    /// ProcessPackets
+    /// Process any pending packets
+    /// @p_packet : Packet being processed
+    void Habbo::ProcessPackets(ClientPacket* p_Packet /*= nullptr*/)
+    {
+        while (m_PacketQueue.Previous(p_Packet))
+        {
+            ToSocket()->ExecutePacket(sOpcode->GetClientPacket(p_Packet->GetHeader()), p_Packet);
+
+            delete p_Packet;
+        }
     }
 
     /// SendPing

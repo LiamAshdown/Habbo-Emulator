@@ -23,60 +23,60 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleMessengerInitialize(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerInitialize(ClientPacket* p_Packet)
     {
         m_Habbo->SendInitializeMessenger();
     }
 
-    void HabboSocket::HandleMessengerUpdate(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerUpdate(ClientPacket* p_Packet)
     {
         m_Habbo->SendMessengerUpdate();
     }
 
-    void HabboSocket::HandleMessengerAcceptBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerAcceptBuddy(ClientPacket* p_Packet)
     {
         uint32 l_SenderId = p_Packet->ReadWiredUint();
 
         m_Habbo->MessengerAcceptRequest(l_SenderId);
     }
 
-    void HabboSocket::HandleMessengerFindUser(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerFindUser(ClientPacket* p_Packet)
     {
         std::string l_Name = p_Packet->ReadString();
 
         m_Habbo->SendSearchUserResults(l_Name);
     }
 
-    void HabboSocket::HandleMessengerSendRequest(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerSendRequest(ClientPacket* p_Packet)
     {
         std::string l_Name = p_Packet->ReadString();
 
         m_Habbo->MessengerBuddyRequest(l_Name);
     }
 
-    void HabboSocket::HandleMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerRemoveBuddy(ClientPacket* p_Packet)
     {
         m_Habbo->MessengerRemoveBuddy(std::move(p_Packet));
     }
 
-    void HabboSocket::HandleMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerRejectBuddy(ClientPacket* p_Packet)
     {
         m_Habbo->MessengerRejectRequest(std::move(p_Packet));
     }
 
-    void HabboSocket::HandleMessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerSendMessage(ClientPacket* p_Packet)
     {
         m_Habbo->MessengerSendMessage(std::move(p_Packet));
     }
 
-    void HabboSocket::HandleMessengerMarkRead(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleMessengerMarkRead(ClientPacket* p_Packet)
     {
         uint32 l_MessageId = p_Packet->ReadWiredUint();
 
         m_Habbo->MessengerReply(l_MessageId);
     }
 
-    void HabboSocket::HandleConsoleMotto(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleConsoleMotto(ClientPacket* p_Packet)
     {
         /// TODO; Filter motto
         std::string l_Motto = p_Packet->ReadString();

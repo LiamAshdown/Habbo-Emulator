@@ -22,7 +22,7 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleSwimSuit(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleSwimSuit(ClientPacket* p_Packet)
     {
         if (TileInstance* l_TileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY()))
         {

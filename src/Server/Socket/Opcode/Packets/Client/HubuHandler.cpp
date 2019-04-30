@@ -22,7 +22,7 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleInfoBus(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleInfoBus(ClientPacket* p_Packet)
     {
         if (!m_Habbo->GetRoom())
             return;
@@ -31,7 +31,7 @@ namespace SteerStone
         m_Habbo->GetRoom()->Walk(m_Habbo->GetRoomGUID(), 28, 4);
     }
 
-    void HabboSocket::HandleChangeWorld(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleChangeWorld(ClientPacket* p_Packet)
     {
         if (!m_Habbo->GetRoom())
             return;

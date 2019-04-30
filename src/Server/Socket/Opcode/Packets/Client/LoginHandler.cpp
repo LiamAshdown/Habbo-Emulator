@@ -25,7 +25,7 @@
 
 namespace SteerStone
 {
-    void HabboSocket::HandleTryLogin(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleTryLogin(ClientPacket* p_Packet)
     {
         std::string l_Username = p_Packet->ReadString();
         std::string l_Password = p_Packet->ReadString();
@@ -111,12 +111,12 @@ namespace SteerStone
         }
     }
 
-    void HabboSocket::HandleGetAvailableBadges(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetAvailableBadges(ClientPacket* p_Packet)
     {
         m_Habbo->SendAccountBadges();
     }
 
-    void HabboSocket::HandleGenerateKey(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGenerateKey(ClientPacket* p_Packet)
     {
         HabboPacket::Login::CryptoParameters l_Packet;
         l_Packet.Parameters[SessionParameters::PARAMETER_COPPA]                 = sHotel->GetBoolConfig(BoolConfigs::CONFIG_PARAMETER_COPPA) ? '2' : '0';
@@ -136,23 +136,23 @@ namespace SteerStone
         SendPacket(l_PacketSet.Write());
     }
 
-    void HabboSocket::HandleInitializeCrypto(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleInitializeCrypto(ClientPacket* p_Packet)
     {
         HabboPacket::Login::InitializeCrypto l_Packet;
         SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleGetAccountPreferences(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetAccountPreferences(ClientPacket* p_Packet)
     {
         m_Habbo->SendAccountPreferences();
     }
 
-    void HabboSocket::HandlePong(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandlePong(ClientPacket* p_Packet)
     {
         m_Habbo->m_Ponged = true;
     }
 
-    void HabboSocket::HandleGetInfoRetrieve(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGetInfoRetrieve(ClientPacket* p_Packet)
     {
         if (m_Habbo && m_Habbo->IsInitialized())
             m_Habbo->SendHabboObject();

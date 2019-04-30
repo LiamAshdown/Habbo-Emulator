@@ -21,7 +21,7 @@
 
 namespace SteerStone
 {    
-    void HabboSocket::HandleCreditBalance(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleCreditBalance(ClientPacket* p_Packet)
     {
         HabboPacket::Purse::CreditBalance l_Packet;
         l_Packet.Credits = std::to_string(m_Habbo->GetCredits());

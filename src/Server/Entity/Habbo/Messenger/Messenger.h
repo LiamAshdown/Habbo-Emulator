@@ -141,15 +141,15 @@ namespace SteerStone
 
         /// ParseMessengerRemoveBuddy
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerRemoveBuddy(ClientPacket* p_Packet);
 
         /// ParseMessengerRejectBuddy
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerRejectBuddy(ClientPacket* p_Packet);
 
         /// ParseMessengerSendMessage
         /// @p_Packet : Incoming client packet which we will decode
-        void ParseMessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet);
+        void ParseMessengerSendMessage(ClientPacket* p_Packet);
 
     private:
         /// Variables

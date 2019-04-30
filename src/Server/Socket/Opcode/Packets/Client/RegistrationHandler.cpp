@@ -25,13 +25,13 @@
 
 namespace SteerStone
 {    
-    void HabboSocket::HandleGDate(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleGDate(ClientPacket* p_Packet)
     {
         HabboPacket::Login::GDate l_Packet;
         SendPacket(l_Packet.Write());
     }
     
-    void HabboSocket::HandleApproveUsername(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleApproveUsername(ClientPacket* p_Packet)
     {
         HabboPacket::Registration::ApproveNameReply l_Packet;
         l_Packet.Name = p_Packet->ReadString();
@@ -69,7 +69,7 @@ namespace SteerStone
         SendPacket(l_Packet.Write());
     }
     
-    void HabboSocket::HandleApprovePassword(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleApprovePassword(ClientPacket* p_Packet)
     {
         HabboPacket::Registration::ApprovePasswordReply l_Packet;
         l_Packet.Name = p_Packet->ReadString();
@@ -107,7 +107,7 @@ namespace SteerStone
         SendPacket(l_Packet.Write());
     }
     
-    void HabboSocket::HandleApproveEmail(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleApproveEmail(ClientPacket* p_Packet)
     {
         std::string l_Email = p_Packet->ReadString();
 
@@ -137,7 +137,7 @@ namespace SteerStone
         SendPacket(l_Packet.Write());
     }
     
-    void HabboSocket::HandleRegisteration(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleRegisteration(ClientPacket* p_Packet)
     {
         std::string l_Username;
         std::string l_Figure;
@@ -202,14 +202,14 @@ namespace SteerStone
         l_Database.ExecuteQuery();
     }
 
-    void HabboSocket::HandleParentEmailRequired(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleParentEmailRequired(ClientPacket* p_Packet)
     {
         HabboPacket::Registration::ParentEmailRequired l_Packet;
         l_Packet.RequireParentEmail = sHotel->GetBoolConfig(CONFIG_REGISTERATION_REQUIRE_PARENT_EMAIL);
         SendPacket(l_Packet.Write());
     }
 
-    void HabboSocket::HandleValidateParentEmail(std::unique_ptr<ClientPacket> p_Packet)
+    void HabboSocket::HandleValidateParentEmail(ClientPacket* p_Packet)
     {
         std::string l_Email = p_Packet->ReadString();
 

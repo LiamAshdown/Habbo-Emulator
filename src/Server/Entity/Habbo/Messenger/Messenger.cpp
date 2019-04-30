@@ -540,7 +540,7 @@ namespace SteerStone
 
     /// ParseMessengerRemoveBuddy
     /// @p_Packet : Incoming client packet which we will decode
-    void Messenger::ParseMessengerRemoveBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void Messenger::ParseMessengerRemoveBuddy(ClientPacket* p_Packet)
     {
         HabboPacket::Messenger::MessengerRemoveBuddy l_Packet;
 
@@ -599,7 +599,7 @@ namespace SteerStone
 
     /// ParseMessengerRejectBuddy
     /// @p_Packet : Incoming client packet which we will decode
-    void Messenger::ParseMessengerRejectBuddy(std::unique_ptr<ClientPacket> p_Packet)
+    void Messenger::ParseMessengerRejectBuddy(ClientPacket* p_Packet)
     {
         bool l_DeclineAll = p_Packet->ReadWiredBool();
 
@@ -632,7 +632,7 @@ namespace SteerStone
 
     /// ParseMessengerSendMessage
     /// @p_Packet : Incoming client packet which we will decode
-    void Messenger::ParseMessengerSendMessage(std::unique_ptr<ClientPacket> p_Packet)
+    void Messenger::ParseMessengerSendMessage(ClientPacket* p_Packet)
     {
         /// TODO; Add a config check on max friends habbo can send to
         uint32 l_Size = p_Packet->ReadWiredUint();
