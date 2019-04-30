@@ -496,7 +496,7 @@ namespace SteerStone
     /// Returns storage of users with room rights
     std::set<uint32>* Room::GetRoomRightsUsers()
     {
-        boost::shared_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_Mutex);
 
         return &m_SuperRights;
     }
@@ -505,8 +505,6 @@ namespace SteerStone
     /// @p_Habbo : Habbo user we are adding user rights to
     void Room::AddUserRights(Habbo* p_Habbo)
     {
-        boost::unique_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
-
         auto const& l_Itr = m_SuperRights.find(p_Habbo->GetId());
         if (l_Itr == m_SuperRights.end())
         {
@@ -528,8 +526,6 @@ namespace SteerStone
     /// @p_Id : User we are removing user rights from
     void Room::RemoveUserRights(uint32 const p_Id)
     {
-        boost::unique_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
-
         auto& l_Itr = m_SuperRights.find(p_Id);
         if (l_Itr != m_SuperRights.end())
         {
@@ -552,7 +548,7 @@ namespace SteerStone
     /// @p_Id : Id we are checking if user has super rights
     bool Room::IsSuperUser(uint32 const p_Id)
     {
-        boost::shared_lock<boost::shared_mutex> l_Guard(m_SuperRightsMutex);
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_Mutex);
 
         auto const& l_Itr = m_SuperRights.find(p_Id);
         if (l_Itr != m_SuperRights.end())
@@ -574,6 +570,8 @@ namespace SteerStone
     /// @p_Diff : Hotel last tick time
     void Room::Update(uint32 const p_Diff)
     {
+        boost::unique_lock<boost::shared_mutex> l_Guard(m_Mutex);
+
         /// Process any pending functions
         m_FunctionCallBack.ProcessFunctions();
 

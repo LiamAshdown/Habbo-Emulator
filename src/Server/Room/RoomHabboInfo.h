@@ -74,6 +74,10 @@ namespace SteerStone
         /// Process Habbo Status
         void ProcessStatusUpdates();
 
+        /// ProcessPackets
+        /// Process any pending packets
+        void ProcessPackets();
+
         /// CheckTimers
         /// Check durations of user; Waving, AFK etc..
         /// @p_Diff : Hotel last tick time

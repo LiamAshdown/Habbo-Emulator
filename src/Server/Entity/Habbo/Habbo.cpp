@@ -364,7 +364,8 @@ namespace SteerStone
     {
         if (m_Socket && !m_Socket->IsClosed())
         {
-            LOG_INFO << m_PacketQueue.Size();
+            /// Process any pending packets
+            ProcessPackets(PacketProcess::PROCESS_PLAYER_UPDATE);
 
             if (m_PingInterval < p_Diff)
             {
@@ -459,22 +460,42 @@ namespace SteerStone
     }
 
     /// QueuePacket
-    /// @p_Packet : Packet we are adding to queue to be processed on hotel update
-    void Habbo::QueuePacket(ClientPacket* p_Packet)
+    /// @p_Process : Type of packet we are processing
+    /// @p_Packet : Packet we are adding to queue to be processed on main thread
+    void Habbo::QueuePacket(uint8 p_Process, ClientPacket * p_Packet)
     {
-        m_PacketQueue.Add(p_Packet);
+        if (p_Process == PacketProcess::PROCESS_PLAYER_UPDATE)
+            m_QueuePlrUpdPck.Add(p_Packet);
+        else if (p_Process == PacketProcess::PROCESS_ROOM_UPDATE)
+            m_QueueRoomUpdPck.Add(p_Packet);
     }
 
     /// ProcessPackets
     /// Process any pending packets
-    /// @p_packet : Packet being processed
-    void Habbo::ProcessPackets(ClientPacket* p_Packet /*= nullptr*/)
+    /// @p_Process : Type of packet we are processing
+    /// @p_Packet : Packet being processed
+    void Habbo::ProcessPackets(uint8 p_Process, ClientPacket* p_Packet /* = nullptr*/)
     {
-        while (m_PacketQueue.Previous(p_Packet))
+        if (m_Socket && !m_Socket->IsClosed())
         {
-            ToSocket()->ExecutePacket(sOpcode->GetClientPacket(p_Packet->GetHeader()), p_Packet);
+            if (p_Process == PacketProcess::PROCESS_PLAYER_UPDATE)
+            {
+                while (m_QueuePlrUpdPck.Previous(p_Packet))
+                {
+                    ToSocket()->ExecutePacket(sOpcode->GetClientPacket(p_Packet->GetHeader()), p_Packet);
 
-            delete p_Packet;
+                    delete p_Packet;
+                }
+            }
+            else if (p_Process == PacketProcess::PROCESS_ROOM_UPDATE)
+            {
+                while (m_QueuePlrUpdPck.Previous(p_Packet))
+                {
+                    ToSocket()->ExecutePacket(sOpcode->GetClientPacket(p_Packet->GetHeader()), p_Packet);
+
+                    delete p_Packet;
+                }
+            }
         }
     }
 

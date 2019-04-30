@@ -213,6 +213,16 @@ namespace SteerStone
         m_UpdateClient = false;
     }
 
+    /// ProcessPackets
+    /// Process any pending packets
+    void RoomHabboInfo::ProcessPackets()
+    {
+        if (!m_Habbo->GetRoom())
+            return;
+
+        m_Habbo->ProcessPackets(PacketProcess::PROCESS_ROOM_UPDATE);
+    }
+
     /// CheckTimers
     /// Check durations of user; Waving, AFK etc..
     void RoomHabboInfo::CheckTimers(uint32 const p_Diff)
