@@ -1,274 +1,196 @@
-###############################################
-# Server Configuration File 			      #
-###############################################
+### SECTION INDEX ###
+#   EXAMPLE CONFIG
+#   SERVER SETTINGS
+#   MYSQL SETTINGS
+#   SESSION PARAMETERS
+#   REGISTERATION SETTINGS
+#   MESSENGER SETTINGS
+#   ROOM SETTINGS
 
-###################################################################################################
-# SECTION INDEX
-#
-#    EXAMPLE CONFIG
-#    SERVER SETTINGS
-#	 MYSQL SETTINGS
-# 	 SESSION PARAMETERS
-#    REGISTERATION SETTINGS
-#    MESSENGER SETTINGS
-#	 ROOM SETTINGS
-#
-###################################################################################################
+### SERVER SETTINGS ###
 
-###################################################################################################
-# EXAMPLE CONFIG
-#
-#    Variable
-#        Description: Brief description what the variable is doing.
-#        Important:   Annotation for important things about this variable.
-#        Example:     "Example, i.e. if the value is a string"
-#        Default:     10 - (Enabled|Comment|Variable name in case of grouped config options)
-#                     0  - (Disabled|Comment|Variable name in case of grouped config options)
-#
-# Note to developers:
-# - Copy this example to keep the formatting.
-# - Line breaks should be at column 100.
-###################################################################################################
-
-###################################################################################################
-# SERVER SETTINGS
-#
-#    ServerPort
-#        Description: TCP port to reach the auth server.
-#        Default:     37120
-#
+## Server Port
+#   Description: TCP port to reach the auth server.
+#   Default: 37120
 ServerPort = 37120
-#
-#
-#
-#    BindIP
-#        Description: Bind auth server to IP/hostname
-#        Default:     "127.0.0.1" - (Bind to all IPs on the system)
-#
+
+## BindIP
+#	Description: Bind server to Ip/Host Name
+#	Default: "127.0.0.1" - (Bind to all IPs on the system)
 BindIP = "127.0.0.1"
-#
-#
-#
-#    NetworkThreadProcessors
-#        Description: Amount of worker threads to launch NetworkThreadProcessors
-#        Default:     1
-#
+
+## NetworkThreadProcessors
+#	Description: Amount of worker socket listener threads to launch
+#	Default: 1
 NetworkThreadProcessors = 1
-#
-#
-#    PongInterval
-#        Description: Pong interval time to sent to clients in milliseconds
-#        Default:     10000
-#
+
+## PongInterval
+#	Description: Pong interval time to sent to clients in milliseconds
+#	Default:     10000 (in milliseconds)
 PongInterval = 10000
-#
-#
-###################################################################################################
 
-###################################################################################################
-# MYSQL SETTINGS
-#
-#    UserDatabaseInfo
-#        Description: Database connection settings for the auth server.
-#        Example:     "hostname;port;username;password;database"
-#                     ".;somenumber;username;password;database" - (Use named pipes on Windows
-#                                                                 "enable-named-pipe" to [mysqld]
-#                                                                 section my.ini)
-#        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
-#
-UserDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
-#
-#
-#    UserDatabaseInfo.WorkerThreads
-#        Description: The amount of MySQL connections spawned to handle.
-#        Default:     10 - (LoginDatabase.WorkerThreads)
-#
+## UseProcessors
+#	Description: Processors mask for Windows systems.
+#   Example:     A computer with 2 CPUs:
+#                1 - 1st CPU only, 2 - 2nd CPU only, 3 - 1st and 2nd CPU, because 1 | 2 is 3
+#   Default:     0  - (Selected by OS)
+#                1+ - (Bit mask value of selected processors)
+UseProcessors = 0
+
+## ProcessPriority
+#	Description: Process priority setting for Windows systems.
+#	Default:     0 - (Normal)
+#                1 - (High)
+ProcessPriority = 0
+
+### MYSQL SETTINGS ###
+
+## UserDatabaseInfo
+#	Description: Mysql account settings to connect to User Database
+#	Example:     "hostname;port;username;password;database"
+#   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+UserDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+
+## UserDatabaseInfo.WorkerThreads
+#	Description: The amount of MySQL connections spawned to handle.
+#   Default:     10 - (LoginDatabase.WorkerThreads)
 UserDatabaseInfo.WorkerThreads  = 10
-#
-#    RoomDatabaseInfo
-#        Description: Database connection settings for the auth server.
-#        Example:     "hostname;port;username;password;database"
-#                     ".;somenumber;username;password;database" - (Use named pipes on Windows
-#                                                                 "enable-named-pipe" to [mysqld]
-#                                                                 section my.ini)
-#        Default:     "127.0.0.1;3306;Quad;Quad;Quad"
-#
-RoomDatabaseInfo = "127.0.0.1;3306;Quad;Quad;Quad"
-#
-#
-#    RoomDatabaseInfo.WorkerThreads
-#        Description: The amount of MySQL connections spawned to handle.
-#        Default:     10 - (LoginDatabase.WorkerThreads)
-#
+
+## RoomDatabaseInfo
+#	Description: Mysql account settings to connect to Room Database
+#	Example:     "hostname;port;username;password;database"
+#   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+RoomDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+
+## RoomDatabaseInfo.WorkerThreads
+#	Description: The amount of MySQL connections spawned to handle.
+#   Default:     10 - (LoginDatabase.WorkerThreads)
 RoomDatabaseInfo.WorkerThreads  = 10
-#
-#
-###################################################################################################
 
-###################################################################################################
-# SESSION PARAMETERS
-#
-#    ParameterCoppa
-#        Description: TODO; Find out what this means
-#        Default:     0 - Disabled | Enabled - 1
-#
+### SESSION PARAMETERS ###
+
+## ParameterCoppa
+#	Description: TODO; Find out what this means
+#   Default:     0 - Disabled | Enabled - 1
 ParameterCoppa = 0
-#
-#    ParameterVoucher
-#        Description: Enable/Disable voucher use in client
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParameterVoucher
+#   Description: Enable/Disable voucher use in client
+#   Default:     0 - Disabled | Enabled - 1
 ParameterVoucher = 1
-#
-#    ParamterRequireParentEmail
-#        Description: TODO; Find out what this means
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParamterRequireParentEmail
+#   Description: TODO; Find out what this means
+#   Default:     0 - Disabled | Enabled - 1
 ParamterRequireParentEmail = 0
-#
-#    ParamterSendParentEmail
-#        Description: TODO; Find out what this means
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParamterSendParentEmail
+#   Description: TODO; Find out what this means
+#   Default:     0 - Disabled | Enabled - 1
 ParamterSendParentEmail = 0
-#
-#    ParamterDirectMail
-#        Description: Allow use of direct mail
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParamterDirectMail
+#   Description: Allow use of direct mail
+#   Default:     0 - Disabled | Enabled - 1
 ParamterDirectMail = 1
-#
-#    ParameterDateFormat
-#        Description: Date format client will use
-#        Default:     dd-MM-yyyy
-#
+
+## ParameterDateFormat
+#   Description: Date format client will use
+#   Default:     dd-MM-yyyy
 ParameterDateFormat = dd-MM-yyyy
-#
-#    ParamterIntegration
-#        Description: TODO; Find out what this means
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParamterIntegration
+#   Description: TODO; Find out what this means
+#   Default:     0 - Disabled | Enabled - 1
 ParamterIntegration = 0
-#
-#    ParameterProfileEditing
-#        Description: Allow use of editing user profile in game
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParameterProfileEditing
+#   Description: Allow use of editing user profile in game
+#   Default:     0 - Disabled | Enabled - 1
 ParameterProfileEditing = 1
-#
-#    ParameterTrackingHeader
-#        Description: TODO; Find out what this means
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParameterTrackingHeader
+#   Description: TODO; Find out what this means
+#   Default:     0 - Disabled | Enabled - 1
 ParameterTrackingHeader = 0
-#
-#    ParameterTutorial
-#        Description: Send tutorial on user first login
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## ParameterTutorial
+#   Description: Send tutorial on user first login
+#   Default:     0 - Disabled | Enabled - 1
 ParameterTutorial = 1
-#
-#
-####################################################################################################
 
-###################################################################################################
-# REGISTERATION SETTINGS
-#
-#    RegisterationHabboClothing
-#        Description: Allow to use Habbo Club Clothing during registeration
-#        Default:     0 - Disabled | Enabled - 1
-#
+### REGISTERATION SETTINGS ###
+
+## RegisterationHabboClothing
+#	Description: Allow to use Habbo Club Clothing during registeration
+#	Default:     0 - Disabled | Enabled - 1
 RegisterationHabboClothing = 0
-#
-#    RegisterationRequireParentEmail
-#        Description: User requires to enter a parent email
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## RegisterationRequireParentEmail
+#	Description: User requires to enter a parent email
+#	Default:     0 - Disabled | Enabled - 1
 RegisterationHabboClothing = 0
-#
-#    RegisterationCredits
-#        Description: Set credit amount on player registeration
-#        Default:     0
-#
+
+## RegisterationCredits
+#	Description: Set credit amount on player registeration
+#	Default:     0
 RegisterationCredits = 0
-#
-#    RegisterationTickets
-#        Description: Set ticket amount on player registeration
-#        Default:     0
-#
+
+## RegisterationTickets
+#	Description: Set ticket amount on player registeration
+#	Default:     0
 RegisterationTickets = 0
-#
-#    RegisterationFilms
-#        Description: Set film amount on player registeration
-#        Default:     0
-#
+
+## RegisterationFilms
+#	Description: Set film amount on player registeration
+#	Default:     0
 RegisterationFilms = 0
-#
-#    RegisterationBobbaWords
-#        Description: Set words which are not allowed when registering.
-#        Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
-#
+
+## RegisterationBobbaWords
+#	Description: Set words which are not allowed when registering.
+#	Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
 RegisterationBobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
-#
-#    RegisterationSound
-#        Description: Set whether sound is enabled or not
-#        Default:     0 - Disabled | Enabled - 1
-#
+
+## RegisterationSound
+#	Description: Set whether sound is enabled or not
+#	Default:     0 - Disabled | Enabled - 1
 RegisterationSound = 0
-#
-#    RegisterationMotto
-#        Description: Set whether sound is enabled or not
-#        Default:     "I'm a new user!"
-#
+
+## RegisterationMotto
+#	Description: Set whether sound is enabled or not
+#	Default:     "I'm a new user!"
 RegisterationMotto = I'm a new user!
-#
-#    RegisterationConsoleMotto
-#        Description: Set whether sound is enabled or not
-#        Default:     "I'm looking for friends!"
-#
+
+## RegisterationConsoleMotto
+#	Description: Set whether sound is enabled or not
+#	Default:     "I'm looking for friends!"
 RegisterationConsoleMotto = I'm looking for friends!
-#
-#    RegisterationWelcomeMessage
-#        Description: Set welcome message when user logging into Habbo
-#        Default:     "Welcome to SteerStone Emulator!"
-#
+
+## RegisterationWelcomeMessage
+#	Description: Set welcome message when user logging into Habbo
+#	Default:     "Welcome to SteerStone Emulator!"
 RegisterationWelcomeMessage = Welcome to SteerStone Emulator!
-#
-#
-###################################################################################################
 
-###################################################################################################
-# MESSENGER SETTINGS
-#
-#    MessengerMaxFriendsLimit
-#        Description: Max amount of friends non club member can have
-#        Default:     50
-#
+### MESSENGER SETTINGS ###
+
+## MessengerMaxFriendsLimit
+#	Description: Max amount of friends non club member can have
+#	Default:     50
 MessengerMaxFriendsLimit = 50
-#
-#    MessengerMaxFriendsClubLimit
-#        Description: Max amount of friends club member can have
-#        Default:     100
-#
-MessengerMaxFriendsClubLimit = 100
-#
-#
-###################################################################################################
 
-###################################################################################################
-# ROOM SETTINGS
-#
-#    AwayFromKeyboardTimer
-#        Description: Last time user sent a Status Update
-#        Default:     900000 (15 minutes)
-#
+## MessengerMaxFriendsClubLimit
+#	Description: Max amount of friends club member can have
+#	Default:     100
+MessengerMaxFriendsClubLimit = 100
+
+### ROOM SETTINGS ###
+
+## AwayFromKeyboardTimer
+#	Description: Last time user sent a Status Update
+#	Default:     900000 (15 minutes)
 AwayFromKeyboardTimer = 900000
-#
-#    WaveTimer
-#        Description: How long user can wave for
-#        Default:     4000
-#
+
+## WaveTimer
+#	Description: How long user can wave for
+#	Default:     4000
 WaveTimer = 4000
-#
-#
-###################################################################################################
