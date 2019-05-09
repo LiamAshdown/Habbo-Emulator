@@ -108,7 +108,7 @@ namespace SteerStone
         /// @p_Connection : Remove Connection from Borrowed Pool
         void UnBorrow(std::shared_ptr<Connection> p_Connection)
         {
-            std::lock_guard<std::mutex> l_Guard(this->m_Mutex);
+            std::unique_lock<std::mutex> l_Guard(this->m_Mutex);
 
             m_BorrowedPool.erase(p_Connection);
             m_Pool.push_back(p_Connection);

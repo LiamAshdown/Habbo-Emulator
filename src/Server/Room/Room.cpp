@@ -151,6 +151,7 @@ namespace SteerStone
         AddFigure(p_Habbo);
         RefreshRights(p_Habbo);
         SendRoomStatuses(p_Habbo);
+        SendUpdateVotes(p_Habbo);
 
         m_VisitorsNow++;
         GetRoomCategory()->GetVisitorsNow()++;
@@ -460,6 +461,50 @@ namespace SteerStone
         return nullptr;
     }
 
+    /// IsUserVoted
+    /// Check if user has voted or not
+    /// @p_Id : User to check
+    bool Room::IsUserVoted(uint32 const p_Id)
+    {
+        auto const& l_Itr = m_VotedUsers.find(p_Id);
+        if (l_Itr != m_VotedUsers.end())
+            return true;
+
+        return false;
+    }
+
+    /// AddUserVoted
+    /// @p_Id : Id we are adding to storage
+    void Room::AddUserVoted(uint32 const p_Id)
+    {
+        m_VotedUsers.insert(p_Id);
+
+        /// Also update database
+        QueryDatabase l_Database("rooms");
+        l_Database.PrepareQuery("INSERT INTO room_rating(room_id, account_id) VALUES(?, ?)");
+        l_Database.GetStatement()->setUInt(1, GetId());
+        l_Database.GetStatement()->setUInt(2, p_Id);
+        l_Database.ExecuteQuery();
+    }
+
+    /// SendUpdateVotes
+    /// @p_Habbo : User we are sending to
+    /// @p_SendToAll : Send packet to users inside room
+    void Room::SendUpdateVotes(Habbo* p_Habbo, bool p_SendToAll /* = false*/)
+    {
+        HabboPacket::Room::UpdateVotes l_Packet;
+
+        if (IsUserVoted(p_Habbo->GetId()) || GetOwnerId() == p_Habbo->GetId())
+            l_Packet.Rating = GetRoomRating();
+        else
+            l_Packet.Rating = -1;
+
+        if (p_SendToAll)
+            SendPacketToAll(l_Packet.Write());
+        else
+            p_Habbo->SendPacket(l_Packet.Write());
+    }
+
     ///////////////////////////////////////////
     //             SUPER RIGHTS
     ///////////////////////////////////////////
@@ -515,7 +560,7 @@ namespace SteerStone
 
             /// And update the database
             QueryDatabase l_Database("rooms");
-            l_Database.PrepareQuery("INSERT INTO room_rights (id, room_id) VALUES (?, ?)");
+            l_Database.PrepareQuery("INSERT INTO room_rights (account_id, room_id) VALUES (?, ?)");
             l_Database.GetStatement()->setUInt(1, p_Habbo->GetId());
             l_Database.GetStatement()->setUInt(2, GetId());
             l_Database.ExecuteQuery();
@@ -537,7 +582,7 @@ namespace SteerStone
 
             /// And update the database
             QueryDatabase l_Database("rooms");
-            l_Database.PrepareQuery("DELETE FROM room_rights WHERE id = ? AND room_id = ?");
+            l_Database.PrepareQuery("DELETE FROM room_rights WHERE account_id = ? AND room_id = ?");
             l_Database.GetStatement()->setUInt(1, p_Id);
             l_Database.GetStatement()->setUInt(2, GetId());
             l_Database.ExecuteQuery();

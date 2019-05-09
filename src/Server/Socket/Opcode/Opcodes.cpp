@@ -64,14 +64,14 @@ namespace SteerStone
         ///////////////////////////////////////////
         //             ROOM HANDLER
         ///////////////////////////////////////////
-        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_DIRECTORY,                "CLIENT_ROOM_DIRECTORY",             PacketStatus::STATUS_HOTEL_VIEW,         PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomDirectory              );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_DIRECTORY,                "CLIENT_ROOM_DIRECTORY",             PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomDirectory              );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_CHAT,                     "CLIENT_ROOM_CHAT",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomChat                   );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_SHOUT,                    "CLIENT_ROOM_SHOUT",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomShout                  );
         StoreClientPacket(PacketClientHeader::CLIENT_ROOM_WHISPER,                  "CLIENT_ROOM_WHISPER",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleRoomWhisper                );
         StoreClientPacket(PacketClientHeader::CLIENT_QUIT,                          "CLIENT_QUIT",                       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLeaveRoom                  );
         StoreClientPacket(PacketClientHeader::CLIENT_GO_VIA_DOOR,                   "CLIENT_GO_VIA_DOOR",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_TRY_FLAT,                      "CLIENT_TRY_FLAT",                   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleTryFlat                    );
-        StoreClientPacket(PacketClientHeader::CLIENT_GO_TO_FLAT,                    "CLIENT_GO_TO_FLAT",                 PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGoToFlat                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_TRY_FLAT,                      "CLIENT_TRY_FLAT",                   PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_PLAYER_UPDATE,  &HabboSocket::HandleTryFlat                    );
+        StoreClientPacket(PacketClientHeader::CLIENT_GO_TO_FLAT,                    "CLIENT_GO_TO_FLAT",                 PacketStatus::STATUS_ALL,                PacketProcess::PROCESS_PLAYER_UPDATE,  &HabboSocket::HandleGoToFlat                   );
         StoreClientPacket(PacketClientHeader::CLIENT_G_HEIGHT_MAP,                  "CLIENT_G_HEIGHT_MAP",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGHeightMap                 );
         StoreClientPacket(PacketClientHeader::CLIENT_G_USERS,                       "CLIENT_G_USERS",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGUsers                     );
         StoreClientPacket(PacketClientHeader::CLIENT_G_OBJECTS,                     "CLIENT_G_OBJECTS",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGObjects                   );
@@ -107,7 +107,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_KICK_USER,                     "CLIENT_KICK_USER",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleKickUser                   );
         StoreClientPacket(PacketClientHeader::CLIENT_ASSIGN_RIGHTS,                 "CLIENT_ASSIGN_RIGHTS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleAssignRights               );
         StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_RIGHTS,                 "CLIENT_REMOVE_RIGHTS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleRemoveRights               );
-        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLetInUser                   );
+        StoreClientPacket(PacketClientHeader::CLIENT_LET_USER_IN,                   "CLIENT_LET_USER_IN",                PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleLetInUser                  );
         StoreClientPacket(PacketClientHeader::CLIENT_REMOVE_STUFF,                  "CLIENT_REMOVE_STUFF",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GO_AWAY,                       "CLIENT_GO_AWAY",                    PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_ROOM_ADD,                  "CLIENT_GET_ROOM_ADD",               PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleGetRoomAdd                 );
@@ -120,6 +120,7 @@ namespace SteerStone
         StoreClientPacket(PacketClientHeader::CLIENT_SET_SPECTATOR_AMOUNT,          "CLIENT_SET_SPECTATOR_AMOUNT",       PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GET_GROUP_BADGES,              "CLIENT_GET_GROUP_BADGES",           PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
         StoreClientPacket(PacketClientHeader::CLIENT_GROUP_DETAILS,                 "CLIENT_GROUP_DETAILS",              PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_NOW,            &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_ROOM_VOTE,                     "CLIENT_ROOM_VOTE",                  PacketStatus::STATUS_IN_ROOM,            PacketProcess::PROCESS_ROOM_UPDATE,    &HabboSocket::HandleRoomVote                   );
 
         ///////////////////////////////////////////
         //             NAVIGATOR HANDLER
@@ -348,6 +349,7 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_GROUP_BADGES,                  "SERVER_GROUP_BADGES",                     &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_GROUP_MEMBER_SHIP_UPDATE,      "SERVER_GROUP_MEMBER_SHIP_UPDATE",         &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_GROUP_DETAILS,                 "SERVER_GROUP_DETAILS",                    &HabboSocket::HandleServerMessage              );
+        StoreServerPacket(PacketServerHeader::SERVER_UPDATE_VOTES,                  "SERVER_UPDATE_VOTES",                     &HabboSocket::HandleServerMessage              );
 
         ///////////////////////////////////////////
         //             NAVIGATOR HANDLER

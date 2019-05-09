@@ -160,6 +160,24 @@ namespace SteerStone
         Habbo* FindHabboById(uint32 const p_Id);
 
         ///////////////////////////////////////////
+        //             ROOM RATING
+        ///////////////////////////////////////////
+
+        /// IsUserVoted
+        /// Check if user has voted or not
+        /// @p_Id : User to check
+        bool IsUserVoted(uint32 const p_Id);
+
+        /// AddUserVoted
+        /// @p_Id : Id we are adding to storage
+        void AddUserVoted(uint32 const p_Id);
+
+        /// SendUpdateVotes
+        /// @p_Habbo : User we are sending to
+        /// @p_SendToAll : Send packet to users inside room
+        void SendUpdateVotes(Habbo* p_Habbo, bool p_SendToAll = false);
+
+        ///////////////////////////////////////////
         //             SUPER RIGHTS
         ///////////////////////////////////////////
 
@@ -211,6 +229,7 @@ namespace SteerStone
         uint32 GetVisitorsNow()      const { return m_VisitorsNow;  }
         uint32 GetVisitorsMax()      const { return m_VisitorsMax;  }
         bool IsRoomVisible()         const { return m_RoomVisible;  }
+        uint32& GetRoomRating()            { return m_Rating;       }
         RoomModel& GetRoomModel()          { return m_RoomModel;    }
         RoomCategory* GetRoomCategory()    { return m_RoomCategory; }
       
@@ -233,10 +252,12 @@ namespace SteerStone
         uint32 m_VisitorsNow;
         uint32 m_VisitorsMax;
         bool m_RoomVisible;
+        uint32 m_Rating;
         RoomModel m_RoomModel;
         RoomCategory* m_RoomCategory;
         GUIDUserMap m_Habbos;                    ///< Hold Habbo users
         std::set<uint32> m_SuperRights;          ///< Holds users who have room rights
+        std::set<uint32> m_VotedUsers;           ///< Users who already voted are stored, so they cannot vote again
         FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
 
         boost::shared_mutex m_Mutex;

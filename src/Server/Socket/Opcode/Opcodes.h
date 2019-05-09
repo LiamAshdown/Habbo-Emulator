@@ -104,6 +104,7 @@ enum PacketClientHeader : uint16
     CLIENT_SET_SPECTATOR_AMOUNT           = 216,
     CLIENT_GET_GROUP_BADGES               = 230,
     CLIENT_GROUP_DETAILS                  = 231,
+    CLIENT_ROOM_VOTE                      = 261,
 
     ///////////////////////////////////////////
     //             NAVIGATOR HANDLER
@@ -333,6 +334,7 @@ enum PacketServerHeader : uint16
     SERVER_GROUP_BADGES                   = 309, ///< #handle_group_badges
     SERVER_GROUP_MEMBER_SHIP_UPDATE       = 310, ///< #handle_group_membership_update
     SERVER_GROUP_DETAILS                  = 311, ///< #handle_group_details
+    SERVER_UPDATE_VOTES                   = 345, ///< #handle_room_vote
 
     ///////////////////////////////////////////
     //             NAVIGATOR HANDLER

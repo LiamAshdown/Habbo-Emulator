@@ -44,16 +44,13 @@ namespace SteerStone
         /// Enter the room
         if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
         {
-            if (l_IsPublic)
-            {
-                HabboPacket::Room::RoomUrl l_PacketUrl;
-                SendPacket(l_PacketUrl.Write());
+            HabboPacket::Room::RoomUrl l_PacketUrl;
+            SendPacket(l_PacketUrl.Write());
 
-                HabboPacket::Room::RoomReady l_PacketRoomReady;
-                l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
-                l_PacketRoomReady.Id = m_Habbo->GetRoom()->GetId();
-                SendPacket(l_PacketRoomReady.Write());
-            }
+            HabboPacket::Room::RoomReady l_PacketRoomReady;
+            l_PacketRoomReady.Model = m_Habbo->GetRoom()->GetRoomModel().GetModel();
+            l_PacketRoomReady.Id = m_Habbo->GetRoom()->GetId();
+            SendPacket(l_PacketRoomReady.Write());
         }
         else
         {
@@ -435,5 +432,28 @@ namespace SteerStone
             HabboPacket::Room::FlatNotAllowedToEnter l_Packet;
             l_Habbo->SendPacket(l_Packet.Write());
         }
+    }
+
+    void HabboSocket::HandleRoomVote(ClientPacket* p_Packet)
+    {
+        /// User cannot vote again if already voted or is owner of room
+        if (m_Habbo->GetRoom()->IsUserVoted(m_Habbo->GetId()) || m_Habbo->GetRoom()->GetOwnerId() == m_Habbo->GetId())
+            return;
+
+        int32 l_Vote = p_Packet->ReadWiredInt();
+
+        if (l_Vote)
+            m_Habbo->GetRoom()->GetRoomRating()++;
+        else
+        {
+            m_Habbo->GetRoom()->GetRoomRating()--;
+
+            /// Room rating cannot go below 0
+            if (m_Habbo->GetRoom()->GetRoomRating() < 0)
+                m_Habbo->GetRoom()->GetRoomRating() = 0;
+        }
+
+        m_Habbo->GetRoom()->AddUserVoted(m_Habbo->GetId());
+        m_Habbo->GetRoom()->SendUpdateVotes(m_Habbo, true);
     }
 }

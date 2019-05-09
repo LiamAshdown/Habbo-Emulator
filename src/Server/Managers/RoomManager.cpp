@@ -193,7 +193,8 @@ namespace SteerStone
     void RoomManager::LoadRooms()
     {
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, room_visible FROM rooms");
+        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper," 
+            "floor, show_name, super_users, access_type, password, visitors_max, room_visible, rating FROM rooms");
         l_Database.ExecuteQuery();
 
         if (!l_Database.GetResult())
@@ -228,9 +229,10 @@ namespace SteerStone
             l_Room->m_AllowSuperRights        = l_Result->GetBool(12);
             l_Room->m_AccessType              = l_Result->GetUint16(13);
             l_Room->m_Password                = l_Result->GetString(14);
-            l_Room->m_VisitorsNow             = l_Result->GetUint32(15);
-            l_Room->m_VisitorsMax             = l_Result->GetUint32(16);
-            l_Room->m_RoomVisible             = l_Result->GetBool(17);
+            l_Room->m_VisitorsNow             = 0;
+            l_Room->m_VisitorsMax             = l_Result->GetUint32(15);
+            l_Room->m_RoomVisible             = l_Result->GetBool(16);
+            l_Room->m_Rating                  = l_Result->GetUint32(17);
             l_Room->m_RoomModel               = *GetRoomModel(l_Room->GetModel());
             l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
@@ -250,7 +252,7 @@ namespace SteerStone
         for (auto const& l_Itr : m_Rooms)
         {
             QueryDatabase l_Database("rooms");
-            l_Database.PrepareQuery("SELECT id FROM room_rights WHERE room_id = ?");
+            l_Database.PrepareQuery("SELECT account_id FROM room_rights WHERE room_id = ?");
             l_Database.GetStatement()->setUInt(1, l_Itr.second->GetId());
             l_Database.ExecuteQuery();
 
@@ -266,6 +268,29 @@ namespace SteerStone
         }
     }
 
+    /// LoadVotedUsers
+    /// Load room rating from database
+    void RoomManager::LoadVotedUsers()
+    {
+        for (auto const& l_Itr : m_Rooms)
+        {
+            QueryDatabase l_Database("rooms");
+            l_Database.PrepareQuery("SELECT account_id FROM room_rating WHERE room_id = ?");
+            l_Database.GetStatement()->setUInt(1, l_Itr.second->GetId());
+            l_Database.ExecuteQuery();
+
+            if (!l_Database.GetResult())
+                continue;
+
+            Result* l_Result = l_Database.Fetch();
+
+            do
+            {
+                l_Itr.second->m_VotedUsers.insert(l_Result->GetUint32(1));
+            } while (l_Result->GetNextResult());
+        }
+    }
+
     /// AddRoom
     /// Add room to storage from database
     /// @p_RoomId : Id of room we are querying database to get room info
@@ -274,7 +299,8 @@ namespace SteerStone
         boost::unique_lock<boost::shared_mutex> l_Guard(m_Mutex);
 
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, floor, show_name, super_users, access_type, password, visitors_now, visitors_max, room_visible FROM rooms WHERE id = ?");
+        l_Database.PrepareQuery("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, "
+            "floor, show_name, super_users, access_type, password, visitors_max, room_visible, rating WHERE id = ?;");
         l_Database.GetStatement()->setUInt(1, p_RoomId);
         l_Database.ExecuteQuery();
 
@@ -302,12 +328,13 @@ namespace SteerStone
         l_Room->m_WallPaper                 = l_Result->GetUint32(9);
         l_Room->m_Floor                     = l_Result->GetUint32(10);
         l_Room->m_ShowName                  = l_Result->GetBool(11);
-        l_Room->m_AllowSuperRights                = l_Result->GetBool(12);
+        l_Room->m_AllowSuperRights          = l_Result->GetBool(12);
         l_Room->m_AccessType                = l_Result->GetUint16(13);
         l_Room->m_Password                  = l_Result->GetString(14);
-        l_Room->m_VisitorsNow               = l_Result->GetUint32(15);
-        l_Room->m_VisitorsMax               = l_Result->GetUint32(16);
-        l_Room->m_RoomVisible               = l_Result->GetBool(17);
+        l_Room->m_VisitorsNow               = 0;
+        l_Room->m_VisitorsMax               = l_Result->GetUint32(15);
+        l_Room->m_RoomVisible               = l_Result->GetBool(16);
+        l_Room->m_Rating                    = l_Result->GetUint32(17);
         l_Room->m_RoomModel                 = *GetRoomModel(l_Room->GetModel());
         l_Room->m_RoomCategory              = GetRoomCategory(l_Room->GetCategoryId());
         l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
@@ -321,6 +348,8 @@ namespace SteerStone
     /// @p_Diff - Update tick
     void RoomManager::UpdateRooms(uint32 const& p_Diff)
     {
+        boost::shared_lock<boost::shared_mutex> l_Guard(m_Mutex);
+
         /// Check any rooms are pending for deletion
         IsScheduledToDeleteRoom();
 
@@ -335,8 +364,6 @@ namespace SteerStone
     /// Check if we can delete the room
     void RoomManager::IsScheduledToDeleteRoom()
     {
-        boost::unique_lock<boost::shared_mutex> l_Guard(m_Mutex);
-
         for (auto l_Itr = m_RoomDeletion.begin(); l_Itr != m_RoomDeletion.end();)
         {
             /// If there is users inside the room, don't delete

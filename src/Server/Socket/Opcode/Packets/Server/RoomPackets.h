@@ -431,7 +431,19 @@ namespace SteerStone
                 StringBuffer const* Write();
             };
 
+            /// SERVER_UPDATE_VOTES packet builder
+            class UpdateVotes final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                UpdateVotes() : ServerPacket(SERVER_UPDATE_VOTES) {}
 
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                int32 Rating;
+            };
         } ///< NAMESPACE ROOM
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

@@ -168,7 +168,7 @@ namespace SteerStone
 
         /// TODO; Clean this. We are querying the database and then finding the room in the storage = slow !!
         QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id FROM rooms WHERE category = 2 AND (name LIKE ? OR owner_name LIKE ?)");
+        l_Database.PrepareQuery("SELECT id FROM rooms WHERE category != 3 AND (name LIKE ? OR owner_name LIKE ?)");
         l_Database.GetStatement()->setString(1, l_Search);
         l_Database.GetStatement()->setString(2, l_Search);
         l_Database.ExecuteQuery();
@@ -332,6 +332,11 @@ namespace SteerStone
 
         if (l_Database.GetResult())
             m_Habbo->m_LastCreatedRoomId = l_Database.Fetch()->GetInt32(1);
+
+        l_Database.ClearParameters();
+        l_Database.PrepareQuery("INSERT INTO room_rating(room_id) VALUES (?)");
+        l_Database.GetStatement()->setUInt(1, m_Habbo->m_LastCreatedRoomId);
+        l_Database.ExecuteQuery();
 
         sRoomMgr->AddRoom(m_Habbo->m_LastCreatedRoomId);
 

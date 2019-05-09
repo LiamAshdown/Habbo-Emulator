@@ -23,8 +23,6 @@
 #include "Opcode/Packets/Server/MiscPackets.h"
 #include "Opcode/Packets/Server/PursePackets.h"
 
-#include "Common/Maths.h"
-
 namespace SteerStone
 {
     void HabboSocket::HandleTryLogin(ClientPacket* p_Packet)
@@ -70,7 +68,7 @@ namespace SteerStone
             l_Result = l_Database.Fetch();
 
             m_Habbo = new Habbo(this);
-            m_Habbo->m_Id                   = Maths::GetRandomUint32(1, 9999999);
+            m_Habbo->m_Id                   = l_Result->GetUint32(1);
             m_Habbo->m_Name                 = l_Result->GetString(2);
             m_Habbo->m_Password             = l_Result->GetString(3);
             m_Habbo->m_Email                = l_Result->GetString(4);

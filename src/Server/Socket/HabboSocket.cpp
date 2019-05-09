@@ -74,6 +74,8 @@ namespace SteerStone
 
                 auto const& l_Handler = sOpcode->GetClientPacket(l_Packet->GetHeader());
 
+                LOG_INFO << "[INCOMING]: " << "[" << l_Packet->GetHeader() << "] [" << l_Handler.Name << "]";
+
                 if (l_Handler.Process != PacketProcess::PROCESS_NOW)
                 {
                     m_Habbo->QueuePacket(l_Handler.Process, l_Packet);
@@ -138,10 +140,6 @@ namespace SteerStone
     /// Client Handlers
     void HabboSocket::ExecutePacket(OpcodeHandler const& p_Handler, ClientPacket* p_Packet)
     {
-        LOG_INFO << "[INCOMING]: " << "[" << p_Packet->GetHeader() << "] [" << p_Handler.Name << "]";
-
-        
-
         (this->*p_Handler.Handler)(std::move(p_Packet));
     }
     

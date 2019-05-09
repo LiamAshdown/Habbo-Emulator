@@ -77,6 +77,10 @@ namespace SteerStone
         /// LoadRoomRights
         /// Load room rights from database
         void LoadRoomRights();
+
+        /// LoadVotedUsers
+        /// Load room rating from database
+        void LoadVotedUsers();
         
         /// AddRoom
         /// Add room to storage from database
