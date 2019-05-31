@@ -45,6 +45,7 @@ target_link_libraries(${LIBRARY_NAME}
 target_include_directories(${LIBRARY_NAME}
   PUBLIC ${OPENSSL_INCLUDE_DIR}
   PRIVATE ${Boost_INCLUDE_DIRS}
+  PRIVATE ${MYSQL_INCLUDE_DIR}
 )
 
 set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Shared")

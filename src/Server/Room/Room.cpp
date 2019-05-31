@@ -485,6 +485,13 @@ namespace SteerStone
         l_Database.GetStatement()->setUInt(1, GetId());
         l_Database.GetStatement()->setUInt(2, p_Id);
         l_Database.ExecuteQuery();
+
+        /// And update room rating
+        l_Database.ClearParameters();
+        l_Database.PrepareQuery("UPDATE rooms SET rating = ? WHERE id = ?");
+        l_Database.GetStatement()->setUInt(1, GetRoomRating());
+        l_Database.GetStatement()->setUInt(1, GetId());
+        l_Database.ExecuteQuery();
     }
 
     /// SendUpdateVotes

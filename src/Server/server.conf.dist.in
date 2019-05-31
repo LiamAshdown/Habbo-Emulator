@@ -10,7 +10,7 @@
 ### SERVER SETTINGS ###
 
 ## Server Port
-#   Description: TCP port to reach the auth server.
+#   Description: TCP port to reach the server.
 #   Default: 37120
 ServerPort = 37120
 

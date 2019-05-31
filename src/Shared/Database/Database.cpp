@@ -19,104 +19,84 @@
 #include "Database.h"
 
 namespace SteerStone
-{ 
-    /// Singleton class
-    Database* Database::instance()
-    {
-        static Database instance;
-        return &instance;
-    }
-    
+{
     /// Constructor
-    Database::Database()
-    {
+    Database::Database() {}
 
-    }
-    
     /// Deconstructor
     Database::~Database()
     {
-        m_DatabaseCont.clear();
-    } 
-    
-    /// CreateDatabase
-    /// @p_InfoString : Database user details; username, password, host, database, l_Port
-    /// @p_PoolSize : How many pool connections database will launch
-    bool Database::CreateDatabase(char const* p_InfoString, std::size_t const& p_PoolSize)
-    {
-        try 
-        {
-            std::string l_Username;
-            std::string l_Password;
-            std::string l_Database;
-            std::string l_Host;
-            std::string l_Port; 
-
-            Tokens l_Tokens = StrSplit(p_InfoString, ";");
-
-            auto& l_Itr = l_Tokens.begin();
-
-            if (l_Itr != l_Tokens.end())
-                l_Host = *l_Itr++;
-            if (l_Itr != l_Tokens.end())
-                l_Port = *l_Itr++;
-            if (l_Itr != l_Tokens.end())
-                l_Username = *l_Itr++;
-            if (l_Itr != l_Tokens.end())
-                l_Password = *l_Itr++;
-            if (l_Itr != l_Tokens.end())
-                l_Database = *l_Itr++;
-
-            /// Create our database, and store the database in a map = key "database name", storage "database structure"
-            std::shared_ptr<DatabaseHolder> l_NewDatabase = std::make_shared<DatabaseHolder>();
-            l_NewDatabase->m_Username = l_Username;
-            l_NewDatabase->m_Password = l_Password;
-            l_NewDatabase->m_Database = l_Database;
-            l_NewDatabase->m_Host     = l_Host;
-            l_NewDatabase->m_Port     = l_Port;
-            l_NewDatabase->m_PoolSize = p_PoolSize;
-
-            l_NewDatabase->m_MySQLConnection = std::make_shared<MySQLConnection>(l_NewDatabase->GetName(), l_NewDatabase->GetPassword(), l_NewDatabase->GetDatabase(),
-                l_NewDatabase->GetHost(), l_NewDatabase->GetPort());
-            l_NewDatabase->m_Pool = std::make_shared<ConnectionPool>(l_NewDatabase->GetMySQLConnection(), l_NewDatabase->GetPoolSize());
-
-            m_DatabaseCont[l_NewDatabase->GetDatabase()] = l_NewDatabase;
-
-            l_Database[0] = std::toupper(l_Database[0]);
-            LOG_INFO << "Connected to Database " << l_Database << " Successfully With " << p_PoolSize << " Pool Connections";
-
-            return true;
-        }
-        catch (sql::SQLException const& p_ErrorCode) 
-        {
-            PrintException(p_ErrorCode, const_cast<char*>(__FILE__), const_cast<char*>(__FUNCTION__), __LINE__);
-            return false;
-        }
     }
-    
-    /// PrintException
-    /// @p_ErrorCode : MYSQL Error code
-    /// @p_File : Which file the error occured
-    /// @p_Function : Which function the error occured
-    /// @p_Line : Which line the error occured
-    void Database::PrintException(sql::SQLException const& p_ErrorCode, char const* p_File, char const* p_Function, uint32 const p_Line)
+
+    /// Initialize
+    /// @p_Username : Name of user
+    /// @p_Password : Password of user
+    /// @p_Port     : Port we are connecting to
+    /// @p_Host     : Address we are connecting to
+    /// @p_Database : Database we are querying to
+    /// @p_PoolSize : Amount of MYSQL connections we are spawning
+    void Database::StartUp(std::string const p_Username, std::string const p_Password, uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize)
     {
-        std::string const& l_Message = p_ErrorCode.what();
+        /// Check if pool size is within our requirements
+        if (p_PoolSize < MIN_CONNECTION_POOL_SIZE)
+            m_PoolSize = MIN_CONNECTION_POOL_SIZE;
+        else if (p_PoolSize > MAX_CONNECTION_POOL_SIZE)
+            m_PoolSize = MAX_CONNECTION_POOL_SIZE;
+        else
+            m_PoolSize = p_PoolSize;
 
-        LOG_FATAL << l_Message;
+        m_PreparedStatements.SetUp(p_Username, p_Password, p_Port, p_Host, p_Database, p_PoolSize, *this);
+    }
 
-        /// Shut down server if database can no longer be reached
-        if (l_Message.find("has gone away") != std::string::npos)
-            assert(false); ///< Assert if one of our database connections are no longer reachable
-    }   
-
-    /// GetDatabase - Get the database
-    std::shared_ptr<DatabaseHolder> Database::GetDatabase(const std::string& database)
+    /// ShutDown
+    /// Shutdown all connections
+    void Database::ShutDown()
     {
-        auto const& l_Itr = m_DatabaseCont.find(database);
-        if (l_Itr != m_DatabaseCont.end())
-            return l_Itr->second;
+        m_DatabaseWorker.m_Queue.ShutDown();
+        CloseConnections();
+    }
 
-        return nullptr;
+    /// GetPreparedStatement
+    /// Returns a Prepare Statement from Pool
+    PreparedStatement* Database::GetPrepareStatement()
+    {
+       return m_PreparedStatements.GetPrepareStatement();
+    }
+
+    /// FreePrepareStatement
+    /// Free Prepare Statement
+    /// @p_PreparedStatement : Connection we are freeing
+    void Database::FreePrepareStatement(PreparedStatement* p_PreparedStatement)
+    {
+        m_PreparedStatements.FreePrepareStatement(p_PreparedStatement);
+    }
+
+    /// PrepareOperator
+    /// Execute query on worker thread
+    /// @p_PrepareStatementHolder : PrepareStatement which will be executed on database worker thread
+    CallBackOperator Database::PrepareOperator(PreparedStatement* p_PrepareStatementHolder)
+    {
+        /// PrepareStatement keeps reference of MYSQLConnection -- keep note
+        PrepareStatementOperator* l_PrepareStatementOperator = new PrepareStatementOperator(p_PrepareStatementHolder);
+
+        /// Keep reference of statement operator to execute query
+        EnqueueOperator(l_PrepareStatementOperator);
+
+        /// Return our CallBackOperator which gets the result from database worker thread
+        return CallBackOperator(std::move(l_PrepareStatementOperator->GetFuture()));
+    }
+
+    /// EnqueueOperator
+    /// @p_Operator : Operator we are adding to be processed on database worker thread
+    void Database::EnqueueOperator(Operator * p_Operator)
+    {
+        m_DatabaseWorker.m_Queue.Push(p_Operator);
+    }
+
+    /// CloseConnections
+    /// Close all MySQL connections
+    void Database::CloseConnections()
+    {
+        m_PreparedStatements.ClosePrepareStatements();
     }
 } ///< NAMESPACE STEERSTONE

@@ -59,8 +59,15 @@ if (POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
+# set macro-directory
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
+
+list(APPEND CMAKE_MODULE_PATH
+  "${CMAKE_SOURCE_DIR}/cmake/macros")
+
 # Find needed packages and if necessery abort if something important is missing
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
+find_package(MySQL REQUIRED)
 
 if(NOT Boost_FOUND)
   message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")

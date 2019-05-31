@@ -42,6 +42,7 @@ add_executable(${EXECUTABLE_NAME} ${source_list})
 target_include_directories(${EXECUTABLE_NAME}
   PRIVATE ${Boost_INCLUDE_DIRS}
   PRIVATE ${OPENSSL_INCLUDE_DIR}
+  PRIVATE ${MYSQL_INCLUDE_DIR}
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
@@ -50,8 +51,8 @@ target_link_libraries(${EXECUTABLE_NAME}
 
 target_link_libraries(${EXECUTABLE_NAME}
   debug ${OPENSSL_DEBUG_LIBRARIES}
-  ${CMAKE_SOURCE_DIR}/dep/mysql/lib/mysqlcppconn.lib
   ${Boost_LIBRARIES}
+  ${MYSQL_LIB}
   )
 
 # Define OutDir to source/bin/(platform)_(configuaration) folder.
@@ -62,5 +63,4 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "Server")
 
 # Add conf file to dev folder
 add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_CURRENT_SOURCE_DIR}/server.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/server.conf.dist\"
-COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/dep/mysql/lib/mysqlcppconn.dll\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/mysqlcppconn.dll\")
+COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_CURRENT_SOURCE_DIR}/server.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/server.conf.dist\")

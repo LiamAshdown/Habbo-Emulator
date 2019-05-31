@@ -61,6 +61,11 @@ typedef boost::multi_array<int16, 2> StaticGridArray; ///< Used for pathfinding
 #define PUBLIC_ROOM_OFFSET 1000 ///< Credits Quackster
 #define MAX_FAVOURITE_ROOMS 10
 
+#define MIN_CONNECTION_POOL_SIZE 1
+#define MAX_CONNECTION_POOL_SIZE 10 ///< Don't change this
+#define MAX_PREPARED_STATEMENTS 50 /// And don't change this
+#define MAX_QUERY_LENGTH  (32*1024)
+
 /// Split String
 std::string SplitString(std::string const& p_StringData, std::string const& p_Tokenizer);
 Tokens StrSplit(std::string const& p_Src, std::string const& p_Seperator);
