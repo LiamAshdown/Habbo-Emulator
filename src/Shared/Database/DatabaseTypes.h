@@ -18,10 +18,11 @@
 
 #ifndef _DATABASE_DATABASE_TYPE_h
 #define _DATABASE_DATABASE_TYPE_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "Database.h"
 #endif /* !_DATABASE_DATABASE_TYPE_h */
 
 typedef SteerStone::Database DatabaseType;
 
 extern DatabaseType RoomDatabase;
+extern DatabaseType UserDatabase;

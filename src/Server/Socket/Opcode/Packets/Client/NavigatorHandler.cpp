@@ -19,7 +19,7 @@
 #include "Habbo.h"
 #include "HabboSocket.h"
 #include "RoomManager.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 
 #include "Opcode/Packets/Server/LoginPackets.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
@@ -167,27 +167,27 @@ namespace SteerStone
         std::string l_Search = p_Packet->GetContent();
 
         /// TODO; Clean this. We are querying the database and then finding the room in the storage = slow !!
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id FROM rooms WHERE category != 3 AND (name LIKE ? OR owner_name LIKE ?)");
-        l_Database.GetStatement()->setString(1, l_Search);
-        l_Database.GetStatement()->setString(2, l_Search);
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id FROM rooms WHERE category != 3 AND (name LIKE ? OR owner_name LIKE ?)");
+        l_PreparedStatement->SetString(1, l_Search);
+        l_PreparedStatement->SetString(2, l_Search);
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// Does any rooms match criteria?
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             HabboPacket::Navigator::NoFlats l_Packet;
             m_Habbo->SendPacket(l_Packet.Write());
             return;
         }
 
-        Result* l_Result = l_Database.Fetch();
-
         HabboPacket::Navigator::FlatResultsSearch l_Packet;
 
         do
         {
-            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result->GetUint32(1));
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[1].GetUInt32());
 
             if (!l_Room)
                 return;
@@ -219,7 +219,10 @@ namespace SteerStone
 
             l_Packet.Flats.push_back(l_FlatResult);
 
-        } while (l_Result->GetNextResult());
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         m_Habbo->SendPacket(l_Packet.Write());
     }
@@ -312,31 +315,29 @@ namespace SteerStone
         if (l_RoomAccess == "password")
             l_AccessType = RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD;
 
-        /// Okay all good! Lets insert our new room into database
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("INSERT INTO rooms (owner_id, owner_name, name, model, show_name, description, access_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-        l_Database.GetStatement()->setString(2, m_Habbo->GetName());
-        l_Database.GetStatement()->setString(3, l_RoomName);
-        l_Database.GetStatement()->setString(4, l_RoomModel);
-        l_Database.GetStatement()->setBoolean(5, l_ShowOwnerName);
-        l_Database.GetStatement()->setString(6, "");
-        l_Database.GetStatement()->setUInt(7, l_AccessType);
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("INSERT INTO rooms (owner_id, owner_name, name, model, show_name, description, access_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
+        l_PreparedStatement->SetString(2, m_Habbo->GetName());
+        l_PreparedStatement->SetString(3, l_RoomName);
+        l_PreparedStatement->SetString(4, l_RoomModel);
+        l_PreparedStatement->SetBool(5, l_ShowOwnerName);
+        l_PreparedStatement->SetString(6, std::string());
+        l_PreparedStatement->SetUint32(7, l_AccessType);
+        l_PreparedStatement->ExecuteStatement();
 
-        /// Get the Room Id of room we just created
-        l_Database.ClearParameters();
+        l_PreparedStatement->PrepareStatement("SELECT LAST_INSERT_ID() as id");
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        l_Database.PrepareQuery("SELECT LAST_INSERT_ID() as id");
-        l_Database.ExecuteQuery();
+        if (l_PreparedResultSet)
+        {
+            m_Habbo->m_LastCreatedRoomId = l_PreparedResultSet->FetchResult()[1].GetUInt32();
+            delete l_PreparedResultSet;
+        }
 
-        if (l_Database.GetResult())
-            m_Habbo->m_LastCreatedRoomId = l_Database.Fetch()->GetInt32(1);
-
-        l_Database.ClearParameters();
-        l_Database.PrepareQuery("INSERT INTO room_rating(room_id) VALUES (?)");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->m_LastCreatedRoomId);
-        l_Database.ExecuteQuery();
+        l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id) VALUES (?)");
+        l_PreparedStatement->SetUint32(1, m_Habbo->m_LastCreatedRoomId);
+        l_PreparedStatement->ExecuteStatement();
 
         sRoomMgr->AddRoom(m_Habbo->m_LastCreatedRoomId);
 
@@ -345,6 +346,8 @@ namespace SteerStone
         l_Packet.Id = std::to_string(m_Habbo->m_LastCreatedRoomId);
         l_Packet.Name = l_RoomName;
         m_Habbo->SendPacket(l_Packet.Write());
+
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleSetFlatInfo(ClientPacket* p_Packet)
@@ -374,14 +377,15 @@ namespace SteerStone
         bool l_AllSuperUser = SplitString(l_Split[1], "allsuperuser")[0] == '1' ? true : false;
 
         /// Update our room
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("UPDATE rooms SET description = ?, password = ?, super_users = ?, visitors_max = ? WHERE id = ?");
-        l_Database.GetStatement()->setString(1, l_Description);
-        l_Database.GetStatement()->setString(2, l_Password);
-        l_Database.GetStatement()->setBoolean(3, l_AllSuperUser);
-        l_Database.GetStatement()->setUInt(4, l_MaxVisitors.empty() ? l_Room->GetVisitorsMax() : std::stoi(l_MaxVisitors));
-        l_Database.GetStatement()->setUInt(5, l_RoomId);
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("UPDATE rooms SET description = ?, password = ?, super_users = ?, visitors_max = ? WHERE id = ?");
+        l_PreparedStatement->SetString(1, l_Description);
+        l_PreparedStatement->SetString(2, l_Password);
+        l_PreparedStatement->SetBool(3, l_AllSuperUser);
+        l_PreparedStatement->SetUint32(4, l_MaxVisitors.empty() ? l_Room->GetVisitorsMax() : std::stoi(l_MaxVisitors));
+        l_PreparedStatement->SetUint32(5, l_RoomId);
+        l_PreparedStatement->ExecuteStatement();
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         /// Okay now reload our room with new details
         sRoomMgr->ReloadRoom(l_Room->GetId());
@@ -390,13 +394,14 @@ namespace SteerStone
     void HabboSocket::HandleSearchUserFlats(ClientPacket* p_Packet)
     {
         /// TODO; Clean this. We are querying the database and then finding the room in the storage = slow !!
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id FROM rooms WHERE owner_id = ?");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id FROM rooms WHERE owner_id = ?");
+        l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+ 
 
         /// Does user have any flats? if not send packet to inform he/she has no flats
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             HabboPacket::Navigator::NoFlatsForUser l_Packet;
             l_Packet.Name = m_Habbo->GetName();
@@ -404,13 +409,13 @@ namespace SteerStone
             return;
         }
 
-        Result* l_Result = l_Database.Fetch();
-
         HabboPacket::Navigator::FlatResults l_Packet;
 
         do
         {
-            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result->GetUint32(1));
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[1].GetUInt32());
 
             if (!l_Room)
                 return;
@@ -442,7 +447,10 @@ namespace SteerStone
 
             l_Packet.Flats.push_back(l_FlatResult);
 
-        } while (l_Result->GetNextResult());
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         m_Habbo->SendPacket(l_Packet.Write());
     }
@@ -512,11 +520,12 @@ namespace SteerStone
         else if (l_Room->GetOwnerId() != m_Habbo->GetId())
             return;
 
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("UPDATE rooms SET category = ? WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, l_CategoryId);
-        l_Database.GetStatement()->setUInt(2, l_Room->GetId());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("UPDATE rooms SET category = ? WHERE id = ?");
+        l_PreparedStatement->SetUint32(1, l_CategoryId);
+        l_PreparedStatement->SetUint32(2, l_Room->GetId());
+        l_PreparedStatement->ExecuteStatement();
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleUpdateFlat(ClientPacket* p_Packet)
@@ -547,13 +556,14 @@ namespace SteerStone
         else if (l_AccessType == "password")
             l_NewAcessType = RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD;
 
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("UPDATE rooms SET name = ?, access_type = ?, show_name = ?  WHERE id = ?");
-        l_Database.GetStatement()->setString(1, l_RoomName);
-        l_Database.GetStatement()->setUInt(2, l_NewAcessType);
-        l_Database.GetStatement()->setBoolean(3, l_ShowOwner);
-        l_Database.GetStatement()->setUInt(4, l_Room->GetId());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("UPDATE rooms SET name = ?, access_type = ?, show_name = ?  WHERE id = ?");
+        l_PreparedStatement->SetString(1, l_RoomName);
+        l_PreparedStatement->SetUint32(2, l_NewAcessType);
+        l_PreparedStatement->SetBool(3, l_ShowOwner);
+        l_PreparedStatement->SetUint32(4, l_Room->GetId());
+        l_PreparedStatement->ExecuteStatement();
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleRemoveAllRights(ClientPacket* p_Packet)

@@ -18,7 +18,7 @@
 
 #ifndef _COMMON_MATHS_h
 #define _COMMON_MATHS_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include <random>
 #include <ctime>
 #endif /* _COMMON_MATHS_h */

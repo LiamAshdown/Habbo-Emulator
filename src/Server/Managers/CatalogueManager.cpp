@@ -17,7 +17,6 @@
 */
 
 #include "CatalogueManager.h"
-#include "Database/QueryDatabase.h"
 
 namespace SteerStone
 {

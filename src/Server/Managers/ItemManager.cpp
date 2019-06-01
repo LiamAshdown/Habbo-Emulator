@@ -18,7 +18,7 @@
 
 #include "ItemManager.h"
 #include "Network/StringBuffer.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 
 namespace SteerStone
 {
@@ -43,38 +43,38 @@ namespace SteerStone
     /// Load Public items from l_Database
     void ItemManager::LoadPublicRoomItems()
     {
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, trigger_state, current_program FROM public_items");
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, room_model, sprite, x, y, z, rotation, top_height, length, width, trigger_state, current_program FROM public_items");
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             LOG_ERROR << "public_items is empty!";
             return;
         }
 
-        Result* l_Result = l_Database.Fetch();
-
         std::vector<Item> l_PublicItemVec;
 
         do
         {
-            Item l_PublicItem;
-            l_PublicItem.m_Id           = l_Result->GetUint32(1);
-            l_PublicItem.m_RoomModel    = l_Result->GetString(2);
-            l_PublicItem.m_Sprite       = l_Result->GetString(3);
-            l_PublicItem.m_X            = l_Result->GetInt32(4);
-            l_PublicItem.m_Y            = l_Result->GetInt32(5);
-            l_PublicItem.m_Z            = l_Result->GetDouble(6);
-            l_PublicItem.m_Rotation     = l_Result->GetInt32(7);
-            l_PublicItem.m_TopHeight    = l_Result->GetDouble(8);
-            l_PublicItem.m_Length       = l_Result->GetInt32(9);
-            l_PublicItem.m_Width        = l_Result->GetInt32(10);
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            if (!l_Result->GetString(11).empty())
+            Item l_PublicItem;
+            l_PublicItem.m_Id           = l_Result[1].GetUInt32();
+            l_PublicItem.m_RoomModel    = l_Result[2].GetString();
+            l_PublicItem.m_Sprite       = l_Result[3].GetString();
+            l_PublicItem.m_X            = l_Result[4].GetInt32();
+            l_PublicItem.m_Y            = l_Result[5].GetInt32();
+            l_PublicItem.m_Z            = l_Result[6].GetDouble();
+            l_PublicItem.m_Rotation     = l_Result[7].GetInt32();
+            l_PublicItem.m_TopHeight    = l_Result[8].GetDouble();
+            l_PublicItem.m_Length       = l_Result[9].GetInt32();
+            l_PublicItem.m_Width        = l_Result[10].GetInt32();
+
+            if (!l_Result[11].GetString().empty())
             {
                 std::vector<std::string> l_Split;
-                boost::split(l_Split, l_Result->GetString(11), boost::is_any_of(","));
+                boost::split(l_Split, l_Result[11].GetString(), boost::is_any_of(","));
 
                 for (auto& l_Itr : l_Split)
                 {
@@ -82,11 +82,14 @@ namespace SteerStone
                 }
             }
 
-            l_PublicItem.m_Program      = l_Result->GetString(12);
+            l_PublicItem.m_Program      = l_Result[12].GetString();
 
             l_PublicItemVec.push_back(l_PublicItem);
 
-        } while (l_Result->GetNextResult());
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
         std::vector<Item> picnic;
         std::vector<Item> newbie_lobby;

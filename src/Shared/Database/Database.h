@@ -18,7 +18,7 @@
 
 #ifndef _DATABASE_DATABASE_h
 #define _DATABASE_DATABASE_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "PreparedStatements.h"
 #include "DatabaseWorker.h"
 #include <mutex>
@@ -36,15 +36,10 @@ namespace SteerStone
         ~Database();
 
     public:
-        /// Initialize
-        /// @p_Username : Name of user
-        /// @p_Password : Password of user
-        /// @p_Port     : Port we are connecting to
-        /// @p_Host     : Address we are connecting to
-        /// @p_Database : Database we are querying to
-        /// @p_PoolSize : Amount of MYSQL connections we are spawning
-        void StartUp(std::string const p_Username, std::string const p_Password,
-            uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize);
+        /// StartUp
+        /// @p_InfoString : Database user details; username, password, host, database, l_Port
+        /// @p_PoolSize : How many pool connections database will launch
+        uint32 StartUp(char const* p_InfoString, uint32 const p_PoolSize);
 
     public:
         /// ShutDown

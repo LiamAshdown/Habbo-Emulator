@@ -18,6 +18,7 @@
 
 #include "Habbo.h"
 #include "Hotel.h"
+#include "Database/DatabaseTypes.h"
 #include "Common/SHA1.h"
 #include "Opcode/Packets/Server/LoginPackets.h"
 #include "Opcode/Packets/Server/MiscPackets.h"
@@ -30,13 +31,13 @@ namespace SteerStone
         std::string l_Username = p_Packet->ReadString();
         std::string l_Password = p_Packet->ReadString();
 
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT id, hash_pass FROM account WHERE user_name = ?");
-        l_Database.GetStatement()->setString(1, l_Username.c_str());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, hash_pass FROM account WHERE user_name = ?");
+        l_PreparedStatement->SetString(0, l_Username.c_str());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// Check user exists
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             HabboPacket::Misc::LocalisedError l_Packet;
             l_Packet.Error = "Login Incorrect";
@@ -44,11 +45,11 @@ namespace SteerStone
             return;
         }
 
-        Result* l_Result = l_Database.Fetch();
+        ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
         /// Check Password
         if (((CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str())
-            != l_Result->GetString(2))
+            != l_Result[2].GetString())
         {
             HabboPacket::Misc::LocalisedError l_Packet;
             l_Packet.Error = "Login Incorrect";
@@ -56,35 +57,35 @@ namespace SteerStone
             return;
         }
 
-        uint32 l_AccountId = l_Result->GetUint32(1);
+        uint32 l_AccountId = l_Result[1].GetUInt32();
 
         /// Success player has logged in
-        l_Database.PrepareQuery("SELECT id, user_name, hash_pass, email, figure, pool_figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled, allow_friend_requests, rank FROM account WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, l_AccountId);
-        l_Database.ExecuteQuery();
+        l_PreparedStatement->PrepareStatement("SELECT id, user_name, hash_pass, email, figure, pool_figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled, allow_friend_requests, rank FROM account WHERE id = ?");
+        l_PreparedStatement->SetUint32(0, l_AccountId);
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (l_Database.GetResult())
+        if (l_PreparedResultSet)
         {
-            l_Result = l_Database.Fetch();
+            l_Result = l_PreparedResultSet->FetchResult();
 
             m_Habbo = new Habbo(this);
-            m_Habbo->m_Id                   = l_Result->GetUint32(1);
-            m_Habbo->m_Name                 = l_Result->GetString(2);
-            m_Habbo->m_Password             = l_Result->GetString(3);
-            m_Habbo->m_Email                = l_Result->GetString(4);
-            m_Habbo->m_Figure               = l_Result->GetString(5);
-            m_Habbo->m_PoolFigure           = l_Result->GetString(6);
-            m_Habbo->m_Motto                = l_Result->GetString(7);
-            m_Habbo->m_ConsoleMotto         = l_Result->GetString(8);
-            m_Habbo->m_DirectMail           = l_Result->GetBool(9);
-            m_Habbo->m_Birthday             = l_Result->GetString(10);
-            m_Habbo->m_Gender               = l_Result->GetString(11);
-            m_Habbo->m_Credits              = l_Result->GetUint32(12);
-            m_Habbo->m_Tickets              = l_Result->GetUint32(13);
-            m_Habbo->m_Films                = l_Result->GetUint32(14);
-            m_Habbo->m_SoundEnabled         = l_Result->GetBool(15);
-            m_Habbo->m_AcceptFriendRequests = l_Result->GetBool(16);
-            m_Habbo->m_Rank                 = l_Result->GetUint16(17);
+            m_Habbo->m_Id                   = l_Result[1].GetUInt32();
+            m_Habbo->m_Name                 = l_Result[2].GetString();
+            m_Habbo->m_Password             = l_Result[3].GetString();
+            m_Habbo->m_Email                = l_Result[4].GetString();
+            m_Habbo->m_Figure               = l_Result[5].GetString();
+            m_Habbo->m_PoolFigure           = l_Result[6].GetString();
+            m_Habbo->m_Motto                = l_Result[7].GetString();
+            m_Habbo->m_ConsoleMotto         = l_Result[8].GetString();
+            m_Habbo->m_DirectMail           = l_Result[9].GetBool();
+            m_Habbo->m_Birthday             = l_Result[10].GetString();
+            m_Habbo->m_Gender               = l_Result[11].GetString();
+            m_Habbo->m_Credits              = l_Result[12].GetUInt32();
+            m_Habbo->m_Tickets              = l_Result[13].GetUInt32();
+            m_Habbo->m_Films                = l_Result[14].GetUInt32();
+            m_Habbo->m_SoundEnabled         = l_Result[15].GetBool();
+            m_Habbo->m_AcceptFriendRequests = l_Result[16].GetBool();
+            m_Habbo->m_Rank                 = l_Result[17].GetUInt16();
             m_Habbo->InitializeHabboData();
             m_Habbo->m_Initialized          = true;
 
@@ -109,6 +110,9 @@ namespace SteerStone
             l_Packet.Error = "Internal system error occured";
             SendPacket(l_Packet.Write());
         }
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleGetAvailableBadges(ClientPacket* p_Packet)

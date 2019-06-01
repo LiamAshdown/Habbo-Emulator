@@ -16,7 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 #include "RoomManager.h"
 #include "Config/Config.h"
 #include "Habbo.h"
@@ -43,26 +43,29 @@ namespace SteerStone
     {
         m_FavouriteRooms.clear();
 
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("SELECT id, room_id, public_space FROM favourite_rooms WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, room_id, public_space FROM favourite_rooms WHERE id = ?");
+        l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
             return;
-
-        Result* l_Result = l_Database.Fetch();
 
         do
         {
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
             FavouriteRoomsData l_FavouriteRoom;
-            l_FavouriteRoom.m_Id        = l_Result->GetUint32(1);
-            l_FavouriteRoom.m_RoomId    = l_Result->GetUint32(2);
-            l_FavouriteRoom.m_RoomType  = l_Result->GetBool(3);
+            l_FavouriteRoom.m_Id        = l_Result[1].GetUInt32();
+            l_FavouriteRoom.m_RoomId    = l_Result[2].GetUInt32();
+            l_FavouriteRoom.m_RoomType  = l_Result[3].GetBool();
 
             m_FavouriteRooms.push_back(l_FavouriteRoom);
 
-        } while (l_Result->GetNextResult());
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
     /// AddFavouriteRoom
@@ -115,26 +118,28 @@ namespace SteerStone
     /// SaveToDB - Update our favourite rooms
     void FavouriteRoom::SaveToDB()
     {
-        QueryDatabase l_Database("rooms");
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
 
         for (auto const& l_Itr : m_FavouriteRooms)
         {
             FavouriteRoomsData const& l_FavouriteRoom = l_Itr;
 
-            l_Database.PrepareQuery("INSERT INTO favourite_rooms (id, room_id, public_space) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE room_id = ?");
-            l_Database.GetStatement()->setUInt(1, l_FavouriteRoom.GetId());
-            l_Database.GetStatement()->setUInt(2, l_FavouriteRoom.GetRoomId());
-            l_Database.GetStatement()->setBoolean(3, l_FavouriteRoom.GetRoomType());
-            l_Database.GetStatement()->setUInt(4, l_FavouriteRoom.GetRoomId());
-            l_Database.ExecuteQuery();
+            l_PreparedStatement->PrepareStatement("INSERT INTO favourite_rooms (id, room_id, public_space) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE room_id = ?");
+            l_PreparedStatement->SetUint32(0, l_FavouriteRoom.GetId());
+            l_PreparedStatement->SetUint32(1, l_FavouriteRoom.GetRoomId());
+            l_PreparedStatement->SetUint32(2, l_FavouriteRoom.GetRoomType());
+            l_PreparedStatement->SetUint32(3, l_FavouriteRoom.GetRoomId());
+            l_PreparedStatement->ExecuteStatement();
         }
 
         for (auto const& l_Itr : m_DeletedFavouriteRooms)
         {
-            l_Database.PrepareQuery("DELETE FROM favourite_rooms WHERE room_id = ?");
-            l_Database.GetStatement()->setUInt(1, l_Itr.GetRoomId());
-            l_Database.ExecuteQuery();
+            l_PreparedStatement->PrepareStatement("DELETE FROM favourite_rooms WHERE room_id = ?");
+            l_PreparedStatement->SetUint32(0, l_Itr.GetRoomId());
+            l_PreparedStatement->ExecuteStatement();
         }
+
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
     /// ParseSendFavouriteRooms

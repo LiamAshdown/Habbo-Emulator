@@ -20,6 +20,7 @@
 #include "Common/Maths.h"
 #include "Hotel.h"
 #include "RoomManager.h"
+#include "Database/DatabaseTypes.h"
 #include "Opcode/Packets/Server/MessengerPackets.h"
 #include "Opcode/Packets/Server/NavigatorPackets.h"
 #include "Opcode/Packets/Server/MiscPackets.h"
@@ -424,23 +425,25 @@ namespace SteerStone
     /// Save Habbo data to database on logout
     void Habbo::SaveToDB()
     {
-        QueryDatabase database("users");
-        database.PrepareQuery("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?, subscribed = ?, rank = ? WHERE id = ?");
-        database.GetStatement()->setString(1, GetEmail());
-        database.GetStatement()->setString(2, GetFigure());
-        database.GetStatement()->setString(3, GetPoolFigure());
-        database.GetStatement()->setString(4, GetMotto());
-        database.GetStatement()->setString(5, GetConsoleMotto());
-        database.GetStatement()->setString(6, GetBirthday());
-        database.GetStatement()->setString(7, GetGender());
-        database.GetStatement()->setUInt(8, GetCredits());
-        database.GetStatement()->setUInt(9, GetTickets());
-        database.GetStatement()->setUInt(10, GetFilms());
-        database.GetStatement()->setBoolean(11, IsSoundEnabled());
-        database.GetStatement()->setBoolean(12, IsSubscribed());
-        database.GetStatement()->setUInt(13, GetRank());
-        database.GetStatement()->setUInt(14, GetId());
-        database.ExecuteQuery();
+
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?, subscribed = ?, rank = ? WHERE id = ?");
+        l_PreparedStatement->SetString(1, GetEmail());
+        l_PreparedStatement->SetString(2, GetFigure());
+        l_PreparedStatement->SetString(3, GetPoolFigure());
+        l_PreparedStatement->SetString(4, GetMotto());
+        l_PreparedStatement->SetString(5, GetConsoleMotto());
+        l_PreparedStatement->SetString(6, GetBirthday());
+        l_PreparedStatement->SetString(7, GetGender());
+        l_PreparedStatement->SetUint32(8, GetCredits());
+        l_PreparedStatement->SetUint32(9, GetTickets());
+        l_PreparedStatement->SetUint32(10, GetFilms());
+        l_PreparedStatement->SetBool(11, IsSoundEnabled());
+        l_PreparedStatement->SetBool(12, IsSubscribed());
+        l_PreparedStatement->SetUint32(13, GetRank());
+        l_PreparedStatement->SetUint32(14, GetId());
+        l_PreparedStatement->ExecuteStatement();
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
         SaveFavouriteRoomToDB();
     }

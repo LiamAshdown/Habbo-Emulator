@@ -18,7 +18,7 @@
 
 #ifndef _DATABASE_RESULT_h
 #define _DATABASE_RESULT_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "BindData.h"
 #endif /* !_DATABASE_RESULT_h */
 

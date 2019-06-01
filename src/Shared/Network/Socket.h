@@ -21,7 +21,6 @@
 #include "Common/SharedDefines.h"
 #include "PacketBuffer.h"
 #include <boost/asio.hpp>
-#include <windows.h>
 #include <mutex>
 #endif /* _NETWORK_SOCKET_h */
 

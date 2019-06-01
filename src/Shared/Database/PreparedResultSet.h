@@ -18,7 +18,7 @@
 
 #ifndef _PREPARED_STATEMENT_RESULT_SET_h
 #define _PREPARED_STATEMENT_RESULT_SET_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "ResultSet.h"
 #endif /* !_PREPARED_STATEMENT_RESULT_SET_h */
 

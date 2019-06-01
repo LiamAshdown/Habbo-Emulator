@@ -20,6 +20,7 @@
 #include "Hotel.h"
 #include "Common/SHA1.h"
 #include "RoomManager.h"
+#include "Database/DatabaseTypes.h"
 #include "Opcode/Packets/Server/RegistrationPackets.h"
 #include "Opcode/Packets/Server/LoginPackets.h"
 
@@ -38,12 +39,12 @@ namespace SteerStone
 
         l_Packet.ErrorCode = ApproveNameError::NAME_VALID;
 
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT user_name FROM account WHERE user_name = ?");
-        l_Database.GetStatement()->setString(1, l_Packet.Name.c_str());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT user_name FROM account WHERE user_name = ?");
+        l_PreparedStatement->SetString(0, l_Packet.Name.c_str());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             if (l_Packet.Name.length() > 15)
                 l_Packet.ErrorCode = ApproveNameError::NAME_TOO_LONG;
@@ -67,6 +68,9 @@ namespace SteerStone
             l_Packet.ErrorCode = ApproveNameError::NAME_TAKEN;
 
         SendPacket(l_Packet.Write());
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
     void HabboSocket::HandleApprovePassword(ClientPacket* p_Packet)
@@ -184,22 +188,23 @@ namespace SteerStone
         else
             l_Gender = "Female";
 
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("INSERT INTO account(user_name, hash_pass, email, figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        l_Database.GetStatement()->setString(1,   l_Username.c_str());
-        l_Database.GetStatement()->setString(2,   (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
-        l_Database.GetStatement()->setString(3,   l_Email.c_str());
-        l_Database.GetStatement()->setString(4,   l_Figure.c_str());
-        l_Database.GetStatement()->setString(5,   sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
-        l_Database.GetStatement()->setString(6,   sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
-        l_Database.GetStatement()->setBoolean(7,  l_DirectEmail);
-        l_Database.GetStatement()->setString(8,   l_Birthday.c_str());
-        l_Database.GetStatement()->setString(9,   l_Gender.c_str());
-        l_Database.GetStatement()->setUInt(10,    sHotel->GetIntConfig(CONFIG_REGISTERATION_CREDITS));
-        l_Database.GetStatement()->setUInt(11,    sHotel->GetIntConfig(CONFIG_REGISTERATION_TICKETS));
-        l_Database.GetStatement()->setUInt(12,    sHotel->GetIntConfig(CONFIG_REGISTERATION_FILMS));
-        l_Database.GetStatement()->setBoolean(13, sHotel->GetBoolConfig(BoolConfigs::CONFIG_REGISTERATION_SOUND));
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("INSERT INTO account(user_name, hash_pass, email, figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        l_PreparedStatement->SetString(1, l_Username.c_str());
+        l_PreparedStatement->SetString(2, (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
+        l_PreparedStatement->SetString(3, l_Email.c_str());
+        l_PreparedStatement->SetString(4, l_Figure.c_str());
+        l_PreparedStatement->SetString(5, sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
+        l_PreparedStatement->SetString(6, sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
+        l_PreparedStatement->SetBool(7, l_DirectEmail);
+        l_PreparedStatement->SetString(8, l_Birthday.c_str());
+        l_PreparedStatement->SetString(9, l_Gender.c_str());
+        l_PreparedStatement->SetUint32(10, sHotel->GetIntConfig(CONFIG_REGISTERATION_CREDITS));
+        l_PreparedStatement->SetUint32(11, sHotel->GetIntConfig(CONFIG_REGISTERATION_TICKETS));
+        l_PreparedStatement->SetUint32(12, sHotel->GetIntConfig(CONFIG_REGISTERATION_FILMS));
+        l_PreparedStatement->SetBool(13, sHotel->GetBoolConfig(BoolConfigs::CONFIG_REGISTERATION_SOUND));
+        l_PreparedStatement->ExecuteStatement();
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleParentEmailRequired(ClientPacket* p_Packet)

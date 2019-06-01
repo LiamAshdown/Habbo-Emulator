@@ -17,7 +17,6 @@
 */
 
 #include "HabboSocket.h"
-#include "Database/QueryDatabase.h"
 #include "Common/SHA1.h"
 #include "Habbo.h"
 

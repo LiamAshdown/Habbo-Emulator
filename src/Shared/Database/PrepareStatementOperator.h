@@ -18,7 +18,7 @@
 
 #ifndef _CALL_BACK_PREPARE_STATEMENT_OPERATOR_h
 #define _CALL_BACK_PREPARE_STATEMENT_OPERATOR_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "Operator.h"
 #include "PreparedResultSet.h"
 #include <future>

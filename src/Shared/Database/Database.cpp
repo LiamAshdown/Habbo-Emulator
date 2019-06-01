@@ -28,14 +28,10 @@ namespace SteerStone
     {
     }
 
-    /// Initialize
-    /// @p_Username : Name of user
-    /// @p_Password : Password of user
-    /// @p_Port     : Port we are connecting to
-    /// @p_Host     : Address we are connecting to
-    /// @p_Database : Database we are querying to
-    /// @p_PoolSize : Amount of MYSQL connections we are spawning
-    void Database::StartUp(std::string const p_Username, std::string const p_Password, uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize)
+    /// StartUp
+    /// @p_InfoString : Database user details; username, password, host, database, l_Port
+    /// @p_PoolSize : How many pool connections database will launch
+    uint32 Database::StartUp(char const* p_InfoString, uint32 const p_PoolSize)
     {
         /// Check if pool size is within our requirements
         if (p_PoolSize < MIN_CONNECTION_POOL_SIZE)
@@ -45,7 +41,28 @@ namespace SteerStone
         else
             m_PoolSize = p_PoolSize;
 
-        m_PreparedStatements.SetUp(p_Username, p_Password, p_Port, p_Host, p_Database, p_PoolSize, *this);
+        std::string l_Username;
+        std::string l_Password;
+        std::string l_Database;
+        std::string l_Host;
+        std::string l_Port;
+
+        Tokens l_Tokens = StrSplit(p_InfoString, ";");
+
+        auto& l_Itr = l_Tokens.begin();
+
+        if (l_Itr != l_Tokens.end())
+            l_Host = *l_Itr++;
+        if (l_Itr != l_Tokens.end())
+            l_Port = *l_Itr++;
+        if (l_Itr != l_Tokens.end())
+            l_Username = *l_Itr++;
+        if (l_Itr != l_Tokens.end())
+            l_Password = *l_Itr++;
+        if (l_Itr != l_Tokens.end())
+            l_Database = *l_Itr++;
+
+        return m_PreparedStatements.SetUp(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this);
     }
 
     /// ShutDown

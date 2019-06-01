@@ -17,7 +17,7 @@
 */
 
 #include "Habbo.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 #include <cmath>
 
 #include "Opcode/Packets/Server/ClubPackets.h"
@@ -56,20 +56,22 @@ namespace SteerStone
         /// Is user already subscribed to habbo club? if so add more days
         if (IsSubscribed())
         {
-            QueryDatabase l_Database("users");
-            l_Database.PrepareQuery("UPDATE club_subscription SET subscription_expires = subscription_expires + ?  WHERE id = ?");
-            l_Database.GetStatement()->setUInt(1, ((p_Days * 60) * 60) * 24);
-            l_Database.GetStatement()->setUInt(2, m_Habbo->GetId());
-            l_Database.ExecuteQuery();
+            PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("UPDATE club_subscription SET subscription_expires = subscription_expires + ?  WHERE id = ?");
+            l_PreparedStatement->SetUint32(0, ((p_Days * 60) * 60) * 24);
+            l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
+            l_PreparedStatement->ExecuteStatement();
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
         }
         else ///< Else first time user subscribed to habbo club
         {
-            QueryDatabase l_Database("users");
-            l_Database.PrepareQuery("INSERT INTO club_subscription (id, first_subscription, subscription_expires) VALUES (?, ?, ?)");
-            l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-            l_Database.GetStatement()->setUInt(2, std::time(0));
-            l_Database.GetStatement()->setUInt(3, std::time(0) + (((p_Days * 60) * 60) * 24));
-            l_Database.ExecuteQuery();
+            PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("INSERT INTO club_subscription (id, first_subscription, subscription_expires) VALUES (?, ?, ?)");
+            l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+            l_PreparedStatement->SetUint32(1, std::time(0));
+            l_PreparedStatement->SetUint32(2, std::time(0) + (((p_Days * 60) * 60) * 24));
+            l_PreparedStatement->ExecuteStatement();
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
             /// Set user rank to habbo club
             if (m_Habbo->GetRank() < AccountRank::HABBO_CLUB)
@@ -84,32 +86,32 @@ namespace SteerStone
     /// Load Habbo Subscription
     void HabboClub::LoadSubscription()
     {
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT first_subscription, subscription_expires FROM club_subscription WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT first_subscription, subscription_expires FROM club_subscription WHERE id = ?");
+        l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// Is user already subscribed?
-        if (l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
-            Result* l_Result = l_Database.Fetch();
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            m_RemainingDays      = ((l_Result->GetUint64(2) - std::time(0)) / 60 / 60 / 24);
+            m_RemainingDays      = ((l_Result[1].GetUInt32() - std::time(0)) / 60 / 60 / 24);
             m_DaysMonthRemaining = ((m_RemainingDays - 1) % 31) + 1;
             m_PrePaidMonths      = (m_RemainingDays - m_DaysMonthRemaining) / 31;
-            m_MonthsPassed       = ((std::time(0) - l_Result->GetUint64(1)) / 60 / 60 / 24 / 31);
+            m_MonthsPassed       = ((std::time(0) - l_Result[1].GetUInt64()) / 60 / 60 / 24 / 31);
 
             /// If our remaining days is lower than 0, this means user is no longer subscribed
             if (m_RemainingDays < 0)
             {
                 m_Habbo->SetRank(AccountRank::HABBO_NORMAL);
                 m_Habbo->SendAccountBadges(); ///< Update our badges for user to recieve HC badge
-                
-                l_Database.ClearParameters();
-
-                l_Database.PrepareQuery("DELETE FROM club_subscription WHERE id = ?");
-                l_Database.GetStatement()->setUInt(1, m_Habbo->GetId());
-                l_Database.ExecuteQuery();
+              
+                l_PreparedStatement->PrepareStatement("DELETE FROM club_subscription WHERE id = ?");
+                l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+                l_PreparedStatement->ExecuteStatement();
+                delete l_PreparedResultSet;
+                UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
                 /// Initialize default values
                 m_DaysMonthRemaining    = 0;

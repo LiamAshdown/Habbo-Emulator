@@ -18,7 +18,7 @@
 
 #ifndef _DATABASE_SQL_BIND_DATA_h
 #define _DATABASE_SQL_BIND_DATA_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include <mysql.h>
 #endif /* !_DATABASE_SQL_BIND_DATA_h */
 

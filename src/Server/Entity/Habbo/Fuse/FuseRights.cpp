@@ -17,7 +17,7 @@
 */
 
 #include "Habbo.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 
 #include "Opcode/Packets/Server/LoginPackets.h"
 
@@ -39,21 +39,23 @@ namespace SteerStone
     /// Load User Fuse Rights from database
     void FuseRights::LoadFuseRights()
     {
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT fuseright FROM rank_fuserights WHERE rank <= ?");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetRank());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT fuseright FROM rank_fuserights WHERE rank <= ? ");
+        l_PreparedStatement->SetUint32(0, m_Habbo->GetRank());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
             return;
-
-        Result* l_Result = l_Database.Fetch();
 
         do
         {
-            m_FuseRights.push_back(l_Result->GetString(1));
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+            m_FuseRights.push_back(l_Result[1].GetString());
             
-        } while (l_Result->GetNextResult());
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     /// SendFuseRights

@@ -51,10 +51,10 @@ ProcessPriority = 0
 #   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
 UserDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
 
-## UserDatabaseInfo.WorkerThreads
+## UserDatabaseInfo.MySQLConnections
 #	Description: The amount of MySQL connections spawned to handle.
-#   Default:     10 - (LoginDatabase.WorkerThreads)
-UserDatabaseInfo.WorkerThreads  = 10
+#   Default:     10 - (LoginDatabase.MySQLConnections)
+UserDatabaseInfo.MySQLConnections  = 10
 
 ## RoomDatabaseInfo
 #	Description: Mysql account settings to connect to Room Database
@@ -62,10 +62,10 @@ UserDatabaseInfo.WorkerThreads  = 10
 #   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
 RoomDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
 
-## RoomDatabaseInfo.WorkerThreads
+## RoomDatabaseInfo.MySQLConnections
 #	Description: The amount of MySQL connections spawned to handle.
-#   Default:     10 - (LoginDatabase.WorkerThreads)
-RoomDatabaseInfo.WorkerThreads  = 10
+#   Default:     10 - (LoginDatabase.MySQLConnections)
+RoomDatabaseInfo.MySQLConnections  = 10
 
 ### SESSION PARAMETERS ###
 

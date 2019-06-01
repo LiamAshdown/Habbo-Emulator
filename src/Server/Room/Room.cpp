@@ -22,7 +22,7 @@
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Opcode/Packets/Server/NavigatorPackets.h"
 #include "Common/Maths.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 #include <functional>
 
 namespace SteerStone
@@ -480,18 +480,18 @@ namespace SteerStone
         m_VotedUsers.insert(p_Id);
 
         /// Also update database
-        QueryDatabase l_Database("rooms");
-        l_Database.PrepareQuery("INSERT INTO room_rating(room_id, account_id) VALUES(?, ?)");
-        l_Database.GetStatement()->setUInt(1, GetId());
-        l_Database.GetStatement()->setUInt(2, p_Id);
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id, account_id) VALUES(?, ?)");
+        l_PreparedStatement->SetUint32(1, GetId());
+        l_PreparedStatement->SetUint32(2, p_Id);
+        l_PreparedStatement->ExecuteStatement();
 
         /// And update room rating
-        l_Database.ClearParameters();
-        l_Database.PrepareQuery("UPDATE rooms SET rating = ? WHERE id = ?");
-        l_Database.GetStatement()->setUInt(1, GetRoomRating());
-        l_Database.GetStatement()->setUInt(1, GetId());
-        l_Database.ExecuteQuery();
+        l_PreparedStatement->PrepareStatement("UPDATE rooms SET rating = ? WHERE id = ?");
+        l_PreparedStatement->SetUint32(1, GetRoomRating());
+        l_PreparedStatement->SetUint32(1, GetId());
+        l_PreparedStatement->ExecuteStatement();
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     /// SendUpdateVotes
@@ -565,12 +565,12 @@ namespace SteerStone
             /// Refresh rights to update client
             RefreshRights(p_Habbo);
 
-            /// And update the database
-            QueryDatabase l_Database("rooms");
-            l_Database.PrepareQuery("INSERT INTO room_rights (account_id, room_id) VALUES (?, ?)");
-            l_Database.GetStatement()->setUInt(1, p_Habbo->GetId());
-            l_Database.GetStatement()->setUInt(2, GetId());
-            l_Database.ExecuteQuery();
+            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("INSERT INTO room_rights (account_id, room_id) VALUES (?, ?)");
+            l_PreparedStatement->SetUint32(1, p_Habbo->GetId());
+            l_PreparedStatement->SetUint32(2, GetId());
+            l_PreparedStatement->ExecuteStatement();
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
         }
     }
 
@@ -588,11 +588,12 @@ namespace SteerStone
                 l_Habbo->GetRoom()->RefreshRights(l_Habbo);
 
             /// And update the database
-            QueryDatabase l_Database("rooms");
-            l_Database.PrepareQuery("DELETE FROM room_rights WHERE account_id = ? AND room_id = ?");
-            l_Database.GetStatement()->setUInt(1, p_Id);
-            l_Database.GetStatement()->setUInt(2, GetId());
-            l_Database.ExecuteQuery();
+            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("DELETE FROM room_rights WHERE account_id = ? AND room_id = ?");
+            l_PreparedStatement->SetUint32(1, GetId());
+            l_PreparedStatement->SetUint32(2, GetId());
+            l_PreparedStatement->ExecuteStatement();
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
         }
     }
 

@@ -18,7 +18,7 @@
 
 #ifndef _DATABASE_DATABASE_WORKER_h
 #define _DATABASE_DATABASE_WORKER_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "ProducerQueue.h"
 #include <thread>
 #endif /* !_DATABASE_DATABASE_WORKER_h */

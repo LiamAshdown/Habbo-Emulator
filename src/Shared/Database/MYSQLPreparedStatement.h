@@ -18,7 +18,7 @@
 
 #ifndef _PREPARED_STATEMENT_MYSQL_PREPARED_STATEMENT_h
 #define _PREPARED_STATEMENT_MYSQL_PREPARED_STATEMENT_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "PreparedStatement.h"
 #include <mutex>
 #endif /* !_PREPARED_STATEMENT_MYSQL_PREPARED_STATEMENT_h */

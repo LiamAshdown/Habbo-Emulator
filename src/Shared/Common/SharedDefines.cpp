@@ -16,7 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "Timer.h"
 
 std::string SplitString(std::string const& p_StringData, std::string const& p_Tokenizer)

@@ -21,7 +21,6 @@
 #include "Common/SharedDefines.h"
 #include "Common/Timer.h"
 #include "Config/Config.h"
-#include "Database/QueryDatabase.h"
 #include "Platform/Thread/ThreadPool.h"
 #include <mutex>
 #endif /* _MANAGERS_HOTEL_h */

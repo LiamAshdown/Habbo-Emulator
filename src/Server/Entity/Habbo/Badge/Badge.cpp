@@ -18,7 +18,7 @@
 
 #include "Habbo.h"
 #include "RoomManager.h"
-#include "Database/QueryDatabase.h"
+#include "Database/DatabaseTypes.h"
 
 #include "Opcode/Packets/Server/LoginPackets.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
@@ -41,27 +41,32 @@ namespace SteerStone
     /// Load user badges
     void Badge::LoadBadges()
     {
-        QueryDatabase l_Database("users");
-        l_Database.PrepareQuery("SELECT badge FROM account_badges WHERE rank <= ?");
-        l_Database.GetStatement()->setUInt(1, m_Habbo->GetRank());
-        l_Database.ExecuteQuery();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT badge FROM account_badges WHERE rank <= ?");
+        l_PreparedStatement->SetUint32(0, m_Habbo->GetRank());
+        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
-        if (!l_Database.GetResult())
+        if (!l_PreparedResultSet)
         {
             /// No Badge? just set to default
             m_CurrentBadge = std::make_tuple(std::string(), false);
             return;
         }
-
-        Result* l_Result = l_Database.Fetch();
+        
+        ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
         /// Set our first result as our current badge
-        m_CurrentBadge = std::make_tuple(l_Result->GetString(1), true);
+        m_CurrentBadge = std::make_tuple(l_Result[1].GetString(), true);
 
         do
         {
-            m_Badges[l_Result->GetString(1)] = true;
-        } while (l_Result->GetNextResult());
+            l_Result = l_PreparedResultSet->FetchResult();
+
+            m_Badges[l_Result[1].GetString()] = true;
+        } while (l_PreparedResultSet->GetNextRow());
+
+        delete l_PreparedResultSet;
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     /// SendBadges

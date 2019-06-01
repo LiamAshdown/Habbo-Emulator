@@ -18,7 +18,7 @@
 
 #ifndef _COMMON_SHA1_h
 #define _COMMON_SHA1_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "openssl/sha.h"
 #endif /* _COMMON_SHA1_h */
 

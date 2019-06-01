@@ -17,7 +17,7 @@
 */
 
 #pragma once
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 
 static uint32 SizeForType(MYSQL_FIELD* p_Field)
 {

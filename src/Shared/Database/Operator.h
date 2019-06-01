@@ -18,7 +18,7 @@
 
 #ifndef _CALL_BACK_OPERATOR_h
 #define _CALL_BACK_OPERATOR_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #endif /* !_CALL_BACK_OPERATOR_h */
 
 namespace SteerStone

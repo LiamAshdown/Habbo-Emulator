@@ -18,7 +18,7 @@
 
 #ifndef _CALL_BACK_QUERY_CALL_BACK_h
 #define _CALL_BACK_QUERY_CALL_BACK_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "PrepareStatementOperator.h"
 #include <future>
 #endif /* !_CALL_BACK_QUERY_CALL_BACK_h */

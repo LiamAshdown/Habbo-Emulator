@@ -18,7 +18,7 @@
 
 #ifndef _CALL_BACK_PROCESSOR_h
 #define _CALL_BACK_PROCESSOR_h
-#include "SharedDefines.h"
+#include "Common/SharedDefines.h"
 #include "CallBackOperator.h"
 #endif /* !_CALL_BACK_PROCESSOR_h */
 
