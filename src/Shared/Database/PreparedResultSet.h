@@ -30,9 +30,8 @@ namespace SteerStone
         /// Constructor
         /// @p_Stmt : Prepare Statement
         /// @p_Result : Result
-        /// @p_Fields : Field result
         /// @p_FieldCount : Field count
-        PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, MYSQL_FIELD* p_Fields, uint32 p_FieldCount);
+        PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, uint32 p_FieldCount);
 
         /// Deconstructor
         ~PreparedResultSet();
@@ -70,7 +69,7 @@ namespace SteerStone
         uint32 m_FieldCount;
 
     private:
-        my_bool* m_IsNull; 
+        bool* m_IsNull; 
         unsigned long* m_Length;
         MYSQL_BIND* m_Bind;
 

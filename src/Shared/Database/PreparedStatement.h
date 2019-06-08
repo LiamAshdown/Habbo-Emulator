@@ -60,7 +60,7 @@ namespace SteerStone
 
         /// ExecuteStatement
         /// Execute the statement
-        PreparedResultSet* ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> ExecuteStatement();
 
     public:
         /// Set our prepared values

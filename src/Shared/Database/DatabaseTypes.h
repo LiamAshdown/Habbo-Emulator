@@ -16,8 +16,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DATABASE_DATABASE_TYPE_h
-#define _DATABASE_DATABASE_TYPE_h
+#ifndef _DATABASE_DATABASE_TYPES_h
+#define _DATABASE_DATABASE_TYPES_h
 #include "Common/SharedDefines.h"
 #include "Database.h"
 #endif /* !_DATABASE_DATABASE_TYPE_h */

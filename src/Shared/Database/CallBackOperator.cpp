@@ -21,7 +21,7 @@
 namespace SteerStone
 {
     /// Constructor
-    CallBackOperator::CallBackOperator(std::future<PreparedResultSet*> p_PreparedFuture) : m_PreparedFuture(std::move(p_PreparedFuture)), m_OperatorFunction(nullptr)
+    CallBackOperator::CallBackOperator(std::future<std::unique_ptr<PreparedResultSet>> p_PreparedFuture) : m_PreparedFuture(std::move(p_PreparedFuture)), m_OperatorFunction(nullptr)
     {
     }
 
@@ -30,7 +30,9 @@ namespace SteerStone
     {
     }
 
-    CallBackOperator&& CallBackOperator::AddFunction(std::function<void(PreparedResultSet*)>&& p_CallBack)
+    /// AddFunction
+    /// p_CallBack : Function which we will be doing a call back on
+    CallBackOperator&& CallBackOperator::AddFunction(std::function<void(std::unique_ptr<PreparedResultSet>)> p_CallBack)
     {
         m_OperatorFunction = std::move(p_CallBack);
         return std::move(*this);
@@ -43,16 +45,12 @@ namespace SteerStone
         /// Is our promise ready?
         if (m_PreparedFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
         {
-            PreparedResultSet* l_PreparedResultSet = m_PreparedFuture.get();
-
             /// If there's a function, then execute the function with our result set
             if (m_OperatorFunction)
-                m_OperatorFunction(l_PreparedResultSet);
-
-            delete l_PreparedResultSet;
+                m_OperatorFunction(m_PreparedFuture.get());
 
             return true;
         }
         return false;
     }
-}
+} ///< NAMESPACE STEERSTONE

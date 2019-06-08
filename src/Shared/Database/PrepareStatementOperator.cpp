@@ -24,7 +24,7 @@ namespace SteerStone
     /// @p_PrepareStatementHolder : Keep reference of statement to be accessed later
     SteerStone::PrepareStatementOperator::PrepareStatementOperator(PreparedStatement * p_PreparedStatementHolder) : m_PreparedStatementHolder(p_PreparedStatementHolder)
     {
-        m_PromiseResultSet = new std::promise<PreparedResultSet*>();
+        m_PromiseResultSet = new std::promise<std::unique_ptr<PreparedResultSet>>();
     }
 
     /// Deconstructor
@@ -37,7 +37,7 @@ namespace SteerStone
 
     /// GetFuture
     /// GetFuture set
-    std::future<PreparedResultSet*> PrepareStatementOperator::GetFuture()
+    std::future<std::unique_ptr<PreparedResultSet>> PrepareStatementOperator::GetFuture()
     {
         return m_PromiseResultSet->get_future();
     }
@@ -46,15 +46,12 @@ namespace SteerStone
     /// Execute Query
     bool PrepareStatementOperator::Execute()
     {
-        PreparedResultSet* l_PreparedResultSet = m_PreparedStatementHolder->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::move(m_PreparedStatementHolder->ExecuteStatement());
 
         if (!l_PreparedResultSet || !l_PreparedResultSet->GetRowCount())
-        {
-            delete l_PreparedResultSet;
             m_PromiseResultSet->set_value(nullptr);
-        }
         else
-            m_PromiseResultSet->set_value(m_PreparedStatementHolder->ExecuteStatement());
+            m_PromiseResultSet->set_value(std::move(m_PreparedStatementHolder->ExecuteStatement()));
 
         return true;
     }

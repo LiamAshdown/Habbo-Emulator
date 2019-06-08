@@ -22,7 +22,7 @@ namespace SteerStone
 {
     /// Constructor
     /// @p_MYSQLPreparedStatement : Keep reference of our connection
-    PreparedStatement::PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement) : m_MySQLPreparedStatement(p_MySQLPreparedStatement)
+    PreparedStatement::PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement) : m_MySQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false)
     {
     }
 
@@ -49,7 +49,7 @@ namespace SteerStone
     /// @p_Query : Query which will be executed to database
     void PreparedStatement::PrepareStatement(char const* p_Query)
     {
-        if (!Prepare(p_Query))
+        if (Prepare(p_Query))
         {
             m_PrepareError = true;
             LOG_ERROR << "Failed in Preparing Statement!";
@@ -58,19 +58,18 @@ namespace SteerStone
 
     /// ExecuteStatement
     /// Execute the statement
-    PreparedResultSet* PreparedStatement::ExecuteStatement()
+    std::unique_ptr<PreparedResultSet> PreparedStatement::ExecuteStatement()
     {
         if (m_PrepareError)
             return nullptr;
 
         MYSQL_RES* l_Result = nullptr;
-        MYSQL_FIELD* l_Fields = nullptr;
         uint32 l_FieldCount = 0;
 
-        if (!Execute(&l_Result, &l_Fields, &l_FieldCount))
+        if (!Execute(&l_Result, &l_FieldCount))
             return nullptr;
 
-        return new PreparedResultSet(m_Stmt, l_Result, l_Fields, l_FieldCount);
+        return std::make_unique<PreparedResultSet>(m_Stmt, l_Result, l_FieldCount);
     }
 
     /// Prepare
@@ -87,9 +86,8 @@ namespace SteerStone
 
     /// Execute
     /// @p_Result : Result set
-    /// @p_Fields : Fields
     /// @p_FieldCount : How many columns
-    bool PreparedStatement::Execute(MYSQL_RES ** p_Result, MYSQL_FIELD ** p_Fields, uint32 * p_FieldCount)
+    bool PreparedStatement::Execute(MYSQL_RES ** p_Result, uint32 * p_FieldCount)
     {
         BindParameters();
 
@@ -108,8 +106,6 @@ namespace SteerStone
             mysql_free_result(*p_Result);
             return false;
         }
-
-        *p_Fields = mysql_fetch_fields(*p_Result);
 
         return true;
     }
@@ -136,7 +132,7 @@ namespace SteerStone
     /// Remove previous binds
     void PreparedStatement::RemoveBinds()
     {
-        if (!m_Stmt)
+        if (!m_Stmt || !m_Bind)
             return;
 
         delete[] m_Bind;

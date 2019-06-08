@@ -41,7 +41,7 @@ namespace SteerStone
     public:
         /// GetFuture
         /// GetFuture set
-        std::future<PreparedResultSet*> GetFuture();
+        std::future<std::unique_ptr<PreparedResultSet>> GetFuture();
 
         /// Execute
         /// Execute Query
@@ -49,7 +49,7 @@ namespace SteerStone
 
     private:
         PreparedStatement* m_PreparedStatementHolder;         ///< Holds query and stores result set if any
-        std::promise<PreparedResultSet*>* m_PromiseResultSet;       ///< Promise which the non database worker thread will hold, database worker thread holds the future
+        std::promise<std::unique_ptr<PreparedResultSet>>* m_PromiseResultSet;       ///< Promise which the non database worker thread will hold, database worker thread holds the future
     };
 
 } ///< NAMESPACE STEERSTONE

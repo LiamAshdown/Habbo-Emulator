@@ -24,48 +24,112 @@
 
 namespace SteerStone
 {
-    static FieldType MysqlTypeToFieldType(enum_field_types type)
+    /// MySQLTypeToFieldType
+    /// Convert MySQL type to Field Type
+    /// @p_Type : MySQL Type we are converting
+    static FieldType MySQLTypeToFieldType(enum_field_types p_Type, bool p_UnSigned)
     {
-        switch (type)
+        switch (p_Type)
         {
-        case MYSQL_TYPE_NULL:
+        case enum_field_types::MYSQL_TYPE_NULL:
             return FieldType::FIELD_NONE;
-        case MYSQL_TYPE_TINY:
-            return FieldType::FIELD_I8;
-        case MYSQL_TYPE_YEAR:
-        case MYSQL_TYPE_SHORT:
-            return FieldType::FIELD_I16;
-        case MYSQL_TYPE_INT24:
-        case MYSQL_TYPE_LONG:
-            return FieldType::FIELD_I32;
-        case MYSQL_TYPE_LONGLONG:
-        case MYSQL_TYPE_BIT:
-            return FieldType::FIELD_I64;
-        case MYSQL_TYPE_FLOAT:
+        case enum_field_types::MYSQL_TYPE_TINY:
+        {
+            if (p_UnSigned)
+                return FieldType::FIELD_UI8;
+            else
+                return FieldType::FIELD_I8;
+        }
+        case enum_field_types::MYSQL_TYPE_YEAR:
+        case enum_field_types::MYSQL_TYPE_SHORT:
+        {
+            if (p_UnSigned)
+                return FieldType::FIELD_I16;
+            else
+                return FieldType::FIELD_UI16;
+        }
+        case enum_field_types::MYSQL_TYPE_INT24:
+        case enum_field_types::MYSQL_TYPE_LONG:
+        {
+            if (p_UnSigned)
+                return FieldType::FIELD_I32;
+            else
+                return FieldType::FIELD_UI32;
+        }
+        case enum_field_types::MYSQL_TYPE_LONGLONG:
+        case enum_field_types::MYSQL_TYPE_BIT:
+        {
+            if (p_UnSigned)
+                return FieldType::FIELD_UI64;
+            else
+                return FieldType::FIELD_UI64;
+        }
+        case enum_field_types::MYSQL_TYPE_FLOAT:
             return FieldType::FIELD_FLOAT;
-        case MYSQL_TYPE_DOUBLE:
+        case enum_field_types::MYSQL_TYPE_DOUBLE:
             return FieldType::FIELD_DOUBLE;
-        case MYSQL_TYPE_DECIMAL:
-        case MYSQL_TYPE_NEWDECIMAL:
+        case enum_field_types::MYSQL_TYPE_DECIMAL:
+        case enum_field_types::MYSQL_TYPE_NEWDECIMAL:
             return FieldType::FIELD_DECIMAL;
-        case MYSQL_TYPE_TIMESTAMP:
-        case MYSQL_TYPE_DATE:
-        case MYSQL_TYPE_TIME:
-        case MYSQL_TYPE_DATETIME:
+        case enum_field_types::MYSQL_TYPE_TIMESTAMP:
+        case enum_field_types::MYSQL_TYPE_DATE:
+        case enum_field_types::MYSQL_TYPE_TIME:
+        case enum_field_types::MYSQL_TYPE_DATETIME:
             return FieldType::FIELD_DATE;
-        case MYSQL_TYPE_TINY_BLOB:
-        case MYSQL_TYPE_MEDIUM_BLOB:
-        case MYSQL_TYPE_LONG_BLOB:
-        case MYSQL_TYPE_BLOB:
-        case MYSQL_TYPE_STRING:
-        case MYSQL_TYPE_VAR_STRING:
+        case enum_field_types::MYSQL_TYPE_TINY_BLOB:
+        case enum_field_types::MYSQL_TYPE_MEDIUM_BLOB:
+        case enum_field_types::MYSQL_TYPE_LONG_BLOB:
+        case enum_field_types::MYSQL_TYPE_BLOB:
+        case enum_field_types::MYSQL_TYPE_STRING:
+        case enum_field_types::MYSQL_TYPE_VAR_STRING:
             return FieldType::FIELD_BINARY;
         default:
-            LOG_INFO << ("MysqlTypeToFieldType(): invalid field type %u", uint32(type));
+            throw std::runtime_error((std::string("MySQLTypeToFieldType: invalid MySQL type %u", uint32(p_Type))));
             break;
         }
+    }
 
-        return FieldType::FIELD_NONE;
+    /// FieldTypeToString
+    /// Convert Field Type to string
+    /// @p_FieldType : Field type we are converting to string
+    static std::string FieldTypeToString(FieldType p_FieldType)
+    {
+        switch (p_FieldType)
+        {
+            case FieldType::FIELD_BOOL:
+                return "FIELD_BOOl";
+            case FieldType::FIELD_UI8:
+                return "FIELD_UI8";
+            case FieldType::FIELD_UI16:
+                return "FIELD_UI16";
+            case FieldType::FIELD_UI32:
+                return "FIELD_UI32";      
+            case FieldType::FIELD_UI64:
+                return "FIELD_UI64";   
+            case FieldType::FIELD_I8:
+                return "FIELD_I8"; 
+            case FieldType::FIELD_I16:
+                return "FIELD_I16";      
+            case FieldType::FIELD_I32:
+                return "FIELD_I32";            
+            case FieldType::FIELD_I64:
+                return "FIELD_I64";         
+            case FieldType::FIELD_FLOAT:
+                return "FIELD_FLOAT";
+            case FieldType::FIELD_DOUBLE:
+                return "FIELD_DOUBLE";         
+            case FieldType::FIELD_DECIMAL:
+                return "FIELD_DECIMAL";      
+            case FieldType::FIELD_DATE:
+                return "FIELD_DATE";       
+            case FieldType::FIELD_BINARY:
+                return "FIELD_BINARY";     
+            case FieldType::FIELD_STRING:
+                return "FIELD_STRING";
+            default:
+                throw std::runtime_error(std::string("FieldTypeToString: Unknown Field Type %u", uint32(p_FieldType)));
+                break;
+        }
     }
 
     class ResultSet
@@ -97,6 +161,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return 0.0f;
 
+            if (Data.Type != FieldType::FIELD_FLOAT)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_FLOAT";
+
             if (Data.Raw)
                 return *reinterpret_cast<float*>(Data.Buffer);
             return static_cast<float>(atof((char*)Data.Buffer));
@@ -106,6 +173,9 @@ namespace SteerStone
         {
             if (!Data.Buffer)
                 return 0.0f;
+
+            if (Data.Type != FieldType::FIELD_DOUBLE)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_DOUBLE";
 
             if (Data.Raw)
                 return *reinterpret_cast<double*>(Data.Buffer);
@@ -117,6 +187,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return NULL;
 
+            if (Data.Type != FieldType::FIELD_BINARY)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_STRING";
+
             return static_cast<char const*>(Data.Buffer);
         }
 
@@ -125,11 +198,14 @@ namespace SteerStone
             if (!Data.Buffer)
                 return "";
 
+            if (Data.Type != FieldType::FIELD_BINARY)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_STRING";
+
             char const* l_String = GetChar();
             if (!l_String)
                 return "";
 
-            return std::string(l_String, Data.Length);
+            return std::string((char*)Data.Buffer, Data.Length);
         }
 
         bool GetBool() const
@@ -150,6 +226,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return 0;
 
+            if (Data.Type != FieldType::FIELD_I8)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_I8";
+
             if (Data.Raw)
                 return *reinterpret_cast<int8*>(Data.Buffer);
             return static_cast<int8>(strtol((char*)Data.Buffer, nullptr, 10));
@@ -159,6 +238,9 @@ namespace SteerStone
         {
             if (!Data.Buffer)
                 return 0;
+
+            if (Data.Type != FieldType::FIELD_I16)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_I16";
 
             if (Data.Raw)
                 return *reinterpret_cast<int16*>(Data.Buffer);
@@ -170,6 +252,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return 0;
 
+            if (Data.Type != FieldType::FIELD_I32)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_I32";
+
             if (Data.Raw)
                 return *reinterpret_cast<int32*>(Data.Buffer);
             return static_cast<int32>(strtol((char*)Data.Buffer, nullptr, 10));
@@ -179,6 +264,9 @@ namespace SteerStone
         {
             if (!Data.Buffer)
                 return 0;
+
+            if (Data.Type != FieldType::FIELD_I64)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_I64";
 
             if (Data.Raw)
                 return *reinterpret_cast<int64*>(Data.Buffer);
@@ -190,6 +278,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return 0;
 
+            if (Data.Type != FieldType::FIELD_UI8)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_UI8";
+
             if (Data.Raw)
                 return *reinterpret_cast<uint8*>(Data.Buffer);
             return static_cast<uint8>(strtoul((char*)Data.Buffer, nullptr, 10));
@@ -199,6 +290,9 @@ namespace SteerStone
         {
             if (!Data.Buffer)
                 return 0;
+
+            if (Data.Type != FieldType::FIELD_UI16)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_UI16";
 
             if (Data.Raw)
                 return *reinterpret_cast<uint16*>(Data.Buffer);
@@ -210,6 +304,9 @@ namespace SteerStone
             if (!Data.Buffer)
                 return 0;
 
+            if (Data.Type != FieldType::FIELD_UI32)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_UI32";
+
             if (Data.Raw)
                 return *reinterpret_cast<uint32*>(Data.Buffer);
             return static_cast<uint32>(strtoul((char*)Data.Buffer, nullptr, 10));
@@ -219,6 +316,9 @@ namespace SteerStone
         {
             if (!Data.Buffer)
                 return 0;
+
+            if (Data.Type != FieldType::FIELD_UI64)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_UI64";
 
             if (Data.Raw)
                 return *reinterpret_cast<uint64*>(Data.Buffer);

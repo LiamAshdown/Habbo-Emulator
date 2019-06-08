@@ -64,7 +64,7 @@ namespace SteerStone
             /// Only do this once
             if (!s_Logged)
             {
-                LOG_INFO << "MySQL Client Libary: " << mysql_get_client_info();
+                LOG_INFO << "MySQL Client Library: " << mysql_get_client_info();
                 LOG_INFO << "MySQL Server Version: " << mysql_get_server_info(m_Connection);
                 LOG_INFO << "Connected to MYSQL Database at " << m_Connection->host;
 
@@ -98,14 +98,18 @@ namespace SteerStone
         if (!p_StatementHolder->m_Stmt)
         {
             LOG_ERROR << "m_Stmt: " << mysql_error(m_Connection);
-            return false;
+            return true;
         }
+
+        /// Set buffer max value
+        bool l_Temp;
+        mysql_stmt_attr_set(p_StatementHolder->m_Stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &l_Temp);
 
         if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
         {
             LOG_ERROR << "mysql_stmt_prepare: " << mysql_error(m_Connection) << " ON " << p_StatementHolder->m_Query;
             mysql_stmt_close(p_StatementHolder->m_Stmt);
-            return false;
+            return true;
         }
 
         p_StatementHolder->m_ParametersCount = mysql_stmt_param_count(p_StatementHolder->m_Stmt);
@@ -116,6 +120,6 @@ namespace SteerStone
             memset(p_StatementHolder->m_Bind, 0, sizeof(MYSQL_BIND) * p_StatementHolder->m_ParametersCount);
         }
 
-        return true;
+        return false;
     }
 }

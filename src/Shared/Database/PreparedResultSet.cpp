@@ -25,26 +25,27 @@ namespace SteerStone
     /// @p_PrepareStatement : Reference of prepare statement, we need this to free the prepare statement
     /// @p_Stmt : Prepare Statement
     /// @p_Result : Result
-    /// @p_Fields : Field result
     /// @p_FieldCount : Field count
-    PreparedResultSet::PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, MYSQL_FIELD * p_Fields, uint32 p_FieldCount)
-        : m_Stmt(p_Stmt), m_Result(p_Result), m_Fields(p_Fields), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0)
+    PreparedResultSet::PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, uint32 p_FieldCount)
+        : m_Stmt(p_Stmt), m_Result(p_Result), m_Fields(nullptr), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0)
     {
         /// IsNull and mLength is deleted at end of constructor when buffer is loaded into our storage
-        m_IsNull = new my_bool[m_FieldCount];
+        m_IsNull = new bool[m_FieldCount];
         m_Length = new unsigned long[m_FieldCount];
         m_Bind = new MYSQL_BIND[m_FieldCount];
 
-        memset(m_IsNull, 0, sizeof(my_bool) * m_FieldCount);
+        memset(m_IsNull, 0, sizeof(bool) * m_FieldCount);
         memset(m_Length, 0, sizeof(unsigned long) * m_FieldCount);
         memset(m_Bind, 0, sizeof(MYSQL_BIND) * m_FieldCount);
 
         if (mysql_stmt_store_result(m_Stmt))
         {
-            LOG_ERROR << "Cannot store result from MySQL Server. Error: " << mysql_stmt_error(m_Stmt);
+            LOG_ERROR << "mysql_stmt_store_result: Cannot store result from MySQL Server. Error: " << mysql_stmt_error(m_Stmt);
             CleanUp();
             return;
         }
+
+        m_Fields = mysql_fetch_fields(m_Result);
 
         m_RowCount = mysql_stmt_num_rows(m_Stmt);
 
@@ -55,7 +56,7 @@ namespace SteerStone
             l_SizeType += l_Size;
 
             m_Bind[l_I].buffer_type = m_Fields[l_I].type;
-            m_Bind[l_I].buffer_length = l_SizeType;
+            m_Bind[l_I].buffer_length = l_Size;
             m_Bind[l_I].length = &m_Length[l_I];
             m_Bind[l_I].is_null = &m_IsNull[l_I];
             m_Bind[l_I].error = nullptr;
@@ -74,13 +75,14 @@ namespace SteerStone
         {
             LOG_ERROR << ("mysql_stmt_bind_result: Cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_Stmt));
             CleanUp();
+            return;
         }
 
         /// Buffer all rows in result
         m_Results.resize(uint32(m_RowCount) * m_FieldCount);
         while (NextRow())
         {
-            for (uint32 l_I = 0; l_I < m_FieldCount; l_I++)
+            for (uint32 l_I = 0; l_I < m_FieldCount; ++l_I)
             {
                 unsigned long l_BufferLength = m_Bind[l_I].buffer_length;
                 unsigned long l_FetchedLength = *m_Bind[l_I].length;
@@ -110,11 +112,17 @@ namespace SteerStone
                     }
 
                     /// Insert buffer into storage
-                    m_Results[m_RowPosition * m_FieldCount + l_I].SetValue(l_Buffer, MysqlTypeToFieldType(m_Bind[l_I].buffer_type),
-                        *m_Bind[l_I].length);
+                    m_Results[uint32(m_RowPosition) * m_FieldCount + l_I].SetValue(l_Buffer, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? false : true),
+                        l_FetchedLength);
 
                     /// move buffer pointer to next part
                     m_Stmt->bind[l_I].buffer = (char*)l_Buffer + l_SizeType;
+                }
+                else
+                {
+                    /// Insert buffer into storage
+                    m_Results[m_RowPosition * m_FieldCount + l_I].SetValue(nullptr, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? false : true),
+                        l_FetchedLength);
                 }
             }
 
@@ -122,15 +130,12 @@ namespace SteerStone
         }
 
         m_RowPosition = 0;
-
-        CleanUp();
     }
 
     /// Deconstructor
     PreparedResultSet::~PreparedResultSet() 
     {
-        mysql_stmt_free_result(m_Stmt);
-        m_Stmt = nullptr;
+        CleanUp();
     }
 
     /// FetchResult
@@ -196,5 +201,8 @@ namespace SteerStone
             delete[] m_Bind;
             m_Bind = nullptr;
         }
+
+        mysql_stmt_free_result(m_Stmt);
+        m_Stmt = nullptr;
     }
 } ///< NAMESPACE STEERSTONE

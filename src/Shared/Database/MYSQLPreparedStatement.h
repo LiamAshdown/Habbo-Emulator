@@ -77,6 +77,10 @@ namespace SteerStone
         /// @p_Query : Query which will be executed to database
         bool Prepare(PreparedStatement* p_StatementHolder);
 
+        /// GetHandle
+        /// Return MySQL Connection Handle
+        MYSQL* GetHandle() { return m_Connection; }
+
     private:
         MYSQL* m_Connection;
 
