@@ -16,12 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Habbo.h"
-#include "RoomManager.h"
-#include "Database/DatabaseTypes.h"
-
 #include "Opcode/Packets/Server/LoginPackets.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
+#include "RoomManager.h"
+#include "Habbo.h"
+#include "Database/DatabaseTypes.h"
 
 namespace SteerStone
 {
@@ -44,7 +43,7 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT badge FROM account_badges WHERE rank <= ?");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetRank());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
         {
@@ -56,16 +55,15 @@ namespace SteerStone
         ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
         /// Set our first result as our current badge
-        m_CurrentBadge = std::make_tuple(l_Result[1].GetString(), true);
+        m_CurrentBadge = std::make_tuple(l_Result[0].GetString(), true);
 
         do
         {
             l_Result = l_PreparedResultSet->FetchResult();
 
-            m_Badges[l_Result[1].GetString()] = true;
+            m_Badges[l_Result[0].GetString()] = true;
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 

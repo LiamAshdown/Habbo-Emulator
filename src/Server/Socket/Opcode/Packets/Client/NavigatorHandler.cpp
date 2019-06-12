@@ -169,15 +169,17 @@ namespace SteerStone
         /// TODO; Clean this. We are querying the database and then finding the room in the storage = slow !!
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id FROM rooms WHERE category != 3 AND (name LIKE ? OR owner_name LIKE ?)");
+        l_PreparedStatement->SetString(0, l_Search);
         l_PreparedStatement->SetString(1, l_Search);
-        l_PreparedStatement->SetString(2, l_Search);
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// Does any rooms match criteria?
         if (!l_PreparedResultSet)
         {
             HabboPacket::Navigator::NoFlats l_Packet;
             m_Habbo->SendPacket(l_Packet.Write());
+
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
@@ -187,7 +189,7 @@ namespace SteerStone
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[1].GetUInt32());
+            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[0].GetUInt32());
 
             if (!l_Room)
                 return;
@@ -221,7 +223,6 @@ namespace SteerStone
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         m_Habbo->SendPacket(l_Packet.Write());
@@ -315,29 +316,38 @@ namespace SteerStone
         if (l_RoomAccess == "password")
             l_AccessType = RoomAccessType::ROOM_ACCESS_TYPE_PASSWORD;
 
-        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("INSERT INTO rooms (owner_id, owner_name, name, model, show_name, description, access_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
-        l_PreparedStatement->SetString(2, m_Habbo->GetName());
-        l_PreparedStatement->SetString(3, l_RoomName);
-        l_PreparedStatement->SetString(4, l_RoomModel);
-        l_PreparedStatement->SetBool(5, l_ShowOwnerName);
-        l_PreparedStatement->SetString(6, std::string());
-        l_PreparedStatement->SetUint32(7, l_AccessType);
-        l_PreparedStatement->ExecuteStatement();
-
-        l_PreparedStatement->PrepareStatement("SELECT LAST_INSERT_ID() as id");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
-
-        if (l_PreparedResultSet)
         {
-            m_Habbo->m_LastCreatedRoomId = l_PreparedResultSet->FetchResult()[1].GetUInt32();
-            delete l_PreparedResultSet;
+            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("INSERT INTO rooms (owner_id, owner_name, name, model, show_name, description, access_type) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
+            l_PreparedStatement->SetString(1, m_Habbo->GetName());
+            l_PreparedStatement->SetString(2, l_RoomName);
+            l_PreparedStatement->SetString(3, l_RoomModel);
+            l_PreparedStatement->SetBool(4, l_ShowOwnerName);
+            l_PreparedStatement->SetString(5, std::string());
+            l_PreparedStatement->SetUint32(6, l_AccessType);
+            l_PreparedStatement->ExecuteStatement();
+
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
         }
 
+        {
+            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("SELECT LAST_INSERT_ID() as id");
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+            if (l_PreparedResultSet)
+                m_Habbo->m_LastCreatedRoomId = l_PreparedResultSet->FetchResult()[1].GetUInt32();
+
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+        }
+
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id) VALUES (?)");
         l_PreparedStatement->SetUint32(1, m_Habbo->m_LastCreatedRoomId);
         l_PreparedStatement->ExecuteStatement();
+
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         sRoomMgr->AddRoom(m_Habbo->m_LastCreatedRoomId);
 
@@ -346,8 +356,6 @@ namespace SteerStone
         l_Packet.Id = std::to_string(m_Habbo->m_LastCreatedRoomId);
         l_Packet.Name = l_RoomName;
         m_Habbo->SendPacket(l_Packet.Write());
-
-        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleSetFlatInfo(ClientPacket* p_Packet)
@@ -379,11 +387,11 @@ namespace SteerStone
         /// Update our room
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE rooms SET description = ?, password = ?, super_users = ?, visitors_max = ? WHERE id = ?");
-        l_PreparedStatement->SetString(1, l_Description);
-        l_PreparedStatement->SetString(2, l_Password);
-        l_PreparedStatement->SetBool(3, l_AllSuperUser);
-        l_PreparedStatement->SetUint32(4, l_MaxVisitors.empty() ? l_Room->GetVisitorsMax() : std::stoi(l_MaxVisitors));
-        l_PreparedStatement->SetUint32(5, l_RoomId);
+        l_PreparedStatement->SetString(0, l_Description);
+        l_PreparedStatement->SetString(1, l_Password);
+        l_PreparedStatement->SetBool(2, l_AllSuperUser);
+        l_PreparedStatement->SetUint32(3, l_MaxVisitors.empty() ? l_Room->GetVisitorsMax() : std::stoi(l_MaxVisitors));
+        l_PreparedStatement->SetUint32(4, l_RoomId);
         l_PreparedStatement->ExecuteStatement();
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
@@ -397,7 +405,7 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id FROM rooms WHERE owner_id = ?");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
  
 
         /// Does user have any flats? if not send packet to inform he/she has no flats
@@ -406,6 +414,7 @@ namespace SteerStone
             HabboPacket::Navigator::NoFlatsForUser l_Packet;
             l_Packet.Name = m_Habbo->GetName();
             m_Habbo->SendPacket(l_Packet.Write());
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
@@ -415,7 +424,7 @@ namespace SteerStone
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[1].GetUInt32());
+            std::shared_ptr<Room> l_Room = sRoomMgr->GetRoom(l_Result[0].GetUInt32());
 
             if (!l_Room)
                 return;
@@ -449,10 +458,9 @@ namespace SteerStone
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
-        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
-
         m_Habbo->SendPacket(l_Packet.Write());
+
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     void HabboSocket::HandleGetFlatInfo(ClientPacket* p_Packet)
@@ -522,9 +530,10 @@ namespace SteerStone
 
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE rooms SET category = ? WHERE id = ?");
-        l_PreparedStatement->SetUint32(1, l_CategoryId);
-        l_PreparedStatement->SetUint32(2, l_Room->GetId());
+        l_PreparedStatement->SetUint32(0, l_CategoryId);
+        l_PreparedStatement->SetUint32(1, l_Room->GetId());
         l_PreparedStatement->ExecuteStatement();
+
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
@@ -558,10 +567,10 @@ namespace SteerStone
 
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE rooms SET name = ?, access_type = ?, show_name = ?  WHERE id = ?");
-        l_PreparedStatement->SetString(1, l_RoomName);
-        l_PreparedStatement->SetUint32(2, l_NewAcessType);
-        l_PreparedStatement->SetBool(3, l_ShowOwner);
-        l_PreparedStatement->SetUint32(4, l_Room->GetId());
+        l_PreparedStatement->SetString(0, l_RoomName);
+        l_PreparedStatement->SetUint32(1, l_NewAcessType);
+        l_PreparedStatement->SetBool(2, l_ShowOwner);
+        l_PreparedStatement->SetUint32(3, l_Room->GetId());
         l_PreparedStatement->ExecuteStatement();
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }

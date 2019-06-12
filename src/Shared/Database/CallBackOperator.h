@@ -16,12 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CALL_BACK_QUERY_CALL_BACK_h
-#define _CALL_BACK_QUERY_CALL_BACK_h
+#ifndef _CALL_BACK_OPERATOR_h
+#define _CALL_BACK_OPERATOR_h
 #include "Common/SharedDefines.h"
 #include "PrepareStatementOperator.h"
 #include <future>
-#endif /* !_CALL_BACK_QUERY_CALL_BACK_h */
+#endif /* !_CALL_BACK_OPERATOR_h */
 
 namespace SteerStone
 {

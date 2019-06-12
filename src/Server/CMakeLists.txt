@@ -42,7 +42,6 @@ add_executable(${EXECUTABLE_NAME} ${source_list})
 target_include_directories(${EXECUTABLE_NAME}
   PRIVATE ${Boost_INCLUDE_DIRS}
   PRIVATE ${OPENSSL_INCLUDE_DIR}
-  PRIVATE ${MYSQL_INCLUDE_DIR}
 )
 
 target_link_libraries(${EXECUTABLE_NAME}
@@ -51,8 +50,8 @@ target_link_libraries(${EXECUTABLE_NAME}
 
 target_link_libraries(${EXECUTABLE_NAME}
   debug ${OPENSSL_DEBUG_LIBRARIES}
+  ${CMAKE_SOURCE_DIR}/dep/mysql/lib/mysqlcppconn.lib
   ${Boost_LIBRARIES}
-  ${MYSQL_LIB}
   )
 
 # Define OutDir to source/bin/(platform)_(configuaration) folder.

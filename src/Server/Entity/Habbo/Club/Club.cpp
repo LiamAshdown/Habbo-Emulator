@@ -16,11 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Opcode/Packets/Server/ClubPackets.h"
 #include "Habbo.h"
 #include "Database/DatabaseTypes.h"
 #include <cmath>
 
-#include "Opcode/Packets/Server/ClubPackets.h"
 
 namespace SteerStone
 {
@@ -34,7 +34,6 @@ namespace SteerStone
         m_PrePaidMonths         = 0;
         m_DaysPassed            = 0;
         m_MonthsPassed          = 0;
-
     }
 
     /// Deconstructor
@@ -79,7 +78,6 @@ namespace SteerStone
         }
 
         LoadSubscription();
-
     }
 
     /// LoadSubscription
@@ -89,17 +87,17 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT first_subscription, subscription_expires FROM club_subscription WHERE id = ?");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// Is user already subscribed?
-        if (!l_PreparedResultSet)
+        if (l_PreparedResultSet)
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            m_RemainingDays      = ((l_Result[1].GetUInt32() - std::time(0)) / 60 / 60 / 24);
+            m_RemainingDays      = ((l_Result[1].GetUInt64() - std::time(0)) / 60 / 60 / 24);
             m_DaysMonthRemaining = ((m_RemainingDays - 1) % 31) + 1;
             m_PrePaidMonths      = (m_RemainingDays - m_DaysMonthRemaining) / 31;
-            m_MonthsPassed       = ((std::time(0) - l_Result[1].GetUInt64()) / 60 / 60 / 24 / 31);
+            m_MonthsPassed       = ((std::time(0) - l_Result[0].GetUInt64()) / 60 / 60 / 24 / 31);
 
             /// If our remaining days is lower than 0, this means user is no longer subscribed
             if (m_RemainingDays < 0)
@@ -107,11 +105,11 @@ namespace SteerStone
                 m_Habbo->SetRank(AccountRank::HABBO_NORMAL);
                 m_Habbo->SendAccountBadges(); ///< Update our badges for user to recieve HC badge
               
+                l_PreparedResultSet.reset();
+
                 l_PreparedStatement->PrepareStatement("DELETE FROM club_subscription WHERE id = ?");
                 l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
                 l_PreparedStatement->ExecuteStatement();
-                delete l_PreparedResultSet;
-                UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
                 /// Initialize default values
                 m_DaysMonthRemaining    = 0;
@@ -124,6 +122,8 @@ namespace SteerStone
             else
                 m_Subscribed = true; ///< User is subscribed to habbo club
         }
+
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
         HabboPacket::Club::ClubInfo l_Packet;
         l_Packet.ProductName   = "club_habbo"; 

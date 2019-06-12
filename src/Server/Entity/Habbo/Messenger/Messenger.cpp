@@ -16,11 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Opcode/Packets/Server/MessengerPackets.h"
+#include "Database/DatabaseTypes.h"
 #include "Habbo.h"
 #include "Hotel.h"
 #include "Room.h"
-#include "Database/DatabaseTypes.h"
-#include "Opcode/Packets/Server/MessengerPackets.h"
 
 namespace SteerStone
 {
@@ -44,26 +44,28 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_friends INNER JOIN account ON messenger_friends.to_id = account.id WHERE(messenger_friends.from_id = ?)");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
+        {
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
+        }
 
         do
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            MessengerFriendData& l_Friend  = m_MessengerFriends[l_Result[1].GetUInt32()];
-            l_Friend.m_Id                  = l_Result[1].GetUInt32();
-            l_Friend.m_Name                = l_Result[2].GetString();
-            l_Friend.m_Figure              = l_Result[3].GetString();
-            l_Friend.m_ConsoleMotto        = l_Result[4].GetString();
-            l_Friend.m_Gender              = l_Result[5].GetString();
-            l_Friend.m_LastOnline          = l_Result[6].GetString();
+            MessengerFriendData& l_Friend  = m_MessengerFriends[l_Result[0].GetUInt32()];
+            l_Friend.m_Id                  = l_Result[0].GetUInt32();
+            l_Friend.m_Name                = l_Result[1].GetString();
+            l_Friend.m_Figure              = l_Result[2].GetString();
+            l_Friend.m_ConsoleMotto        = l_Result[3].GetString();
+            l_Friend.m_Gender              = l_Result[4].GetString();
+            l_Friend.m_LastOnline          = l_Result[5].GetDateToString();
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
@@ -74,26 +76,28 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, user_name, figure, console_motto, gender, last_online FROM messenger_requests INNER JOIN account ON messenger_requests.from_id = account.id WHERE(messenger_requests.to_id = ?)");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
+        {
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
+        }
 
         do
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            MessengerFriendData& l_Friend = m_MessengerFriendRequests[l_Result[1].GetUInt32()];
-            l_Friend.m_Id                  = l_Result[1].GetUInt32();
-            l_Friend.m_Name                = l_Result[2].GetString();
-            l_Friend.m_Figure              = l_Result[3].GetString();
-            l_Friend.m_ConsoleMotto        = l_Result[4].GetString();
-            l_Friend.m_Gender              = l_Result[5].GetString();
-            l_Friend.m_LastOnline          = l_Result[6].GetString();
+            MessengerFriendData& l_Friend = m_MessengerFriendRequests[l_Result[0].GetUInt32()];
+            l_Friend.m_Id                  = l_Result[0].GetUInt32();
+            l_Friend.m_Name                = l_Result[1].GetString();
+            l_Friend.m_Figure              = l_Result[2].GetString();
+            l_Friend.m_ConsoleMotto        = l_Result[3].GetString();
+            l_Friend.m_Gender              = l_Result[4].GetString();
+            l_Friend.m_LastOnline          = l_Result[5].GetString();
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
@@ -102,26 +106,27 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT sender_id, body, date FROM messenger_messages WHERE receiver_id = ? AND has_read = 0");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
+        {
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
+        }
 
         do
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
             HabboPacket::Messenger::SendMessage l_Packet;
-            l_Packet.Id         = l_Result[1].GetUInt32();
+            l_Packet.Id         = l_Result[0].GetUInt32();
             l_Packet.ToId       = m_Habbo->GetId();
-            l_Packet.Date       = l_Result[3].GetString();
+            l_Packet.Date       = l_Result[1].GetString();
             l_Packet.Message    = l_Result[2].GetString();
 
             m_Habbo->SendPacket(l_Packet.Write());
-
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
@@ -184,6 +189,7 @@ namespace SteerStone
         l_PreparedStatement->PrepareStatement("UPDATE messenger_messages SET has_read = 1 WHERE receiver_id = ? AND has_read = 0 ORDER BY id DESC LIMIT 1");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
         l_PreparedStatement->ExecuteStatement();
+
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
@@ -296,8 +302,8 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, subscribed, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.id = ?)");
-        l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        l_PreparedStatement->SetUint32(0, p_SenderId);
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         HabboPacket::Messenger::BuddyRequestResult l_Packet;
         l_Packet.Error = MessengerErrorCode::ACCEPT_SUCCESS;
@@ -308,6 +314,8 @@ namespace SteerStone
             LOG_FATAL << "Habbo " << m_Habbo->GetName() << " tried to accept friend request from Habbo Id " << p_SenderId << " but Habbo does not exist!";
             l_Packet.Error = MessengerErrorCode::CONCURRENCY_ERROR;
             m_Habbo->SendPacket(l_Packet.Write());
+
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
@@ -324,49 +332,55 @@ namespace SteerStone
             l_Packet.Error = MessengerErrorCode::TARGET_FRIEND_LIST_FULL;
 
         /// Does target user already exist on friend list?
-        if (l_Result[10].GetUInt32() == m_Habbo->GetId())
+        if (l_Result[9].GetUInt32() == m_Habbo->GetId())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         /// Does target user accept friend requests?
-        if (!l_Result[7].GetBool())
+        if (!l_Result[6].GetBool())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         if (l_Packet.Error != MessengerErrorCode::ACCEPT_SUCCESS)
         {
             m_Habbo->SendPacket(l_Packet.Write());
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
+
+        l_PreparedStatement->ClearPrepared();
 
         /// Succesfull! Insert into our messenger friends for both users
         /// TODO; Is there anyway to clean this?
         /// I don't feel comfortable on querying the database every time we accept a new friend request
-        l_PreparedStatement->PrepareStatement("INSERT INTO messenger_friends (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = ?");
+        LOG_INFO << l_Result[0].GetUInt32();
+        l_PreparedStatement->PrepareStatement("INSERT INTO messenger_friends (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = VALUES(to_id)");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        l_PreparedStatement->SetUint32(1, l_Result[1].GetUInt32());
-        l_PreparedStatement->SetUint32(2, l_Result[1].GetUInt32());
+        l_PreparedStatement->SetUint32(1, l_Result[0].GetUInt32());
         l_PreparedStatement->ExecuteStatement();
 
-        l_PreparedStatement->PrepareStatement("INSERT INTO messenger_friends (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = ?");
-        l_PreparedStatement->SetUint32(1, l_Result[1].GetUInt32());
-        l_PreparedStatement->SetUint32(2, m_Habbo->GetId());
-        l_PreparedStatement->SetUint32(3, m_Habbo->GetId());
+        l_PreparedStatement->ClearPrepared();
+
+        l_PreparedStatement->PrepareStatement("INSERT INTO messenger_friends (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = VALUES(to_id)");
+        l_PreparedStatement->SetUint32(0, l_Result[0].GetUInt32());
+        l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
         l_PreparedStatement->ExecuteStatement();
+
+        l_PreparedStatement->ClearPrepared();
 
         /// Remove friend request
         l_PreparedStatement->PrepareStatement("DELETE FROM messenger_requests WHERE from_id = ? AND to_id = ?");
-        l_PreparedStatement->SetUint32(1, l_Result[1].GetUInt32());
+        l_PreparedStatement->SetUint32(0, l_Result[0].GetUInt32());
         l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
         l_PreparedStatement->ExecuteStatement();
 
         /// Send Packet to update console with new friend!
         /// Is User online?
-        Habbo* l_Habbo = sHotel->FindHabbo(l_Result[1].GetUInt32());
+        Habbo* l_Habbo = sHotel->FindHabbo(l_Result[0].GetUInt32());
 
         HabboPacket::Messenger::AddBuddy l_PacketAddFriend;
-        l_PacketAddFriend.Id            = l_Result[1].GetUInt32();
-        l_PacketAddFriend.Name          = l_Result[2].GetString();
-        l_PacketAddFriend.Gender        = l_Result[3].GetString() == "Male" ? true : false;
-        l_PacketAddFriend.ConsoleMotto  = l_Result[4].GetString();
+        l_PacketAddFriend.Id            = l_Result[0].GetUInt32();
+        l_PacketAddFriend.Name          = l_Result[1].GetString();
+        l_PacketAddFriend.Gender        = l_Result[4].GetString() == "Male" ? true : false;
+        l_PacketAddFriend.ConsoleMotto  = l_Result[3].GetString();
         l_PacketAddFriend.IsOnline      = l_Habbo ? true : false;
         
         if (l_PacketAddFriend.IsOnline)
@@ -384,10 +398,10 @@ namespace SteerStone
                 l_PacketAddFriend.Status = "On Hotel View";
         }
         else
-            l_PacketAddFriend.Status = l_Result[6].GetString(); ///< Last time user was online
+            l_PacketAddFriend.Status = l_Result[5].GetDateToString(); ///< Last time user was online
 
-        l_PacketAddFriend.LastOnline = l_Result[6].GetString(); ///< Last time user was online
-        l_PacketAddFriend.Figure = l_Result[3].GetString(); ///< User Figure
+        l_PacketAddFriend.LastOnline = l_Result[5].GetDateToString(); ///< Last time user was online
+        l_PacketAddFriend.Figure = l_Result[2].GetString(); ///< User Figure
         
         m_Habbo->SendPacket(l_PacketAddFriend.Write());
 
@@ -419,7 +433,6 @@ namespace SteerStone
             l_Habbo->SendMessengerUpdate();
         }
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
@@ -435,23 +448,24 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, user_name, figure, console_motto, gender, last_online FROM account WHERE user_name = ?");
         l_PreparedStatement->SetString(0, p_Name);
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         /// User doesn't exist
         if (!l_PreparedResultSet)
         {
             p_Buffer.AppendWired(0);
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-        p_Buffer.AppendWired(l_Result[1].GetUInt32());
-        p_Buffer.AppendString(l_Result[2].GetString());
-        p_Buffer.AppendWired(l_Result[5].GetString() == "Male" ? true : false);
-        p_Buffer.AppendString(l_Result[4].GetString());
+        p_Buffer.AppendWired(l_Result[0].GetUInt32());
+        p_Buffer.AppendString(l_Result[1].GetString());
+        p_Buffer.AppendWired(l_Result[4].GetString() == "Male" ? true : false);
+        p_Buffer.AppendString(l_Result[3].GetString());
 
-        Habbo* l_Habbo = sHotel->FindHabbo(l_Result[1].GetUInt32());
+        Habbo* l_Habbo = sHotel->FindHabbo(l_Result[0].GetUInt32());
 
         p_Buffer.AppendWired(l_Habbo ? true : false); ///< Is user online?
 
@@ -471,10 +485,12 @@ namespace SteerStone
                 p_Buffer.AppendString("On Hotel View");
         }
         else
-            p_Buffer.AppendString(l_Result[4].GetString()); ///< Last time user was online
+            p_Buffer.AppendString(l_Result[3].GetString()); ///< Last time user was online
 
-        p_Buffer.AppendString(l_Result[6].GetString()); ///< Last time user was online
-        p_Buffer.AppendString(l_Result[3].GetString()); ///< User Figure
+        p_Buffer.AppendString(l_Result[5].GetDateToString()); ///< Last time user was online
+        p_Buffer.AppendString(l_Result[2].GetString()); ///< User Figure
+
+        UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     /// ParseMessengerSendBuddyRequest
@@ -484,7 +500,7 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, user_name, figure, console_motto, gender, last_online, allow_friend_requests, subscribed, messenger_requests.from_id, messenger_friends.to_id FROM account LEFT JOIN messenger_requests ON messenger_requests.to_id = account.id LEFT JOIN messenger_friends ON messenger_friends.from_id = account.id WHERE(account.user_name = ?)");
         l_PreparedStatement->SetString(0, p_Name);
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         HabboPacket::Messenger::ErrorMessenger l_Packet;
         l_Packet.Error = MessengerErrorCode::ACCEPT_SUCCESS;
@@ -494,6 +510,8 @@ namespace SteerStone
         {
             l_Packet.Error = MessengerErrorCode::FRIEND_REQUEST_NOT_FOUND;
             m_Habbo->SendPacket(l_Packet.Write());
+
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
@@ -509,26 +527,24 @@ namespace SteerStone
         if (l_PreparedResultSet->GetRowCount() >= l_FriendsLimit)
             l_Packet.Error = MessengerErrorCode::TARGET_FRIEND_LIST_FULL;
 
-        /// Does target user already exist on friend request list?
-        if (l_Result[1].GetUInt32() == m_Habbo->GetId())
-            l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
-
         /// Does target user already exist on friend list?
-        if (l_Result[10].GetUInt32() == m_Habbo->GetId())
+        if (l_Result[0].GetUInt32() == m_Habbo->GetId())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         /// Does target user accept friend requests?
-        if (!l_Result[7].GetBool())
+        if (!l_Result[6].GetBool())
             l_Packet.Error = MessengerErrorCode::TARGET_DOES_NOT_ACCEPT;
 
         if (l_Packet.Error != MessengerErrorCode::ACCEPT_SUCCESS)
         {
             m_Habbo->SendPacket(l_Packet.Write());
+
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         ///< All Good send friend request notification to player if online
-        if (Habbo* l_Habbo = sHotel->FindHabbo(l_Result[1].GetUInt32()))
+        if (Habbo* l_Habbo = sHotel->FindHabbo(l_Result[0].GetUInt32()))
         {
             HabboPacket::Messenger::MessengerBuddyRequest l_Packet;
             l_Packet.Id = m_Habbo->GetId();
@@ -537,15 +553,18 @@ namespace SteerStone
         }
         else
         {
+            l_PreparedResultSet.reset();
+
             /// Insert friend request into database if user is not online
             /// So user will pick up friend request the next time he logs in
             /// TODO; What happens if user is online and goes offline and not accept the friend request?
             /// the friend request will go limbo - not good!
             l_PreparedStatement->PrepareStatement("INSERT INTO messenger_requests (from_id, to_id) VALUES (?, ?) ON DUPLICATE KEY UPDATE to_id = ?");
             l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-            l_PreparedStatement->SetUint32(1, l_Result[1].GetUInt32());
-            l_PreparedStatement->SetUint32(2, l_Result[1].GetUInt32());
+            l_PreparedStatement->SetUint32(1, l_Result[0].GetUInt32());
+            l_PreparedStatement->SetUint32(2, l_Result[0].GetUInt32());
             l_PreparedStatement->ExecuteStatement();
+
             UserDatabase.FreePrepareStatement(l_PreparedStatement);
         }
     }
@@ -580,7 +599,7 @@ namespace SteerStone
             /// so when it comes to updating the database on misc querys we can do it on another thread
             /// this way we don't cause any lag if a habbo is mass removing friends as we don't do 
             /// one thread per player
-            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
             l_PreparedStatement->PrepareStatement("DELETE from messenger_friends WHERE from_id = ? AND to_id = ?");
             l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
             l_PreparedStatement->SetUint32(1, l_Id);
@@ -590,6 +609,8 @@ namespace SteerStone
             l_PreparedStatement->SetUint32(0, l_Id);
             l_PreparedStatement->SetUint32(1, m_Habbo->GetId());
             l_PreparedStatement->ExecuteStatement();
+
+            UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
             m_MessengerFriends.erase(l_Itr);
             l_Packet.FriendsId.push_back(l_Id);
@@ -605,6 +626,7 @@ namespace SteerStone
                 l_Habbo->SendMessengerUpdate();
             }
         }
+
         m_Habbo->SendPacket(l_Packet.Write());
     }
 
@@ -621,6 +643,7 @@ namespace SteerStone
             l_PreparedStatement->PrepareStatement("DELETE FROM messenger_requests WHERE to_id = ?");
             l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
             l_PreparedStatement->ExecuteStatement();
+
             UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
             m_MessengerFriendRequests.clear(); ///< Clear our storage

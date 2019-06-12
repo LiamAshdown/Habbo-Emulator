@@ -46,6 +46,10 @@ namespace SteerStone
         /// Shutdown all connections
         void ShutDown();
 
+        /// GetDatabasename 
+        /// Return database name
+        std::string GetName() const { return m_Database; }
+
     public:
         /// GetPreparedStatement
         /// Returns a Prepare Statement from Pool
@@ -82,7 +86,7 @@ namespace SteerStone
 
     private:
         PreparedStatements m_PreparedStatements;
-        DatabaseWorker m_DatabaseWorker;
+        DatabaseWorker* m_DatabaseWorker;
     };
 }
 

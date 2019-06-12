@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Liam Ashdown
 * Copyright (C) 2019
 *
@@ -16,13 +16,14 @@
 * along with this program.  If not, see <http:///www.gnu.org/licenses/>.
 */
 
+#include "Opcode/Packets/Server/RegistrationPackets.h"
+#include "Opcode/Packets/Server/LoginPackets.h"
 #include "Habbo.h"
 #include "Hotel.h"
 #include "Common/SHA1.h"
 #include "RoomManager.h"
 #include "Database/DatabaseTypes.h"
-#include "Opcode/Packets/Server/RegistrationPackets.h"
-#include "Opcode/Packets/Server/LoginPackets.h"
+#include <time.h>
 
 namespace SteerStone
 {    
@@ -39,10 +40,10 @@ namespace SteerStone
 
         l_Packet.ErrorCode = ApproveNameError::NAME_VALID;
 
-        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT user_name FROM account WHERE user_name = ?");
         l_PreparedStatement->SetString(0, l_Packet.Name.c_str());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
         {
@@ -69,7 +70,6 @@ namespace SteerStone
 
         SendPacket(l_Packet.Write());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
@@ -86,7 +86,7 @@ namespace SteerStone
             l_Packet.ErrorCode = ApprovePasswordError::PASSWORD_TOO_LONG;
         else
         {
-            std::string l_BobbaWords = sConfig->GetStringDefault("bobbaWords");
+            std::string l_BobbaWords = sConfig->GetStringDefault("RegisterationFilter");
 
             bool l_UsedNumber = false;
 
@@ -190,19 +190,19 @@ namespace SteerStone
 
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("INSERT INTO account(user_name, hash_pass, email, figure, motto, console_motto, direct_mail, birthday, gender, credits, tickets, films, sound_enabled) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        l_PreparedStatement->SetString(1, l_Username.c_str());
-        l_PreparedStatement->SetString(2, (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
-        l_PreparedStatement->SetString(3, l_Email.c_str());
-        l_PreparedStatement->SetString(4, l_Figure.c_str());
-        l_PreparedStatement->SetString(5, sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
-        l_PreparedStatement->SetString(6, sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
-        l_PreparedStatement->SetBool(7, l_DirectEmail);
-        l_PreparedStatement->SetString(8, l_Birthday.c_str());
-        l_PreparedStatement->SetString(9, l_Gender.c_str());
-        l_PreparedStatement->SetUint32(10, sHotel->GetIntConfig(CONFIG_REGISTERATION_CREDITS));
-        l_PreparedStatement->SetUint32(11, sHotel->GetIntConfig(CONFIG_REGISTERATION_TICKETS));
-        l_PreparedStatement->SetUint32(12, sHotel->GetIntConfig(CONFIG_REGISTERATION_FILMS));
-        l_PreparedStatement->SetBool(13, sHotel->GetBoolConfig(BoolConfigs::CONFIG_REGISTERATION_SOUND));
+        l_PreparedStatement->SetString(0, l_Username.c_str());
+        l_PreparedStatement->SetString(1, (CalculateSHA1Hash(boost::to_upper_copy(l_Username) + ":" + boost::to_upper_copy(l_Password))).c_str());
+        l_PreparedStatement->SetString(2, l_Email.c_str());
+        l_PreparedStatement->SetString(3, l_Figure.c_str());
+        l_PreparedStatement->SetString(4, sConfig->GetStringDefault("RegisterationMotto", "I'm a new user!"));
+        l_PreparedStatement->SetString(5, sConfig->GetStringDefault("RegisterationConsoleMotto", "I'm looking for friends!"));
+        l_PreparedStatement->SetBool(6, l_DirectEmail);
+        l_PreparedStatement->SetString(7, l_Birthday.c_str());
+        l_PreparedStatement->SetString(8, l_Gender.c_str());
+        l_PreparedStatement->SetUint32(9, sHotel->GetIntConfig(CONFIG_REGISTERATION_CREDITS));
+        l_PreparedStatement->SetUint32(10, sHotel->GetIntConfig(CONFIG_REGISTERATION_TICKETS));
+        l_PreparedStatement->SetUint32(11, sHotel->GetIntConfig(CONFIG_REGISTERATION_FILMS));
+        l_PreparedStatement->SetBool(12, sHotel->GetBoolConfig(BoolConfigs::CONFIG_REGISTERATION_SOUND));
         l_PreparedStatement->ExecuteStatement();
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
@@ -244,6 +244,59 @@ namespace SteerStone
         /// TODO; Add another database column to users, but will anyone ever use this parent email thingy?
         HabboPacket::Registration::ValidateParentEmail l_Packet;
         l_Packet.Validate = false;
+        SendPacket(l_Packet.Write());
+    }
+
+    void HabboSocket::HandleClientAC(ClientPacket* p_Packet)
+    {
+        std::string l_DateOfBirth = p_Packet->ReadString();
+        std::string l_MinimumDate = sConfig->GetStringDefault("RegisterationDateOfBirth");
+
+        HabboPacket::Registration::ValidateAge l_Packet;
+        l_Packet.Validate = true;
+        SendPacket(l_Packet.Write());
+
+        /// TODO; Fix
+        /*struct tm l_TimeInfoDateOfBirth;
+        struct tm l_TimeInfoMinimumDate;
+
+        sscanf(l_DateOfBirth.c_str(), "%d.%d.%d", &l_TimeInfoDateOfBirth.tm_year, &l_TimeInfoDateOfBirth.tm_mon, &l_TimeInfoDateOfBirth.tm_mday);
+        sscanf(l_MinimumDate.c_str(), "%d.%d.%d", &l_TimeInfoMinimumDate.tm_year, &l_TimeInfoMinimumDate.tm_mon, &l_TimeInfoMinimumDate.tm_mday);
+
+        std::time_t l_TimeDateOfBirth = std::mktime(&l_TimeInfoDateOfBirth);
+        std::time_t l_TimeMinimumDate = std::mktime(&l_TimeInfoMinimumDate);
+        if (l_TimeDateOfBirth != (std::time_t)(-1) && l_TimeMinimumDate != (std::time_t)(-1))
+        {
+            double l_Difference = std::difftime(l_TimeMinimumDate, l_TimeDateOfBirth) / (60 * 60 * 24);
+            std::cout << std::ctime(&l_TimeDateOfBirth);
+            std::cout << std::ctime(&l_TimeMinimumDate);
+
+            /// Is user date older than 13 years old?
+            if (l_Difference > MINIMUM_AMOUNT_OF_DAYS)
+            {
+                HabboPacket::Registration::ValidateAge l_Packet;
+                l_Packet.Validate = true;
+                SendPacket(l_Packet.Write());
+            }
+            else
+            {
+                HabboPacket::Registration::ValidateAge l_Packet;
+                l_Packet.Validate = false;
+                SendPacket(l_Packet.Write());
+            }
+        }
+        else ///< Shouldn't happen but handle this anyway just incase
+        {
+            LOG_WARNING << "Failed to compare two dates, rejecting user.";
+            HabboPacket::Registration::ValidateAge l_Packet;
+            l_Packet.Validate = false;
+            SendPacket(l_Packet.Write());
+        }*/
+    }
+
+    void HabboSocket::HandleCoppaRegGetRealTime(ClientPacket* p_Packet)
+    {
+        HabboPacket::Registration::CoppaGetRealTime l_Packet;
         SendPacket(l_Packet.Write());
     }
 }

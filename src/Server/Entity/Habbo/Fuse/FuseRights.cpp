@@ -16,10 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Opcode/Packets/Server/LoginPackets.h"
 #include "Habbo.h"
 #include "Database/DatabaseTypes.h"
 
-#include "Opcode/Packets/Server/LoginPackets.h"
 
 namespace SteerStone
 {
@@ -39,10 +39,10 @@ namespace SteerStone
     /// Load User Fuse Rights from database
     void FuseRights::LoadFuseRights()
     {
-        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT fuseright FROM rank_fuserights WHERE rank <= ? ");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetRank());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
             return;
@@ -50,11 +50,10 @@ namespace SteerStone
         do
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
-            m_FuseRights.push_back(l_Result[1].GetString());
+            m_FuseRights.push_back(l_Result[0].GetString());
             
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 

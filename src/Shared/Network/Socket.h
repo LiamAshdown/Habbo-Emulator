@@ -18,9 +18,9 @@
 
 #ifndef _NETWORK_SOCKET_h
 #define _NETWORK_SOCKET_h
+#include <boost/asio.hpp>
 #include "Common/SharedDefines.h"
 #include "PacketBuffer.h"
-#include <boost/asio.hpp>
 #include <mutex>
 #endif /* _NETWORK_SOCKET_h */
 

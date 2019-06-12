@@ -44,33 +44,33 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, parent_id, name, public_spaces, allow_trading, minrole_access, minrole_setflatcat FROM rooms_categories");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedStatement)
         {
             LOG_ERROR << "room_categories is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         do
         {
-            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+            ResultSet* l_Result                = l_PreparedResultSet->FetchResult();
 
             RoomCategory& l_RoomCategories     = m_RoomCategories[l_Result[0].GetUInt32()];
-            l_RoomCategories.m_CategoryId      = l_Result[1].GetUInt32();
-            l_RoomCategories.m_ParentId        = l_Result[2].GetUInt32();
-            l_RoomCategories.m_Name            = l_Result[3].GetString();
-            l_RoomCategories.m_RoomType        = l_Result[4].GetBool();
-            l_RoomCategories.m_AllowTrading    = l_Result[5].GetBool();
-            l_RoomCategories.m_MinRoleAccess   = l_Result[6].GetUInt16();
-            l_RoomCategories.m_MinRoleSetFlat  = l_Result[7].GetUInt16();
+            l_RoomCategories.m_CategoryId      = l_Result[0].GetUInt32();
+            l_RoomCategories.m_ParentId        = l_Result[1].GetUInt32();
+            l_RoomCategories.m_Name            = l_Result[2].GetString();
+            l_RoomCategories.m_RoomType        = l_Result[3].GetBool();
+            l_RoomCategories.m_AllowTrading    = l_Result[4].GetBool();
+            l_RoomCategories.m_MinRoleAccess   = l_Result[5].GetUInt16();
+            l_RoomCategories.m_MinRoleSetFlat  = l_Result[6].GetUInt16();
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        LOG_INFO << "Loaded " << m_RoomCategories.size() << " Room Categories";
-
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded " << m_RoomCategories.size() << " Room Categories";
     } 
 
     /// LoadRooms
@@ -79,37 +79,35 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, model_id, model_name, door_x, door_y, door_z, door_dir, height_map from room_models");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedStatement)
         {
             LOG_ERROR << "height_map is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         do
         {
-            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+            ResultSet* l_Result             = l_PreparedResultSet->FetchResult();
 
-            RoomModel& l_RoomModel          = m_RoomModels[l_Result[2].GetString()];
-            l_RoomModel.m_Id                = l_Result[1].GetUInt32();
-            l_RoomModel.m_ModelId           = l_Result[2].GetString();
-            l_RoomModel.m_Model             = l_Result[3].GetString();
-            l_RoomModel.m_DoorX             = l_Result[4].GetInt32();
-            l_RoomModel.m_DoorY             = l_Result[5].GetInt32();
-            l_RoomModel.m_DoorZ             = l_Result[6].GetFloat();
-            l_RoomModel.m_DoorOrientation   = l_Result[7].GetInt32();
-            l_RoomModel.m_HeightMap         = l_Result[8].GetString();
-
+            RoomModel& l_RoomModel          = m_RoomModels[l_Result[1].GetString()];
+            l_RoomModel.m_Id                = l_Result[0].GetUInt32();
+            l_RoomModel.m_ModelId           = l_Result[1].GetString();
+            l_RoomModel.m_Model             = l_Result[2].GetString();
+            l_RoomModel.m_DoorX             = l_Result[3].GetInt32();
+            l_RoomModel.m_DoorY             = l_Result[4].GetInt32();
+            l_RoomModel.m_DoorZ             = l_Result[5].GetDouble();
+            l_RoomModel.m_DoorOrientation   = l_Result[6].GetUInt32();
+            l_RoomModel.m_HeightMap         = l_Result[7].GetString();
             boost::replace_all(l_RoomModel.m_HeightMap, "|", "\r");
 
         } while (l_PreparedResultSet->GetNextRow());
 
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
         LOG_INFO << "Loaded " << m_RoomModels.size() << " Room Models";
-
-        delete l_PreparedResultSet;
-        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 
     /// LoadRoomUrls
@@ -118,29 +116,29 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, image_url, link_url FROM room_url WHERE is_active = 1");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedStatement)
         {
             LOG_ERROR << "room_url is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         do
         {
-            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+            ResultSet* l_Result    = l_PreparedResultSet->FetchResult();
 
-            RoomUrlData& l_RoomUrl = m_RoomUrl[l_Result[1].GetUInt32()];
-            l_RoomUrl.Id = l_Result[1].GetUInt32();
-            l_RoomUrl.ImageUrl = l_Result[2].GetString();
-            l_RoomUrl.LinkUrl = l_Result[3].GetString();
+            RoomUrlData& l_RoomUrl = m_RoomUrl[l_Result[0].GetUInt32()];
+            l_RoomUrl.Id           = l_Result[0].GetUInt32();
+            l_RoomUrl.ImageUrl     = l_Result[1].GetString();
+            l_RoomUrl.LinkUrl      = l_Result[2].GetString();
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        LOG_INFO << "Loaded " << m_RoomUrl.size() << " Room Urls";
-
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded " << m_RoomUrl.size() << " Room Urls";
     }
 
     /// LoadRoomWalkWays
@@ -149,11 +147,12 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT from_id, to_id, from_model, to_model, from_position, to_position FROM room_walk_way WHERE is_active = 1");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedStatement)
         {
             LOG_ERROR << "room_walk_way is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
         
@@ -162,13 +161,13 @@ namespace SteerStone
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
             WalkWay l_RoomWalkWay;
-            l_RoomWalkWay.m_FromId         = l_Result[1].GetUInt32();
-            l_RoomWalkWay.m_ToId           = l_Result[2].GetUInt32();
-            l_RoomWalkWay.m_WalkWayFromMod = l_Result[3].GetString();
-            l_RoomWalkWay.m_WalkWayToMod   = l_Result[4].GetString();
+            l_RoomWalkWay.m_FromId         = l_Result[0].GetUInt32();
+            l_RoomWalkWay.m_ToId           = l_Result[1].GetUInt32();
+            l_RoomWalkWay.m_WalkWayFromMod = l_Result[2].GetString();
+            l_RoomWalkWay.m_WalkWayToMod   = l_Result[3].GetString();
 
             std::vector<std::string> l_SpaceSplit;
-            boost::split(l_SpaceSplit, l_Result[5].GetString(), boost::is_any_of(" "));
+            boost::split(l_SpaceSplit, l_Result[4].GetString(), boost::is_any_of(" "));
 
             for (auto& l_Itr : l_SpaceSplit)
             {
@@ -183,7 +182,7 @@ namespace SteerStone
             }
 
             std::vector<std::string> l_CommaSplit;
-            boost::split(l_CommaSplit, l_Result[6].GetString(), boost::is_any_of(","));
+            boost::split(l_CommaSplit, l_Result[5].GetString(), boost::is_any_of(","));
 
             l_RoomWalkWay.m_WalkWayToPos.X        = std::stoi(l_CommaSplit[0]);
             l_RoomWalkWay.m_WalkWayToPos.Y        = std::stoi(l_CommaSplit[1]);
@@ -194,10 +193,9 @@ namespace SteerStone
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        LOG_INFO << "Loaded " << m_RoomWalkWays.size() << " Room Walk Ways";
-
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded " << m_RoomWalkWays.size() << " Room Walk Ways";
     }
 
     /// LoadRooms
@@ -207,44 +205,45 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, " 
             "floor, show_name, super_users, access_type, password, visitors_max, room_visible, rating FROM rooms");
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedStatement)
         {
             LOG_ERROR << "hotel_rooms is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
         }
 
         do
         {
-            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+            ResultSet* l_Result               = l_PreparedResultSet->FetchResult();
 
             std::unique_ptr<Room> l_Room      = std::make_unique<Room>();
-            l_Room->m_Id                      = l_Result[1].GetUInt32();
-            l_Room->m_OwnerId                 = l_Result[2].GetUInt32();
-            l_Room->m_OwnerName               = l_Result[4].GetString();
-            l_Room->m_CategoryId              = l_Result[4].GetUInt32();
-            l_Room->m_Name                    = l_Result[5].GetString();
-            l_Room->m_Description             = l_Result[6].GetString();
-            l_Room->m_Model                   = l_Result[7].GetString();
+            l_Room->m_Id                      = l_Result[0].GetUInt32();
+            l_Room->m_OwnerId                 = l_Result[1].GetUInt32();
+            l_Room->m_OwnerName               = l_Result[2].GetString();
+            l_Room->m_CategoryId              = l_Result[3].GetUInt32();
+            l_Room->m_Name                    = l_Result[4].GetString();
+            l_Room->m_Description             = l_Result[5].GetString();
+            l_Room->m_Model                   = l_Result[6].GetString();
 
             std::vector<std::string> l_Split;
-            boost::split(l_Split, l_Result[8].GetString(), boost::is_any_of(","));
+            boost::split(l_Split, l_Result[7].GetString(), boost::is_any_of(","));
             for (auto &l_Itr : l_Split) 
             {
                 l_Room->m_Ccts.push_back(l_Itr);
             }
 
-            l_Room->m_WallPaper               = l_Result[9].GetUInt32();
-            l_Room->m_Floor                   = l_Result[10].GetUInt32();
-            l_Room->m_ShowName                = l_Result[11].GetBool();
-            l_Room->m_AllowSuperRights        = l_Result[12].GetBool();
-            l_Room->m_AccessType              = l_Result[13].GetUInt16();
-            l_Room->m_Password                = l_Result[14].GetString();
+            l_Room->m_WallPaper               = l_Result[8].GetUInt32();
+            l_Room->m_Floor                   = l_Result[9].GetUInt32();
+            l_Room->m_ShowName                = l_Result[10].GetBool();
+            l_Room->m_AllowSuperRights        = l_Result[11].GetBool();
+            l_Room->m_AccessType              = l_Result[12].GetUInt16();
+            l_Room->m_Password                = l_Result[13].GetString();
             l_Room->m_VisitorsNow             = 0;
-            l_Room->m_VisitorsMax             = l_Result[15].GetUInt32();
-            l_Room->m_RoomVisible             = l_Result[16].GetBool();
-            l_Room->m_Rating                  = l_Result[17].GetUInt32();
+            l_Room->m_VisitorsMax             = l_Result[14].GetUInt32();
+            l_Room->m_RoomVisible             = l_Result[15].GetBool();
+            l_Room->m_Rating                  = l_Result[16].GetUInt32();
             l_Room->m_RoomModel               = *GetRoomModel(l_Room->GetModel());
             l_Room->m_RoomCategory            = GetRoomCategory(l_Room->GetCategoryId());
             l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
@@ -254,10 +253,9 @@ namespace SteerStone
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        LOG_INFO << "Loaded " << m_Rooms.size() << " Hotel Rooms";
-
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded " << m_Rooms.size() << " Hotel Rooms";
     }
 
     /// LoadRoomRights
@@ -269,8 +267,8 @@ namespace SteerStone
         for (auto const& l_Itr : m_Rooms)
         {
             l_PreparedStatement->PrepareStatement("SELECT account_id FROM room_rights WHERE room_id = ?");
-            l_PreparedStatement->SetUint32(1, l_Itr.second->GetId());
-            PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+            l_PreparedStatement->SetUint32(0, l_Itr.second->GetId());
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
             if (l_PreparedResultSet)
             {
@@ -278,14 +276,15 @@ namespace SteerStone
                 {
                     ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-                    l_Itr.second->m_SuperRights.insert(l_Result[1].GetUInt32());
+                    l_Itr.second->m_SuperRights.insert(l_Result[0].GetUInt32());
                 }
-
-                delete l_PreparedResultSet;
             }
+
         }
 
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded Rooms Rights!";
     }
 
     /// LoadVotedUsers
@@ -297,8 +296,8 @@ namespace SteerStone
         for (auto const& l_Itr : m_Rooms)
         {
             l_PreparedStatement->PrepareStatement("SELECT account_id FROM room_rating WHERE room_id = ? ");
-            l_PreparedStatement->SetUint32(1, l_Itr.second->GetId());
-            PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+            l_PreparedStatement->SetUint32(0, l_Itr.second->GetId());
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
             if (l_PreparedResultSet)
             {
@@ -306,14 +305,14 @@ namespace SteerStone
                 {
                     ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-                    l_Itr.second->m_VotedUsers.insert(l_Result[1].GetUInt32());
+                    l_Itr.second->m_VotedUsers.insert(l_Result[0].GetUInt32());
                 }
-
-                delete l_PreparedResultSet;
             }
         }
 
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded Rooms Ratings!";
     }
 
     /// AddRoom
@@ -327,7 +326,7 @@ namespace SteerStone
         l_PreparedStatement->PrepareStatement("SELECT id, owner_id, owner_name, category, name, description, model, ccts, wall_paper, "
             "floor, show_name, super_users, access_type, password, visitors_max, room_visible, rating WHERE id = ?");
         l_PreparedStatement->SetUint32(1, p_RoomId);
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
             return;
@@ -335,31 +334,31 @@ namespace SteerStone
         ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
         std::unique_ptr<Room> l_Room        = std::make_unique<Room>();
-        l_Room->m_Id                        = l_Result[1].GetUInt32();
-        l_Room->m_OwnerId                   = l_Result[2].GetUInt32();
-        l_Room->m_OwnerName                 = l_Result[3].GetString();
-        l_Room->m_CategoryId                = l_Result[4].GetUInt32();
-        l_Room->m_Name                      = l_Result[5].GetString();
-        l_Room->m_Description               = l_Result[6].GetString();
-        l_Room->m_Model                     = l_Result[7].GetString();
+        l_Room->m_Id                        = l_Result[0].GetUInt32();
+        l_Room->m_OwnerId                   = l_Result[1].GetUInt32();
+        l_Room->m_OwnerName                 = l_Result[2].GetString();
+        l_Room->m_CategoryId                = l_Result[3].GetUInt32();
+        l_Room->m_Name                      = l_Result[4].GetString();
+        l_Room->m_Description               = l_Result[5].GetString();
+        l_Room->m_Model                     = l_Result[6].GetString();
 
         std::vector<std::string> l_Split;
-        boost::split(l_Split, l_Result[8].GetString(), boost::is_any_of(","));
+        boost::split(l_Split, l_Result[7].GetString(), boost::is_any_of(","));
         for (auto &l_Itr : l_Split)
         {
             l_Room->m_Ccts.push_back(l_Itr);
         }
 
-        l_Room->m_WallPaper                 = l_Result[9].GetUInt32();
-        l_Room->m_Floor                     = l_Result[10].GetUInt32();
-        l_Room->m_ShowName                  = l_Result[11].GetBool();
-        l_Room->m_AllowSuperRights          = l_Result[12].GetBool();
-        l_Room->m_AccessType                = l_Result[13].GetUInt16();
-        l_Room->m_Password                  = l_Result[14].GetString();
+        l_Room->m_WallPaper                 = l_Result[8].GetUInt32();
+        l_Room->m_Floor                     = l_Result[9].GetUInt32();
+        l_Room->m_ShowName                  = l_Result[10].GetBool();
+        l_Room->m_AllowSuperRights          = l_Result[11].GetBool();
+        l_Room->m_AccessType                = l_Result[12].GetUInt16();
+        l_Room->m_Password                  = l_Result[13].GetString();
         l_Room->m_VisitorsNow               = 0;
-        l_Room->m_VisitorsMax               = l_Result[15].GetUInt32();
-        l_Room->m_RoomVisible               = l_Result[16].GetBool();
-        l_Room->m_Rating                    = l_Result[17].GetUInt32();
+        l_Room->m_VisitorsMax               = l_Result[14].GetUInt32();
+        l_Room->m_RoomVisible               = l_Result[15].GetBool();
+        l_Room->m_Rating                    = l_Result[16].GetUInt32();
         l_Room->m_RoomModel                 = *GetRoomModel(l_Room->GetModel());
         l_Room->m_RoomCategory              = GetRoomCategory(l_Room->GetCategoryId());
         l_Room->GetRoomCategory()->m_VisitorsMax += l_Room->GetVisitorsMax();
@@ -367,9 +366,7 @@ namespace SteerStone
 
         m_Rooms[l_Room->GetId()] = std::move(l_Room);
 
-        delete l_PreparedResultSet;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
-
     }
 
     /// UpdateRooms
@@ -407,7 +404,7 @@ namespace SteerStone
 
                 PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
                 l_PreparedStatement->PrepareStatement("DELETE FROM rooms WHERE id = ?");
-                l_PreparedStatement->SetUint32(1, (*l_Itr)->GetId());
+                l_PreparedStatement->SetUint32(0, (*l_Itr)->GetId());
                 l_PreparedStatement->ExecuteStatement();
                 RoomDatabase.FreePrepareStatement(l_PreparedStatement);
 
@@ -486,8 +483,8 @@ namespace SteerStone
     {
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT category, name, description, wall_paper, show_name, super_users, access_type, password, visitors_max, room_visible FROM rooms WHERE id = ?");
-        l_PreparedStatement->SetUint32(1, p_Id);
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        l_PreparedStatement->SetUint32(0, p_Id);
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
             return;
@@ -495,18 +492,18 @@ namespace SteerStone
         ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
         std::shared_ptr<Room> l_Room        = GetRoom(p_Id);
-        l_Room->m_CategoryId                = l_Result[1].GetUInt32();
-        l_Room->m_Name                      = l_Result[2].GetString();
-        l_Room->m_Description               = l_Result[3].GetString();
-        l_Room->m_WallPaper                 = l_Result[4].GetUInt32();
-        l_Room->m_ShowName                  = l_Result[5].GetBool();
-        l_Room->m_AllowSuperRights          = l_Result[6].GetBool();
-        l_Room->m_AccessType                = l_Result[7].GetUInt16();
-        l_Room->m_Password                  = l_Result[8].GetString();
-        l_Room->m_VisitorsMax               = l_Result[9].GetUInt32();
-        l_Room->m_RoomVisible               = l_Result[10].GetBool();
+        l_Room->m_CategoryId                = l_Result[0].GetUInt32();
+        l_Room->m_Name                      = l_Result[1].GetString();
+        l_Room->m_Description               = l_Result[2].GetString();
+        l_Room->m_WallPaper                 = l_Result[3].GetUInt32();
+        l_Room->m_ShowName                  = l_Result[4].GetBool();
+        l_Room->m_AllowSuperRights          = l_Result[5].GetBool();
+        l_Room->m_AccessType                = l_Result[6].GetUInt16();
+        l_Room->m_Password                  = l_Result[7].GetString();
+        l_Room->m_VisitorsMax               = l_Result[8].GetUInt32();
+        l_Room->m_RoomVisible               = l_Result[9].GetBool();
 
-        delete l_PreparedResultSet;
+        ;
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
 

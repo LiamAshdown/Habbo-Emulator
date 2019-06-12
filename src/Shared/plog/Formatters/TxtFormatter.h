@@ -16,9 +16,6 @@ namespace plog
 
         static util::nstring format(const Record& record)
         {
-            tm t;
-            (useUtcTime ? util::gmtime_s : util::localtime_s)(&t, &record.getTime().time);
-
             util::nostringstream ss;
 
             ss << PLOG_NSTR("[");

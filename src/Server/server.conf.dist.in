@@ -121,6 +121,12 @@ ParameterTutorial = 1
 
 ### REGISTERATION SETTINGS ###
 
+## RegisterationDateOfBirth
+#	Description: Date which server will calculate whether user is old enough to join (server calculates if user is older than 12)
+#	Example: 	 12.12.2012 (DD.MM.YYY) - If you want to disable change it to this: 00.00.000
+#	Default:     12.12.2012
+RegisterationDateOfBirth = 12.12.2012
+
 ## RegisterationHabboClothing
 #	Description: Allow to use Habbo Club Clothing during registeration
 #	Default:     0 - Disabled | Enabled - 1
@@ -146,10 +152,10 @@ RegisterationTickets = 0
 #	Default:     0
 RegisterationFilms = 0
 
-## RegisterationBobbaWords
-#	Description: Set words which are not allowed when registering.
+## RegisterationFilter
+#	Description: Set letters which are not allowed when registering.
 #	Default:     "1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`"
-RegisterationBobbaWords = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
+RegisterationFilter = 1234567890!"£$%^&*()[]{};:'@#~,<.>/?\|`
 
 ## RegisterationSound
 #	Description: Set whether sound is enabled or not

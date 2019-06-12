@@ -193,13 +193,31 @@ namespace SteerStone
             return static_cast<char const*>(Data.Buffer);
         }
 
+        std::string GetDateToString() const
+        {
+            if (!Data.Buffer)
+                return "";
+
+            if (Data.Type != FieldType::FIELD_DATE)
+                LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_DATE";
+
+            MYSQL_TIME* l_Time = (MYSQL_TIME*)Data.Buffer;
+            
+            return std::to_string(l_Time->day) + "/" + std::to_string(l_Time->month) + "/" + std::to_string(l_Time->year);
+        }
+
         std::string GetString() const
         {
             if (!Data.Buffer)
                 return "";
 
             if (Data.Type != FieldType::FIELD_BINARY)
+            {
+                MYSQL_TIME*  ts;
+                ts = (MYSQL_TIME*)Data.Buffer;
+
                 LOG_WARNING << "Converting " << FieldTypeToString(Data.Type) << " to FIELD_STRING";
+            }
 
             char const* l_String = GetChar();
             if (!l_String)

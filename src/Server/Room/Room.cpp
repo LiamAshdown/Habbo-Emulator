@@ -21,9 +21,12 @@
 #include "TriggerEventManager.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Opcode/Packets/Server/NavigatorPackets.h"
-#include "Common/Maths.h"
 #include "Database/DatabaseTypes.h"
+#include "Common/Maths.h"
 #include <functional>
+
+/// It's declared here because of winsock.h include error
+static SteerStone::OperatorProcessor g_OperatorProcessor;
 
 namespace SteerStone
 {
@@ -47,6 +50,9 @@ namespace SteerStone
         for (int32 l_Y = 0; l_Y < GetRoomModel().m_MapSizeY; l_Y++)
         {
             std::string l_Line = l_Split[l_Y];
+
+            if (l_Line.empty())
+                continue;
 
             for (int32 l_X = 0; l_X < GetRoomModel().m_MapSizeX; l_X++)
             {     
@@ -480,18 +486,22 @@ namespace SteerStone
         m_VotedUsers.insert(p_Id);
 
         /// Also update database
-        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id, account_id) VALUES(?, ?)");
-        l_PreparedStatement->SetUint32(1, GetId());
-        l_PreparedStatement->SetUint32(2, p_Id);
-        l_PreparedStatement->ExecuteStatement();
+        {
+            PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+            l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id, account_id) VALUES(?, ?)");
+            l_PreparedStatement->SetUint32(0, GetId());
+            l_PreparedStatement->SetUint32(1, p_Id);
+
+            g_OperatorProcessor.AddOperator(RoomDatabase.PrepareOperator(l_PreparedStatement));
+        }
 
         /// And update room rating
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE rooms SET rating = ? WHERE id = ?");
-        l_PreparedStatement->SetUint32(1, GetRoomRating());
+        l_PreparedStatement->SetUint32(0, GetRoomRating());
         l_PreparedStatement->SetUint32(1, GetId());
         l_PreparedStatement->ExecuteStatement();
-        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+        g_OperatorProcessor.AddOperator(RoomDatabase.PrepareOperator(l_PreparedStatement));
     }
 
     /// SendUpdateVotes
@@ -567,10 +577,10 @@ namespace SteerStone
 
             PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
             l_PreparedStatement->PrepareStatement("INSERT INTO room_rights (account_id, room_id) VALUES (?, ?)");
-            l_PreparedStatement->SetUint32(1, p_Habbo->GetId());
-            l_PreparedStatement->SetUint32(2, GetId());
-            l_PreparedStatement->ExecuteStatement();
-            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+            l_PreparedStatement->SetUint32(0, p_Habbo->GetId());
+            l_PreparedStatement->SetUint32(1, GetId());
+
+            g_OperatorProcessor.AddOperator(RoomDatabase.PrepareOperator(l_PreparedStatement));
         }
     }
 
@@ -590,10 +600,10 @@ namespace SteerStone
             /// And update the database
             PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
             l_PreparedStatement->PrepareStatement("DELETE FROM room_rights WHERE account_id = ? AND room_id = ?");
+            l_PreparedStatement->SetUint32(0, p_Id);
             l_PreparedStatement->SetUint32(1, GetId());
-            l_PreparedStatement->SetUint32(2, GetId());
-            l_PreparedStatement->ExecuteStatement();
-            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+            g_OperatorProcessor.AddOperator(RoomDatabase.PrepareOperator(l_PreparedStatement));
         }
     }
 
@@ -627,6 +637,7 @@ namespace SteerStone
 
         /// Process any pending functions
         m_FunctionCallBack.ProcessFunctions();
+        g_OperatorProcessor.ProcessOperators();
 
         ProcessUserActions(p_Diff);
     }

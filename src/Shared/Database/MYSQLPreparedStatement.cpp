@@ -97,12 +97,12 @@ namespace SteerStone
 
         if (!p_StatementHolder->m_Stmt)
         {
-            LOG_ERROR << "m_Stmt: " << mysql_error(m_Connection);
+            LOG_ERROR << "mysql_stmt_init: " << mysql_error(m_Connection);
             return true;
         }
 
         /// Set buffer max value
-        bool l_Temp;
+        bool l_Temp = true;
         mysql_stmt_attr_set(p_StatementHolder->m_Stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &l_Temp);
 
         if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
@@ -120,6 +120,28 @@ namespace SteerStone
             memset(p_StatementHolder->m_Bind, 0, sizeof(MYSQL_BIND) * p_StatementHolder->m_ParametersCount);
         }
 
+        p_StatementHolder->m_Prepared = true;
+
         return false;
+    }
+
+    /// Execute
+    /// @p_Stmt : Statement we are executing
+    /// @p_Result : Result set
+    /// @p_FieldCount : How many columns
+    bool MYSQLPreparedStatement::Execute(MYSQL_STMT* p_Stmt, MYSQL_RES ** p_Result, uint32 * p_FieldCount)
+    {
+        std::unique_lock<std::mutex> l_Guard(m_Mutex);
+
+        if (mysql_stmt_execute(p_Stmt))
+        {
+            LOG_ERROR << "mysql_stmt_execute: " << mysql_stmt_error(p_Stmt);
+            return false;
+        }
+
+        *p_Result = mysql_stmt_result_metadata(p_Stmt);
+        *p_FieldCount = mysql_stmt_field_count(p_Stmt);
+
+        return true;
     }
 }

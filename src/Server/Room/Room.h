@@ -259,7 +259,6 @@ namespace SteerStone
         std::set<uint32> m_SuperRights;          ///< Holds users who have room rights
         std::set<uint32> m_VotedUsers;           ///< Users who already voted are stored, so they cannot vote again
         FunctionCallBack m_FunctionCallBack;     ///< Execute functions on Room::Update
-
         boost::shared_mutex m_Mutex;
     };
 } ///< NAMESPACE STEERSTONE

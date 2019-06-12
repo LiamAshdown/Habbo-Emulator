@@ -49,6 +49,14 @@ namespace plog
         }
 #endif
 
+#ifdef __cplusplus_cli
+        inline void operator<<(util::nostringstream& stream, System::String^ data)
+        {
+            cli::pin_ptr<const System::Char> ptr = PtrToStringChars(data);
+            plog::detail::operator<<(stream, static_cast<const wchar_t*>(ptr));
+        }
+#endif
+
 #ifdef _WIN32
         namespace meta
         {
@@ -105,7 +113,7 @@ namespace plog
         Record(Severity severity, const char* func, size_t line, const char* file, const void* object)
             : m_severity(severity), m_tid(util::gettid()), m_object(object), m_line(line), m_func(func), m_file(file)
         {
-            util::ftime(&m_time);
+           util::ftime(&m_time);
         }
 
         Record& ref() 
@@ -154,14 +162,6 @@ namespace plog
         {
             QString qstr;
             return *this << qstr.append(data);
-        }
-#endif
-
-#ifdef __cplusplus_cli
-        Record& operator<<(System::String^ data)
-        {
-            cli::pin_ptr<const System::Char> ptr = PtrToStringChars(data);
-            return *this << static_cast<const wchar_t*>(ptr);
         }
 #endif
 

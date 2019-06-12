@@ -16,11 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _CALL_BACK_PROCESSOR_h
-#define _CALL_BACK_PROCESSOR_h
+#ifndef _OPERATOR_PROCESSOR_h
+#define _OPERATOR_PROCESSOR_h
 #include "Common/SharedDefines.h"
 #include "CallBackOperator.h"
-#endif /* !_CALL_BACK_PROCESSOR_h */
+#endif /* !_OPERATOR_PROCESSOR_h */
 
 namespace SteerStone
 {

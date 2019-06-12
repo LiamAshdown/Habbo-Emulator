@@ -17,18 +17,20 @@
 */
 
 #include "MYSQLPreparedStatement.h"
+#include "SQLCommon.h"
 
 namespace SteerStone
 {
     /// Constructor
     /// @p_MYSQLPreparedStatement : Keep reference of our connection
-    PreparedStatement::PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement) : m_MySQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false)
+    PreparedStatement::PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement) : m_MySQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false), m_Prepared(false)
     {
     }
 
     /// Deconstructor
     PreparedStatement::~PreparedStatement()
     {
+        RemoveBinds();
     }
 
     /// TryLock
@@ -56,20 +58,36 @@ namespace SteerStone
         }
     }
 
+    /// ClearPrepared
+    /// Allow Prepare statement to be used again on same scope
+    void PreparedStatement::ClearPrepared()
+    {
+        m_Prepared = false;
+    }
+
     /// ExecuteStatement
     /// Execute the statement
     std::unique_ptr<PreparedResultSet> PreparedStatement::ExecuteStatement()
     {
         if (m_PrepareError)
             return nullptr;
-
+            
         MYSQL_RES* l_Result = nullptr;
         uint32 l_FieldCount = 0;
 
-        if (!Execute(&l_Result, &l_FieldCount))
+        BindParameters();
+        if (!m_MySQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
             return nullptr;
 
-        return std::make_unique<PreparedResultSet>(m_Stmt, l_Result, l_FieldCount);
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount);
+
+        if (!l_PreparedResultSet || !l_PreparedResultSet->GetRowCount())
+        {
+            m_Prepared = false;
+            return nullptr;
+        }
+        else
+            return std::move(l_PreparedResultSet);
     }
 
     /// Prepare
@@ -77,37 +95,16 @@ namespace SteerStone
     /// @p_Query : Query which will be executed to database
     bool PreparedStatement::Prepare(char const * p_Query)
     {
-        /// Remove previous binds
+        if (IsPrepared())
+        {
+            LOG_ERROR << "Trying to prepare a statement but statement is already being used by another thread!";
+            return true;
+        }
+
         RemoveBinds();
         m_Query = p_Query;
 
         return m_MySQLPreparedStatement->Prepare(this);
-    }
-
-    /// Execute
-    /// @p_Result : Result set
-    /// @p_FieldCount : How many columns
-    bool PreparedStatement::Execute(MYSQL_RES ** p_Result, uint32 * p_FieldCount)
-    {
-        BindParameters();
-
-        if (mysql_stmt_execute(m_Stmt))
-        {
-            LOG_ERROR << "mysql_stmt_execute: " << mysql_stmt_error(m_Stmt);
-            RemoveBinds();
-            return false;
-        }
-
-        *p_Result = mysql_stmt_result_metadata(m_Stmt);
-        *p_FieldCount = mysql_stmt_field_count(m_Stmt);
-
-        if (!*p_Result)
-        {
-            mysql_free_result(*p_Result);
-            return false;
-        }
-
-        return true;
     }
 
     /// BindParameters
@@ -132,17 +129,20 @@ namespace SteerStone
     /// Remove previous binds
     void PreparedStatement::RemoveBinds()
     {
-        if (!m_Stmt || !m_Bind)
+        if (!m_Stmt)
             return;
 
-        delete[] m_Bind;
-        m_Binds.clear();
-        mysql_stmt_close(m_Stmt);
+        if (m_ParametersCount)
+        {
+            delete[] m_Bind;
+            m_Bind = nullptr;
+            m_Binds.clear();
+        }
 
         m_PrepareError = false;
-        m_Bind = nullptr;
-        m_Stmt = nullptr;
-        m_Query = std::string();
         m_ParametersCount = 0;
+        m_Query = "";
+        mysql_stmt_close(m_Stmt);
+        m_Stmt = nullptr;
     }
 }

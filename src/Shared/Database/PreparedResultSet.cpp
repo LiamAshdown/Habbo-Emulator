@@ -22,13 +22,16 @@
 namespace SteerStone
 {
     /// Constructor
-    /// @p_PrepareStatement : Reference of prepare statement, we need this to free the prepare statement
+    /// @p_PrepareStatement : PrepareStatement
     /// @p_Stmt : Prepare Statement
     /// @p_Result : Result
     /// @p_FieldCount : Field count
-    PreparedResultSet::PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, uint32 p_FieldCount)
-        : m_Stmt(p_Stmt), m_Result(p_Result), m_Fields(nullptr), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0)
+    PreparedResultSet::PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount)
+        : m_PreparedStatement(p_Statement), m_Result(p_Result), m_Fields(nullptr), m_Bind(nullptr), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0)
     {
+        if (!m_Result)
+            return;
+
         /// IsNull and mLength is deleted at end of constructor when buffer is loaded into our storage
         m_IsNull = new bool[m_FieldCount];
         m_Length = new unsigned long[m_FieldCount];
@@ -38,16 +41,18 @@ namespace SteerStone
         memset(m_Length, 0, sizeof(unsigned long) * m_FieldCount);
         memset(m_Bind, 0, sizeof(MYSQL_BIND) * m_FieldCount);
 
-        if (mysql_stmt_store_result(m_Stmt))
+        if (mysql_stmt_store_result(m_PreparedStatement->GetStatement()))
         {
-            LOG_ERROR << "mysql_stmt_store_result: Cannot store result from MySQL Server. Error: " << mysql_stmt_error(m_Stmt);
-            CleanUp();
+            LOG_ERROR << "mysql_stmt_store_result: Cannot store result from MySQL Server. Error: " << mysql_stmt_error(m_PreparedStatement->GetStatement());
+            delete[] m_Bind;
+            delete[] m_IsNull;
+            delete[] m_Length;
             return;
         }
 
         m_Fields = mysql_fetch_fields(m_Result);
 
-        m_RowCount = mysql_stmt_num_rows(m_Stmt);
+        m_RowCount = mysql_stmt_num_rows(m_PreparedStatement->GetStatement());
 
         std::size_t l_SizeType = 0;
         for (uint32 l_I = 0; l_I < m_FieldCount; l_I++)
@@ -71,10 +76,13 @@ namespace SteerStone
             l_Offset += m_Bind[l_I].buffer_length;
         }
 
-        if (mysql_stmt_bind_result(m_Stmt, m_Bind))
+        if (mysql_stmt_bind_result(m_PreparedStatement->GetStatement(), m_Bind))
         {
-            LOG_ERROR << ("mysql_stmt_bind_result: Cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_Stmt));
+            LOG_ERROR << ("mysql_stmt_bind_result: Cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(m_PreparedStatement->GetStatement()));
+            mysql_stmt_free_result(m_PreparedStatement->GetStatement());
             CleanUp();
+            delete[] m_IsNull;
+            delete[] m_Length;
             return;
         }
 
@@ -90,7 +98,7 @@ namespace SteerStone
                 if (!*m_Bind[l_I].is_null)
                 {
                     /// Retrieve our buffer
-                    void* l_Buffer = m_Stmt->bind[l_I].buffer;
+                    void* l_Buffer = m_PreparedStatement->GetStatement()->bind[l_I].buffer;
 
                     switch (m_Bind[l_I].buffer_type)
                     {
@@ -116,7 +124,7 @@ namespace SteerStone
                         l_FetchedLength);
 
                     /// move buffer pointer to next part
-                    m_Stmt->bind[l_I].buffer = (char*)l_Buffer + l_SizeType;
+                    m_PreparedStatement->GetStatement()->bind[l_I].buffer = (char*)l_Buffer + l_SizeType;
                 }
                 else
                 {
@@ -130,6 +138,9 @@ namespace SteerStone
         }
 
         m_RowPosition = 0;
+
+        /// All data is buffered, let go of mysql c api structures
+        mysql_stmt_free_result(m_PreparedStatement->GetStatement());
     }
 
     /// Deconstructor
@@ -171,7 +182,7 @@ namespace SteerStone
         if (m_RowPosition >= m_RowCount)
             return false;
 
-        int32 l_Code = mysql_stmt_fetch(m_Stmt);
+        int32 l_Code = mysql_stmt_fetch(m_PreparedStatement->GetStatement());
         return l_Code == 0 || l_Code == MYSQL_DATA_TRUNCATED; ///< Success
     }
 
@@ -182,17 +193,10 @@ namespace SteerStone
         if (m_Result)
             mysql_free_result(m_Result);
 
-        /// If the statement has binded, then it took reference of the pointers
-        /// so delete from statement
-        if (m_Stmt->bind_result_done)
+        if (m_PreparedStatement->GetStatement()->bind_result_done)
         {
-            delete[] m_Stmt->bind->length;
-            delete[] m_Stmt->bind->is_null;
-        }
-        else
-        {
-            delete[] m_IsNull;
-            delete[] m_Length;
+            delete[]m_PreparedStatement->GetStatement()->bind->length;
+            delete[]m_PreparedStatement->GetStatement()->bind->is_null;
         }
 
         if (m_Bind)
@@ -202,7 +206,7 @@ namespace SteerStone
             m_Bind = nullptr;
         }
 
-        mysql_stmt_free_result(m_Stmt);
-        m_Stmt = nullptr;
+        /// Let statement be used again
+        m_PreparedStatement->SetPrepared(false);
     }
 } ///< NAMESPACE STEERSTONE

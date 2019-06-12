@@ -16,16 +16,16 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Habbo.h"
-#include "Common/Maths.h"
-#include "Hotel.h"
-#include "RoomManager.h"
-#include "Database/DatabaseTypes.h"
 #include "Opcode/Packets/Server/MessengerPackets.h"
 #include "Opcode/Packets/Server/NavigatorPackets.h"
 #include "Opcode/Packets/Server/MiscPackets.h"
 #include "Opcode/Packets/Server/RoomPackets.h"
 #include "Opcode/Packets/Server/LoginPackets.h"
+#include "Habbo.h"
+#include "Common/Maths.h"
+#include "Hotel.h"
+#include "RoomManager.h"
+#include "Database/DatabaseTypes.h"
 
 namespace SteerStone
 {
@@ -377,8 +377,8 @@ namespace SteerStone
                 }
                 else
                 {
-                    LOG_INFO << "Disconnecting Habbo: " << GetId() << " have not recieved a pong back";
-                    return false;
+                    //LOG_INFO << "Disconnecting Habbo: " << GetId() << " have not recieved a pong back";
+                    return true;
                 }
             }
             else
@@ -425,24 +425,24 @@ namespace SteerStone
     /// Save Habbo data to database on logout
     void Habbo::SaveToDB()
     {
-
         PreparedStatement* l_PreparedStatement = UserDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ?, sound_enabled = ?, subscribed = ?, rank = ? WHERE id = ?");
-        l_PreparedStatement->SetString(1, GetEmail());
-        l_PreparedStatement->SetString(2, GetFigure());
-        l_PreparedStatement->SetString(3, GetPoolFigure());
-        l_PreparedStatement->SetString(4, GetMotto());
-        l_PreparedStatement->SetString(5, GetConsoleMotto());
-        l_PreparedStatement->SetString(6, GetBirthday());
-        l_PreparedStatement->SetString(7, GetGender());
-        l_PreparedStatement->SetUint32(8, GetCredits());
-        l_PreparedStatement->SetUint32(9, GetTickets());
-        l_PreparedStatement->SetUint32(10, GetFilms());
-        l_PreparedStatement->SetBool(11, IsSoundEnabled());
-        l_PreparedStatement->SetBool(12, IsSubscribed());
-        l_PreparedStatement->SetUint32(13, GetRank());
-        l_PreparedStatement->SetUint32(14, GetId());
+        l_PreparedStatement->PrepareStatement("UPDATE account SET email = ?, figure = ?, pool_figure = ?, motto = ?, console_motto = ?, birthday = ?, gender = ?, credits = ?, tickets = ?, films = ? WHERE id = ?");
+        l_PreparedStatement->SetString(0, GetEmail());
+        l_PreparedStatement->SetString(1, GetFigure());
+        l_PreparedStatement->SetString(2, GetPoolFigure());
+        l_PreparedStatement->SetString(3, GetMotto());
+        l_PreparedStatement->SetString(4, GetConsoleMotto());
+        l_PreparedStatement->SetString(5, GetBirthday());
+        l_PreparedStatement->SetString(6, GetGender());
+        l_PreparedStatement->SetUint32(7, GetCredits());
+        l_PreparedStatement->SetUint32(8, GetTickets());
+        l_PreparedStatement->SetUint32(9, GetFilms());
+        l_PreparedStatement->SetBool(10, IsSoundEnabled());
+        l_PreparedStatement->SetBool(11, IsSubscribed());
+        l_PreparedStatement->SetUint16(12, GetRank());
+        l_PreparedStatement->SetUint32(13, GetId());
         l_PreparedStatement->ExecuteStatement();
+
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
 
         SaveFavouriteRoomToDB();

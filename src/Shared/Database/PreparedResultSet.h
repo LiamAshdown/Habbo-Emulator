@@ -24,14 +24,16 @@
 
 namespace SteerStone
 {
+    class PreparedStatement;
+
     class PreparedResultSet
     {
     public:
         /// Constructor
-        /// @p_Stmt : Prepare Statement
+        /// @p_Statement : Prepare Statement
         /// @p_Result : Result
         /// @p_FieldCount : Field count
-        PreparedResultSet(MYSQL_STMT* p_Stmt, MYSQL_RES* p_Result, uint32 p_FieldCount);
+        PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount);
 
         /// Deconstructor
         ~PreparedResultSet();
@@ -51,6 +53,10 @@ namespace SteerStone
         /// Get total row count
         uint64 GetRowCount() const { return m_RowCount; }
 
+        /// GetPreparedStatement
+        /// Returns PrepareStatement
+        PreparedStatement* GetPreparedStatement() { return m_PreparedStatement; }
+
     private:
         /// CleanUp
         /// Free Bind Memory
@@ -62,7 +68,7 @@ namespace SteerStone
         uint32 NextRow();
 
     private:
-        MYSQL_STMT* m_Stmt;
+        PreparedStatement* m_PreparedStatement;
         MYSQL_RES* m_Result;
         MYSQL_FIELD* m_Fields;
         uint64 m_RowCount;

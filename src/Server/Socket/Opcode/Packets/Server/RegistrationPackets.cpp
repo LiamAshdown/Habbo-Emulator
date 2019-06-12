@@ -92,6 +92,27 @@ namespace SteerStone
                 return &m_Buffer;
             }
 
+            //////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////
+
+            StringBuffer const * ValidateAge::Write()
+            {
+                m_Buffer.AppendWiredBool(Validate);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
+            StringBuffer const * CoppaGetRealTime::Write()
+            {
+                m_Buffer.AppendString(BlockTime, false);
+
+                m_Buffer.AppendSOH();
+
+                return &m_Buffer;
+            }
+
         } ///< NAMESPACE REGISTRATION
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

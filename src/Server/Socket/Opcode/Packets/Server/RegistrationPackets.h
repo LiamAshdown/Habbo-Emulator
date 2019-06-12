@@ -128,6 +128,34 @@ namespace SteerStone
                 bool Validate;
             };
 
+            /// SERVER_ACR packet builder
+            class ValidateAge final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                ValidateAge() : ServerPacket(SERVER_ACR) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                bool Validate;
+            };
+
+            /// CLIENT_COPPA_REG_GET_REAL_TIME packet builder
+            class CoppaGetRealTime final : public ServerPacket
+            {
+            public:
+                /// Constructor 
+                CoppaGetRealTime() : ServerPacket(CLIENT_COPPA_REG_GET_REAL_TIME) {}
+
+            public:
+                /// Write the packet
+                StringBuffer const* Write();
+
+                std::string BlockTime;
+            };
+
         } ///< NAMESPACE REGISTRATION
     } ///< NAMESPACE HABBOPACKET
 } ///< NAMESPACE STEERSTONE

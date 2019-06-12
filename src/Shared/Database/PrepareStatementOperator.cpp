@@ -49,9 +49,13 @@ namespace SteerStone
         std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::move(m_PreparedStatementHolder->ExecuteStatement());
 
         if (!l_PreparedResultSet || !l_PreparedResultSet->GetRowCount())
-            m_PromiseResultSet->set_value(nullptr);
+        {
+            /// We need to keep a reference of prepared statement even though there's no result set, so we can free the prepare statement later
+            std::unique_ptr<PreparedResultSet> l_PreparedStatementTemp = std::make_unique<PreparedResultSet>(m_PreparedStatementHolder, nullptr, 0);
+            m_PromiseResultSet->set_value(std::move(l_PreparedStatementTemp));
+        }
         else
-            m_PromiseResultSet->set_value(std::move(m_PreparedStatementHolder->ExecuteStatement()));
+            m_PromiseResultSet->set_value(std::move(l_PreparedResultSet));
 
         return true;
     }

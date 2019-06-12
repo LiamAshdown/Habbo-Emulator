@@ -21,7 +21,7 @@
 namespace SteerStone
 {
     /// Constructor
-    Database::Database() {}
+    Database::Database() : m_DatabaseWorker(new DatabaseWorker()) {}
 
     /// Deconstructor
     Database::~Database()
@@ -62,6 +62,12 @@ namespace SteerStone
         if (l_Itr != l_Tokens.end())
             l_Database = *l_Itr++;
 
+        m_Database = l_Database;
+        m_Host = l_Database;
+        m_Port = std::stoi(l_Port);
+        m_Username = l_Username;
+        m_Password = l_Password;
+
         return m_PreparedStatements.SetUp(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this);
     }
 
@@ -69,8 +75,8 @@ namespace SteerStone
     /// Shutdown all connections
     void Database::ShutDown()
     {
-        m_DatabaseWorker.m_Queue.ShutDown();
-        CloseConnections();
+        delete m_DatabaseWorker;
+        CloseConnections(); 
     }
 
     /// GetPreparedStatement
@@ -85,6 +91,12 @@ namespace SteerStone
     /// @p_PreparedStatement : Connection we are freeing
     void Database::FreePrepareStatement(PreparedStatement* p_PreparedStatement)
     {
+        if (p_PreparedStatement->GetMYSQLStatement()->GetDatabase().GetName() != m_Database)
+        {
+            LOG_ERROR << "Cannot free PrepareStatement. Does not belong to " << m_Database << " from " << p_PreparedStatement->GetMYSQLStatement()->GetDatabase().GetName();
+            return;
+        }
+
         m_PreparedStatements.FreePrepareStatement(p_PreparedStatement);
     }
 
@@ -107,7 +119,7 @@ namespace SteerStone
     /// @p_Operator : Operator we are adding to be processed on database worker thread
     void Database::EnqueueOperator(Operator * p_Operator)
     {
-        m_DatabaseWorker.m_Queue.Push(p_Operator);
+        m_DatabaseWorker->m_Queue.Push(p_Operator);
     }
 
     /// CloseConnections

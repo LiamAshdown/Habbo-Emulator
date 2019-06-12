@@ -21,6 +21,7 @@
 #include "Common/SharedDefines.h"
 #include "OperatorProcessor.h"
 #include <mutex>
+#include <atomic>
 #endif /* !_PREPARED_STATEMENT_PREPARED_STATEMENT_HOLDER_h */
 
 namespace SteerStone
@@ -58,13 +59,34 @@ namespace SteerStone
         /// @p_Query : Query which will be executed to database
         void PrepareStatement(char const* p_Query);
 
+        /// ClearPrepared
+        /// Allow Prepare statement to be used again on same scope
+        void ClearPrepared();
+
         /// ExecuteStatement
         /// Execute the statement
         std::unique_ptr<PreparedResultSet> ExecuteStatement();
 
+        /// GetStatement
+        /// Return statement
+        MYSQL_STMT* GetStatement() { return m_Stmt; }
+
+        /// GetMYSQLStatement
+        /// Return MYSQL Statement
+        MYSQLPreparedStatement* GetMYSQLStatement() { return m_MySQLPreparedStatement; }
+
+        /// SetPrepared
+        /// Set whether the statement can be prepared or not
+        /// @p_Prepared : Value we are setting it to
+        void SetPrepared(bool const p_Prepared) { m_Prepared = p_Prepared; }
+
+        /// IsPrepared
+        /// Returns if query is currently being prepared
+        bool IsPrepared() const { return m_Prepared; }
+
     public:
         /// Set our prepared values
-        void SetBool(uint8 p_Index, bool p_Value)          { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
+        void SetBool(uint8 p_Index, uint8 p_Value)         { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
         void SetUint8(uint8 p_Index, uint8 p_Value)        { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
         void SetUint16(uint8 p_Index, uint16 p_Value)      { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
         void SetUint32(uint8 p_Index, uint32 p_Value)      { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
@@ -83,12 +105,6 @@ namespace SteerStone
         /// @p_Query : Query which will be executed to database
         bool Prepare(char const * p_Query);
 
-        /// Execute
-        /// @p_Result : Result set
-        /// @p_Fields : Fields
-        /// @p_FieldCount : How many columns
-        bool Execute(MYSQL_RES** p_Result, MYSQL_FIELD** p_Fields, uint32* p_FieldCount);
-
         /// BindParameters
         /// Bind parameters from storage into SQL
         void BindParameters();
@@ -106,6 +122,7 @@ namespace SteerStone
         uint32 m_ParametersCount;
         std::string m_Query;
         bool m_PrepareError;
+        std::atomic<bool> m_Prepared;
         std::vector<std::pair<uint8, SQLBindData>> m_Binds;
         std::mutex m_Mutex; ///< We use this to prevent other uses trying to access a already accessed object
     };

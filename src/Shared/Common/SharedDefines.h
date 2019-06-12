@@ -60,10 +60,11 @@ typedef boost::multi_array<int16, 2> StaticGridArray; ///< Used for pathfinding
 #define UPDATE_WORLD_TIMER 500
 #define PUBLIC_ROOM_OFFSET 1000 ///< Credits Quackster
 #define MAX_FAVOURITE_ROOMS 10
+#define MINIMUM_AMOUNT_OF_DAYS 4745 /// 13 years without accounting leap periods
 
 #define MIN_CONNECTION_POOL_SIZE 1
 #define MAX_CONNECTION_POOL_SIZE 10 ///< Don't change this
-#define MAX_PREPARED_STATEMENTS 50 /// And don't change this
+#define MAX_PREPARED_STATEMENTS 10 /// And don't change this
 #define MAX_QUERY_LENGTH  (32*1024)
 
 /// Split String

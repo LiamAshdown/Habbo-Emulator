@@ -77,9 +77,19 @@ namespace SteerStone
         /// @p_Query : Query which will be executed to database
         bool Prepare(PreparedStatement* p_StatementHolder);
 
+        /// Execute
+        /// @p_Stmt : Statement we are executing
+        /// @p_Result : Result set
+        /// @p_FieldCount : How many columns
+        bool Execute(MYSQL_STMT* p_Stmt, MYSQL_RES ** p_Result, uint32* p_FieldCount);
+
         /// GetHandle
         /// Return MySQL Connection Handle
         MYSQL* GetHandle() { return m_Connection; }
+
+        /// GetDatabase
+        /// Return database
+        Database& GetDatabase() const { return m_Database; }
 
     private:
         MYSQL* m_Connection;

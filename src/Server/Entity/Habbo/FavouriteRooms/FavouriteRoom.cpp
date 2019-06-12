@@ -16,12 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Opcode/Packets/Server/MiscPackets.h"
 #include "Database/DatabaseTypes.h"
 #include "RoomManager.h"
 #include "Config/Config.h"
 #include "Habbo.h"
 
-#include "Opcode/Packets/Server/MiscPackets.h"
 
 namespace SteerStone
 {
@@ -46,25 +46,27 @@ namespace SteerStone
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, room_id, public_space FROM favourite_rooms WHERE id = ?");
         l_PreparedStatement->SetUint32(0, m_Habbo->GetId());
-        PreparedResultSet* l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (!l_PreparedResultSet)
+        {
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
             return;
+        }
 
         do
         {
             ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
             FavouriteRoomsData l_FavouriteRoom;
-            l_FavouriteRoom.m_Id        = l_Result[1].GetUInt32();
-            l_FavouriteRoom.m_RoomId    = l_Result[2].GetUInt32();
-            l_FavouriteRoom.m_RoomType  = l_Result[3].GetBool();
+            l_FavouriteRoom.m_Id        = l_Result[0].GetUInt32();
+            l_FavouriteRoom.m_RoomId    = l_Result[1].GetUInt32();
+            l_FavouriteRoom.m_RoomType  = l_Result[2].GetBool();
 
             m_FavouriteRooms.push_back(l_FavouriteRoom);
 
         } while (l_PreparedResultSet->GetNextRow());
 
-        delete l_PreparedResultSet;
         UserDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
@@ -124,11 +126,10 @@ namespace SteerStone
         {
             FavouriteRoomsData const& l_FavouriteRoom = l_Itr;
 
-            l_PreparedStatement->PrepareStatement("INSERT INTO favourite_rooms (id, room_id, public_space) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE room_id = ?");
+            l_PreparedStatement->PrepareStatement("INSERT INTO favourite_rooms (id, room_id, public_space) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE room_id = VALUES(room_id)");
             l_PreparedStatement->SetUint32(0, l_FavouriteRoom.GetId());
             l_PreparedStatement->SetUint32(1, l_FavouriteRoom.GetRoomId());
-            l_PreparedStatement->SetUint32(2, l_FavouriteRoom.GetRoomType());
-            l_PreparedStatement->SetUint32(3, l_FavouriteRoom.GetRoomId());
+            l_PreparedStatement->SetBool(2, l_FavouriteRoom.GetRoomType());
             l_PreparedStatement->ExecuteStatement();
         }
 
@@ -137,9 +138,10 @@ namespace SteerStone
             l_PreparedStatement->PrepareStatement("DELETE FROM favourite_rooms WHERE room_id = ?");
             l_PreparedStatement->SetUint32(0, l_Itr.GetRoomId());
             l_PreparedStatement->ExecuteStatement();
+
         }
 
-        UserDatabase.FreePrepareStatement(l_PreparedStatement);
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
     }
     
     /// ParseSendFavouriteRooms

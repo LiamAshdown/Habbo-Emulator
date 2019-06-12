@@ -16,7 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "OperatorProcessor.h"
+#include "DatabaseTypes.h"
 
 namespace SteerStone
 {
@@ -45,9 +45,18 @@ namespace SteerStone
         /// Is our promise ready?
         if (m_PreparedFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
         {
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = m_PreparedFuture.get();
+
             /// If there's a function, then execute the function with our result set
             if (m_OperatorFunction)
-                m_OperatorFunction(m_PreparedFuture.get());
+                m_OperatorFunction(std::move(l_PreparedResultSet));
+            else ///< If there's no function, then free the prepared statement here
+            {
+                if (l_PreparedResultSet->GetPreparedStatement()->GetMYSQLStatement()->GetDatabase().GetName() == "users")
+                    UserDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
+                else
+                    RoomDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
+            }
 
             return true;
         }

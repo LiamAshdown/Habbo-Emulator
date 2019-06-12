@@ -96,24 +96,21 @@ namespace SteerStone
         if (m_ShutDown)
             return nullptr;
 
-        for (auto const& l_Itr : m_Pool)
+        for(;;)
         {
-            MYSQLPreparedStatement* l_PreparedStatement = l_Itr;
-
-            for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
+            for (auto const& l_Itr : m_Pool)
             {
-                PreparedStatement* l_PrepareStatement = l_PreparedStatement->m_Statements[l_I];
+                MYSQLPreparedStatement* l_PreparedStatement = l_Itr;
 
-                if (l_PrepareStatement->TryLock())
-                    return l_PrepareStatement;
-                else if (!l_PrepareStatement->GetStatement()) ///< If our statement is null then lets take it
-                    return l_PrepareStatement;
+                for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
+                {
+                    PreparedStatement* l_PrepareStatement = l_PreparedStatement->m_Statements[l_I];
+
+                    if (l_PrepareStatement->TryLock())
+                        return l_PrepareStatement;
+                }
             }
         }
-
-        /// If we get here then there's a design logic flaw, it should be impossible for all statements to be used
-        /// unless we are running with thousands of players querying at same time which is unlikely
-        throw std::runtime_error("GetPrepareStatement: Could not get a prepare statement. All statements are taken.");
 
         return nullptr;
     }

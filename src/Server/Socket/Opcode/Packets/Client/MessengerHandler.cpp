@@ -35,7 +35,7 @@ namespace SteerStone
 
     void HabboSocket::HandleMessengerAcceptBuddy(ClientPacket* p_Packet)
     {
-        uint32 l_SenderId = p_Packet->ReadWiredUint();
+        uint32 l_SenderId = p_Packet->ReadWiredInt();
 
         m_Habbo->MessengerAcceptRequest(l_SenderId);
     }

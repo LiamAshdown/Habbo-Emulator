@@ -123,6 +123,8 @@ namespace SteerStone
         void HandleRemoveAllRights(ClientPacket* p_Packet);
         void HandleDeleteFlat(ClientPacket* p_Packet);
         void HandleRoomVote(ClientPacket* p_Packet);
+        void HandleClientAC(ClientPacket* p_Packet);
+        void HandleCoppaRegGetRealTime(ClientPacket* p_Packet);
         void HandleNULL(ClientPacket* p_Packet);
         void HandleServerMessage(ClientPacket* p_Packet) {}
 
