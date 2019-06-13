@@ -64,7 +64,7 @@ namespace SteerStone
             /// The lowest means its the closest to the end position
             for (auto& l_Itr = m_OpenList.begin(); l_Itr != m_OpenList.end(); l_Itr++)
             {
-                if ((*l_Itr)->GetTotalCost() <= m_Current->GetTotalCost())
+                if ((*l_Itr)->GetTotalCost() < m_Current->GetTotalCost())
                 {
                     m_Current = *l_Itr;
                     l_CurrentItr = l_Itr;
@@ -88,11 +88,8 @@ namespace SteerStone
                 l_FuturePosition.X = m_Current->GetPosition().X + m_Directions[l_I].X;
                 l_FuturePosition.Y = m_Current->GetPosition().Y + m_Directions[l_I].Y;
 
-                /// We don't want to check the tile if it's our final point, because
-                /// we check it at the start and the checks are different
-                if (l_FuturePosition.X != p_EndX || l_FuturePosition.Y != p_EndY)
-                    if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
-                        continue;
+                if (!CheckValidTile(l_FuturePosition, m_Current->GetPosition()) || DoesNodeExist(m_ClosedList, l_FuturePosition))
+                    continue;
 
                 /// Work out our G Cost
                 /// If we are moving diagnol our cost would be 14 since diagnol will be the closest
@@ -167,7 +164,7 @@ namespace SteerStone
         auto l_Node = m_OpenList.begin();
         for (auto& l_Itr = m_OpenList.begin(); l_Itr != m_OpenList.end(); l_Itr++)
         {
-            if ((*l_Itr)->GetTotalCost() <= (*l_Node)->GetTotalCost())
+            if ((*l_Itr)->GetTotalCost() < (*l_Node)->GetTotalCost())
                 l_Node = l_Itr;
         }
 

@@ -110,7 +110,7 @@ namespace SteerStone
         {
             if (Habbo* l_Habbo = m_Habbo.get())
             {
-                if (GetTilePositionX() != l_Habbo->GetPositionX() || GetTilePositionY() != l_Habbo->GetPositionY()) ///< User is no longer on the tile
+                if (GetTilePositionX() != l_Habbo->GetPositionX() && GetTilePositionY() != l_Habbo->GetPositionY()) ///< User is no longer on the tile
                     SetTileOccupied(false, l_Habbo);
                 else
                     return false;

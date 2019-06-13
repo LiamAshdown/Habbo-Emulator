@@ -127,7 +127,10 @@ namespace SteerStone
             TileInstance* l_PrevTileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(m_Habbo->GetPositionX(), m_Habbo->GetPositionY());
 
             if (!l_CurrTileInstance)
+            {
+                m_Path->GetPath().pop_back();
                 return;
+            }
 
             /// Set our previous tile occupation to false as we are no longer on the tile
             if (l_PrevTileInstance)
@@ -145,8 +148,11 @@ namespace SteerStone
 
                         l_Position = m_Path->GetPath().back();
                     }
+
+                    l_CurrTileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
                 }
                 else
+                {
                     if (!m_Path->ReCalculatePath(l_Position = Position({ m_Habbo->GetPositionX(), m_Habbo->GetPositionY() }), m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
                     {
                         if (!CreatePath(m_Path->GetEndPositionX(), m_Path->GetEndPositionY()))
@@ -154,9 +160,12 @@ namespace SteerStone
 
                         l_Position = m_Path->GetPath().back();
                     }
+
+                    l_CurrTileInstance = m_Habbo->GetRoom()->GetRoomModel().GetTileInstance(l_Position.X, l_Position.Y);
+                }
             }
-            else
-                l_CurrTileInstance->SetTileOccupied(true, m_Habbo); ///< We are no occupying this tile
+
+            l_CurrTileInstance->SetTileOccupied(true, m_Habbo);
 
             int16 l_Rotation = Maths::CalculateWalkDirection(m_Habbo->GetPositionX(), m_Habbo->GetPositionY(), l_Position.X, l_Position.Y);
 
