@@ -125,6 +125,9 @@ namespace SteerStone
         void HandleRoomVote(ClientPacket* p_Packet);
         void HandleClientAC(ClientPacket* p_Packet);
         void HandleCoppaRegGetRealTime(ClientPacket* p_Packet);
+        void HandleCataloguePages(ClientPacket* p_Packet);
+        void HandleCatalogueItems(ClientPacket* p_Packet);
+        void HandleGetAliasList(ClientPacket* p_Packet);
         void HandleNULL(ClientPacket* p_Packet);
         void HandleServerMessage(ClientPacket* p_Packet) {}
 

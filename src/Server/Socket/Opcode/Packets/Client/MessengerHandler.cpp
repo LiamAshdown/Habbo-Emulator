@@ -88,9 +88,5 @@ namespace SteerStone
         HabboPacket::Messenger::PersistentMessage l_Packet;
         l_Packet.Motto = l_Motto;
         SendPacket(l_Packet.Write());
-
-        /// Time to update the database
-        /// I will just call the default SaveToDb which will save all player details
-        m_Habbo->SaveToDB();
     }
 } /// NAMESPACE STEERSTONE

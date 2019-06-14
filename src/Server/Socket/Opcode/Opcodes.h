@@ -242,6 +242,7 @@ enum PacketClientHeader : uint16
     CLIENT_GPRC                           = 100,
     CLIENT_GCIX                           = 101,
     CLIENT_GCAP                           = 102,
+    CLIENT_GET_ALIAS_LIST                 = 215,
      
 };
 
@@ -483,7 +484,13 @@ enum PacketServerHeader : uint16
     SERVER_GIFT_APPROVAL                   = 210,
     SERVER_CLUB_INFO                       = 7,
 
- 
+    ///////////////////////////////////////////
+    //           CATALOGUE HANDLER
+    ///////////////////////////////////////////
+    SERVER_CATALOGUE_PAGES                 = 126,
+    SERVER_CATALOGUE_ITEMS                 = 127,
+    SERVER_SPRITE_LIST                     = 295,
+    SERVER_ALIAS_TOGGLE                    = 297,
 };
 
 /// Used to prevent any one attempting to tamper with the client packets,

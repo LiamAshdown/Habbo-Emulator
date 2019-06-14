@@ -23,6 +23,8 @@
 
 namespace SteerStone
 {
+    class PreparedResultSet;
+
     /// Holds room Urls info
     /// Each room can only hold 1 url, keep note
     typedef struct RoomUrlStruct
@@ -134,6 +136,11 @@ namespace SteerStone
         /// GetRooms
         /// Get Room Map
         RoomsMap* GetRooms();
+
+    private:
+        /// AddRoomCallBack
+        /// @p_PreparedResultSet : Result set from querying the database
+        void AddRoomCallBack(std::unique_ptr<PreparedResultSet> p_PreparedResultSet);
 
     private:
         RoomCategoriesMap m_RoomCategories;                          ///< Map Storage which holds key category Id and structure for Category

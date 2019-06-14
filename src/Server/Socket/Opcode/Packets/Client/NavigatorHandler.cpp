@@ -337,14 +337,14 @@ namespace SteerStone
             std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
             if (l_PreparedResultSet)
-                m_Habbo->m_LastCreatedRoomId = l_PreparedResultSet->FetchResult()[1].GetUInt32();
+                m_Habbo->m_LastCreatedRoomId = l_PreparedResultSet->FetchResult()[0].GetUInt32();
 
             RoomDatabase.FreePrepareStatement(l_PreparedStatement);
         }
 
         PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("INSERT INTO room_rating(room_id) VALUES (?)");
-        l_PreparedStatement->SetUint32(1, m_Habbo->m_LastCreatedRoomId);
+        l_PreparedStatement->SetUint32(0, m_Habbo->m_LastCreatedRoomId);
         l_PreparedStatement->ExecuteStatement();
 
         RoomDatabase.FreePrepareStatement(l_PreparedStatement);

@@ -20,6 +20,7 @@
 #define _ITEM_ITEM_MANAGER_h
 #include "Common/SharedDefines.h"
 #include "Item.h"
+#include "ItemDefinition.h"
 #include <mutex>
 #endif /* _ITEM_ITEM_MANAGER_h */
 
@@ -27,6 +28,7 @@ namespace SteerStone
 {
     typedef std::vector<Item> PublicItemVec;
     typedef std::map<std::string, PublicItemVec> PublicItemMap;
+    typedef std::unordered_map<uint32, ItemDefinition> ItemDefinitionMap;
 
     /// Class which holds item information
     /// Singleton
@@ -46,6 +48,10 @@ namespace SteerStone
         /// Load Public items from database
         void LoadPublicRoomItems();
 
+        /// LoadItemDefinitions;
+        /// Load Item definitions from database
+        void LoadItemDefinitions();
+
         /// GetPublicRoomItems
         /// @p_Model : Room Model to retrieve furniture data
         PublicItemVec GetPublicRoomItems(std::string const& p_Model);
@@ -55,9 +61,14 @@ namespace SteerStone
         /// @p_X : Y axis of public item position
         Item* GetPublicItemByPosition(std::string const p_Model, const int16 p_X, int16 const p_Y);
 
+        /// GetItemDefinition
+        /// @p_Id : Definition Id
+        ItemDefinition* GetItemDefinition(uint32 const p_Id);
+
     private:
-        PublicItemMap m_PublicItems;                     ///< Map which holds Room Model as key and info of the item
-        std::mutex m_Mutex;                             ///< Mutex
+        PublicItemMap m_PublicItems;
+        ItemDefinitionMap m_ItemDefinitions;
+        std::mutex m_Mutex;
     };
 } ///< NAMESPACE STEERSTONE
 

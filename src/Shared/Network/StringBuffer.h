@@ -115,6 +115,22 @@ namespace SteerStone
                 Append(l_SOT.c_str(), l_Length);
         }
 
+        /// AppendCarriage - Append Carriage to split into seperate lines
+        void AppendCarriage()
+        {
+            std::string l_Carriage = "\r";
+            if (std::size_t l_Length = l_Carriage.length())
+                Append(l_Carriage.c_str(), l_Length);
+        }
+
+        /// AppendTab
+        void AppendTab()
+        {
+            std::string l_Tab = "\u0009";
+            if (std::size_t l_Length = l_Tab.length())
+                Append(l_Tab.c_str(), l_Length);
+        }
+
         /// Append
         /// @param T the source type to convert.
         void Append(const char* p_Buffer, const std::size_t& p_Size)

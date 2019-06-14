@@ -255,8 +255,9 @@ namespace SteerStone
         //           CATALOGUE HANDLER
         ///////////////////////////////////////////
         StoreClientPacket(PacketClientHeader::CLIENT_GPRC,                          "CLIENT_GPRC",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GCIX,                          "CLIENT_GCIX",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
-        StoreClientPacket(PacketClientHeader::CLIENT_GCAP,                          "CLIENT_GCAP",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleNULL                       );
+        StoreClientPacket(PacketClientHeader::CLIENT_GCIX,                          "CLIENT_GCIX",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleCataloguePages             );
+        StoreClientPacket(PacketClientHeader::CLIENT_GCAP,                          "CLIENT_GCAP",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleCatalogueItems             );
+        StoreClientPacket(PacketClientHeader::CLIENT_GET_ALIAS_LIST,                "CLIENT_GET_ALIAS_LIST",                      PacketStatus::STATUS_IN_ROOM,             PacketProcess::PROCESS_NOW,              &HabboSocket::HandleGetAliasList               );
         
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -489,6 +490,14 @@ namespace SteerStone
         StoreServerPacket(PacketServerHeader::SERVER_STATUS ,                           "SERVER_STATUS ",                      &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_WIN,                            "SERVER_PT_WIN",                       &HabboSocket::HandleServerMessage              );
         StoreServerPacket(PacketServerHeader::SERVER_PT_BOTH_LOSE,                      "SERVER_PT_BOTH_LOSE",                 &HabboSocket::HandleServerMessage              );
+
+        ///////////////////////////////////////////
+        //           CATALOGUE HANDLER
+        ///////////////////////////////////////////
+        StoreServerPacket(PacketServerHeader::SERVER_CATALOGUE_PAGES,                   "SERVER_CATALOGUE_PAGES",             &HabboSocket::HandleServerMessage               );
+        StoreServerPacket(PacketServerHeader::SERVER_CATALOGUE_ITEMS,                   "SERVER_CATALOGUE_PAGES",             &HabboSocket::HandleServerMessage               );
+        StoreServerPacket(PacketServerHeader::SERVER_SPRITE_LIST,                       "SPRITE_LIST",                        &HabboSocket::HandleServerMessage               );
+        StoreServerPacket(PacketServerHeader::SERVER_ALIAS_TOGGLE,                      "SERVER_ALIAS_TOGGLE",                &HabboSocket::HandleServerMessage               );
 
 
         LOG_INFO << "Loaded " << m_ClientOpcode.size() << " CMSG OPCodes";

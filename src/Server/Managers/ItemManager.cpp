@@ -355,7 +355,51 @@ namespace SteerStone
 
         LOG_INFO << "Loaded " << l_PublicItemVec.size() << " Room Public Items";
     }
-    
+
+    /// LoadItemDefinitions;
+    /// Load Item definitions from database
+    void ItemManager::LoadItemDefinitions()
+    {
+        PreparedStatement* l_PreparedStatement = RoomDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, sprite, sprite_id, name, description, colour, length, width, top_height, max_status, "
+        "behaviour, interactor, is_tradable, is_recyclable, drink_ids FROM items_definitions");
+        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        if (!l_PreparedResultSet)
+        {
+            LOG_INFO << "items_definitions is empty!";
+            RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+            return;
+        }
+
+        do
+        {
+            ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+            ItemDefinition& l_ItemDefinition = m_ItemDefinitions[l_Result[0].GetUInt32()];
+            l_ItemDefinition.m_Id            = l_Result[0].GetUInt32();
+            l_ItemDefinition.m_Sprite        = l_Result[1].GetString();
+            l_ItemDefinition.m_SpriteId      = l_Result[2].GetUInt32();
+            l_ItemDefinition.m_Name          = l_Result[3].GetString();
+            l_ItemDefinition.m_Description   = l_Result[4].GetString();
+            l_ItemDefinition.m_Colour        = l_Result[5].GetString();
+            l_ItemDefinition.m_Length        = l_Result[6].GetUInt32();
+            l_ItemDefinition.m_Width         = l_Result[7].GetUInt32();
+            l_ItemDefinition.m_TopHeight     = l_Result[8].GetDouble();
+            l_ItemDefinition.m_MaxStatus     = l_Result[9].GetString();
+            l_ItemDefinition.m_Behaviour     = l_Result[10].GetString();
+            l_ItemDefinition.m_Interactor    = l_Result[11].GetString();
+            l_ItemDefinition.m_IsTradable    = l_Result[12].GetBool();
+            l_ItemDefinition.m_IsRecyclable  = l_Result[13].GetBool();
+            l_ItemDefinition.m_DrinkIds      = l_Result[14].GetString();
+
+        } while (l_PreparedResultSet->GetNextRow());
+
+        RoomDatabase.FreePrepareStatement(l_PreparedStatement);
+
+        LOG_INFO << "Loaded " << m_ItemDefinitions.size() << " Item Definitions!";
+    }
+
     /// GetPublicRoomItems
     /// @p_Model : Room Model to retrieve furniture data
     PublicItemVec ItemManager::GetPublicRoomItems(const std::string& model)
@@ -383,5 +427,16 @@ namespace SteerStone
             }
         }
         return nullptr;
+    }
+
+    /// GetItemDefinition
+    /// @p_Id : Definition Id
+    ItemDefinition * ItemManager::GetItemDefinition(uint32 const p_Id)
+    {
+        ItemDefinitionMap::iterator l_Itr = m_ItemDefinitions.find(p_Id);
+        if (l_Itr != m_ItemDefinitions.end())
+            return &l_Itr->second;
+        else
+            return nullptr;
     }
 } ///< NAMESPACE STEERSTONE

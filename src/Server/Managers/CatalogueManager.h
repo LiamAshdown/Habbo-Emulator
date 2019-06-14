@@ -19,10 +19,15 @@
 #ifndef MANAGERS_CATALOGUE_MANAGER_h
 #define MANAGERS_CATALOGUE_MANAGER_h
 #include "Common/SharedDefines.h"
+#include "CataloguePage.h"
 #endif /* MANAGERS_CATALOGUE_MANAGER_h */
 
 namespace SteerStone
 {
+    typedef std::vector<std::pair<std::string, CataloguePage>> CataloguePageVector;
+    typedef std::unordered_map<uint32, CatalogueItem> CatalogueItemMap;
+    typedef std::map<uint32, std::vector<CataloguePackage>> CataloguePackageMap;
+
     /// Holds information about catalogue categories
     class CatalogueManager
     {
@@ -37,11 +42,36 @@ namespace SteerStone
         ~CatalogueManager();
 
     public:
-        /// LoadPages
+        /// LoadCataloguePages
         /// Load Catalogue pages from database
-        void LoadPages();
-       
+        void LoadCataloguePages();
+
+        /// LoadCatalogueItems
+        /// Load Catalogue items from database
+        void LoadCatalogueItems();
+
+        /// LoadCataloguePackages
+        /// Load Catalogue Packages from database
+        void LoadCataloguePackages();
+
+        /// GetCataloguePages
+        /// Returns Catalogue pages
+        CataloguePageVector GetCataloguePages() const;
+
+        /// GetCataloguePageByName
+        /// @p_Name : Page name we are searching for
+        CataloguePage* GetCaloguePageByName(std::string const p_Name);
+
+    private:
+        /// SortCatalogueItems
+        /// Sort the items into their respective catalogue pages
+        void SortCatalogueItems();
+
+    private:
+        CataloguePageVector m_CataloguePages;
+        CatalogueItemMap m_CatalogueItems;
+        CataloguePackageMap m_CataloguePackages;
     };
 } ///< NAMESPACE STEERSTONE
 
-#define sCatalogueMgr SteerStone::PoolManager::instance()
+#define sCatalogueMgr SteerStone::CatalogueManager::instance()

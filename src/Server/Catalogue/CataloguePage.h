@@ -16,77 +16,62 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _ITEM_ITEM_h
-#define _ITEM_ITEM_h
+#ifndef _CATALOGUE_CATALOGUE_PAGE_h
+#define _CATALOGUE_CATALOGUE_PAGE_h
 #include "Common/SharedDefines.h"
-#endif /* _ITEM_ITEM_h */
+#include "CatalogueItem.h"
+#endif /* _CATALOGUE_CATALOGUE_PAGE_h */
 
 namespace SteerStone
 {
-    class Item
+    class CataloguePage
     {
     public:
-        friend class ItemManager;
+        friend class CatalogueManager;
 
     public:
         /// Constructor
-        Item();
+        CataloguePage() {}
 
         /// Deconstructor
-        ~Item();
+        ~CataloguePage() {}
 
     public:
+        uint32 GetId()                  const { return m_Id;                    }
+        uint32 GetOrderId()             const { return m_OrderId;               }
+        uint16 GetMinRole()             const { return m_MinRole;               }
+        bool IsIndexVisible()           const { return m_IndexVisible;          }
+        bool IsClubOnly()               const { return m_ClubOnly;              }
+        std::string GetNameIndex()      const { return m_NameIndex;             }
+        std::string GetLinkList()       const { return m_LinkList;              }
+        std::string GetName()           const { return m_Name;                  }
+        std::string GetLayout()         const { return m_Layout;                }
+        std::string GetImageHeadLine()  const { return m_ImageHeadLine;         }
+        std::string GetImageTeasers()   const { return m_ImageTeasers;          }
+        std::string GetBody()           const { return m_Body;                  }
+        std::string GetLabelPick()      const { return m_LabelPick;             }
+        std::string GetLabelExtraS()    const { return m_LabelExtraS;           }
+        std::string GetLabelExrtraT()   const { return m_LabelExtraT;           }
 
-        /// CanBeWalkedOn
-        /// Check if tile can be walked on
-        /// @p_Extra : If true do extra checks
-        bool CanBeWalkedOn(bool m_Extra = false);
-
-        /// Item Info
-        uint32 GetId()                                const { return m_Id;                }
-        uint32 GetSpriteId()                          const { return m_SpriteId;          }
-        std::string GetName()                         const { return m_Name;              }
-        std::string GetDescription()                  const { return m_Description;       }
-        std::string GetColour()                       const { return m_Colour;            }
-        std::string GetRoomModel()                    const { return m_RoomModel;         }
-        std::string GetSprite()                       const { return m_Sprite;            }
-        int16 GetPositionX()                          const { return m_X;                 }
-        int16 GetPositionY()                          const { return m_Y;                 }
-        double GetPositionZ()                         const { return m_Z;                 }
-        int16 GetRotation()                           const { return m_Rotation;          }
-        float GetTopHeight()                          const { return m_TopHeight;         }
-        int16 GetLength()                             const { return m_Length;            }
-        int16 GetWidth()                              const { return m_Width;             }
-        std::vector<std::string> GetTrigger()         const { return m_Trigger;           }
-        std::string GetProgram()                      const { return m_Program;           }
-        std::string GetState()                        const { return m_State;             }
-        bool IsTradable()                             const { return m_Tradable;          }
-        bool IsRecycleable()                          const { return m_Recycleable;       }
-        uint32 GetDrinkId()                           const { return m_DrinkId;           }
-
-        void SetState(std::string const p_State)            { m_State = p_State;          }
+        std::vector<CatalogueItem*>& GetCatalogueItems() { return m_CataloguePageItems; }
 
     private:
-        /// Variables
         uint32 m_Id;
-        uint32 m_SpriteId;
+        uint32 m_OrderId;
+        uint16 m_MinRole;
+        bool m_IndexVisible;
+        bool m_ClubOnly;
+        std::string m_NameIndex;
+        std::string m_LinkList;
         std::string m_Name;
-        std::string m_Description;
-        std::string m_Colour;
-        std::string m_RoomModel;
-        std::string m_Sprite;
-        int16 m_X;
-        int16 m_Y;
-        double m_Z;
-        int16 m_Rotation;
-        float m_TopHeight;
-        int16 m_Length;
-        int16 m_Width;
-        std::vector<std::string> m_Trigger;
-        std::string m_Program;
-        std::string m_State;                ///< Program State
-        bool m_Tradable;
-        bool m_Recycleable;
-        uint32 m_DrinkId;
+        std::string m_Layout;
+        std::string m_ImageHeadLine;
+        std::string m_ImageTeasers;
+        std::string m_Body;
+        std::string m_LabelPick;
+        std::string m_LabelExtraS;
+        std::string m_LabelExtraT;
+
+        std::vector<CatalogueItem*> m_CataloguePageItems;
     };
 } ///< NAMESPACE STEERSTONE
