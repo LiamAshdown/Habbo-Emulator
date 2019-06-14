@@ -337,6 +337,12 @@ namespace SteerStone
     {
         uint32 l_RoomId = std::stoi(p_Packet->GetContent());
 
+        /// I'm not exactly sure how CLIENT_ROOM_DIRECTORY works because sometimes
+        /// when we enter a flat this function is called or room directory function is called, or sometimes they are
+        /// called at same time, and both functions here handle entering room, so check whether if player is already inside room
+        if (m_Habbo->GetRoom()->GetId() == l_RoomId)
+            return;
+
         /// Enter the room
         if (m_Habbo->SetRoom(sRoomMgr->GetRoom(l_RoomId)))
         {
