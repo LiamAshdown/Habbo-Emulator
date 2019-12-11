@@ -1,5 +1,5 @@
 #* Liam Ashdown
-#* Copyright (C) 2018
+#* Copyright (C) 2019
 #*
 #* This program is free software: you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -13,7 +13,18 @@
 #*
 #* You should have received a copy of the GNU General Public License
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#*/
+#*
 
-# Shared must be included first
-add_subdirectory(Engine)
+#
+# Force out-of-source build
+#
+
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" BUILDING_IN_SOURCE)
+
+if( BUILDING_IN_SOURCE )
+  message(FATAL_ERROR "
+    This project requires an out of source build. Remove the file 'CMakeCache.txt'
+    found in this directory before continuing, create a separate build directory
+    and run 'cmake path_to_project [options]' from there.
+  ")
+endif()

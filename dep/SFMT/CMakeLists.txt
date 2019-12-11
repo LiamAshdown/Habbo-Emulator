@@ -1,5 +1,5 @@
 #* Liam Ashdown
-#* Copyright (C) 2018
+#* Copyright (C) 2019
 #*
 #* This program is free software: you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -13,7 +13,10 @@
 #*
 #* You should have received a copy of the GNU General Public License
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#*/
+#*
 
-# Shared must be included first
-add_subdirectory(Engine)
+add_library(sfmt INTERFACE)
+
+target_include_directories(sfmt
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR})

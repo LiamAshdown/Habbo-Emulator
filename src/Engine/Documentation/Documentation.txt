@@ -1,0 +1,3 @@
+### TROUBLESHOOTING
+## ERROR CODES
+# MONGOOSE:- The Engine requires atleast 1 Exclusive worker count. Your CPU must be a multi-core processor.

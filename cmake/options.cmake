@@ -1,5 +1,5 @@
 #* Liam Ashdown
-#* Copyright (C) 2018
+#* Copyright (C) 2019
 #*
 #* This program is free software: you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -13,7 +13,8 @@
 #*
 #* You should have received a copy of the GNU General Public License
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#*/
+#*
 
-# Shared must be included first
-add_subdirectory(Engine)
+option(WITH_WARNINGS         "Show all warnings during compile"                           0)
+option(WITH_CORE_DEBUG       "Include additional debug-code in core"                      1)
+option(WITH_HEADLESS_DEBUG   "Include Headless Players"                     		      1)

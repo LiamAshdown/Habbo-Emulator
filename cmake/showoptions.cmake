@@ -15,5 +15,26 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*
 
-add_subdirectory(openssl)
-add_subdirectory(SFMT)
+# output generic information about the options
+if( WITH_CORE_DEBUG )
+  message("")
+  message(" *** WITH_CORE_DEBUG - WARNING!")
+  message(" *** additional core debug logs have been enabled!")
+  message("* Use coreside debug     	  : Yes")
+  add_definitions(-DSTEERSTONE_CORE_DEBUG)
+else()
+  message("* Use coreside debug           : No  (default)")
+endif()
+
+if( WITH_WARNINGS )
+  message("* Show all warnings      	  : Yes")
+else()
+  message("* Show compile-warnings  	  : No  (default)")
+endif()
+
+if( WITH_HEADLESS_DEBUG )
+  message("* Enable Headless Players       : Yes")
+  add_definitions(-DHEADLESS_DEBUG)
+else()
+  message("* Enable Headless Players      : No  (default)")
+endif()
