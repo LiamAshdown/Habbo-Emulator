@@ -1,5 +1,5 @@
 #* Liam Ashdown
-#* Copyright (C) 2018
+#* Copyright (C) 2019
 #*
 #* This program is free software: you can redistribute it and/or modify
 #* it under the terms of the GNU General Public License as published by
@@ -15,5 +15,6 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*/
 
-# Shared must be included first
+# Engine must be included first
 add_subdirectory(Engine)
+add_subdirectory(Game)
